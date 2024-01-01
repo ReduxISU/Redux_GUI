@@ -17,7 +17,7 @@ import { Stack, Button, Box } from '@mui/material'
 import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import PopoverTooltipClick from './PopoverTooltipClick';
 
-import { ProblemContext, useProblemInfo } from '../contexts/ProblemProvider'
+import { ProblemContext, useProblemInfo, useReducerInfo } from '../contexts/ProblemProvider'
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarSelectReduceToV2 from './SearchBars/SearchBarSelectReduceToV2';
 import SearchBarSelectReductionTypeV2 from './SearchBars/SearchBarSelectReductionTypeV2';
@@ -29,7 +29,7 @@ function AccordionDualInputNestedButton(props) {
   const [reducedInstanceLocal, setReducedInstanceLocal] = useState();
 
   const reduceToInfo = useProblemInfo(props.accordion.INPUTURL.url, chosenReduceTo);
-  const [toolTip2, setToolTip2] = useState(props.accordion.TOOLTIP2) //keeps track of tooltip state (right)
+  const reducerInfo = useReducerInfo(props.accordion.INPUTURL.url, chosenReductionType);
   const [testData, setTestData] = useState("TEST DATA REDUCE") //keeps track of reduce to text
 
   const reduceRequest = async () => {
@@ -64,23 +64,9 @@ function AccordionDualInputNestedButton(props) {
     reduceRequest();
   }, [chosenReductionType, problemInstance]);
   
-
   useEffect(() => {
     setReducedInstance('');
-  }, [chosenReduceTo])
-
-
-  //TOOLTIP RIGHT
-  useEffect(() => {
-    if(chosenReductionType !== '' && chosenReductionType !== null){
-      let reductionType = chosenReductionType.split("-")[0];
-      requestReductionData(props.accordion.INPUTURL.url, reductionType).then(data => {
-        setToolTip2({ header: data.reductionName, formalDef: data.reductionDefinition, info: data.source }) //updates TOOLTIP
-      }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
-    }
-
-    setReducedInstance('');
-  }, [chosenReductionType,chosenReduceTo])
+  }, [chosenReductionType, chosenReduceTo])
 
 
 
@@ -101,7 +87,17 @@ function AccordionDualInputNestedButton(props) {
         ></PopoverTooltipClick>
 
         <SearchBarSelectReductionTypeV2 placeholder={props.accordion.ACCORDION_FORM_TWO.placeHolder} />
-        <PopoverTooltipClick toolTip={toolTip2}></PopoverTooltipClick>
+        <PopoverTooltipClick
+          toolTip={
+            chosenReductionType
+              ? {
+                  header: reducerInfo.reductionName ?? "",
+                  formalDef: reducerInfo.reductionDefinition ?? "",
+                  info: reducerInfo.source ?? "",
+                }
+              : props.accordion.TOOLTIP2
+          }
+        ></PopoverTooltipClick>
       </ProblemSection.Header>
       
       <ProblemSection.Body>
@@ -228,18 +224,6 @@ function checkProblemType(stringInstance, chosenReduceTo){
 function getEdges(stringInstance){
   return stringInstance.match('((?<=}, {)[ -~]+)(?=}\\), )');
 }
-
-async function requestProblemData(url, name) {
-  //$`{url}{name}Generic`
-  return await fetch(url + name + "Generic").then(resp => resp.json());
-}
-
-async function requestReductionData(url, reductionName) {
-  //$`{url}{reductionName}/info`
-  return await fetch(url + reductionName + '/info').then(resp => resp.json());
-}
-
-
 
 export async function requestReducedInstance(url, reductionName, reduceFrom) {
   var parsedInstance = reduceFrom.replaceAll('&', '%26');
