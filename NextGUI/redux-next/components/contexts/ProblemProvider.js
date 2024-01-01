@@ -363,11 +363,7 @@ function useChosenSolver({ problemName, defaultSolverMap }) {
   const [chosenSolver, setChosenSolver] = useState("");
 
   useEffect(() => {
-    if (problemName === "" || problemName === null) {
-      setChosenSolver("");
-    } else {
-      setChosenSolver(defaultSolverMap.get(problemName)); // Gets the file name of default solver
-    }
+    setChosenSolver(!problemName ? "" : defaultSolverMap.get(problemName)); // Gets the file name of default solver
   }, [problemName]);
 
   return [chosenSolver, setChosenSolver];

@@ -15,28 +15,17 @@ import React, { useContext, useEffect, useState } from "react";
 const noSolverMessage = " No solvers available. Please select a problem";
 
 export default function SearchBarSelectSolverV2(props) {
-  const [defaultSolver, setDefaultSolver] = useState("");
-  const { problemName, solverNameMap, defaultSolverMap, setChosenSolver, solverOptions } = useContext(ProblemContext);
-  const [noSolver, setNoSolvers] = useState(false);
-
-  useEffect(() => {
-    if (problemName === "" || problemName === null) {
-      setNoSolvers(true);
-      setDefaultSolver(noSolverMessage);
-    } else {
-      setNoSolvers(false);
-      setDefaultSolver(defaultSolverMap.get(problemName)); // Matches file name with solver name
-    }
-  }, [problemName, defaultSolverMap]);
+  const { problemName, solverNameMap, setChosenSolver, chosenSolver, solverOptions } = useContext(ProblemContext);
 
   return (
     <Autocomplete
       style={{ width: "100%" }}
-      value={defaultSolver}
-      disabled={noSolver}
-      onChange={(event, newValue) => {
-        setChosenSolver(newValue);
-        setDefaultSolver(newValue);
+      value={!problemName ? noSolverMessage : chosenSolver}
+      disabled={!problemName}
+      onChange={(event, value) => {
+        if (value !== noSolverMessage) {
+          setChosenSolver(value);
+        }
       }}
       selectOnFocus
       clearOnBlur
@@ -61,7 +50,7 @@ export default function SearchBarSelectSolverV2(props) {
         <TextField
           {...params}
           label={props.placeholder}
-          InputProps={noSolver ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }}
+          InputProps={!problemName ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }}
         />
       )}
     />
