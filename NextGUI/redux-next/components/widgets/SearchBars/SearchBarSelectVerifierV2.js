@@ -16,29 +16,18 @@ import React, { useContext, useEffect, useState } from "react";
 export const noProblemChosenMessage = "No verifier available. Please select a problem";
 
 export default function SearchBarSelectVerifierV2(props) {
-  const [defaultVerifier, setDefaultVerifier] = useState("");
-  const { problemName, verifierNameMap, defaultVerifierMap, verifierOptions, setChosenVerifier } =
+  const { problemName, verifierNameMap, verifierOptions, setChosenVerifier, chosenVerifier } =
     useContext(ProblemContext);
-  const [noVerifier, setNoVerifiers] = useState(false);
-
-  useEffect(() => {
-    if (problemName === "" || problemName === null) {
-      setNoVerifiers(true);
-      setDefaultVerifier(noProblemChosenMessage);
-    } else {
-      setNoVerifiers(false);
-      setDefaultVerifier(defaultVerifierMap.get(problemName));
-    }
-  }, [problemName, defaultVerifierMap]);
 
   return (
     <Autocomplete
       style={{ width: "100%" }}
-      value={defaultVerifier}
-      disabled={noVerifier ? true : false}
-      onChange={(event, newValue) => {
-        setChosenVerifier(newValue);
-        setDefaultVerifier(newValue);
+      value={!problemName ? noProblemChosenMessage : chosenVerifier}
+      disabled={!problemName}
+      onChange={(event, value) => {
+        if (value !== noProblemChosenMessage) {
+          setChosenVerifier(value);
+        }
       }}
       selectOnFocus
       clearOnBlur
@@ -61,7 +50,7 @@ export default function SearchBarSelectVerifierV2(props) {
         <TextField
           {...params}
           label={props.placeholder}
-          InputProps={noVerifier ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }}
+          InputProps={!problemName ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }}
         />
       )}
     />

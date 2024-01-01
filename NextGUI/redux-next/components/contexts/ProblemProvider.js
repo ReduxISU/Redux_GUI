@@ -211,11 +211,7 @@ function useChosenVerifier({ problemName, defaultVerifierMap }) {
   const [chosenVerifier, setChosenVerifier] = useState("");
 
   useEffect(() => {
-    if (problemName === "" || problemName === null) {
-      setChosenVerifier("");
-    } else {
-      setChosenVerifier(defaultVerifierMap.get(problemName));
-    }
+    setChosenVerifier(!problemName ? "" : defaultVerifierMap.get(problemName));
   }, [problemName, defaultVerifierMap]);
 
   return [chosenVerifier, setChosenVerifier];
