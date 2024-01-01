@@ -20,38 +20,8 @@ import { ProblemContext, useProblemInfo } from '../contexts/ProblemProvider'
 import { Stack, Button, Box } from '@mui/material'
 import TextField from '@mui/material/TextField';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
+import ProblemSection from '../widgets/ProblemSection';
 
-/**
- * This represents the button that triggers the accordion component opening or closing
- * 
- * @param {*} param0 parameters change handler
- * @returns A Dropdown toggle component. 
- */
-function ContextAwareToggle({ children, eventKey, callback, colors }) {
-  const { activeEventKey } = useContext(AccordionContext);
-
-
-
-
-  const decoratedOnClick = useAccordionButton(
-    eventKey,
-    () => callback && callback(eventKey),
-  );
-
-  const isCurrentEventKey = activeEventKey === eventKey;
-  return (
-    <Button
-      sx={{ height: 54, width: 64 }}
-      color='white'
-      className="float-end"
-      type="button"
-      style={{ backgroundColor: isCurrentEventKey ? colors.orange : colors.grey }}
-      onClick={decoratedOnClick}
-    >
-      {children}
-    </Button>
-  );
-}
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
  * 
@@ -135,62 +105,43 @@ function AccordionNestedTextBox(props) {
 
 
   return (
-    <div>
-      <Accordion className="accordion" defaultActiveKey="0">
-        <Card>
-          <Card.Header>
+    <ProblemSection defaultCollapsed={false}>
+      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} themeColors={props.accordion.THEME.colors}>
+        <SearchBarProblemType
+          setTestName={setTestName}
+          placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
+          url={props.accordion.INPUTURL.url}
+        ></SearchBarProblemType>
 
-            <Stack direction="horizontal" justifyContent="right" gap={2}>
-              <Box
-              sx={{width:'10%'}}
-              >
-                {props.accordion.CARD.cardHeaderText}
-                </Box>
-              {/**FORM CONTROL 1 */}
-              <SearchBarProblemType setTestName={setTestName} placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder} url={props.accordion.INPUTURL.url}></SearchBarProblemType>
-
-              <PopoverTooltipClick
-                toolTip={
-                  problemName
-                    ? {
-                        header: problemInfo.problemName ?? "",
-                        formalDef: problemInfo.formalDefinition ?? "",
-                        info: (problemInfo.problemDefinition ?? "") + (problemInfo.source ?? ""),
-                      }
-                    : props.accordion.TOOLTIP
+        <PopoverTooltipClick
+          toolTip={
+            problemName
+              ? {
+                  header: problemInfo.problemName ?? "",
+                  formalDef: problemInfo.formalDefinition ?? "",
+                  info: (problemInfo.problemDefinition ?? "") + (problemInfo.source ?? ""),
                 }
-              ></PopoverTooltipClick>
-              <ContextAwareToggle eventKey="0" colors={props.accordion.THEME.colors}>▼</ContextAwareToggle>
+              : props.accordion.TOOLTIP
+          }
+        ></PopoverTooltipClick>
+      </ProblemSection.Header>
 
-            </Stack>
-
-          </Card.Header>
-
-          <Accordion.Collapse eventKey="0">
-            <Card.Body>
-              <Stack direction="horizontal" gap={1}>
-                {props.accordion.CARD.cardBodyText}
-                {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
-                <TextField
-                  error={!instanceParsed.test}
-                  id="outlined-error"
-                  label={!instanceParsed.test? "Incorrect Format":"Problem Instance"}
-                  sx={{width:'100%'}}
-                  value={problemLocalInstance}
-                  onChange={handleChangeInstance}
-                  helperText={!instanceParsed.test? "Problem failed? Try: " + instanceParsed.exampleStr:""} // Only displays the "Incorrect format" stuff when the input is activly wrong
-                >
-                </TextField>
-                
-
-              </Stack>
-            </Card.Body>
-          </Accordion.Collapse>
-        </Card>
-
-      </Accordion>
-
-    </div>
+      <ProblemSection.Body>
+        <Stack direction="horizontal" gap={1}>
+          {props.accordion.CARD.cardBodyText}
+          {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
+          <TextField
+            error={!instanceParsed.test}
+            id="outlined-error"
+            label={!instanceParsed.test ? "Incorrect Format" : "Problem Instance"}
+            sx={{ width: "100%" }}
+            value={problemLocalInstance}
+            onChange={handleChangeInstance}
+            helperText={!instanceParsed.test ? "Problem failed? Try: " + instanceParsed.exampleStr : ""} // Only displays the "Incorrect format" stuff when the input is activly wrong
+          ></TextField>
+        </Stack>
+      </ProblemSection.Body>
+    </ProblemSection>
   );
 }
 
