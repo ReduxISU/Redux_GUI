@@ -53,12 +53,10 @@ function AccordionVerifier(props) {
 
   const { problemName, problemInstance, problemType, chosenVerifier, setChosenVerifier, solvedInstance } = useContext(ProblemContext)
   const [toolTip, setToolTip] = useState(props.accordion.TOOLTIP); //Keeps track of tooltip state (left)
-  var SOLVEROPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/Problem_VerifiersRefactor/' + '?chosenProblem=' + problemName + '&problemType=' + problemType;
 
   useEffect(() => {
     setVerifiedInstance("");
     setVerifyResult("");
-    SOLVEROPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/Problem_VerifiersRefactor/' + '?chosenProblem=' + problemName + '&problemType=' + problemType
     requestVerifyData(props.accordion.INPUTURL.url, chosenVerifier).then(data => {
       setToolTip({ header: data.verifierName, formalDef: data.verifierDefinition, info: data.source }) //updates TOOLTIP
       setVerifiedInstance(data.certificate)
@@ -153,9 +151,6 @@ function parseUserInput(userInput){
 
               <SearchBarSelectVerifierV2
                 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
-                url={SOLVEROPTIONSURL}
-                setData={setChosenVerifier}
-                data={problemName}
               /> {/**Search bar left (form control 1) */}
 
               <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>

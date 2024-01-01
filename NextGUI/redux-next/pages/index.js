@@ -75,7 +75,7 @@ function MainPageContent() {
 
 
       
-        <ProblemProvider>
+        <ProblemProvider url={reduxBaseUrl}>
 
           <div className="d-flex flex-column">
 

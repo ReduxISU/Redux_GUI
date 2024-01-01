@@ -47,19 +47,9 @@ function ContextAwareToggle({ children, eventKey, callback, colors }) {
 
 function AccordionDualInputNestedButton(props) {
 
-  var REDUCETOOPTIONSURL = props.accordion.INPUTURL.url;
-  var REDUCTIONTYPEOPTIONSURL = props.accordion.INPUTURL.url;
   const { problemName, problemInstance, problemType, chosenReduceTo, setChosenReduceTo, chosenReductionType, setChosenReductionType, reducedInstance, setReducedInstance } = useContext(ProblemContext)
 
   const [reducedInstanceLocal, setReducedInstanceLocal] = useState();
-
-
-      //new
-  REDUCETOOPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/NPC_NavGraph/availableReductions/' + '?chosenProblem=' + problemName + '&problemType=' + problemType
-  REDUCTIONTYPEOPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/NPC_NavGraph/reductionPath/' + '?reducingFrom=' + problemName + '&reducingTo=' + chosenReduceTo + '&problemType=' + problemType
-      
-  // REDUCETOOPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/Problem_ReductionsRefactor/' + '?chosenProblem=' + problemName + '&problemType=' + problemType
-  // REDUCTIONTYPEOPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/PossibleReductionsRefactor/' + '?reducingFrom=' + problemName + '&reducingTo=' + chosenReduceTo + '&problemType=' + problemType
 
   const [toolTip, setToolTip] = useState(props.accordion.TOOLTIP1); //Keeps track of tooltip state (left)
   const [toolTip2, setToolTip2] = useState(props.accordion.TOOLTIP2) //keeps track of tooltip state (right)
@@ -102,7 +92,6 @@ function AccordionDualInputNestedButton(props) {
 
   //TOOLTIP LEFT
   useEffect(() => {
-    REDUCETOOPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/Problem_ReductionsRefactor/' + '?chosenProblem=' + problemName + '&problemType=' + problemType
     requestProblemData(props.accordion.INPUTURL.url, chosenReduceTo).then(data => {
       setToolTip({ header: data.problemName, formalDef: data.formalDefinition, info: data.problemDefinition }) //updates TOOLTIP
     }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
@@ -150,23 +139,12 @@ function AccordionDualInputNestedButton(props) {
               </Box>
               <SearchBarSelectReduceToV2
                 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
-                url={props.accordion.INPUTURL.url}
-                setData={setChosenReduceTo}
-                setInstance={setReducedInstance}
-                data={testData}
               /> {/**Search bar left (form control 1) */}
 
               <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>
 
               <SearchBarSelectReductionTypeV2
                 placeholder={props.accordion.ACCORDION_FORM_TWO.placeHolder}
-                url={REDUCTIONTYPEOPTIONSURL}
-                setData={setChosenReductionType}
-                data={chosenReduceTo}
-                instanceURL={props.accordion.INPUTURL.url}
-                // setInstance={setReducedInstance}
-
-
               />
               <PopoverTooltipClick toolTip={toolTip2}></PopoverTooltipClick>
               <ContextAwareToggle eventKey="0" colors={props.accordion.THEME.colors}>▼</ContextAwareToggle>

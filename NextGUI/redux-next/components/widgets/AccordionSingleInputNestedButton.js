@@ -53,10 +53,8 @@ function AccordionSingleInputNestedButton(props) {
   const [disableButton, setActive] = useState(false) // keeps track of button
 
   
-  var SOLVEROPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/Problem_SolversRefactor/' + '?chosenProblem=' + problemName + '&problemType=' + problemType
   useEffect(() => {
     setSolvedInstance("");
-    SOLVEROPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/Problem_SolversRefactor/' + '?chosenProblem=' + problemName + '&problemType=' + problemType
     // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
     // remove first if once this functionality is added for all problems, the else code block was the original
     // functionality
@@ -123,9 +121,6 @@ function AccordionSingleInputNestedButton(props) {
 
               <SearchBarSelectSolverV2
                 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
-                url={SOLVEROPTIONSURL}
-                setData={setChosenSolver}
-                data={problemName}
               /> {/**Search bar left (form control 1) */}
 
               <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>
