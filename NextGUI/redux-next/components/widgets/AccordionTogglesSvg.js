@@ -15,24 +15,13 @@
 import React from 'react'
 import { useContext, useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Accordion, Card, AccordionContext, Stack, OverlayTrigger, Popover } from 'react-bootstrap'
-import { useAccordionButton } from 'react-bootstrap/AccordionButton';
-import PopoverTooltipClick from './PopoverTooltipClick';
-// import FormControl from '../components/FormControl'
+import { Stack, OverlayTrigger, Popover } from 'react-bootstrap'
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { Button, Switch, Container, Grid, getNativeSelectUtilityClasses, touchRippleClasses, Box } from '@mui/material'
+import { Button, Switch } from '@mui/material'
 
-// import FormControl from '../components/FormControl'
-// import Page from "../components/widgets/graph";
 import { ProblemContext } from '../contexts/ProblemProvider';
-// import { getClique } from '../Visualization/svgs/Sat3ToCliqueReduction';
-// import { getSat3 } from '../Visualization/svgs/Sat3ToCliqueInstance'
-import SAT3_SVG_React from '../Visualization/svgs/SAT3_SVG_React';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import VisualizationBox from './VisualizationBox';
-import { svg } from 'd3';
-import TEST_SVG_REACT from '../Visualization/svgs/TEST_SVG_REACT';
-import VisualizationLogic from './VisualizationLogic';
 import ProblemSection from '../widgets/ProblemSection';
 
 function AccordionTogglesSvg(props) {

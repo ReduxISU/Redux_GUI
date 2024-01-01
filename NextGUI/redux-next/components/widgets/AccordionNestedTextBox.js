@@ -9,15 +9,13 @@
  */
 
 import React, { useEffect, useState } from 'react'
-import { useContext, useMemo } from 'react';
+import { useContext } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Accordion, Card, AccordionContext, FormControl, Row, Col } from 'react-bootstrap'
-import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import PopoverTooltipClick from './PopoverTooltipClick';
 import SearchBarProblemType from './SearchBars/SearchBarProblemType';
 import { ProblemContext, useProblemInfo } from '../contexts/ProblemProvider'
-import { Stack, Button, Box } from '@mui/material'
+import { Stack } from '@mui/material'
 import TextField from '@mui/material/TextField';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';

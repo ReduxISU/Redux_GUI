@@ -12,9 +12,8 @@
 import React from 'react'
 import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Accordion, Card, AccordionContext, FormControl, Col, Row, Container } from 'react-bootstrap'
-import { Stack, Button, Box } from '@mui/material'
-import { useAccordionButton } from 'react-bootstrap/AccordionButton';
+import { Card } from 'react-bootstrap'
+import { Button } from '@mui/material'
 import PopoverTooltipClick from './PopoverTooltipClick';
 
 import { ProblemContext, useProblemInfo, useReducerInfo } from '../contexts/ProblemProvider'

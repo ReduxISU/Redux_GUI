@@ -12,10 +12,8 @@
 import React from 'react'
 import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Accordion, Card, AccordionContext, FormControl } from 'react-bootstrap'
-import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import PopoverTooltipClick from './PopoverTooltipClick';
-import { Stack, Button, Box } from '@mui/material'
+import { Button } from '@mui/material'
 import { ProblemContext } from '../contexts/ProblemProvider';
 import SearchBarSelectSolverV2 from './SearchBars/SearchBarSelectSolverV2';
 import ProblemSection from '../widgets/ProblemSection';
