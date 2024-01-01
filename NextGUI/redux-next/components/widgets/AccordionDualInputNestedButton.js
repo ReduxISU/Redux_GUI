@@ -17,7 +17,7 @@ import { Stack, Button, Box } from '@mui/material'
 import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import PopoverTooltipClick from './PopoverTooltipClick';
 
-import { ProblemContext } from '../contexts/ProblemProvider';
+import { ProblemContext, useProblemInfo } from '../contexts/ProblemProvider'
 import SearchBarSelectReduceToV2 from './SearchBars/SearchBarSelectReduceToV2';
 import SearchBarSelectReductionTypeV2 from './SearchBars/SearchBarSelectReductionTypeV2';
 
@@ -51,10 +51,9 @@ function AccordionDualInputNestedButton(props) {
 
   const [reducedInstanceLocal, setReducedInstanceLocal] = useState();
 
-  const [toolTip, setToolTip] = useState(props.accordion.TOOLTIP1); //Keeps track of tooltip state (left)
+  const reduceToInfo = useProblemInfo(props.accordion.INPUTURL.url, chosenReduceTo);
   const [toolTip2, setToolTip2] = useState(props.accordion.TOOLTIP2) //keeps track of tooltip state (right)
   const [testData, setTestData] = useState("TEST DATA REDUCE") //keeps track of reduce to text
-  const [disableButton, setDisableButton] = useState(false) // keeps track of button
 
   const reduceRequest = async () => {
 
@@ -89,14 +88,8 @@ function AccordionDualInputNestedButton(props) {
   }, [chosenReductionType, problemInstance]);
   
 
-
-  //TOOLTIP LEFT
   useEffect(() => {
-    requestProblemData(props.accordion.INPUTURL.url, chosenReduceTo).then(data => {
-      setToolTip({ header: data.problemName, formalDef: data.formalDefinition, info: data.problemDefinition }) //updates TOOLTIP
-    }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
-
-    setReducedInstance('');;
+    setReducedInstance('');
   }, [chosenReduceTo])
 
 
@@ -109,13 +102,6 @@ function AccordionDualInputNestedButton(props) {
       }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
     }
 
-    if(!chosenReductionType){
-      setDisableButton(true);
-    }else{
-      setDisableButton(false);
-    }
-
-   
     setReducedInstance('');
   }, [chosenReductionType,chosenReduceTo])
 
@@ -141,7 +127,17 @@ function AccordionDualInputNestedButton(props) {
                 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
               /> {/**Search bar left (form control 1) */}
 
-              <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>
+              <PopoverTooltipClick
+                toolTip={
+                  chosenReduceTo
+                    ? {
+                        header: reduceToInfo.problemName ?? "",
+                        formalDef: reduceToInfo.formalDefinition ?? "",
+                        info: (reduceToInfo.problemDefinition ?? "") + (reduceToInfo.source ?? ""),
+                      }
+                    : props.accordion.TOOLTIP1
+                }
+              ></PopoverTooltipClick>
 
               <SearchBarSelectReductionTypeV2
                 placeholder={props.accordion.ACCORDION_FORM_TWO.placeHolder}
@@ -164,7 +160,7 @@ function AccordionDualInputNestedButton(props) {
                   color='white'
                   style={{ backgroundColor: props.accordion.THEME.colors.grey }}
                   onClick={reduceRequest}
-                  disabled= {disableButton}
+                  disabled= {!chosenReductionType}
                 >{props.accordion.BUTTON.buttonText}</Button>
               </div>
             </Card.Body>
