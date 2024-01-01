@@ -20,7 +20,7 @@ import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import PopoverTooltipClick from './PopoverTooltipClick';
 // import FormControl from '../components/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { Button, Switch, Container, Grid, getNativeSelectUtilityClasses, touchRippleClasses } from '@mui/material'
+import { Button, Switch, Container, Grid, getNativeSelectUtilityClasses, touchRippleClasses, Box } from '@mui/material'
 
 // import FormControl from '../components/FormControl'
 // import Page from "../components/widgets/graph";
@@ -33,42 +33,7 @@ import VisualizationBox from './VisualizationBox';
 import { svg } from 'd3';
 import TEST_SVG_REACT from '../Visualization/svgs/TEST_SVG_REACT';
 import VisualizationLogic from './VisualizationLogic';
-
-
-
-function ContextAwareToggle({ accordionState, setAccordionState, children, eventKey, callback, colors }) {
-
-
-  const { activeEventKey } = useContext(AccordionContext);
-
-  const decoratedOnClick = useAccordionButton(
-    eventKey,
-    () => {
-      testFunc();
-      callback && callback(eventKey)
-
-    },
-  );
-  function testFunc() {
-    setAccordionState(!accordionState)
-  }
-  var isCurrentEventKey = activeEventKey === eventKey;
-
-  return (
-    <Button
-      color='white'
-      className="float-end"
-      type="button"
-      sx={{ height: 54, width: 64 }}
-      style={{ backgroundColor: isCurrentEventKey ? colors.orange : colors.grey }}
-      onClick={decoratedOnClick}
-    >
-      {children}
-    </Button>
-  );
-}
-
-
+import ProblemSection from '../widgets/ProblemSection';
 
 function AccordionTogglesSvg(props) {
   var visualization;
@@ -266,80 +231,88 @@ function AccordionTogglesSvg(props) {
     gadgetsOn: showGadgets,
   }
 
-  const refreshButtonStyle = {
-    position: 'relative',
-    left: '2%',
-    top: '10%',
-    backgroundColor: '#43a047',
-    padding: ''
-  }
-
   return (
+    <ProblemSection defaultCollapsed={false}>
+      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} themeColors={props.accordion.THEME.colors}>
+        <div>
+          <Button
+            style={{ backgroundColor: "#43a047" }}
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={handleRefreshButton}
+          >
+            Refresh
+          </Button>
+        </div>
 
+        <Stack
+          style={{ width: "100%", flexDirection: "row-reverse" }}
+          className="float-end"
+          direction="horizontal"
+          gap={3}
+        >
+          {disableReduction ? (
+            <OverlayTrigger
+              placement="bottom"
+              triggers={["hover"]}
+              overlay={
+                <Popover id="popover-basic" className="tooltip">
+                  <Popover.Body>{"Please select a reduction"}</Popover.Body>
+                </Popover>
+              }
+            >
+              <FormControlLabel
+                disabled={disableReduction ? true : false}
+                checked={showReduction}
+                control={<Switch />}
+                label={props.accordion.SWITCHES.switch3}
+                onChange={handleSwitch3Change}
+              />
+            </OverlayTrigger>
+          ) : (
+            <FormControlLabel
+              disabled={disableReduction ? true : false}
+              checked={showReduction}
+              control={<Switch />}
+              label={props.accordion.SWITCHES.switch3}
+              onChange={handleSwitch3Change}
+            />
+          )}
+          <FormControlLabel
+            disabled={disableGadget ? true : false}
+            checked={showGadgets}
+            control={<Switch id={"highlightGadgets"} />}
+            label={props.accordion.SWITCHES.switch2}
+            onChange={handleSwitch2Change}
+          />
+          <FormControlLabel
+            disabled={disableSolution ? true : false}
+            checked={showSolution}
+            control={<Switch id={"showSolution"} />}
+            label={props.accordion.SWITCHES.switch1}
+            onChange={handleSwitch1Change}
+          />
+        </Stack>
+      </ProblemSection.Header>
 
-    <div>
-      <Accordion className="accordion" defaultActiveKey="0">
-        <Card className="text-left">
-          <Card.Header>
-            {props.accordion.CARD.cardHeaderText}
-                          
-            <Button style={refreshButtonStyle}
-                variant="outlined"
-                startIcon={<RefreshIcon/>}
-                onClick={handleRefreshButton}
-              >
-                Refresh
-              </Button>
-
-            <Stack className="float-end" direction="horizontal" gap={3}>
-              <FormControlLabel disabled={disableSolution ? true : false} checked={showSolution} control={<Switch id={"showSolution"} />} label={props.accordion.SWITCHES.switch1} onChange={handleSwitch1Change} />
-              <FormControlLabel disabled={disableGadget ? true : false} checked={showGadgets} control={<Switch id={"highlightGadgets"} />} label={props.accordion.SWITCHES.switch2} onChange={handleSwitch2Change} />         
-            {
-              disableReduction 
-              ?
-                <OverlayTrigger
-                  placement="bottom"
-                  triggers={["hover"]}
-                  overlay={
-                    <Popover id="popover-basic" className="tooltip">
-                        <Popover.Body>
-                          {"Please select a reduction"}
-                      </Popover.Body>
-                    </Popover>}
-                  >
-                    <FormControlLabel disabled={disableReduction ? true : false} checked={showReduction} control={<Switch />} label={props.accordion.SWITCHES.switch3} onChange={handleSwitch3Change} />
-                </OverlayTrigger>
-              :
-              <FormControlLabel disabled={disableReduction ? true : false} checked={showReduction} control={<Switch />} label={props.accordion.SWITCHES.switch3} onChange={handleSwitch3Change} />
-            }
-
-              <ContextAwareToggle accordionState={accordionOpened} setAccordionState={setAccordionOpened} className="float-end" eventKey="0" colors={props.accordion.THEME.colors} style={{ height: '60px' }}>▼</ContextAwareToggle>
-
-            </Stack>
-
-          </Card.Header>
-
-          <Accordion.Collapse eventKey="0">
-            <Card.Body>
-
-              <VisualizationBox
-                loading={svgIsLoading}
-                // reduceToggled={showReduction}
-                //We are using the logicProps(visualizationState to handle this)
-                // solveToggled={showSolution}
-                apiInstance={apiCompatibleInstance}
-                problemVisualizationData={problemVisualizationData}
-                reducedVisualizationData={reducedVisualizationData}
-                problemSolutionData={defaultSat3SolutionArr}
-                visualizationState={logicProps}
-                url={props.accordion.INPUTURL.url}
-
-              ></VisualizationBox>
-              {/* <VisualizationLogic
+      <ProblemSection.Body>
+        <VisualizationBox
+          loading={svgIsLoading}
+          // reduceToggled={showReduction}
+          //We are using the logicProps(visualizationState to handle this)
+          // solveToggled={showSolution}
+          apiInstance={apiCompatibleInstance}
+          problemVisualizationData={problemVisualizationData}
+          reducedVisualizationData={reducedVisualizationData}
+          problemSolutionData={defaultSat3SolutionArr}
+          visualizationState={logicProps}
+          url={props.accordion.INPUTURL.url}
+        ></VisualizationBox>
+        {/* <VisualizationLogic
                props={logicProps}>
               </VisualizationLogic> */}
 
-              {/* <VisualizationLogic
+        {/* <VisualizationLogic
                 problemName={problemName}
                 problemInstance={problemInstance}
                 reductionName={chosenReductionType}
@@ -352,13 +325,8 @@ function AccordionTogglesSvg(props) {
             // reductionOn={reduceToggled}
             // gadgetsOn={false}
             /> */}
-
-            </Card.Body>
-          </Accordion.Collapse>
-        </Card>
-
-      </Accordion>
-    </div>
+      </ProblemSection.Body>
+    </ProblemSection>
   );
 }
 
