@@ -15,7 +15,7 @@ import { Accordion, Card, AccordionContext, FormControl } from 'react-bootstrap'
 import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import PopoverTooltipClick from './PopoverTooltipClick';
 import { Stack, Button, Box } from '@mui/material'
-import { ProblemContext } from '../contexts/ProblemProvider';
+import { ProblemContext, useVerifierInfo } from '../contexts/ProblemProvider';
 import SearchBarSelectVerifierV2 from './SearchBars/SearchBarSelectVerifierV2';
 import ProblemSection from '../widgets/ProblemSection';
 
@@ -23,29 +23,21 @@ function AccordionVerifier(props) {
 
   const [verifiedInstance, setVerifiedInstance] = useState("");
   const [verifyResult, setVerifyResult] = useState("");
-  const [disableButton, setActive] = useState(false) // keeps track of button
 
   const { problemName, problemInstance, problemType, chosenVerifier, setChosenVerifier, solvedInstance } = useContext(ProblemContext)
-  const [toolTip, setToolTip] = useState(props.accordion.TOOLTIP); //Keeps track of tooltip state (left)
+
+  const verifierInfo = useVerifierInfo(props.accordion.INPUTURL.url, chosenVerifier);
 
   useEffect(() => {
     setVerifiedInstance("");
     setVerifyResult("");
-    requestVerifyData(props.accordion.INPUTURL.url, chosenVerifier).then(data => {
-      setToolTip({ header: data.verifierName, formalDef: data.verifierDefinition, info: data.source }) //updates TOOLTIP
-      setVerifiedInstance(data.certificate)
-    }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
-
-    
-    if(!chosenVerifier){
-      setActive(true);
-
-    }else{
-      setActive(false);
-    }
   }, [chosenVerifier]);
 
-
+  useEffect(() => {
+    if (verifierInfo && verifierInfo.certificate) {
+      setVerifiedInstance(verifierInfo.certificate)
+    }
+  }, [verifierInfo]);
 
 
 
@@ -116,7 +108,17 @@ function parseUserInput(userInput){
     <ProblemSection>
       <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} themeColors={props.accordion.THEME.colors}>
         <SearchBarSelectVerifierV2 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder} />{" "}
-        <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>
+        <PopoverTooltipClick
+          toolTip={
+            chosenVerifier
+              ? {
+                  header: verifierInfo.verifierName ?? "",
+                  formalDef: verifierInfo.verifierDefinition ?? "",
+                  info: verifierInfo.source ?? "",
+                }
+              : props.accordion.TOOLTIP
+          }
+        ></PopoverTooltipClick>
       </ProblemSection.Header>
 
       <ProblemSection.Body>
@@ -130,7 +132,7 @@ function parseUserInput(userInput){
             color="white"
             style={{ backgroundColor: props.accordion.THEME.colors.grey }}
             onClick={handleVerify}
-            disabled={disableButton}
+            disabled={!chosenVerifier}
           >
             {props.accordion.BUTTON.buttonText}
           </Button>
@@ -141,15 +143,6 @@ function parseUserInput(userInput){
 
 }
 
-
-async function requestVerifyData(url, vName) {
-
-  return await fetch(url + vName + '/info').then(resp => {
-    if (resp.ok) {
-      return resp.json();
-    }
-  });
-}
 async function requestVerifiedInstance(url, vName, instance, cert) {
   var parsedInstance = instance.replaceAll('&', '%26');
 
