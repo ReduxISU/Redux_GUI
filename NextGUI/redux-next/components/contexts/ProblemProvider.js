@@ -22,181 +22,335 @@ export default function ProblemProvider({ url, children }) {
 
   const state = {};
 
-  [state.problemJson, state.setProblemJson] = useState("");
   [state.problemType, state.setProblemType] = useState("NPC");
   [state.problemName, state.setProblemName] = useState("");
   [state.problemInstance, state.setProblemInstance] = useState("{{1,2,3},{1,2},GENERIC}"); // Careful about changing this value, the application boot up sequence is dependent on having a default value.
-  [state.problemDescription, state.setProblemDescription] = useState(
-    "You need to enter a problem to see information about it"
-  );
-  [state.reduceToOptions, state.setReduceToOptions] = useState([]);
-  [state.chosenReduceTo, state.setChosenReduceTo] = useState("");
-  [state.reductionTypeOptions, state.setReductionTypeOptions] = useState([]);
-  [state.chosenReductionType, state.setChosenReductionType] = useState("");
-  [state.reducedInstance, state.setReducedInstance] = useState("");
-  [state.solverOptions, state.setSolverOptions] = useState([]);
-  [state.chosenSolver, state.setChosenSolver] = useState("");
-  [state.chosenVerifier, state.setChosenVerifier] = useState("");
-  [state.verifierOptions, state.setVerifierOptions] = useState([]);
-  [state.solvedInstance, state.setSolvedInstance] = useState("");
-  [state.problemNameMap, state.setProblemNameMap] = useState(new Map());
-  [state.solverNameMap, state.setSolverNameMap] = useState(new Map());
-  [state.verifierNameMap, state.setVerifierNameMap] = useState(new Map());
-  [state.reductionNameMap, state.setReductionNameMap] = useState(new Map());
-  [state.defaultSolverMap, state.setDefaultSolverMap] = useState(new Map());
-  [state.defaultVerifierMap, state.setDefaultVerifierMap] = useState(new Map());
+  [state.problemNameMap, state.setProblemNameMap] = useProblemNameMap(url);
 
-  useProblemProvider_SearchBarProblemType({ url: url, ...state });
-  useProblemProvider_SearchBarSelectSolverV2({ url: url, ...state });
-  useProblemProvider_SearchBarSelectVerifierV2({ url: url, ...state });
-  useProblemProvider_SearchBarSelectReductionTypeV2({ url: url, ...state });
-  useProblemProvider_SearchBarSelectReduceToV2({ url: url, ...state });
+  [state.defaultVerifierMap, state.setDefaultVerifierMap] = useDefaultVerifierMap({ url: url, ...state });
+  [state.verifierOptions, state.setVerifierOptions] = useVerifierOptions({ url: url, ...state });
+  [state.chosenVerifier, state.setChosenVerifier] = useChosenVerifier(state);
+  [state.verifierNameMap, state.setVerifierNameMap] = useVerifierNameMap({ url: url, ...state });
+
+  /// Maps each problem name to its default solver name.
+  [state.defaultSolverMap, state.setDefaultSolverMap] = useDefaultSolverMap({ url: url, ...state });
+  [state.solverOptions, state.setSolverOptions] = useSolverOptions({ url: url, ...state });
+  [state.chosenSolver, state.setChosenSolver] = useChosenSolver(state);
+  [state.solverNameMap, state.setSolverNameMap] = useSolverNameMap({ url: url, ...state });
+  [state.solvedInstance, state.setSolvedInstance] = useState("");
+
+  [state.reduceToOptions, state.setReduceToOptions] = useReduceToOptions({ url: url, ...state });
+  [state.chosenReduceTo, state.setChosenReduceTo] = useChosenReduceTo(state);
+  [state.reductionNameMap, state.setReductionNameMap] = useReductionNameMap({ url: url, ...state });
+  [state.reductionTypeOptions, state.setReductionTypeOptions] = useReductionTypeOptions({ url: url, ...state });
+  [state.chosenReductionType, state.setChosenReductionType] = useChosenReductionType(state);
+  [state.reducedInstance, state.setReducedInstance] = useState("");
 
   return <ProblemContext.Provider value={state}>{children}</ProblemContext.Provider>;
 }
 
-function useProblemProvider_SearchBarSelectReduceToV2({
-  problemType,
-  problemName,
-  setReductionNameMap,
-  chosenReduceTo,
-  setChosenReduceTo,
-  reduceToOptions,
-  setReduceToOptions,
-  problemNameMap,
-  ...props
-}) {
-  const fullUrl =
-    props.url +
-    "Navigation/NPC_NavGraph/availableReductions/" +
-    "?chosenProblem=" +
-    problemName +
-    "&problemType=" +
-    problemType;
+function useProblemNameMap(baseUrl) {
+  const [problemNameMap, setProblemNameMap] = useState(new Map());
 
   useEffect(() => {
-    setChosenReduceTo("");
-    initializeList(fullUrl);
-  }, [problemName]);
+    initializeList(`${baseUrl}navigation/NPC_ProblemsRefactor/`);
+  }, []);
 
-  useEffect(() => {
-    requestReductionNameMap(props.url, problemName, chosenReduceTo).then((reductionMap) => {
-      setReductionNameMap(reductionMap);
-    });
-  }, [chosenReduceTo]);
+  async function initializeList(url) {
+    const problems = await getRequest(url).catch((error) => console.log("GET REQUEST FAILED", error));
+    const problemNames = await requestProblemNameMap(baseUrl, problems);
+    setProblemNameMap(problemNames);
+  }
 
-  function initializeProblemJson(arr) {
-    if (!arr.length) {
-      setChosenReduceTo("");
+  async function requestProblemNameMap(url, problems) {
+    let map = new Map();
+    for (const problem of problems) {
+      await getProblemInfo(url, problem + "Generic")
+        .then((info) => {
+          map.set(problem, info.problemName);
+        })
+        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
     }
-
-    setReduceToOptions(arr);
-
-    // // var elementChosen = false;
-    // arr.map(function (element, index, array) {
-    //   if (!problemJson.includes(element)) {
-    //     // if (element === "CLIQUE" && problemName === "SAT3") {
-    //     //   // stateVal = element;
-    //     //   setChosenReduceTo(element);
-    //     //   setReduceTo(element);
-    //     //   elementChosen = true;
-    //     // } else if (problemName === "CLIQUE" && element === "VERTEXCOVER") {
-    //     //   setChosenReduceTo(element);
-    //     //   setReduceTo(element);
-    //     //   elementChosen = true;
-    //     // }
-    //     // if (!elementChosen) {
-    //     //   setChosenReduceTo(element);
-    //     //   setReduceTo(element);
-    //     // }
-    //     problemJson.push(element);
-    //   }
-    // }, 80);
+    return map;
   }
 
-  async function getRequest(url) {
-    const promise = await fetch(url).then((result) => {
-      return result.json();
+  return [problemNameMap, setProblemNameMap];
+}
+
+function useDefaultVerifierMap({ url, problemNameMap }) {
+  const [defaultVerifierMap, setDefaultVerifierMap] = useState(new Map());
+
+  useEffect(() => {
+    const problems = Array.from(problemNameMap.keys());
+    requestDefaultVerifierMap(url, problems).then((defaultVerifierNames) => {
+      requestDefaultVerifierFileMap(url, problems, defaultVerifierNames).then((defaultVerifierFileNames) => {
+        setDefaultVerifierMap(defaultVerifierFileNames);
+      });
     });
-    return promise;
+  }, [problemNameMap]);
+
+  //The requestDefaultVerifierMap sets the verifier names
+  async function requestDefaultVerifierMap(url, problems) {
+    let map = new Map();
+    for (const problem of problems) {
+      await getProblemInfo(url, problem + "Generic")
+        .then((info) => {
+          map.set(problem, info.defaultVerifier.verifierName);
+        })
+        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
+    }
+    return map;
   }
+
+  //The requestDefaultVerifierFileMap sets the verifier names by the file name
+  async function requestDefaultVerifierFileMap(url, problems, defaultVerifierNames) {
+    let map = new Map();
+    for (const problem of problems) {
+      const data = await getAvailableVerifiers(url, problem).catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
+      for (const v of data) {
+        let verifier = v.split(" ")[0];
+        const info = await getInfo(url, verifier).catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
+        if (info === undefined) {
+          continue;
+        }
+        if (Array.from(defaultVerifierNames.values()).includes(info.verifierName)) {
+          map.set(problem, v);
+        }
+      }
+    }
+    return map;
+  }
+
+  return [defaultVerifierMap, setDefaultVerifierMap];
+}
+
+function useVerifierOptions({ url, problemName, problemType }) {
+  const [verifierOptions, setVerifierOptions] = useState([]);
+
+  useEffect(() => {
+    const fullUrl =
+      url + "Navigation/Problem_VerifiersRefactor/" + "?chosenProblem=" + problemName + "&problemType=" + problemType;
+
+    if (problemName !== "" && problemName !== null) {
+      initializeList(fullUrl);
+    }
+  }, [problemName]);
 
   function initializeList(url) {
     const req = getRequest(url);
     req
       .then((data) => {
-        initializeProblemJson(data);
+        setVerifierOptions(data);
       })
-      .catch((error) => console.log("GET REQUEST FAILED SELECT REDUCE TO"));
+      .catch((error) => console.log("GET REQUEST FAILED SEARCHBAR VERIFIER"));
   }
 
-  // The following the functions are used to set the reduction names
-  async function requestReductionNameMap(url, problemFrom, problemTo) {
+  // function initializeProblemJson(arr) {
+  //   arr.map(function (element, index, array) {
+  //     if (!problemJson.includes(element)) {
+  //       if (element === "KadensSimpleVerifier" && problemName === "SAT3") {
+  //         setChosenVerifier(element);
+  //         setDefaultVerifier("Kaden Simple Verifier");
+  //       } else if (element === "CliqueVerifier" && problemName === "CLIQUE") {
+  //         setChosenVerifier(element);
+  //         setDefaultVerifier("Generic Verifier");
+  //       }
+  //       problemJson.push(element);
+  //     }
+  //   }, 80);
+  // }
+
+  return [verifierOptions, setVerifierOptions];
+}
+
+function useChosenVerifier({ problemName, defaultVerifierMap }) {
+  const [chosenVerifier, setChosenVerifier] = useState("");
+
+  useEffect(() => {
+    if (problemName === "" || problemName === null) {
+      setChosenVerifier("");
+    } else {
+      setChosenVerifier(defaultVerifierMap.get(problemName));
+    }
+  }, [problemName, defaultVerifierMap]);
+
+  return [chosenVerifier, setChosenVerifier];
+}
+
+function useVerifierNameMap({ url, problemNameMap }) {
+  const [verifierNameMap, setVerifierNameMap] = useState(new Map());
+
+  useEffect(() => {
+    const problems = Array.from(problemNameMap.keys());
+    requestVerifierNameMap(url, problems).then((verifierMap) => {
+      setVerifierNameMap(verifierMap);
+    });
+  }, [problemNameMap]);
+
+  //The following the functions are used to set the verifier names
+  async function requestVerifierNameMap(url, problems) {
     let map = new Map();
-    await getAvailableReductions(url, problemFrom, problemTo)
-      .then((data) => {
-        data.forEach((r) => {
-          r.forEach((reduction) => {
-            getInfo(url, reduction)
-              .then((info) => {
-                map.set(reduction, info.reductionName);
-              })
-              .catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
-          });
-        });
-      })
-      .catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
+    for (const problem of problems) {
+      const data = await getAvailableVerifiers(url, problem).catch((error) =>
+        console.log("VERIFIER INFO REQUEST FAILED")
+      );
+      for (const verifier of data) {
+        const info = await getInfo(url, verifier).catch((error) => console.log("VERIFIER REQUEST FAILED"));
+        if (info === undefined) {
+          continue;
+        }
+        map.set(verifier, info.verifierName);
+      }
+    }
     return map;
   }
 
-  async function getAvailableReductions(url, problemFrom, problemTo) {
-    return await fetch(
-      url + `Navigation/NPC_NavGraph/reductionPath/?reducingFrom=${problemFrom}&reducingTo=${problemTo}&problemType=NPC`
-    ).then((resp) => {
-      if (resp.ok) {
-        return resp.json();
-      }
-    });
-  }
-
-  async function getInfo(url, reduction) {
-    return await fetch(url + `${reduction}/info`).then((resp) => {
-      if (resp.ok) {
-        return resp.json();
-      }
-    });
-  }
+  return [verifierNameMap, setVerifierNameMap];
 }
 
-function useProblemProvider_SearchBarSelectReductionTypeV2({
-  problemName,
-  problemType,
-  chosenReduceTo,
-  setChosenReductionType,
-  setReductionTypeOptions,
-  ...props
-}) {
-  const fullUrl =
-    props.url +
-    "Navigation/NPC_NavGraph/reductionPath/" +
-    "?reducingFrom=" +
-    problemName +
-    "&reducingTo=" +
-    chosenReduceTo +
-    "&problemType=" +
-    problemType;
+function useSolverNameMap({ url, problemNameMap }) {
+  const [solverNameMap, setSolverNameMap] = useState(new Map());
+
   useEffect(() => {
-    setChosenReductionType(null);
+    const problems = Array.from(problemNameMap.keys());
+    requestSolverNameMap(url, problems).then((solverMap) => {
+      setSolverNameMap(solverMap);
+    });
+  }, [problemNameMap]);
+
+  //The following the functions are used to set the solver names
+  async function requestSolverNameMap(url, problems) {
+    let map = new Map();
+    for (const problem of problems) {
+      const data = await getAvailableSolvers(url, problem).catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
+      for (const s of data) {
+        let solver = s.split(" ")[0];
+        const info = await getInfo(url, solver).catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
+        map.set(s, info.solverName);
+      }
+    }
+    return map;
+  }
+
+  return [solverNameMap, setSolverNameMap];
+}
+
+function useDefaultSolverMap({ url, problemNameMap }) {
+  const [defaultSolverMap, setDefaultSolverMap] = useState(new Map());
+
+  useEffect(() => {
+    const problems = Array.from(problemNameMap.keys());
+    requestDefaultSolverMap(url, problems).then((defaultSolverNames) => {
+      requestDefaultSolverFileMap(url, problems, defaultSolverNames).then((defaultSolverFileNames) => {
+        setDefaultSolverMap(defaultSolverFileNames);
+      });
+    });
+  }, [problemNameMap]);
+
+  //The requestDefaultSolverMap sets the solver names
+  async function requestDefaultSolverMap(url, problems) {
+    let map = new Map();
+    for (const problem of problems) {
+      await getProblemInfo(url, problem + "Generic")
+        .then((info) => {
+          map.set(problem, info.defaultSolver.solverName);
+        })
+        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
+    }
+    return map;
+  }
+
+  //The requestDefaultSolverFileMap sets the solver names by the file name
+  async function requestDefaultSolverFileMap(url, problems, defaultSolverNames) {
+    let map = new Map();
+    for (const problem of problems) {
+      const data = await getAvailableSolvers(url, problem).catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
+      for (const s of data) {
+        let solver = s.split(" ")[0];
+        const info = await getInfo(url, solver).catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
+        if (Array.from(defaultSolverNames.values()).includes(info.solverName)) {
+          map.set(problem, s);
+        }
+      }
+    }
+    return map;
+  }
+
+  return [defaultSolverMap, setDefaultSolverMap];
+}
+
+function useSolverOptions({ url, problemName, problemType }) {
+  const [solverOptions, setSolverOptions] = useState([]);
+
+  useEffect(() => {
+    const fullUrl =
+      url + "Navigation/Problem_SolversRefactor/" + "?chosenProblem=" + problemName + "&problemType=" + problemType;
+
+    if (!(problemName === "" || problemName === null)) {
+      initializeList(fullUrl);
+    }
+  }, [problemName]);
+
+  function initializeList(url) {
+    const req = getRequest(url);
+    req
+      .then((data) => {
+        setSolverOptions(data);
+      })
+      .catch((error) => console.log("GET REQUEST FAILED SEARCHBAR SOLVER"));
+  }
+
+  // function initializeProblemJson(arr) {
+  //   // Every problem should have a generic solver
+  //   arr.map(function (element, index, array) {
+  //     if (!problemJson.includes(element)) {
+  //       if (element === "Sat3BacktrackingSolver" && problemName === "SAT3") {
+  //         setChosenSolver(element);
+  //         setDefaultSolver("3SAT Backtracking Solver");
+  //       } else if (element === "CliqueBruteForce" && problemName === "CLIQUE") {
+  //         setChosenSolver(element);
+  //         setDefaultSolver("Clique Brute Force");
+  //       }
+  //       problemJson.push(element);
+  //     }
+  //   }, 80);
+  // }
+
+  return [solverOptions, setSolverOptions];
+}
+
+function useChosenSolver({ problemName, defaultSolverMap }) {
+  const [chosenSolver, setChosenSolver] = useState("");
+
+  useEffect(() => {
+    if (problemName === "" || problemName === null) {
+      setChosenSolver("");
+    } else {
+      setChosenSolver(defaultSolverMap.get(problemName)); // Gets the file name of default solver
+    }
+  }, [problemName]);
+
+  return [chosenSolver, setChosenSolver];
+}
+
+function useReductionTypeOptions({ url, problemName, problemType, chosenReduceTo }) {
+  const [reductionTypeOptions, setReductionTypeOptions] = useState([]);
+
+  useEffect(() => {
+    const fullUrl =
+      url +
+      "Navigation/NPC_NavGraph/reductionPath/" +
+      "?reducingFrom=" +
+      problemName +
+      "&reducingTo=" +
+      chosenReduceTo +
+      "&problemType=" +
+      problemType;
+
     initializeList(fullUrl);
   }, [chosenReduceTo]);
 
   function initializeProblemJson(arr) {
-    // check if reduceTo is selected
-    if (!arr.length) {
-      setChosenReductionType("");
-      return;
-    }
-
     let path = "";
     arr.map((reduction) => {
       path += reduction[0] + "-";
@@ -247,13 +401,6 @@ function useProblemProvider_SearchBarSelectReductionTypeV2({
     // }
   }
 
-  async function getRequest(url) {
-    const promise = await fetch(url).then((result) => {
-      return result.json();
-    });
-    return promise;
-  }
-
   function initializeList(url) {
     if (chosenReduceTo !== "") {
       const req = getRequest(url);
@@ -274,361 +421,175 @@ function useProblemProvider_SearchBarSelectReductionTypeV2({
   //     }
   //   });
   // }
+
+  return [reductionTypeOptions, setReductionTypeOptions];
 }
 
-function useProblemProvider_SearchBarSelectVerifierV2({
-  problemName,
-  problemType,
-  setChosenVerifier,
-  setVerifierOptions,
-  defaultVerifierMap,
-  ...props
-}) {
+function useChosenReductionType({ problemName, reductionTypeOptions }) {
+  const [chosenReductionType, setChosenReductionType] = useState("");
+
   useEffect(() => {
-    if (problemName === "" || problemName === null) {
-      setChosenVerifier("");
-    } else {
-      initializeList(
-        props.url +
-          "Navigation/Problem_VerifiersRefactor/" +
-          "?chosenProblem=" +
-          problemName +
-          "&problemType=" +
-          problemType
-      );
-      setChosenVerifier(defaultVerifierMap.get(problemName));
-    }
+    setChosenReductionType("");
   }, [problemName]);
 
-  function initializeProblemJson(arr) {
-    // arr.map(function (element, index, array) {
-    //   if (!problemJson.includes(element)) {
-    //     if (element === "KadensSimpleVerifier" && problemName === "SAT3") {
-    //       setChosenVerifier(element);
-    //       setDefaultVerifier("Kaden Simple Verifier");
-    //     } else if (element === "CliqueVerifier" && problemName === "CLIQUE") {
-    //       setChosenVerifier(element);
-    //       setDefaultVerifier("Generic Verifier");
-    //     }
-    //     problemJson.push(element);
-    //   }
-    // }, 80);
+  useEffect(() => {
+    if (!reductionTypeOptions.length || reductionTypeOptions[0] === "") {
+      setChosenReductionType("");
+    }
+  }, [reductionTypeOptions]);
 
-    setVerifierOptions(arr);
-  }
+  return [chosenReductionType, setChosenReductionType];
+}
 
-  async function getRequest(url) {
-    const promise = await fetch(url).then((result) => {
-      return result.json();
-    });
-    return promise;
-  }
+function useReduceToOptions({ url, problemName, problemType }) {
+  const [reduceToOptions, setReduceToOptions] = useState([]);
+
+  useEffect(() => {
+    const fullUrl =
+      url +
+      "Navigation/NPC_NavGraph/availableReductions/" +
+      "?chosenProblem=" +
+      problemName +
+      "&problemType=" +
+      problemType;
+
+    initializeList(fullUrl);
+  }, [problemName]);
 
   function initializeList(url) {
     const req = getRequest(url);
     req
       .then((data) => {
-        initializeProblemJson(data);
+        setReduceToOptions(data);
       })
-      .catch((error) => console.log("GET REQUEST FAILED SEARCHBAR VERIFIER"));
+      .catch((error) => console.log("GET REQUEST FAILED SELECT REDUCE TO"));
   }
+
+  // function initializeProblemJson(arr) {
+  //   // var elementChosen = false;
+  //   arr.map(function (element, index, array) {
+  //     if (!problemJson.includes(element)) {
+  //       if (element === "CLIQUE" && problemName === "SAT3") {
+  //         // stateVal = element;
+  //         setChosenReduceTo(element);
+  //         setReduceTo(element);
+  //         elementChosen = true;
+  //       } else if (problemName === "CLIQUE" && element === "VERTEXCOVER") {
+  //         setChosenReduceTo(element);
+  //         setReduceTo(element);
+  //         elementChosen = true;
+  //       }
+  //       if (!elementChosen) {
+  //         setChosenReduceTo(element);
+  //         setReduceTo(element);
+  //       }
+  //       problemJson.push(element);
+  //     }
+  //   }, 80);
+  // }
+
+  return [reduceToOptions, setReduceToOptions];
 }
 
-function useProblemProvider_SearchBarSelectSolverV2({
-  problemName,
-  problemType,
-  defaultSolverMap,
-  setChosenSolver,
-  setSolverOptions,
-  ...props
-}) {
+function useChosenReduceTo({ problemName, reduceToOptions }) {
+  const [chosenReduceTo, setChosenReduceTo] = useState("");
+
   useEffect(() => {
-    if (problemName === "" || problemName === null) {
-      setChosenSolver("");
-    } else {
-      initializeList(
-        props.url +
-          "Navigation/Problem_SolversRefactor/" +
-          "?chosenProblem=" +
-          problemName +
-          "&problemType=" +
-          problemType
-      );
-      setChosenSolver(defaultSolverMap.get(problemName)); // Gets the file name of default solver
-    }
+    setChosenReduceTo("");
   }, [problemName]);
 
-  function initializeProblemJson(arr) {
-    //Every problem should have a generic solver
-    // arr.map(function (element, index, array) {
-    //   if (!problemJson.includes(element)) {
-    //     if (element === "Sat3BacktrackingSolver" && problemName === "SAT3") {
-    //       setChosenSolver(element);
-    //       setDefaultSolver("3SAT Backtracking Solver");
-    //     } else if (element === "CliqueBruteForce" && problemName === "CLIQUE") {
-    //       setChosenSolver(element);
-    //       setDefaultSolver("Clique Brute Force");
-    //     }
-    //     problemJson.push(element);
-    //   }
-    // }, 80);
+  useEffect(() => {
+    if (!reduceToOptions.length) {
+      setChosenReduceTo("");
+    }
+  }, [reduceToOptions]);
 
-    setSolverOptions(arr);
-  }
-
-  async function getRequest(url) {
-    const promise = await fetch(url).then((result) => {
-      return result.json();
-    });
-    return promise;
-  }
-
-  function initializeList(url) {
-    const req = getRequest(url);
-    req
-      .then((data) => {
-        initializeProblemJson(data);
-      })
-      .catch((error) => console.log("GET REQUEST FAILED SEARCHBAR SOLVER"));
-  }
+  return [chosenReduceTo, setChosenReduceTo];
 }
 
-var problemJson = [];
-function useProblemProvider_SearchBarProblemType({
-  setProblemName,
-  setSolverNameMap,
-  setVerifierNameMap,
-  setProblemNameMap,
-  setDefaultSolverMap,
-  setDefaultVerifierMap,
-  ...props
-}) {
+function useReductionNameMap({ url, problemName, chosenReduceTo }) {
+  const [reductionNameMap, setReductionNameMap] = useState(new Map());
   useEffect(() => {
-    initializeList(`${props.url}navigation/NPC_ProblemsRefactor/`);
-  }, []);
-
-  /**
-   * converts asynchronous fetch request into synchronous call that sets the dropdown labels by updating our array
-   * we make sure to avoid duplicates
-   * @param {*} arr
-   */
-  function initializeProblemJson(arr) {
-    arr.map(function (element, index, array) {
-      if (!problemJson.includes(element)) {
-        if (element === "SAT3") {
-          //setDefaultProblemName(element);
-          setProblemName(element);
-        }
-
-        problemJson.push(element);
-      }
-    }, 80);
-  }
-
-  /**
-   *
-   * @param {*} url passed in url
-   * @returns a promise with the json
-   */
-  async function getRequest(url) {
-    const promise = await fetch(url).then((result) => {
-      return result.json();
+    requestReductionNameMap(url, problemName, chosenReduceTo).then((reductionMap) => {
+      setReductionNameMap(reductionMap);
     });
-    return promise;
-  }
-  /**
-   * gets the data from our request and attempts to set our labels by calling initializeProblemJson
-   *
-   */
-  function initializeList(url) {
-    if (problemJson.length === 0) {
-      const req = getRequest(url);
-      req
-        .then((data) => {
-          initializeProblemJson(data);
-          requestProblemNameMap(props.url, data).then((problemNames) => {
-            setProblemNameMap(problemNames);
-          });
-          requestDefaultSolverMap(props.url, data).then((defaultSolverNames) => {
-            requestDefaultSolverFileMap(props.url, data, defaultSolverNames).then((defaultSolverFileNames) => {
-              setDefaultSolverMap(defaultSolverFileNames);
-            });
-          });
+  }, [chosenReduceTo]);
 
-          requestDefaultVerifierMap(props.url, data).then((defaultVerifierNames) => {
-            requestDefaultVerifierFileMap(props.url, data, defaultVerifierNames).then((defaultVerifierFileNames) => {
-              setDefaultVerifierMap(defaultVerifierFileNames);
-            });
-          });
-
-          requestVerifierNameMap(props.url, data).then((verifierMap) => {
-            setVerifierNameMap(verifierMap);
-          });
-          requestSolverNameMap(props.url, data).then((solverMap) => {
-            setSolverNameMap(solverMap);
-          });
-        })
-        .catch((error) => console.log("GET REQUEST FAILED", error));
-    }
-
-    // initialized = true;
-  }
-
-  //The requestProblemNameMap sets the problem names
-  async function requestProblemNameMap(url, problems) {
+  // The following the functions are used to set the reduction names
+  async function requestReductionNameMap(url, problemFrom, problemTo) {
     let map = new Map();
-    problems.forEach((problem) => {
-      getProblemInfo(url, problem + "Generic")
-        .then((info) => {
-          map.set(problem, info.problemName);
-        })
-        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
-    });
-    return map;
-  }
-
-  //The requestDefaultSolverMap sets the solver names
-  async function requestDefaultSolverMap(url, problems) {
-    let map = new Map();
-    problems.forEach((problem) => {
-      getProblemInfo(url, problem + "Generic")
-        .then((info) => {
-          map.set(problem, info.defaultSolver.solverName);
-        })
-        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
-    });
-    return map;
-  }
-
-  //The requestDefaultSolverFileMap sets the solver names by the file name
-  async function requestDefaultSolverFileMap(url, problems, defaultSolverNames) {
-    let map = new Map();
-    problems.forEach(async (problem) => {
-      await getAvailableSolvers(url, problem)
-        .then((data) => {
-          data.forEach((s) => {
-            let solver = s.split(" ")[0];
-            getInfo(url, solver)
+    await getAvailableReductions(url, problemFrom, problemTo)
+      .then((data) => {
+        data.forEach((r) => {
+          r.forEach((reduction) => {
+            getInfo(url, reduction)
               .then((info) => {
-                if (Array.from(defaultSolverNames.values()).includes(info.solverName)) {
-                  map.set(problem, s);
-                }
+                map.set(reduction, info.reductionName);
               })
               .catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
           });
-        })
-        .catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
-    });
+        });
+      })
+      .catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
     return map;
   }
 
-  //The requestDefaultVerifierMap sets the verifier names
-  async function requestDefaultVerifierMap(url, problems) {
-    let map = new Map();
-    problems.forEach((problem) => {
-      getProblemInfo(url, problem + "Generic")
-        .then((info) => {
-          map.set(problem, info.defaultVerifier.verifierName);
-        })
-        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
-    });
-    return map;
-  }
-  //The requestDefaultVerifierFileMap sets the verifier names by the file name
-  async function requestDefaultVerifierFileMap(url, problems, defaultVerifierNames) {
-    let map = new Map();
-    problems.forEach(async (problem) => {
-      await getAvailableVerifiers(url, problem)
-        .then((data) => {
-          data.forEach((v) => {
-            let verifier = v.split(" ")[0];
-            getInfo(url, verifier)
-              .then((info) => {
-                if (Array.from(defaultVerifierNames.values()).includes(info.verifierName)) {
-                  map.set(problem, v);
-                }
-              })
-              .catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
-          });
-        })
-        .catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
-    });
-    return map;
-  }
-
-  async function getProblemInfo(url, problem) {
-    return await fetch(url + `${problem}`).then((resp) => {
+  async function getAvailableReductions(url, problemFrom, problemTo) {
+    return await fetch(
+      url + `Navigation/NPC_NavGraph/reductionPath/?reducingFrom=${problemFrom}&reducingTo=${problemTo}&problemType=NPC`
+    ).then((resp) => {
       if (resp.ok) {
         return resp.json();
       }
     });
   }
 
-  //The following the functions are used to set the solver names
-  async function requestSolverNameMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      await getAvailableSolvers(url, problem)
-        .then((data) => {
-          data.forEach((s) => {
-            let solver = s.split(" ")[0];
-            getInfo(url, solver)
-              .then((info) => {
-                map.set(s, info.solverName);
-              })
-              .catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
-          });
-        })
-        .catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
-    }
-    return map;
-  }
+  return [reductionNameMap, setReductionNameMap];
+}
 
-  async function getAvailableSolvers(url, problem) {
-    return await fetch(url + `Navigation/Problem_SolversRefactor/?chosenProblem=${problem}&problemType=NPC`).then(
-      (resp) => {
-        if (resp.ok) {
-          return resp.json();
-        }
-      }
-    );
-  }
-
-  async function getInfo(url, apiCall) {
-    return await fetch(url + `${apiCall}/info`).then((resp) => {
+async function getAvailableSolvers(url, problem) {
+  return await fetch(url + `Navigation/Problem_SolversRefactor/?chosenProblem=${problem}&problemType=NPC`).then(
+    (resp) => {
       if (resp.ok) {
         return resp.json();
       }
-    });
-  }
-
-  //The following the functions are used to set the verifier names
-  async function requestVerifierNameMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      await getAvailableVerifiers(url, problem)
-        .then((data) => {
-          data.forEach((v) => {
-            let verifier = v;
-            getInfo(url, verifier)
-              .then((info) => {
-                map.set(verifier, info.verifierName);
-              })
-              .catch((error) => console.log("VERIFIER INFO REQUEST FAILED"));
-          });
-        })
-        .catch((error) => console.log("VERIFIER REQUEST FAILED"));
     }
-    return map;
-  }
+  );
+}
 
-  async function getAvailableVerifiers(url, problem) {
-    return await fetch(url + `Navigation/Problem_VerifiersRefactor/?chosenProblem=${problem}&problemType=NPC`).then(
-      (resp) => {
-        if (resp.ok) {
-          return resp.json();
-        }
+async function getAvailableVerifiers(url, problem) {
+  return await fetch(url + `Navigation/Problem_VerifiersRefactor/?chosenProblem=${problem}&problemType=NPC`).then(
+    (resp) => {
+      if (resp.ok) {
+        return resp.json();
       }
-    );
-  }
+    }
+  );
+}
+
+/**
+ * @param {*} url passed in url
+ * @returns a promise with the json
+ */
+async function getRequest(url) {
+  const promise = await fetch(url).then((result) => {
+    return result.json();
+  });
+  return promise;
+}
+
+async function getInfo(url, apiCall) {
+  return await fetch(url + `${apiCall}/info`).then((resp) => {
+    if (resp.ok) {
+      return resp.json();
+    }
+  });
+}
+
+async function getProblemInfo(url, problem) {
+  return await fetch(url + `${problem}`).then((resp) => {
+    if (resp.ok) {
+      return resp.json();
+    }
+  });
 }
