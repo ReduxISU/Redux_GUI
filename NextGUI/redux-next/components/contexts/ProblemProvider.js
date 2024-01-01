@@ -49,6 +49,32 @@ export default function ProblemProvider({ url, children }) {
   return <ProblemContext.Provider value={state}>{children}</ProblemContext.Provider>;
 }
 
+function useGenericInfo(url, info) {
+  const [genericInfo, setGenericInfo] = useState({});
+
+  useEffect(() => {
+    if (!info) {
+      setGenericInfo({});
+    } else {
+      getInfo(url, info)
+        .then((info) => {
+          setGenericInfo(info);
+        })
+        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
+    }
+  }, [info]);
+
+  return genericInfo; // There should be no reason to set the information
+}
+
+export function useVerifierInfo(url, verifier) {
+  return useGenericInfo(url, verifier);
+}
+
+export function useReducerInfo(url, reducer) {
+  return useGenericInfo(url, (reducer ?? "").split("-")[0]);
+}
+
 export function useProblemInfo(url, problemName) {
   const [problemInfo, setProblemInfo] = useState({});
 
