@@ -16,7 +16,7 @@ import { Accordion, Card, AccordionContext, FormControl, Row, Col } from 'react-
 import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import PopoverTooltipClick from './PopoverTooltipClick';
 import SearchBarProblemType from './SearchBars/SearchBarProblemType';
-import { ProblemContext } from '../contexts/ProblemProvider'
+import { ProblemContext, useProblemInfo } from '../contexts/ProblemProvider'
 import { Stack, Button, Box } from '@mui/material'
 import TextField from '@mui/material/TextField';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
@@ -60,18 +60,10 @@ function ContextAwareToggle({ children, eventKey, callback, colors }) {
  */
 function AccordionNestedTextBox(props) {
 
-  const {
-    problemName,
-    problemType,
-    problemInstance,
-    setProblemName,
-    setProblemInstance,
-    makeApiCall,
-    setProblemJson
-  } = useContext(ProblemContext) //We are giving this row access to basically all global state. This will allow us to reset a page on problem change.
+  const { problemName, problemType, setProblemInstance } = useContext(ProblemContext); //We are giving this row access to basically all global state. This will allow us to reset a page on problem change.
 
+  const problemInfo = useProblemInfo(props.accordion.INPUTURL.url, problemName);
   const [testName, setTestName] = useState('DEFAULT ACCORDION NAME') //This may only actually cause a re-render event. But removing it means no rerender.
-  const [toolTip, setToolTip] = useState(props.accordion.TOOLTIP);
   const [problemLocalInstance, setProblemLocalInstance] = useState("")
   const defaultInstanceParsed = {
                 test: true,
@@ -116,27 +108,12 @@ function AccordionNestedTextBox(props) {
     return () => clearInterval(timer);
   });
 
-  //Updates the problem instance on problem name change to be the default instance of the new problem. also updates tooltips with that information.
+  //Updates the problem instance on problem name change to be the default instance of the new problem.
   useEffect(() => {
-    try {
-      requestProblemData(props.accordion.INPUTURL.url, problemName, problemType).then(data => {
-        if (!(typeof data === "undefined")) {
-          setProblemLocalInstance(data.defaultInstance);
-          setProblemInstance(data.defaultInstance);
-          setToolTip({ header: data.problemName, formalDef: data.formalDefinition, info: data.problemDefinition + data.source })
-        }
-
-        if(problemName === '' || problemName === null ){
-        
-          setProblemLocalInstance('');
-          setProblemInstance('');
-
-        }
-
-      }).catch(console.log("Problem not defined"));
-    }
-    catch {console.log("problem name is empty")}
-  }, [problemName])
+    const problem = problemName ? problemInfo : {};
+    setProblemLocalInstance(problem.defaultInstance ?? "");
+    setProblemInstance(problem.defaultInstance ?? "");
+  }, [problemName, problemInfo])
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {
@@ -172,7 +149,17 @@ function AccordionNestedTextBox(props) {
               {/**FORM CONTROL 1 */}
               <SearchBarProblemType setTestName={setTestName} placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder} url={props.accordion.INPUTURL.url}></SearchBarProblemType>
 
-              <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>
+              <PopoverTooltipClick
+                toolTip={
+                  problemName
+                    ? {
+                        header: problemInfo.problemName ?? "",
+                        formalDef: problemInfo.formalDefinition ?? "",
+                        info: (problemInfo.problemDefinition ?? "") + (problemInfo.source ?? ""),
+                      }
+                    : props.accordion.TOOLTIP
+                }
+              ></PopoverTooltipClick>
               <ContextAwareToggle eventKey="0" colors={props.accordion.THEME.colors}>▼</ContextAwareToggle>
 
             </Stack>
@@ -206,23 +193,5 @@ function AccordionNestedTextBox(props) {
     </div>
   );
 }
-
-
-/**
- * 
- * @param {*} url the base url of the application 
- * @param {*} name The name of the selected problem
- * @returns A promise from the passed in url. 
- */
-async function requestProblemData(url, name) {
-  return await fetch(url + name + "Generic").then(resp => {
-    if (resp.ok) {
-      return resp.json()
-    }
-  });
-
-}
-
-
 
 export default AccordionNestedTextBox
