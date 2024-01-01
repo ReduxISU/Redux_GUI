@@ -49,6 +49,24 @@ export default function ProblemProvider({ url, children }) {
   return <ProblemContext.Provider value={state}>{children}</ProblemContext.Provider>;
 }
 
+export function useProblemInfo(url, problemName) {
+  const [problemInfo, setProblemInfo] = useState({});
+
+  useEffect(() => {
+    if (!problemName) {
+      setProblemInfo({});
+    } else {
+      getProblemInfo(url, problemName + "Generic")
+        .then((info) => {
+          setProblemInfo(info);
+        })
+        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
+    }
+  }, [problemName]);
+
+  return problemInfo; // There should be no reason to set the problem information
+}
+
 function useProblemNameMap(baseUrl) {
   const [problemNameMap, setProblemNameMap] = useState(new Map());
 
