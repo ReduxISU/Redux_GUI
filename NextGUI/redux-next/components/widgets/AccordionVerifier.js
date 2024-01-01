@@ -17,33 +17,7 @@ import PopoverTooltipClick from './PopoverTooltipClick';
 import { Stack, Button, Box } from '@mui/material'
 import { ProblemContext } from '../contexts/ProblemProvider';
 import SearchBarSelectVerifierV2 from './SearchBars/SearchBarSelectVerifierV2';
-
-
-// import FormControl from '../components/FormControl'
-
-
-function ContextAwareToggle({ children, eventKey, callback, colors }) {
-  const { activeEventKey } = useContext(AccordionContext);
-
-
-  const decoratedOnClick = useAccordionButton(
-    eventKey,
-    () => callback && callback(eventKey),
-  );
-
-  const isCurrentEventKey = activeEventKey === eventKey;
-  return (
-    <Button
-      color='white'
-      className="float-end"
-      type="button"
-      style={{ backgroundColor: isCurrentEventKey ? colors.orange : colors.grey }}
-      onClick={decoratedOnClick}
-    >
-      {children}
-    </Button>
-  );
-}
+import ProblemSection from '../widgets/ProblemSection';
 
 function AccordionVerifier(props) {
 
@@ -139,49 +113,30 @@ function parseUserInput(userInput){
 }
 
   return (
-    <div>
-      <Accordion className="accordion" defaultActiveKey="1">
+    <ProblemSection>
+      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} themeColors={props.accordion.THEME.colors}>
+        <SearchBarSelectVerifierV2 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder} />{" "}
+        <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>
+      </ProblemSection.Header>
 
-        <Card>
-          <Card.Header>
-            <Stack direction="horizontal" gap={2}>
-              <Box sx={{ width: '10%' }}>
-                {props.accordion.CARD.cardHeaderText}
-              </Box>
-
-              <SearchBarSelectVerifierV2
-                placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
-              /> {/**Search bar left (form control 1) */}
-
-              <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>
-
-              <ContextAwareToggle eventKey="0" colors={props.accordion.THEME.colors}>▼</ContextAwareToggle>
-            </Stack>
-          </Card.Header>
-          <Accordion.Collapse eventKey="0">
-            <Card.Body>
-
-              {props.accordion.CARD.cardBodyText + " "}
-              <FormControl as="textarea" value={verifiedInstance} onChange={handleChangeCertificate} ></FormControl> {/**FORM CONTROL 2 (dropdown) */}
-              {"Verifier output: " + verifyResult + ""}
-              <div className="submitButton">
-                <Button
-                  size='large'
-                  color='white'
-                  style={{ backgroundColor: props.accordion.THEME.colors.grey }}
-                  onClick={handleVerify}
-                  disabled = {disableButton}
-                >{props.accordion.BUTTON.buttonText}</Button>
-              </div>
-            </Card.Body>
-
-          </Accordion.Collapse>
-
-        </Card>
-
-      </Accordion>
-
-    </div>
+      <ProblemSection.Body>
+        {props.accordion.CARD.cardBodyText + " "}
+        <FormControl as="textarea" value={verifiedInstance} onChange={handleChangeCertificate}></FormControl>{" "}
+        {/**FORM CONTROL 2 (dropdown) */}
+        {"Verifier output: " + verifyResult + ""}
+        <div className="submitButton">
+          <Button
+            size="large"
+            color="white"
+            style={{ backgroundColor: props.accordion.THEME.colors.grey }}
+            onClick={handleVerify}
+            disabled={disableButton}
+          >
+            {props.accordion.BUTTON.buttonText}
+          </Button>
+        </div>
+      </ProblemSection.Body>
+    </ProblemSection>
   );
 
 }
