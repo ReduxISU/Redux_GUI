@@ -18,32 +18,9 @@ import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import PopoverTooltipClick from './PopoverTooltipClick';
 
 import { ProblemContext, useProblemInfo } from '../contexts/ProblemProvider'
+import ProblemSection from '../widgets/ProblemSection';
 import SearchBarSelectReduceToV2 from './SearchBars/SearchBarSelectReduceToV2';
 import SearchBarSelectReductionTypeV2 from './SearchBars/SearchBarSelectReductionTypeV2';
-
-
-function ContextAwareToggle({ children, eventKey, callback, colors }) {
-  const { activeEventKey } = useContext(AccordionContext);
-
-  const decoratedOnClick = useAccordionButton(
-    eventKey,
-    () => callback && callback(eventKey),
-  );
-
-  const isCurrentEventKey = activeEventKey === eventKey;
-  return (
-    <Button
-      sx={{ height: 54, width: 64 }}
-      color='white'
-      className="float-end"
-      type="button"
-      style={{ backgroundColor: isCurrentEventKey ? colors.orange : colors.grey }}
-      onClick={decoratedOnClick}
-    >
-      {children}
-    </Button>
-  );
-}
 
 function AccordionDualInputNestedButton(props) {
 
@@ -108,71 +85,42 @@ function AccordionDualInputNestedButton(props) {
 
 
   return (
-    
-    <div>
-
-      
-
-      <Accordion className="accordion" defaultActiveKey="0">
-        <Card>
-          <Card.Header>
-
-            <Stack direction="horizontal" justifyContent="right" gap={2}>
-              <Box
-                sx={{ width: '22%' }}
-              >
-                {props.accordion.CARD.cardHeaderText}
-              </Box>
-              <SearchBarSelectReduceToV2
-                placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
-              /> {/**Search bar left (form control 1) */}
-
-              <PopoverTooltipClick
-                toolTip={
-                  chosenReduceTo
-                    ? {
-                        header: reduceToInfo.problemName ?? "",
-                        formalDef: reduceToInfo.formalDefinition ?? "",
-                        info: (reduceToInfo.problemDefinition ?? "") + (reduceToInfo.source ?? ""),
-                      }
-                    : props.accordion.TOOLTIP1
+    <ProblemSection defaultCollapsed={false}>
+      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} titleWidth={"22%"} themeColors={props.accordion.THEME.colors}>
+        <SearchBarSelectReduceToV2 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder} />{" "}
+        <PopoverTooltipClick
+          toolTip={
+            chosenReduceTo
+              ? {
+                  header: reduceToInfo.problemName ?? "",
+                  formalDef: reduceToInfo.formalDefinition ?? "",
+                  info: (reduceToInfo.problemDefinition ?? "") + (reduceToInfo.source ?? ""),
                 }
-              ></PopoverTooltipClick>
+              : props.accordion.TOOLTIP1
+          }
+        ></PopoverTooltipClick>
 
-              <SearchBarSelectReductionTypeV2
-                placeholder={props.accordion.ACCORDION_FORM_TWO.placeHolder}
-              />
-              <PopoverTooltipClick toolTip={toolTip2}></PopoverTooltipClick>
-              <ContextAwareToggle eventKey="0" colors={props.accordion.THEME.colors}>▼</ContextAwareToggle>
+        <SearchBarSelectReductionTypeV2 placeholder={props.accordion.ACCORDION_FORM_TWO.placeHolder} />
+        <PopoverTooltipClick toolTip={toolTip2}></PopoverTooltipClick>
+      </ProblemSection.Header>
+      
+      <ProblemSection.Body>
+        <Card.Text>{createPrettyFormat(reducedInstance, chosenReduceTo)}</Card.Text>
 
-            </Stack>
-
-          </Card.Header>
-
-          <Accordion.Collapse eventKey="0">
-            <Card.Body>
-
-            <Card.Text>{createPrettyFormat(reducedInstance,chosenReduceTo)}</Card.Text>
-            
-              <div className="submitButton">
-                <Button
-                  size='large'
-                  color='white'
-                  style={{ backgroundColor: props.accordion.THEME.colors.grey }}
-                  onClick={reduceRequest}
-                  disabled= {!chosenReductionType}
-                >{props.accordion.BUTTON.buttonText}</Button>
-              </div>
-            </Card.Body>
-          </Accordion.Collapse>
-        </Card>
-
-      </Accordion>
-
-    </div>
+        <div className="submitButton">
+          <Button
+            size="large"
+            color="white"
+            style={{ backgroundColor: props.accordion.THEME.colors.grey }}
+            onClick={reduceRequest}
+            disabled={!chosenReductionType}
+          >
+            {props.accordion.BUTTON.buttonText}
+          </Button>
+        </div>
+      </ProblemSection.Body>
+    </ProblemSection>
   );
-
-
 }
 
 // Returns a "pretty" version of the reduction string if possible.
