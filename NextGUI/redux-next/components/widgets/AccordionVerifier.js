@@ -15,15 +15,16 @@ import { FormControl } from 'react-bootstrap'
 import PopoverTooltipClick from './PopoverTooltipClick';
 import { Button } from '@mui/material'
 import { ProblemContext, useVerifierInfo } from '../contexts/ProblemProvider';
-import SearchBarSelectVerifierV2 from './SearchBars/SearchBarSelectVerifierV2';
 import ProblemSection from '../widgets/ProblemSection';
+import SearchBarExtensible from './SearchBarExtensible';
 
 function AccordionVerifier(props) {
 
   const [verifiedInstance, setVerifiedInstance] = useState("");
   const [verifyResult, setVerifyResult] = useState("");
 
-  const { problemName, problemInstance, problemType, chosenVerifier, setChosenVerifier, solvedInstance } = useContext(ProblemContext)
+  const { problemName, problemInstance, chosenVerifier, setChosenVerifier, verifierOptions, verifierNameMap } =
+    useContext(ProblemContext);
 
   const verifierInfo = useVerifierInfo(props.accordion.INPUTURL.url, chosenVerifier);
 
@@ -106,7 +107,21 @@ function parseUserInput(userInput){
   return (
     <ProblemSection>
       <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} themeColors={props.accordion.THEME.colors}>
-        <SearchBarSelectVerifierV2 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder} />{" "}
+        <SearchBarExtensible
+          placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
+          selected={chosenVerifier}
+          onSelect={setChosenVerifier}
+          options={verifierOptions}
+          optionsMap={verifierNameMap}
+          disabled={!problemName}
+          disabledMessage={"No verifier available. Please select a problem."}
+          extenderButtons={(input) => [
+            {
+              label: `Add new verifier "${input}"`,
+              href: `${props.accordion.INPUTURL.url}ProblemTemplate/?problemName=${input}`,
+            },
+          ]}
+        />{" "}
         <PopoverTooltipClick
           toolTip={
             chosenVerifier
