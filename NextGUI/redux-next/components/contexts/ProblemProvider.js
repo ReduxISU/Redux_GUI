@@ -557,28 +557,29 @@ function useChosenReduceTo({ problemName, reduceToOptions }) {
 
 function useReductionNameMap({ url, problemName, chosenReduceTo }) {
   const [reductionNameMap, setReductionNameMap] = useState(new Map());
+
   useEffect(() => {
-    requestReductionNameMap(url, problemName, chosenReduceTo).then((reductionMap) => {
-      setReductionNameMap(reductionMap);
-    });
+    if (chosenReduceTo) {
+      requestReductionNameMap(url, problemName, chosenReduceTo).then((reductionMap) => {
+        setReductionNameMap(reductionMap);
+      });
+    } else {
+      setReductionNameMap(new Map());
+    }
   }, [chosenReduceTo]);
 
   // The following the functions are used to set the reduction names
   async function requestReductionNameMap(url, problemFrom, problemTo) {
     let map = new Map();
-    await getAvailableReductions(url, problemFrom, problemTo)
-      .then((data) => {
-        data.forEach((r) => {
-          r.forEach((reduction) => {
-            getInfo(url, reduction)
-              .then((info) => {
-                map.set(reduction, info.reductionName);
-              })
-              .catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
-          });
-        });
-      })
-      .catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
+    const data = await getAvailableReductions(url, problemFrom, problemTo).catch((error) =>
+      console.log("SOLUTIONS REQUEST FAILED")
+    );
+    for (const r of data) {
+      for (const reduction of r) {
+        const info = await getInfo(url, reduction).catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
+        map.set(reduction, info.reductionName);
+      }
+    }
     return map;
   }
 
