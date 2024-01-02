@@ -18,18 +18,29 @@ import PopoverTooltipClick from './PopoverTooltipClick';
 
 import { ProblemContext, useProblemInfo, useReducerInfo } from '../contexts/ProblemProvider'
 import ProblemSection from '../widgets/ProblemSection';
-import SearchBarSelectReduceToV2 from './SearchBars/SearchBarSelectReduceToV2';
-import SearchBarSelectReductionTypeV2 from './SearchBars/SearchBarSelectReductionTypeV2';
+import SearchBarExtensible from './SearchBarExtensible';
 
 function AccordionDualInputNestedButton(props) {
 
-  const { problemName, problemInstance, problemType, chosenReduceTo, setChosenReduceTo, chosenReductionType, setChosenReductionType, reducedInstance, setReducedInstance } = useContext(ProblemContext)
+  const {
+    problemName,
+    problemNameMap,
+    problemInstance,
+    reductionNameMap,
+    reduceToOptions,
+    chosenReduceTo,
+    setChosenReduceTo,
+    reductionTypeOptions,
+    chosenReductionType,
+    setChosenReductionType,
+    reducedInstance,
+    setReducedInstance,
+  } = useContext(ProblemContext);
 
   const [reducedInstanceLocal, setReducedInstanceLocal] = useState();
 
   const reduceToInfo = useProblemInfo(props.accordion.INPUTURL.url, chosenReduceTo);
   const reducerInfo = useReducerInfo(props.accordion.INPUTURL.url, chosenReductionType);
-  const [testData, setTestData] = useState("TEST DATA REDUCE") //keeps track of reduce to text
 
   const reduceRequest = async () => {
 
@@ -72,7 +83,21 @@ function AccordionDualInputNestedButton(props) {
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} titleWidth={"22%"} themeColors={props.accordion.THEME.colors}>
-        <SearchBarSelectReduceToV2 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder} />{" "}
+      <SearchBarExtensible
+          placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
+          selected={chosenReduceTo}
+          onSelect={setChosenReduceTo}
+          options={reduceToOptions}
+          optionsMap={problemNameMap}
+          disabled={!problemName}
+          disabledMessage={"No reductions available. Please select a problem."}
+          extenderButtons={(input) => [
+            {
+              label: `Add new problem "${input}"`,
+              href: `${props.accordion.INPUTURL.url}ProblemTemplate/?problemName=${input}`,
+            },
+          ]}
+        />{" "}
         <PopoverTooltipClick
           toolTip={
             chosenReduceTo
@@ -84,8 +109,29 @@ function AccordionDualInputNestedButton(props) {
               : props.accordion.TOOLTIP1
           }
         ></PopoverTooltipClick>
-
-        <SearchBarSelectReductionTypeV2 placeholder={props.accordion.ACCORDION_FORM_TWO.placeHolder} />
+        <SearchBarExtensible
+          placeholder={props.accordion.ACCORDION_FORM_TWO.placeHolder}
+          selected={chosenReductionType}
+          onSelect={setChosenReductionType}
+          options={reductionTypeOptions}
+          optionsMap={
+            new Map(
+              reductionTypeOptions.map((option) => {
+                const reductions = option.split("-").map((r) => reductionNameMap.get(r) ?? r);
+                const reductionName = reductions.reduce((name, r) => (name += r + " - "), "");
+                return [option, reductionName.slice(0, reductionName.lastIndexOf(" - "))];
+              })
+            )
+          }
+          disabled={!problemName || !chosenReduceTo}
+          disabledMessage={"No reduction method available. Please select a reduction problem."}
+          extenderButtons={(input) => [
+            {
+              label: `Add new reduction "${input}"`,
+              href: `${props.accordion.INPUTURL.url}ProblemTemplate/?problemName=${input}`,
+            },
+          ]}
+        />
         <PopoverTooltipClick
           toolTip={
             chosenReductionType
