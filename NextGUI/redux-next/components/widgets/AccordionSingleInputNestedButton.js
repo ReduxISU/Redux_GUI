@@ -15,11 +15,23 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import PopoverTooltipClick from './PopoverTooltipClick';
 import { Button } from '@mui/material'
 import { ProblemContext } from '../contexts/ProblemProvider';
-import SearchBarSelectSolverV2 from './SearchBars/SearchBarSelectSolverV2';
 import ProblemSection from '../widgets/ProblemSection';
+import SearchBarExtensible from './SearchBarExtensible';
 
 function AccordionSingleInputNestedButton(props) {
-  const { problemName, problemInstance, problemType, chosenSolver, setChosenSolver, solvedInstance, setSolvedInstance } = useContext(ProblemContext)
+  const {
+    problemName,
+    problemInstance,
+    chosenSolver,
+    setChosenSolver,
+    solvedInstance,
+    setSolvedInstance,
+    solverOptions,
+    solverNameMap,
+    problemNameMap,
+    chosenReduceTo,
+  } = useContext(ProblemContext);
+  
   const [toolTip, setToolTip] = useState(props.accordion.TOOLTIP); //Keeps track of tooltip state (left)
   const [disableButton, setActive] = useState(false) // keeps track of button
 
@@ -82,7 +94,22 @@ function AccordionSingleInputNestedButton(props) {
   return (
     <ProblemSection>
       <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} themeColors={props.accordion.THEME.colors}>
-        <SearchBarSelectSolverV2 placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder} />{" "}
+        <SearchBarExtensible
+          placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
+          selected={chosenSolver}
+          onSelect={setChosenSolver}
+          options={solverOptions}
+          optionsMap={solverNameMap}
+          disabled={!problemName}
+          disabledMessage={"No solvers available. Please select a problem."}
+          extenderButtons={(input) => {
+            const extender = (problem) => ({
+              label: `Add new ${problemNameMap.get(problem)} solution algorithm "${input}"`,
+              href: `${props.url}ProblemTemplate/?problemName=${input}`,
+            });
+            return !chosenReduceTo ? [extender(problemName)] : [extender(problemName), extender(chosenReduceTo)];
+          }}
+        />{" "}
         <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>
       </ProblemSection.Header>
 
