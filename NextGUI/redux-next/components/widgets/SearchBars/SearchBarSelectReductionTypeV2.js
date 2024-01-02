@@ -15,14 +15,16 @@ import React, { useContext, useEffect, useState } from "react";
 export const noReductionsTypeMessage = "No reduction method available. Please choose a reduce-to";
 
 export default function SearchBarSelectReductionTypeV2(props) {
-  const { reductionNameMap, setChosenReductionType, chosenReductionType, reductionTypeOptions } =
+  const { reductionNameMap, setChosenReductionType, chosenReductionType, chosenReduceTo, reductionTypeOptions } =
     useContext(ProblemContext);
+
+  const disabled = !reductionTypeOptions.length && !chosenReduceTo;
 
   return (
     <Autocomplete
       style={{ width: "100%" }}
-      value={!reductionTypeOptions.length ? noReductionsTypeMessage : chosenReductionType}
-      disabled={!reductionTypeOptions.length}
+      value={disabled ? noReductionsTypeMessage : chosenReductionType}
+      disabled={disabled}
       onChange={(event, value) => {
         if (value !== noReductionsTypeMessage) {
           setChosenReductionType(value);
@@ -55,9 +57,7 @@ export default function SearchBarSelectReductionTypeV2(props) {
         <TextField
           {...params}
           label={props.placeholder}
-          InputProps={
-            !reductionTypeOptions.length ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }
-          }
+          InputProps={disabled ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }}
         />
       )}
     />
