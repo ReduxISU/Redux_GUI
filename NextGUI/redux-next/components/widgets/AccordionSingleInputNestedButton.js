@@ -10,11 +10,11 @@
 
 
 import React from 'react'
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import PopoverTooltipClick from './PopoverTooltipClick';
 import { Button } from '@mui/material'
-import { ProblemContext } from '../contexts/ProblemProvider';
+import { ProblemContext, useSolverInfo } from '../contexts/ProblemProvider';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from './SearchBarExtensible';
 
@@ -32,33 +32,7 @@ function AccordionSingleInputNestedButton(props) {
     chosenReduceTo,
   } = useContext(ProblemContext);
   
-  const [toolTip, setToolTip] = useState(props.accordion.TOOLTIP); //Keeps track of tooltip state (left)
-  const [disableButton, setActive] = useState(false) // keeps track of button
-
-  
-  useEffect(() => {
-    setSolvedInstance("");
-    // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
-    // remove first if once this functionality is added for all problems, the else code block was the original
-    // functionality
-    if(chosenSolver == "CliqueBruteForce - via SipserReduceToCliqueStandard"){
-      requestSolverData(props.accordion.INPUTURL.url, "CliqueBruteForce").then(data => {
-        setToolTip({ header: data.solverName, formalDef: data.solverDefinition, info: data.source }) //updates TOOLTIP
-      }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
-    }
-    else{
-      requestSolverData(props.accordion.INPUTURL.url, chosenSolver).then(data => {
-        setToolTip({ header: data.solverName, formalDef: data.solverDefinition, info: data.source }) //updates TOOLTIP
-      }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
-    }
-
-    if(!chosenSolver){
-      setActive(true);
-
-    }else{
-      setActive(false);
-    }
-  }, [chosenSolver])
+  const solverInfo = useSolverInfo(props.accordion.INPUTURL.url, chosenSolver);
 
   const handleSolve = () => {
     if (chosenSolver !== null && chosenSolver !== '') {
@@ -110,7 +84,17 @@ function AccordionSingleInputNestedButton(props) {
             return !chosenReduceTo ? [extender(problemName)] : [extender(problemName), extender(chosenReduceTo)];
           }}
         />{" "}
-        <PopoverTooltipClick toolTip={toolTip}></PopoverTooltipClick>
+        <PopoverTooltipClick
+          toolTip={
+            chosenSolver
+              ? {
+                  header: solverInfo.solverName ?? "",
+                  formalDef: solverInfo.solverDefinition ?? "",
+                  info: solverInfo.source ?? "",
+                }
+              : props.accordion.TOOLTIP
+          }
+        ></PopoverTooltipClick>
       </ProblemSection.Header>
 
       <ProblemSection.Body>
@@ -121,7 +105,7 @@ function AccordionSingleInputNestedButton(props) {
             color="white"
             style={{ backgroundColor: props.accordion.THEME.colors.grey }}
             onClick={handleSolve}
-            disabled={disableButton}
+            disabled={!chosenSolver}
           >
             {props.accordion.BUTTON.buttonText}
           </Button>
@@ -129,16 +113,6 @@ function AccordionSingleInputNestedButton(props) {
       </ProblemSection.Body>
     </ProblemSection>
   );
-}
-
-
-async function requestSolverData(url, solverName) {
-
-  return await fetch(url + solverName + '/info').then(resp => {
-    if (resp.ok) {
-      return resp.json();
-    }
-  });
 }
 
 async function requestSolvedInstance(url, sName, instance) {
