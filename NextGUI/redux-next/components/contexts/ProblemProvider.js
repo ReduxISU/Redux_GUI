@@ -37,7 +37,7 @@ export default function ProblemProvider({ url, children }) {
   [state.solverOptions, state.setSolverOptions] = useSolverOptions({ url: url, ...state });
   [state.chosenSolver, state.setChosenSolver] = useChosenSolver(state);
   [state.solverNameMap, state.setSolverNameMap] = useSolverNameMap({ url: url, ...state });
-  [state.solvedInstance, state.setSolvedInstance] = useState("");
+  [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance({ ...state });
 
   [state.reduceToOptions, state.setReduceToOptions] = useReduceToOptions({ url: url, ...state });
   [state.chosenReduceTo, state.setChosenReduceTo] = useChosenReduceTo(state);
@@ -95,6 +95,16 @@ export function useProblemInfo(url, problemName) {
   }, [problemName]);
 
   return problemInfo; // There should be no reason to set the problem information
+}
+
+function useSolvedInstance({ chosenSolver }) {
+  const [solvedInstance, setSolvedInstance] = useState("");
+
+  useEffect(() => {
+    setSolvedInstance("");
+  }, [chosenSolver]);
+
+  return [solvedInstance, setSolvedInstance];
 }
 
 function useProblemNameMap(baseUrl) {
