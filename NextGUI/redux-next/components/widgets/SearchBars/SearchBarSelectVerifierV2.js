@@ -26,7 +26,7 @@ export default function SearchBarSelectVerifierV2(props) {
       disabled={!problemName}
       onChange={(event, value) => {
         if (value !== noProblemChosenMessage) {
-          setChosenVerifier(value);
+          setChosenVerifier(value ?? "");
         }
       }}
       selectOnFocus

@@ -27,7 +27,7 @@ export default function SearchBarSelectReductionTypeV2(props) {
       disabled={disabled}
       onChange={(event, value) => {
         if (value !== noReductionsTypeMessage) {
-          setChosenReductionType(value);
+          setChosenReductionType(value ?? "");
         }
       }}
       selectOnFocus

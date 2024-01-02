@@ -24,7 +24,7 @@ export default function SearchBarSelectSolverV2(props) {
       disabled={!problemName}
       onChange={(event, value) => {
         if (value !== noSolverMessage) {
-          setChosenSolver(value);
+          setChosenSolver(value ?? "");
         }
       }}
       selectOnFocus
