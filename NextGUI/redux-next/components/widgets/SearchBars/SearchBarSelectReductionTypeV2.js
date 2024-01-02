@@ -15,35 +15,18 @@ import React, { useContext, useEffect, useState } from "react";
 export const noReductionsTypeMessage = "No reduction method available. Please choose a reduce-to";
 
 export default function SearchBarSelectReductionTypeV2(props) {
-  const [reductionType, setReductionType] = useState("");
-  const { chosenReduceTo, reductionNameMap, setChosenReductionType, reductionTypeOptions } = useContext(ProblemContext);
-  const [noReductionsType, setNoReductionsType] = useState(false);
-
-  useEffect(() => {
-    if (chosenReduceTo === "") {
-      setNoReductionsType(true);
-      setReductionType(noReductionsTypeMessage);
-    }
-  }, [chosenReduceTo]);
-
-  useEffect(() => {
-    if (reductionTypeOptions.length) {
-      setNoReductionsType(false);
-      setReductionType("");
-    } else {
-      setNoReductionsType(true);
-      setReductionType(noReductionsTypeMessage);
-    }
-  }, [reductionTypeOptions]);
+  const { reductionNameMap, setChosenReductionType, chosenReductionType, reductionTypeOptions } =
+    useContext(ProblemContext);
 
   return (
     <Autocomplete
       style={{ width: "100%" }}
-      disabled={noReductionsType}
-      value={reductionType}
-      onChange={(event, newValue) => {
-        setReductionType(newValue);
-        setChosenReductionType(newValue);
+      value={!reductionTypeOptions.length ? noReductionsTypeMessage : chosenReductionType}
+      disabled={!reductionTypeOptions.length}
+      onChange={(event, value) => {
+        if (value !== noReductionsTypeMessage) {
+          setChosenReductionType(value);
+        }
       }}
       selectOnFocus
       clearOnBlur
@@ -72,7 +55,9 @@ export default function SearchBarSelectReductionTypeV2(props) {
         <TextField
           {...params}
           label={props.placeholder}
-          InputProps={noReductionsType ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }}
+          InputProps={
+            !reductionTypeOptions.length ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }
+          }
         />
       )}
     />

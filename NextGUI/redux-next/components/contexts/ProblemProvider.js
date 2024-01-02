@@ -461,12 +461,12 @@ function useReductionTypeOptions({ url, problemName, problemType, chosenReduceTo
   return [reductionTypeOptions, setReductionTypeOptions];
 }
 
-function useChosenReductionType({ problemName, reductionTypeOptions }) {
+function useChosenReductionType({ problemName, chosenReduceTo, reductionTypeOptions }) {
   const [chosenReductionType, setChosenReductionType] = useState("");
 
   useEffect(() => {
     setChosenReductionType("");
-  }, [problemName]);
+  }, [problemName, chosenReduceTo]);
 
   useEffect(() => {
     if (!reductionTypeOptions.length || reductionTypeOptions[0] === "") {
