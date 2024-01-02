@@ -21,7 +21,6 @@ import Button from 'react-bootstrap/Button'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Image from 'next/image'
 import isulogo from '../components/images/ISULogo.png'
-import SearchBarProblemType from '../components/widgets/SearchBars/SearchBarProblemType'
 import ProblemProvider from '../components/contexts/ProblemProvider'
 import ResponsiveAppBar from '../components/widgets/ResponsiveAppBar'
 import { Box, createTheme, Grid, ThemeProvider, Typograph } from "@mui/material"

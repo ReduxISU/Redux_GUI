@@ -13,12 +13,12 @@ import { useContext } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import PopoverTooltipClick from './PopoverTooltipClick';
-import SearchBarProblemType from './SearchBars/SearchBarProblemType';
 import { ProblemContext, useProblemInfo } from '../contexts/ProblemProvider'
 import { Stack } from '@mui/material'
 import TextField from '@mui/material/TextField';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
+import SearchBarExtensible from './SearchBarExtensible';
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
@@ -28,10 +28,9 @@ import ProblemSection from '../widgets/ProblemSection';
  */
 function AccordionNestedTextBox(props) {
 
-  const { problemName, problemType, setProblemInstance } = useContext(ProblemContext); //We are giving this row access to basically all global state. This will allow us to reset a page on problem change.
+  const { problemName, setProblemName, problemNameMap, setProblemInstance } = useContext(ProblemContext); //We are giving this row access to basically all global state. This will allow us to reset a page on problem change.
 
   const problemInfo = useProblemInfo(props.accordion.INPUTURL.url, problemName);
-  const [testName, setTestName] = useState('DEFAULT ACCORDION NAME') //This may only actually cause a re-render event. But removing it means no rerender.
   const [problemLocalInstance, setProblemLocalInstance] = useState("")
   const defaultInstanceParsed = {
                 test: true,
@@ -97,20 +96,22 @@ function AccordionNestedTextBox(props) {
     }
   }
 
-  // useEffect(() => {
-  //   window.location.reload(false);
-  // },[testName])
-
-
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} themeColors={props.accordion.THEME.colors}>
-        <SearchBarProblemType
-          setTestName={setTestName}
+        <SearchBarExtensible
           placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
-          url={props.accordion.INPUTURL.url}
-        ></SearchBarProblemType>
-
+          selected={problemName}
+          onSelect={setProblemName}
+          options={[...problemNameMap.keys()]}
+          optionsMap={problemNameMap}
+          extenderButtons={(input) => [
+            {
+              label: `Add new problem "${input}"`,
+              href: `${props.accordion.INPUTURL.url}ProblemTemplate/?problemName=${input}`,
+            },
+          ]}
+        />{" "}
         <PopoverTooltipClick
           toolTip={
             problemName
