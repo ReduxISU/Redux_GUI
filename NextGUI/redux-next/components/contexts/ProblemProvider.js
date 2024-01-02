@@ -68,7 +68,13 @@ function useGenericInfo(url, info) {
 }
 
 export function useSolverInfo(url, solver) {
-  return useGenericInfo(url, solver);
+  // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
+  // remove first if once this functionality is added for all problems, the false expression was the original
+  // functionality
+  return useGenericInfo(
+    url,
+    solver === "CliqueBruteForce - via SipserReduceToCliqueStandard" ? "CliqueBruteForce" : solver
+  );
 }
 
 export function useVerifierInfo(url, verifier) {
