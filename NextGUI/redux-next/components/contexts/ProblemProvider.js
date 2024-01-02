@@ -67,6 +67,10 @@ function useGenericInfo(url, info) {
   return genericInfo; // There should be no reason to set the information
 }
 
+export function useSolverInfo(url, solver) {
+  return useGenericInfo(url, solver);
+}
+
 export function useVerifierInfo(url, verifier) {
   return useGenericInfo(url, verifier);
 }
