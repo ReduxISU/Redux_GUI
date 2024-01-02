@@ -172,11 +172,13 @@ function useVerifierOptions({ url, problemName, problemType }) {
   const [verifierOptions, setVerifierOptions] = useState([]);
 
   useEffect(() => {
-    const fullUrl =
-      url + "Navigation/Problem_VerifiersRefactor/" + "?chosenProblem=" + problemName + "&problemType=" + problemType;
+    if (problemName) {
+      const fullUrl =
+        url + "Navigation/Problem_VerifiersRefactor/" + "?chosenProblem=" + problemName + "&problemType=" + problemType;
 
-    if (problemName !== "" && problemName !== null) {
       initializeList(fullUrl);
+    } else {
+      setVerifierOptions([]);
     }
   }, [problemName]);
 
@@ -323,11 +325,13 @@ function useSolverOptions({ url, problemName, problemType }) {
   const [solverOptions, setSolverOptions] = useState([]);
 
   useEffect(() => {
-    const fullUrl =
-      url + "Navigation/Problem_SolversRefactor/" + "?chosenProblem=" + problemName + "&problemType=" + problemType;
+    if (problemName) {
+      const fullUrl =
+        url + "Navigation/Problem_SolversRefactor/" + "?chosenProblem=" + problemName + "&problemType=" + problemType;
 
-    if (!(problemName === "" || problemName === null)) {
       initializeList(fullUrl);
+    } else {
+      setSolverOptions([]);
     }
   }, [problemName]);
 
@@ -373,17 +377,21 @@ function useReductionTypeOptions({ url, problemName, problemType, chosenReduceTo
   const [reductionTypeOptions, setReductionTypeOptions] = useState([]);
 
   useEffect(() => {
-    const fullUrl =
-      url +
-      "Navigation/NPC_NavGraph/reductionPath/" +
-      "?reducingFrom=" +
-      problemName +
-      "&reducingTo=" +
-      chosenReduceTo +
-      "&problemType=" +
-      problemType;
+    if (chosenReduceTo) {
+      const fullUrl =
+        url +
+        "Navigation/NPC_NavGraph/reductionPath/" +
+        "?reducingFrom=" +
+        problemName +
+        "&reducingTo=" +
+        chosenReduceTo +
+        "&problemType=" +
+        problemType;
 
-    initializeList(fullUrl);
+      initializeList(fullUrl);
+    } else {
+      setReductionTypeOptions([]);
+    }
   }, [chosenReduceTo]);
 
   function initializeProblemJson(arr) {
@@ -481,15 +489,19 @@ function useReduceToOptions({ url, problemName, problemType }) {
   const [reduceToOptions, setReduceToOptions] = useState([]);
 
   useEffect(() => {
-    const fullUrl =
-      url +
-      "Navigation/NPC_NavGraph/availableReductions/" +
-      "?chosenProblem=" +
-      problemName +
-      "&problemType=" +
-      problemType;
+    if (problemName) {
+      const fullUrl =
+        url +
+        "Navigation/NPC_NavGraph/availableReductions/" +
+        "?chosenProblem=" +
+        problemName +
+        "&problemType=" +
+        problemType;
 
-    initializeList(fullUrl);
+      initializeList(fullUrl);
+    } else {
+      setReduceToOptions([]);
+    }
   }, [problemName]);
 
   function initializeList(url) {
