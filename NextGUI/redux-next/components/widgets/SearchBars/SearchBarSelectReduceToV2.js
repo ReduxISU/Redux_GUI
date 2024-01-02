@@ -9,47 +9,25 @@
  */
 
 import TextField from "@mui/material/TextField";
-import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
+import Autocomplete from "@mui/material/Autocomplete";
 import { ProblemContext } from "../../contexts/ProblemProvider";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 export const noReductionsMessage = "No reductions available. Click on the add button to add a new reduce-to";
 
 export default function SearchBarSelectReduceToV2(props) {
-  // const [defaultProblemName, setDefaultProblemName] = useState('');
-  const [reductionProblem, setReduceTo] = useState(noReductionsMessage);
-  const { problemName, setChosenReduceTo, reduceToOptions, problemNameMap } = useContext(ProblemContext);
-  const [noReductions, setNoReductions] = useState(true);
+  const { problemName, chosenReduceTo, setChosenReduceTo, reduceToOptions, problemNameMap } =
+    useContext(ProblemContext);
 
-  useEffect(() => {
-    if (problemName !== "" || problemName !== null) {
-      setNoReductions(true);
-      setReduceTo(noReductionsMessage);
-    } else {
-      setReduceTo("");
-    }
-  }, [problemName]);
-
-  useEffect(() => {
-    if (!reduceToOptions.length) {
-      setNoReductions(true);
-      setReduceTo(noReductionsMessage);
-    } else {
-      setNoReductions(false);
-      setReduceTo("");
-    }
-  }, [reduceToOptions]);
+  const noReductions = !!problemName && !reduceToOptions.length;
 
   return (
     <Autocomplete
       style={{ width: "100%" }}
       disabled={noReductions}
-      value={reductionProblem}
-      onChange={(event, newValue) => {
-        setReduceTo(newValue);
-        setChosenReduceTo(newValue);
-
-        if (newValue === "" || newValue === null) {
-          setChosenReduceTo("");
+      value={noReductions ? noReductionsMessage : chosenReduceTo}
+      onChange={(event, value) => {
+        if (value !== noReductionsMessage) {
+          setChosenReduceTo(value ?? "");
         }
       }}
       selectOnFocus
