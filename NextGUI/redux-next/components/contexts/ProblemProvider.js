@@ -10,8 +10,7 @@
  * @author Alex Diviney
  */
 
-import React, { useEffect } from "react";
-import { useState, createContext } from "react";
+import React, { useEffect, useState, createContext } from "react";
 
 export const ProblemContext = createContext();
 
