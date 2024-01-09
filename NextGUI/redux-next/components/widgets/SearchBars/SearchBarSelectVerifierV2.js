@@ -31,7 +31,7 @@ export default function SearchBarSelectVerifierV2(props) {
 
   let stateVal = undefined;
   const [defaultVerifier, setDefaultVerifier] = useState('');
-  const { problemName, verifierNameMap } = useContext(ProblemContext);
+  const { problemName, verifierNameMap, defaultVerifierMap } = useContext(ProblemContext);
   const [noVerifier, setNoVerifiers] = useState(false);
 
 
@@ -47,6 +47,8 @@ export default function SearchBarSelectVerifierV2(props) {
       setDefaultVerifier(noProblemChosenMessage);
     } else {
       initializeList(fullUrl);
+      props.setData(defaultVerifierMap.get(problemName))
+      setDefaultVerifier(verifierNameMap.get(defaultVerifierMap.get(problemName)))
     }
 
 

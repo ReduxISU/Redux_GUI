@@ -12,14 +12,12 @@ import TextField from '@mui/material/TextField';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { ProblemContext } from '../../contexts/ProblemProvider';
 import React,{useContext,useEffect, useState} from 'react';
-import { ProblemParser } from '../../../Tools/ProblemParser';
 
 const filter = createFilterOptions();
 export const noReductionsMessage =
   'No reductions available. Click on the add button to add a new reduce-to';
 //our problems to be shown
 var problemJson = [];
-const problemParser = new ProblemParser()
 
 
 
@@ -30,6 +28,7 @@ export default function SearchBarSelectReduceToV2(props) {
   const [reductionProblem, setReduceTo] = useState(noReductionsMessage);
   const { problemType, problemName, setReducedInstance, reductionNameMap, setReductionNameMap,problemNameMap } = useContext(ProblemContext);
   const [noReductions, setNoReductions] = useState(true);
+  const [reductionToMap, setReductionToMap] = useState(new Map());
   
 
   // let stateVal = undefined;
@@ -61,8 +60,9 @@ export default function SearchBarSelectReduceToV2(props) {
     style={{ width: "100%" }}
     disabled={noReductions ? true : false}
     //problemParser.getWikiName(reductionProblem)
-      value={reductionProblem}
+      value={reductionToMap.get(reductionProblem) || ''}
       onChange={(event, newValue) => {
+        newValue = getKeyByValue(reductionToMap, newValue);
         if (typeof newValue === 'string') {
           // setChosenReduceTo(
           //   newValue
@@ -84,34 +84,18 @@ export default function SearchBarSelectReduceToV2(props) {
 
         }
       }}
-      filterOptions={(options, params) => {
-        const filtered = filter(options, params);
-
-        const { inputValue } = params;
-        // Suggest the creation of a new value
-        const isExisting = options.some((option) => inputValue === option.title);
-      
-
-        return filtered;
-      }}
       selectOnFocus
       clearOnBlur
       handleHomeEndKeys
       id="search-bar"
-      options={problemJson}
+      options={Array.from(reductionToMap, ([problem, label]) => (label))}
       getOptionLabel={(option) => {
         // Value selected with enter, right from the input
         if (typeof option === 'string') {
-          return problemNameMap.get(option) ?? problemParser.getWikiName(option) ?? option;
+          return option;
           }
-         
-          // Regular option
           return ''
-          // wikiName.get(option);
-  
-        }}    // return wiki_name here
-
-      //renderOption={(props, option) => <li {...props}>{option}</li>}
+        }} 
       sx={{ width: 300 }}
       freeSolo
       renderInput={(params) => (
@@ -174,14 +158,45 @@ async function getRequest(url) {
   
 }
 
+function getKeyByValue(map, searchValue) {
+  for (const [key, value] of map.entries()) {
+    if (value === searchValue) {
+      return key;
+    }
+  }
+  // Return a default value (e.g., null) if the value is not found
+  return null;
+}
+
 function initializeList(url) {
   const req = getRequest(url);
   req.then(data => {
     initializeProblemJson(data)
-    
+    requestProblemNameMap(props.url,data).then(problemNames => {
+      setReductionToMap(problemNames);
+    })
   })
     .catch((error) => console.log("GET REQUEST FAILED SELECT REDUCE TO"));
     
+}
+
+//The requestProblemNameMap sets the problem names
+async function requestProblemNameMap(url, problems){
+  let map = new Map();
+  problems.forEach(problem => {
+    getProblemInfo(url, problem+"Generic").then(info => {
+      map.set(problem, info.problemName)
+    }).catch(error => console.log("PROBLEM IFO REQUEST FAILED"))
+  })
+  return map;
+}
+async function getProblemInfo(url, problem){
+  return await fetch(url + `${problem}`).then(resp => {
+
+    if(resp.ok){
+      return resp.json();
+    }
+  })
 }
 
 // The following the functions are used to set the reduction names

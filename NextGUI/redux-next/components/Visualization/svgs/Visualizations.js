@@ -3,6 +3,14 @@ import CliqueSvgReactV2 from "./Clique_SVG_REACT_V2";
 import VertexCoverSvgReact from "./VertexCover_SVG_React";
 import ArcSetSvgReact from "./ArcSet_SVG_React";
 import CutSvgReact  from "./Cut_SVG_REACT";
+import CliqueCoverSvgReact  from "./CliqueCover_SVG_REACT";
+import GraphColoringSvgReact from "./GraphColoring_SVG_REACT";
+import HamiltonianSvgReact from "./Hamiltonian_SVG_REACT";
+import SteinerTreeSvgReact from "./SteinerTree_SVG_REACT";
+import WeightedCutSvgReact from "./WeightedCut_SVG_REACT";
+import DirHamiltonianSvgReact from "./DirHamiltonian_SVG_React";
+import TSPSvgReact from "./TSP_SVG_React";
+import NodeSetSvgReact from "./NodeSet_SVG_React";
 
 const Visualizations = new Map([
     ["SAT3" , (solve, url, problemInstance, solution) => {
@@ -17,6 +25,14 @@ const Visualizations = new Map([
     }],
     ["CLIQUE", (solve, url, problemInstance, solution)=>{
         let apiCall = createAPICall("ClIQUE", solve, url, problemInstance, solution)
+        return(
+        <CliqueSvgReactV2 
+            apiCall={apiCall} 
+        ></CliqueSvgReactV2>
+        )
+    }],
+    ["INDEPENDENTSET", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("INDEPENDENTSET", solve, url, problemInstance, solution)
         return(
         <CliqueSvgReactV2 
             apiCall={apiCall} 
@@ -45,6 +61,70 @@ const Visualizations = new Map([
             <CutSvgReact 
                 apiCall={apiCall} 
             ></CutSvgReact>
+        )
+    }],
+    ["CLIQUECOVER", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("CLIQUECOVER", solve, url, problemInstance, solution)
+        return(
+            <CliqueCoverSvgReact 
+                apiCall={apiCall} 
+            ></CliqueCoverSvgReact>
+        )
+    }],
+    ["GRAPHCOLORING", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("GRAPHCOLORING", solve, url, problemInstance, solution)
+        return(
+            <GraphColoringSvgReact 
+                apiCall={apiCall} 
+            ></GraphColoringSvgReact>
+        )
+    }],
+    ["HAMILTONIAN", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("HAMILTONIAN", solve, url, problemInstance, solution)
+        return(
+            <HamiltonianSvgReact 
+                apiCall={apiCall} 
+            ></HamiltonianSvgReact>
+        )
+    }],
+    ["DIRHAMILTONIAN", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("DIRHAMILTONIAN", solve, url, problemInstance, solution)
+        return(
+            <DirHamiltonianSvgReact 
+                apiCall={apiCall} 
+            ></DirHamiltonianSvgReact>
+        )
+    }],
+    ["STEINERTREE", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("STEINERTREE", solve, url, problemInstance, solution)
+        return(
+            <SteinerTreeSvgReact
+                apiCall={apiCall} 
+            ></SteinerTreeSvgReact>
+        )
+    }],
+    ["WEIGHTEDCUT", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("WEIGHTEDCUT", solve, url, problemInstance, solution)
+        return(
+            <WeightedCutSvgReact
+                apiCall={apiCall} 
+            ></WeightedCutSvgReact>
+        )
+    }],
+    ["TSP", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("TSP", solve, url, problemInstance, solution)
+        return(
+            <TSPSvgReact
+                apiCall={apiCall} 
+            ></TSPSvgReact>
+        )
+    }],
+    ["NODESET", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("NODESET", solve, url, problemInstance, solution)
+        return(
+            <NodeSetSvgReact
+                apiCall={apiCall} 
+            ></NodeSetSvgReact>
         )
     }],
 ])

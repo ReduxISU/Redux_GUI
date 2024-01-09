@@ -12,6 +12,7 @@ import TextField from '@mui/material/TextField';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { ProblemContext } from '../../contexts/ProblemProvider';
 import React, { useContext, useEffect, useState } from 'react';
+import { curveStepBefore } from 'd3';
 const filter = createFilterOptions();
 const noSolverMessage = ' No solvers available. Please select a problem';
 
@@ -23,7 +24,7 @@ var problemJson = [];
 export default function SearchBarSelectSolverV2(props) {
   //props.setData and props.data should be passed down.
   const [defaultSolver, setDefaultSolver] = useState('');
-  const { problemName, solverNameMap } = useContext(ProblemContext);
+  const { problemName, solverNameMap, problemNameMap, defaultSolverMap } = useContext(ProblemContext);
   const [noSolver, setNoSolvers] = useState(false);
 
 
@@ -39,10 +40,10 @@ export default function SearchBarSelectSolverV2(props) {
       setDefaultSolver(noSolverMessage);
     } else {
       initializeList(fullUrl);
+      props.setData(defaultSolverMap.get(problemName)); // Gets the file name of default solver
+      setDefaultSolver(solverNameMap.get(defaultSolverMap.get(problemName))) // Matches file name with solver name
     }
   }, [problemName])
-
-
 
   //const [value, setValue] = React.useState(null); //state manager.
   return (
@@ -82,12 +83,11 @@ export default function SearchBarSelectSolverV2(props) {
       getOptionLabel={(option) => {
         // Value selected with enter, right from the input
         if (typeof option === 'string') {
-          if(option ==="CliqueBruteForce - via SipserReduceToCliqueStandard"){
+          if (option === "CliqueBruteForce - via SipserReduceToCliqueStandard") {
             return "Clique Brute Force - via Sipser Clique Reduction"
           }
           return solverNameMap.get(option) ?? option;
         }
-
         // Regular option
         return option;
       }}
@@ -121,14 +121,12 @@ export default function SearchBarSelectSolverV2(props) {
           props.setData(element);
           setDefaultSolver('3SAT Backtracking Solver');
         }
-        else if (element === 'CliqueBruteForce' && problemName === 'CLIQUE'){
+        else if (element === 'CliqueBruteForce' && problemName === 'CLIQUE') {
           props.setData(element);
           setDefaultSolver('Clique Brute Force');
         }
         problemJson.push(element);
       }
-
-
     }, 80);
   }
   async function getRequest(url) {

@@ -63,7 +63,7 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
         .data(data.links)
         .join("line")
         .style("stroke", function (d) {
-          if (d.attribute1 == "True") {
+          if (d.attribute1 == "True" || d.attribute1 == "Cut") {
             return VisColors.Solution //Highlight solutions color: green 
           }
           else {
@@ -71,28 +71,30 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
           }
         })
         .style("stroke-width", function (d) {
-          if (d.attribute1 == "True") {
+          if (d.attribute1 == "Cut" || d.attribute1 == "True") {
             return "2px"; // Increase thickness for solutions
           } else {
             return "1px"; // Default thickness for non-solutions
           }
         })
         .style("stroke-dasharray", function (d) {
-          if (d.attribute1 == "True") {
+          if (d.attribute1 == "Cut") {
             return "5, 5"; // Dashed pattern for solutions: 5 pixels dash, 5 pixels gap
           } else {
             return "none"; // No dashed pattern for non-solutions
           }
         })
         .attr('marker-end', function (d) {
-          if (d.attribute1 == "True") {
+          if (d.attribute1 == "Cut") {
             return "url(#solvedTriangle)" //Highlight solutions color: green 
           }
           else {
             return "url(#triangle)" // Non-Solution color: grey
           }
-        })
+        });
 
+
+        
 
 
 
@@ -224,7 +226,7 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
 }
 
 
-export default function CutSvgReact(props) {
+export default function WeightedCutSvgReact(props) {
   const [charge, setCharge] = useState(-50);
 
   // create nodes with unique ids
