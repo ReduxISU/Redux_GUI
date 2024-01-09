@@ -123,7 +123,7 @@ function AccordionNestedTextBox(props) {
         if (!(typeof data === "undefined")) {
           setProblemLocalInstance(data.defaultInstance);
           setProblemInstance(data.defaultInstance);
-          setToolTip({ header: problemName, formalDef: data.formalDefinition, info: data.problemDefinition + data.source })
+          setToolTip({ header: data.problemName, formalDef: data.formalDefinition, info: data.problemDefinition + data.source })
         }
 
         if(problemName === '' || problemName === null ){

@@ -62,12 +62,12 @@ function AccordionSingleInputNestedButton(props) {
     // functionality
     if(chosenSolver == "CliqueBruteForce - via SipserReduceToCliqueStandard"){
       requestSolverData(props.accordion.INPUTURL.url, "CliqueBruteForce").then(data => {
-        setToolTip({ header: chosenSolver, formalDef: data.solverDefinition, info: data.source }) //updates TOOLTIP
+        setToolTip({ header: data.solverName, formalDef: data.solverDefinition, info: data.source }) //updates TOOLTIP
       }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
     }
     else{
       requestSolverData(props.accordion.INPUTURL.url, chosenSolver).then(data => {
-        setToolTip({ header: chosenSolver, formalDef: data.solverDefinition, info: data.source }) //updates TOOLTIP
+        setToolTip({ header: data.solverName, formalDef: data.solverDefinition, info: data.source }) //updates TOOLTIP
       }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
     }
 

@@ -44,7 +44,9 @@ class ProblemProvider extends Component {
         solvedInstance: "",
         problemNameMap: new Map(),
         solverNameMap: new Map(),
+        defaultSolverMap: new Map(),
         verifierNameMap : new Map(),
+        defaultVerifierMap: new Map(),
         reductionNameMap : new Map()
     }
 
@@ -107,8 +109,14 @@ class ProblemProvider extends Component {
     setSolverNameMap = (solverNameMap) => {
         this.setState({solverNameMap: solverNameMap})
     }
+    setDefaultSolverMap = (defaultSolverMap) => {
+        this.setState({defaultSolverMap: defaultSolverMap})
+    }
     setVerifierNameMap = (verifierNameMap) => {
         this.setState({verifierNameMap: verifierNameMap})
+    }
+    setDefaultVerifierMap = (defaultVerifierMap) => {
+        this.setState({defaultVerifierMap: defaultVerifierMap})
     }
     setReductionNameMap = (reductionNameMap) => {
         this.setState({reductionNameMap: reductionNameMap})
@@ -133,7 +141,9 @@ class ProblemProvider extends Component {
                 setSolvedInstance: this.setSolvedInstance,
                 setProblemNameMap: this.setProblemNameMap,
                 setSolverNameMap: this.setSolverNameMap,
+                setDefaultSolverMap: this.setDefaultSolverMap,
                 setVerifierNameMap: this.setVerifierNameMap,
+                setDefaultVerifierMap: this.setDefaultVerifierMap,
                 setReductionNameMap: this.setReductionNameMap
             }}>
                 {this.props.children}

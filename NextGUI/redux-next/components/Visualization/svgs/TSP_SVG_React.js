@@ -5,6 +5,8 @@ import * as d3 from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
 import VisColors from '../constants/VisColors';
 
+const initDefinitions = (svg) => {
+}
 
 function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }) {
   const [animatedNodes, setAnimatedNodes] = useState([]);
@@ -31,29 +33,7 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    svg
-      .append("rect")
-      .attr("x", -margin.left - w / 2)
-      .attr("y", -margin.top - h / 2)
-      .attr("width", w * 2)
-      .attr("height", h * 2)
-      .attr("fill", "transparent")
-      .attr("pointer-events", "all");
-
-
-
-    // Zoom functionality
-    const zoomBehavior = d3
-      .zoom()
-      .scaleExtent([0.7, 2])
-      .on("zoom", (event) => {
-        svg.transition().duration(400).attr("transform", event.transform);
-      });
-
-    svg.call(zoomBehavior);
-    svg.on("mousedown.zoom", null);
-    svg.call(zoomBehavior.transform, d3.zoomIdentity.translate(width / 2, height / 2));
-
+    initDefinitions(svg);
 
     const problemUrl = apiCall;
     d3.json(problemUrl).then(function (data) {
@@ -63,35 +43,22 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
         .data(data.links)
         .join("line")
         .style("stroke", function (d) {
-          if (d.attribute1 == "True") {
-            return VisColors.Solution //Highlight solutions color: green 
-          }
-          else {
-            return VisColors.Edges // Non-Solution color: grey
-          }
-        })
+            if (d.attribute1 == "True") {
+              return VisColors.Solution //Highlight solutions color: green 
+            }
+            else {
+              return VisColors.Edges // Non-Solution color: grey
+            }
+          })
         .style("stroke-width", function (d) {
-          if (d.attribute1 == "True") {
-            return "2px"; // Increase thickness for solutions
-          } else {
-            return "1px"; // Default thickness for non-solutions
-          }
+            if (d.attribute1 == "True") {
+              return "2px"; // Increase thickness for solutions
+            } else {
+              return "1px"; // Default thickness for non-solutions
+            }
         })
-        .style("stroke-dasharray", function (d) {
-          if (d.attribute1 == "True") {
-            return "5, 5"; // Dashed pattern for solutions: 5 pixels dash, 5 pixels gap
-          } else {
-            return "none"; // No dashed pattern for non-solutions
-          }
-        })
-        .attr('marker-end', function (d) {
-          if (d.attribute1 == "True") {
-            return "url(#solvedTriangle)" //Highlight solutions color: green 
-          }
-          else {
-            return "url(#triangle)" // Non-Solution color: grey
-          }
-        })
+        
+
 
 
 
@@ -119,13 +86,10 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
         }) //node prefix added to class name to allow for int names by user.
         .attr("r", 20)
         .attr("fill", function (d) {
-          //return "#FFC300";
-          //"#00e676"
           if (d.attribute2 == "True") {
-            return VisColors.Solution //Highlight solutions color: green 
-          }
-          else {
-            return VisColors.Background // Non-Solution color: grey
+            return VisColors.Solution; // Return the original color to prevent instant color change
+          } else {
+            return VisColors.Background;
           }
 
         })
@@ -203,7 +167,7 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
           .attr('text-anchor', "middle")
       }
 
-    }).catch(error => console.log("CUT VISUALIZATION FAILED"));
+    }).catch(error => console.log("ARCSET VISUALIZATION FAILED"));
 
   }, [solve, apiCall])
   return (
@@ -224,7 +188,7 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
 }
 
 
-export default function CutSvgReact(props) {
+export default function TSPSvgReact(props) {
   const [charge, setCharge] = useState(-50);
 
   // create nodes with unique ids

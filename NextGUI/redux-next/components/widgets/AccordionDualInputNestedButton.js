@@ -104,7 +104,7 @@ function AccordionDualInputNestedButton(props) {
   useEffect(() => {
     REDUCETOOPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/Problem_ReductionsRefactor/' + '?chosenProblem=' + problemName + '&problemType=' + problemType
     requestProblemData(props.accordion.INPUTURL.url, chosenReduceTo).then(data => {
-      setToolTip({ header: chosenReduceTo, formalDef: data.formalDefinition, info: data.problemDefinition }) //updates TOOLTIP
+      setToolTip({ header: data.problemName, formalDef: data.formalDefinition, info: data.problemDefinition }) //updates TOOLTIP
     }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
 
     setReducedInstance('');;
@@ -116,7 +116,7 @@ function AccordionDualInputNestedButton(props) {
     if(chosenReductionType !== '' && chosenReductionType !== null){
       let reductionType = chosenReductionType.split("-")[0];
       requestReductionData(props.accordion.INPUTURL.url, reductionType).then(data => {
-        setToolTip2({ header: reductionType, formalDef: data.reductionDefinition, info: data.source }) //updates TOOLTIP
+        setToolTip2({ header: data.reductionName, formalDef: data.reductionDefinition, info: data.source }) //updates TOOLTIP
       }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
     }
 
@@ -266,14 +266,14 @@ function checkProblemType(stringInstance, chosenReduceTo){
   const kValue = stringInstance.match('(\\d+)(?!.*\\d)'); // Gets the K value from the string.
 
   // Regex for undirected graph
-  const prettyUndirectedNodes = spacedInstance.match('((?<={{)[ -~]+)(?=}, {{)');
+  const prettyUndirectedNodes = spacedInstance.match('((?<=\\(\\({)[ -~]+)(?=}, {{)');
   const prettyUndirectedEdges = getEdges(spacedInstance);
-  if (prettyUndirectedNodes != null && (chosenReduceTo == "CLIQUE" || chosenReduceTo == "VERTEXCOVER" || chosenReduceTo == "GRAPHCOLORING")){
+  if (prettyUndirectedNodes != null){
     return ["GRAPH", prettyUndirectedNodes[0], prettyUndirectedEdges[0], kValue[0]];
   }
 
   // Regex for directed graph. Consequently the edge regex is the same for both directed and undirected. Shouldn't be a problem, but good to note.
-  const prettyDirectedNodes = spacedInstance.match('((?<={{)[ -~]+)(?=}, {\\()');
+  const prettyDirectedNodes = spacedInstance.match('((?<=\\(\\({)[ -~]+)(?=}, {\\()');
   const prettyDirectedEdges = getEdges(spacedInstance);
   if(prettyDirectedNodes != null && (chosenReduceTo == "ARCSET" || chosenReduceTo == "TSP")){
     return ["GRAPH", prettyDirectedNodes[0], prettyDirectedEdges[0], kValue[0]];
@@ -304,7 +304,7 @@ function checkProblemType(stringInstance, chosenReduceTo){
 
 // Parses the edges from the graph
 function getEdges(stringInstance){
-  return stringInstance.match('((?<=}, {)[ -~]+)(?=}, )');
+  return stringInstance.match('((?<=}, {)[ -~]+)(?=}\\), )');
 }
 
 async function requestProblemData(url, name) {

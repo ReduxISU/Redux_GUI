@@ -18,7 +18,7 @@ class ProblemInstanceParser {
             parsedOutput = this.parseSat3(problemInstance);
         }
             
-        else if (problemType === Constants.ProblemTypes.Arcset || problemType === Constants.ProblemTypes.Knapsack) {
+        else if (problemType === Constants.ProblemTypes.Arcset) {
             parsedOutput = this.parseDirectedGraph(problemInstance);
         }
         else {
@@ -52,18 +52,18 @@ class ProblemInstanceParser {
       
     parseUndirectedGraph(instance) {
         const type = "UndirectedGraph"
-        const undirectedGraphFormat = /^{{(([\w!]+)(,([\w!]+))*)+},{(\{([\w!]+),([\w!]+)\}(,\{([\w!]+),([\w!]+)\})*)*},\d+}$/g; //checks for undirected graph format, implicitly regex
+        const undirectedGraphFormat = /\(\({([\w!]+)(,([\w!]+))*},{\{([\w!]+),([\w!]+)\}(,\{([\w!]+),([\w!]+)\})*}\),\d+\)$/g; //checks for undirected graph format, implicitly regex
         const graphReg = new RegExp(undirectedGraphFormat);
         const bool = graphReg.test(instance)
-        return {test:bool,input:instance,regex:undirectedGraphFormat,type:type,exampleStr:"{{a,b,c},{{a,b},{b,c}},2}"}
+        return {test:bool,input:instance,regex:undirectedGraphFormat,type:type,exampleStr:"(({a,b,c},{{a,b},{b,c}}),2)"}
     }
 
     parseDirectedGraph(instance) {
         const type = "DirectedGraph"
-        const directedGraphFormat = /^{{(([\w!]+)*([\w!]+,)*)+},{((\([\w!]+,[\w!]+\))*(\([\w!]+,[\w!]+\),)*)*},\d+}$/g
+        const directedGraphFormat = /\(\({(([\w!]+)+(,([\w!]+))*)},{(\(([\w!]+),([\w!]+)\)(,\(([\w!]+),([\w!]+)\))*)*}\),\d+\)$/g
         const graphReg = new RegExp(directedGraphFormat);
         const bool = graphReg.test(instance);
-        return {test:bool,input:instance,regex:directedGraphFormat,type:type,exampleStr:"{{a,b,c},{(a,b),(b,c),(c,a)},3}"}
+        return {test:bool,input:instance,regex:directedGraphFormat,type:type,exampleStr:"(({a,b,c},{(a,b),(b,c),(c,a)}),3)"}
     }
     
 }
