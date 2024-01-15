@@ -14,7 +14,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { FormControl } from 'react-bootstrap'
 import PopoverTooltipClick from './PopoverTooltipClick';
 import { Button } from '@mui/material'
-import { ProblemContext, useVerifierInfo } from '../contexts/ProblemProvider';
+import { ProblemContext } from '../contexts/ProblemProvider';
+import { useVerifierInfo } from '../hooks/ProblemProvider';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from './SearchBarExtensible';
 

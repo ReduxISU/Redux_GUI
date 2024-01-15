@@ -13,7 +13,8 @@ import { useContext } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import PopoverTooltipClick from './PopoverTooltipClick';
-import { ProblemContext, useProblemInfo } from '../contexts/ProblemProvider'
+import { ProblemContext } from '../contexts/ProblemProvider'
+import { useProblemInfo } from '../hooks/ProblemProvider'
 import { Stack } from '@mui/material'
 import TextField from '@mui/material/TextField';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';

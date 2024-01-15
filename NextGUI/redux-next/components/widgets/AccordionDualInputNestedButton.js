@@ -16,7 +16,8 @@ import { Card } from 'react-bootstrap'
 import { Button } from '@mui/material'
 import PopoverTooltipClick from './PopoverTooltipClick';
 
-import { ProblemContext, useProblemInfo, useReducerInfo } from '../contexts/ProblemProvider'
+import { ProblemContext } from '../contexts/ProblemProvider'
+import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from './SearchBarExtensible';
 

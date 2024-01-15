@@ -14,7 +14,8 @@ import { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import PopoverTooltipClick from './PopoverTooltipClick';
 import { Button } from '@mui/material'
-import { ProblemContext, useSolverInfo } from '../contexts/ProblemProvider';
+import { ProblemContext } from '../contexts/ProblemProvider';
+import { useSolverInfo } from '../hooks/ProblemProvider';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from './SearchBarExtensible';
 
