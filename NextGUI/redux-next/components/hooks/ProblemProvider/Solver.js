@@ -150,7 +150,7 @@ function useChosenSolver(problemName, defaultSolverMap) {
 
   useEffect(() => {
     setChosenSolver(!problemName ? "" : defaultSolverMap.get(problemName)); // Gets the file name of default solver
-  }, [problemName]);
+  }, [problemName, defaultSolverMap]);
 
   return [chosenSolver, setChosenSolver];
 }

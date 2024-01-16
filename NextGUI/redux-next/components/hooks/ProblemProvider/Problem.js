@@ -1,16 +1,14 @@
 import { getRequest, getProblemInfo } from "../ProblemProvider";
 import React, { useEffect, useState } from "react";
 
-export function useProblem(url) {
-  // Alex it might be better to leave this [problemName] as an empty string
-  // When the page is loaded first the problem name was
-  // DEFAULTTYPE before it changed to SAT3, so I changed it to empty string
+const DEFAULT_PROBLEM_NAME = "SAT3";
 
+export function useProblem(url) {
   const state = {};
-  [state.problemType, state.setProblemType] = useState("NPC");
-  [state.problemName, state.setProblemName] = useState("");
-  [state.problemInstance, state.setProblemInstance] = useState("{{1,2,3},{1,2},GENERIC}"); // Careful about changing this value, the application boot up sequence is dependent on having a default value.
   [state.problemNameMap] = useProblemNameMap(url);
+  [state.problemType, state.setProblemType] = useState("NPC");
+  [state.problemName, state.setProblemName] = useProblemName(state.problemNameMap);
+  [state.problemInstance, state.setProblemInstance] = useState("{{1,2,3},{1,2},GENERIC}"); // Careful about changing this value, the application boot up sequence is dependent on having a default value.
   return state;
 }
 
@@ -30,6 +28,18 @@ export function useProblemInfo(url, problemName) {
   }, [problemName]);
 
   return problemInfo; // There should be no reason to set the problem information
+}
+
+function useProblemName(problemNameMap) {
+  const [problemName, setProblemName] = useState("");
+
+  useEffect(() => { // Default problem name
+    if (problemNameMap.has(DEFAULT_PROBLEM_NAME)) {
+      setProblemName(DEFAULT_PROBLEM_NAME);
+    }
+  }, [problemNameMap]);
+
+  return [problemName, setProblemName]; // There should be no reason to set the problem information
 }
 
 function useProblemNameMap(baseUrl) {
