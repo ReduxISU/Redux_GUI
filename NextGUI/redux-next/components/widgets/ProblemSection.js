@@ -9,6 +9,9 @@ import { Accordion, Card, AccordionContext } from "react-bootstrap";
 import { Stack, Button, Box } from "@mui/material";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 
+/// Default theme.
+const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } };
+
 /**
  * Represents the button that triggers the accordion component opening or closing.
  */
@@ -47,13 +50,13 @@ export default function ProblemSection({ children, defaultCollapsed = true }) {
   );
 }
 
-ProblemSection.Header = function Header({ children, title, titleWidth, themeColors }) {
+ProblemSection.Header = function Header({ children, title, titleWidth }) {
   return (
     <Card.Header>
       <Stack direction="horizontal" gap={2}>
         <Box sx={{ width: titleWidth ?? "10%" }}>{title}</Box>
         {children}
-        <ContextAwareToggle eventKey="0" colors={themeColors}>
+        <ContextAwareToggle eventKey="0" colors={THEME.colors}>
           ▼
         </ContextAwareToggle>
       </Stack>

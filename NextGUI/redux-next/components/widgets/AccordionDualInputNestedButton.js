@@ -83,7 +83,7 @@ function AccordionDualInputNestedButton(props) {
 
   return (
     <ProblemSection defaultCollapsed={false}>
-      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} titleWidth={"22%"} themeColors={props.accordion.THEME.colors}>
+      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} titleWidth={"22%"}>
       <SearchBarExtensible
           placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
           selected={chosenReduceTo}

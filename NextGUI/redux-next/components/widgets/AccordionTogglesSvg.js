@@ -222,7 +222,7 @@ function AccordionTogglesSvg(props) {
 
   return (
     <ProblemSection defaultCollapsed={false}>
-      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} themeColors={props.accordion.THEME.colors}>
+      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText}>
         <div>
           <Button
             style={{ backgroundColor: "#43a047" }}

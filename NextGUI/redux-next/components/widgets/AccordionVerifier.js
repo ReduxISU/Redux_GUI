@@ -107,7 +107,7 @@ function parseUserInput(userInput){
 
   return (
     <ProblemSection>
-      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText} themeColors={props.accordion.THEME.colors}>
+      <ProblemSection.Header title={props.accordion.CARD.cardHeaderText}>
         <SearchBarExtensible
           placeholder={props.accordion.ACCORDION_FORM_ONE.placeHolder}
           selected={chosenVerifier}
