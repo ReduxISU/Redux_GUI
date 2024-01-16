@@ -74,23 +74,23 @@ function MainPageContent() {
           <div className="d-flex flex-column">
 
             <div className="p-2 col-example">
-              <ProblemRowReact reduxBaseUrl={reduxBaseUrl}></ProblemRowReact>
+              <ProblemRowReact url={reduxBaseUrl}></ProblemRowReact>
             </div>
             <div className="p-2 col-example">
 
-              <ReduceToRowReact reduxBaseUrl={reduxBaseUrl}></ReduceToRowReact>
+              <ReduceToRowReact url={reduxBaseUrl}></ReduceToRowReact>
             </div>
 
             <div className="p-2 col-example">
-              <VisualizeRowReact reduxBaseUrl={reduxBaseUrl}></VisualizeRowReact>
+              <VisualizeRowReact url={reduxBaseUrl}></VisualizeRowReact>
             </div>
             
             <div className="p-2 col-example">
-              <SolveRowReact reduxBaseUrl={reduxBaseUrl}></SolveRowReact>
+              <SolveRowReact url={reduxBaseUrl}></SolveRowReact>
             </div>
             <div className="p-2 col-example">
 
-              <VerifyRowReact reduxBaseUrl={reduxBaseUrl}></VerifyRowReact>
+              <VerifyRowReact url={reduxBaseUrl}></VerifyRowReact>
             </div>
            
           </div>
