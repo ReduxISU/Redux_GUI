@@ -11,12 +11,12 @@ import { useReducer } from "./Reducer";
 
 export function useProblemProvider(url) {
   const problem = useProblem(url);
-  const { problemName, problemType, problemNameMap } = problem;
+  const { problemName, problemType, problemNameMap, problemInfoMap } = problem;
   return {
     ...problem,
     ...useReducer(url, problemName, problemType),
-    ...useSolver(url, problemName, problemType, problemNameMap),
-    ...useVerifier(url, problemName, problemType, problemNameMap),
+    ...useSolver(url, problemName, problemType, problemNameMap, problemInfoMap),
+    ...useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap),
   };
 }
 

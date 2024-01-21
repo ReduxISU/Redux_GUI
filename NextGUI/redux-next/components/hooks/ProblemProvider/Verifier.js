@@ -1,9 +1,9 @@
 import { useGenericInfo, getRequest, getInfo, getProblemInfo } from "../ProblemProvider";
 import React, { useEffect, useState } from "react";
 
-export function useVerifier(url, problemName, problemType, problemNameMap) {
+export function useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap) {
   const state = {};
-  [state.defaultVerifierMap] = useDefaultVerifierMap(url, problemNameMap);
+  [state.defaultVerifierMap] = useDefaultVerifierMap(url, problemInfoMap);
   [state.verifierOptions] = useVerifierOptions(url, problemName, problemType);
   [state.chosenVerifier, state.setChosenVerifier] = useChosenVerifier(problemName, state.defaultVerifierMap);
   [state.verifierNameMap] = useVerifierNameMap(url, problemNameMap);
@@ -14,30 +14,16 @@ export function useVerifierInfo(url, verifier) {
   return useGenericInfo(url, verifier);
 }
 
-function useDefaultVerifierMap(url, problemNameMap) {
+function useDefaultVerifierMap(url, problemInfoMap) {
   const [defaultVerifierMap, setDefaultVerifierMap] = useState(new Map());
 
   useEffect(() => {
-    const problems = Array.from(problemNameMap.keys());
-    requestDefaultVerifierMap(url, problems).then((defaultVerifierNames) => {
-      requestDefaultVerifierFileMap(url, problems, defaultVerifierNames).then((defaultVerifierFileNames) => {
-        setDefaultVerifierMap(defaultVerifierFileNames);
-      });
+    const problems = [...problemInfoMap.keys()];
+    const defaultVerifierNames = [...problemInfoMap.values()].map((info) => info.defaultVerifier.verifierName);
+    requestDefaultVerifierFileMap(url, problems, defaultVerifierNames).then((defaultVerifierFileNames) => {
+      setDefaultVerifierMap(defaultVerifierFileNames);
     });
-  }, [problemNameMap]);
-
-  //The requestDefaultVerifierMap sets the verifier names
-  async function requestDefaultVerifierMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      await getProblemInfo(url, problem + "Generic")
-        .then((info) => {
-          map.set(problem, info.defaultVerifier.verifierName);
-        })
-        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
-    }
-    return map;
-  }
+  }, [problemInfoMap]);
 
   //The requestDefaultVerifierFileMap sets the verifier names by the file name
   async function requestDefaultVerifierFileMap(url, problems, defaultVerifierNames) {

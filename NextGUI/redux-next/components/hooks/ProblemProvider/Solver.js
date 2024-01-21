@@ -1,10 +1,10 @@
 import { useGenericInfo, getRequest, getInfo, getProblemInfo } from "../ProblemProvider";
 import React, { useEffect, useState } from "react";
 
-export function useSolver(url, problemName, problemType, problemNameMap) {
+export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap) {
   const state = {};
   /// Maps each problem name to its default solver name.
-  [state.defaultSolverMap] = useDefaultSolverMap(url, problemNameMap);
+  [state.defaultSolverMap] = useDefaultSolverMap(url, problemInfoMap);
   [state.solverOptions] = useSolverOptions(url, problemName, problemType);
   [state.chosenSolver, state.setChosenSolver] = useChosenSolver(problemName, state.defaultSolverMap);
   [state.solverNameMap] = useSolverNameMap(url, problemNameMap);
@@ -59,30 +59,16 @@ function useSolverNameMap(url, problemNameMap) {
   return [solverNameMap, setSolverNameMap];
 }
 
-function useDefaultSolverMap(url, problemNameMap) {
+function useDefaultSolverMap(url, problemInfoMap) {
   const [defaultSolverMap, setDefaultSolverMap] = useState(new Map());
 
   useEffect(() => {
-    const problems = Array.from(problemNameMap.keys());
-    requestDefaultSolverMap(url, problems).then((defaultSolverNames) => {
-      requestDefaultSolverFileMap(url, problems, defaultSolverNames).then((defaultSolverFileNames) => {
-        setDefaultSolverMap(defaultSolverFileNames);
-      });
+    const problems = [...problemInfoMap.keys()];
+    const defaultSolverNames = [...problemInfoMap.values()].map((info) => info.defaultSolver.solverName);
+    requestDefaultSolverFileMap(url, problems, defaultSolverNames).then((defaultSolverFileNames) => {
+      setDefaultSolverMap(defaultSolverFileNames);
     });
-  }, [problemNameMap]);
-
-  //The requestDefaultSolverMap sets the solver names
-  async function requestDefaultSolverMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      await getProblemInfo(url, problem + "Generic")
-        .then((info) => {
-          map.set(problem, info.defaultSolver.solverName);
-        })
-        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
-    }
-    return map;
-  }
+  }, [problemInfoMap]);
 
   //The requestDefaultSolverFileMap sets the solver names by the file name
   async function requestDefaultSolverFileMap(url, problems, defaultSolverNames) {
@@ -92,7 +78,7 @@ function useDefaultSolverMap(url, problemNameMap) {
       for (const s of data) {
         let solver = s.split(" ")[0];
         const info = await getInfo(url, solver).catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
-        if (Array.from(defaultSolverNames.values()).includes(info.solverName)) {
+        if (defaultSolverNames.includes(info.solverName)) {
           map.set(problem, s);
         }
       }
