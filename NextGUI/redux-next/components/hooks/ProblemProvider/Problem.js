@@ -1,4 +1,4 @@
-import { getRequest, getProblemInfo } from "../ProblemProvider";
+import { requestProblems, requestProblemGeneric } from "../../redux";
 import React, { useEffect, useState } from "react";
 
 const DEFAULT_PROBLEM_NAME = "SAT3";
@@ -17,41 +17,31 @@ export function useProblemInfo(url, problemName) {
   const [problemInfo, setProblemInfo] = useState({});
 
   useEffect(() => {
-    if (!problemName) {
-      setProblemInfo({});
-    } else {
-      getProblemInfo(url, problemName + "Generic")
-        .then((info) => {
-          setProblemInfo(info);
-        })
-        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
-    }
+    (async () => {
+      setProblemInfo(problemName ? requestProblemGeneric(url, problemName) ?? {} : {});
+    })();
   }, [problemName]);
 
   return problemInfo; // There should be no reason to set the problem information
 }
 
-function useProblemInfoMap(baseUrl) {
+function useProblemInfoMap(url) {
   const [problemInfoMap, setProblemInfoMap] = useState(new Map());
 
   useEffect(() => {
-    initializeList(`${baseUrl}navigation/NPC_ProblemsRefactor/`);
+    (async () => {
+      const problems = (await requestProblems(url)) ?? [];
+      setProblemInfoMap(await requestProblemInfoMap(url, problems));
+    })();
   }, []);
-
-  async function initializeList(url) {
-    const problems = await getRequest(url).catch((error) => console.log("GET REQUEST FAILED", error));
-    const problemNames = await requestProblemInfoMap(baseUrl, problems);
-    setProblemInfoMap(problemNames);
-  }
 
   async function requestProblemInfoMap(url, problems) {
     let map = new Map();
     for (const problem of problems) {
-      await getProblemInfo(url, problem + "Generic")
-        .then((info) => {
-          map.set(problem, info);
-        })
-        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
+      const info = await requestProblemGeneric(url, problem);
+      if (info) {
+        map.set(problem, info);
+      }
     }
     return map;
   }
@@ -62,7 +52,8 @@ function useProblemInfoMap(baseUrl) {
 function useProblemName(problemNameMap) {
   const [problemName, setProblemName] = useState("");
 
-  useEffect(() => { // Default problem name
+  useEffect(() => {
+    // Default problem name
     if (problemNameMap.has(DEFAULT_PROBLEM_NAME)) {
       setProblemName(DEFAULT_PROBLEM_NAME);
     }

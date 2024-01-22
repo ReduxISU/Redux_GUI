@@ -1,4 +1,5 @@
-import { useGenericInfo, getRequest, getInfo, getProblemInfo } from "../ProblemProvider";
+import { useGenericInfo } from "../ProblemProvider";
+import { requestInfo, requestSolvers } from "../../redux";
 import React, { useEffect, useState } from "react";
 
 export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap) {
@@ -46,11 +47,13 @@ function useSolverNameMap(url, problemNameMap) {
   async function requestSolverNameMap(url, problems) {
     let map = new Map();
     for (const problem of problems) {
-      const data = await getAvailableSolvers(url, problem).catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
-      for (const s of data) {
+      const solvers = (await requestSolvers(url, problem)) ?? [];
+      for (const s of solvers) {
         let solver = s.split(" ")[0];
-        const info = await getInfo(url, solver).catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
-        map.set(s, info.solverName);
+        const info = await requestInfo(url, solver);
+        if (info) {
+          map.set(s, info.solverName);
+        }
       }
     }
     return map;
@@ -74,11 +77,11 @@ function useDefaultSolverMap(url, problemInfoMap) {
   async function requestDefaultSolverFileMap(url, problems, defaultSolverNames) {
     let map = new Map();
     for (const problem of problems) {
-      const data = await getAvailableSolvers(url, problem).catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
-      for (const s of data) {
+      const solvers = (await requestSolvers(url, problem)) ?? [];
+      for (const s of solvers) {
         let solver = s.split(" ")[0];
-        const info = await getInfo(url, solver).catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
-        if (defaultSolverNames.includes(info.solverName)) {
+        const info = await requestInfo(url, solver);
+        if (info && defaultSolverNames.includes(info.solverName)) {
           map.set(problem, s);
         }
       }
@@ -93,24 +96,10 @@ function useSolverOptions(url, problemName, problemType) {
   const [solverOptions, setSolverOptions] = useState([]);
 
   useEffect(() => {
-    if (problemName) {
-      const fullUrl =
-        url + "Navigation/Problem_SolversRefactor/" + "?chosenProblem=" + problemName + "&problemType=" + problemType;
-
-      initializeList(fullUrl);
-    } else {
-      setSolverOptions([]);
-    }
-  }, [problemName]);
-
-  function initializeList(url) {
-    const req = getRequest(url);
-    req
-      .then((data) => {
-        setSolverOptions(data);
-      })
-      .catch((error) => console.log("GET REQUEST FAILED SEARCHBAR SOLVER"));
-  }
+    (async () => {
+      setSolverOptions(problemName && problemType ? (await requestSolvers(url, problemName, problemType)) ?? [] : []);
+    })();
+  }, [problemName, problemType]);
 
   // function initializeProblemJson(arr) {
   //   // Every problem should have a generic solver
@@ -139,14 +128,4 @@ function useChosenSolver(problemName, defaultSolverMap) {
   }, [problemName, defaultSolverMap]);
 
   return [chosenSolver, setChosenSolver];
-}
-
-async function getAvailableSolvers(url, problem) {
-  return await fetch(url + `Navigation/Problem_SolversRefactor/?chosenProblem=${problem}&problemType=NPC`).then(
-    (resp) => {
-      if (resp.ok) {
-        return resp.json();
-      }
-    }
-  );
 }

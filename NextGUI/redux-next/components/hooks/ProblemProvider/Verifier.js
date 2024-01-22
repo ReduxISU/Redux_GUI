@@ -1,4 +1,5 @@
-import { useGenericInfo, getRequest, getInfo, getProblemInfo } from "../ProblemProvider";
+import { useGenericInfo } from "../ProblemProvider";
+import { requestInfo, requestVerifiers } from "../../redux";
 import React, { useEffect, useState } from "react";
 
 export function useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap) {
@@ -29,14 +30,11 @@ function useDefaultVerifierMap(url, problemInfoMap) {
   async function requestDefaultVerifierFileMap(url, problems, defaultVerifierNames) {
     let map = new Map();
     for (const problem of problems) {
-      const data = await getAvailableVerifiers(url, problem).catch((error) => console.log("SOLUTIONS REQUEST FAILED"));
-      for (const v of data) {
-        let verifier = v.split(" ")[0];
-        const info = await getInfo(url, verifier).catch((error) => console.log("SOLVER INFO REQUEST FAILED"));
-        if (info === undefined) {
-          continue;
-        }
-        if (Array.from(defaultVerifierNames.values()).includes(info.verifierName)) {
+      const verifiers = (await requestVerifiers(url, problem)) ?? [];
+      for (const v of verifiers) {
+        const verifier = v.split(" ")[0];
+        const info = await requestInfo(url, verifier);
+        if (info && defaultVerifierNames.includes(info.verifierName)) {
           map.set(problem, v);
         }
       }
@@ -51,24 +49,12 @@ function useVerifierOptions(url, problemName, problemType) {
   const [verifierOptions, setVerifierOptions] = useState([]);
 
   useEffect(() => {
-    if (problemName) {
-      const fullUrl =
-        url + "Navigation/Problem_VerifiersRefactor/" + "?chosenProblem=" + problemName + "&problemType=" + problemType;
-
-      initializeList(fullUrl);
-    } else {
-      setVerifierOptions([]);
-    }
-  }, [problemName]);
-
-  function initializeList(url) {
-    const req = getRequest(url);
-    req
-      .then((data) => {
-        setVerifierOptions(data);
-      })
-      .catch((error) => console.log("GET REQUEST FAILED SEARCHBAR VERIFIER"));
-  }
+    (async () => {
+      setVerifierOptions(
+        problemName && problemType ? (await requestVerifiers(url, problemName, problemType)) ?? [] : []
+      );
+    })();
+  }, [problemName, problemType]);
 
   // function initializeProblemJson(arr) {
   //   arr.map(function (element, index, array) {
@@ -112,29 +98,16 @@ function useVerifierNameMap(url, problemNameMap) {
   async function requestVerifierNameMap(url, problems) {
     let map = new Map();
     for (const problem of problems) {
-      const data = await getAvailableVerifiers(url, problem).catch((error) =>
-        console.log("VERIFIER INFO REQUEST FAILED")
-      );
-      for (const verifier of data) {
-        const info = await getInfo(url, verifier).catch((error) => console.log("VERIFIER REQUEST FAILED"));
-        if (info === undefined) {
-          continue;
+      const verifiers = (await requestVerifiers(url, problem)) ?? [];
+      for (const verifier of verifiers) {
+        const info = await requestInfo(url, verifier);
+        if (info) {
+          map.set(verifier, info.verifierName);
         }
-        map.set(verifier, info.verifierName);
       }
     }
     return map;
   }
 
   return [verifierNameMap, setVerifierNameMap];
-}
-
-async function getAvailableVerifiers(url, problem) {
-  return await fetch(url + `Navigation/Problem_VerifiersRefactor/?chosenProblem=${problem}&problemType=NPC`).then(
-    (resp) => {
-      if (resp.ok) {
-        return resp.json();
-      }
-    }
-  );
 }

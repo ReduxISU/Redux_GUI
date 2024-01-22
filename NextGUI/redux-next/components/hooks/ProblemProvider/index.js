@@ -4,6 +4,8 @@ export * from "./Solver";
 export * from "./Verifier";
 
 import React, { useEffect, useState } from "react";
+import { requestInfo } from "../../redux";
+
 import { useProblem } from "./Problem";
 import { useVerifier } from "./Verifier";
 import { useSolver } from "./Solver";
@@ -24,43 +26,10 @@ export function useGenericInfo(url, info) {
   const [genericInfo, setGenericInfo] = useState({});
 
   useEffect(() => {
-    if (!info) {
-      setGenericInfo({});
-    } else {
-      getInfo(url, info)
-        .then((info) => {
-          setGenericInfo(info);
-        })
-        .catch((error) => console.log("PROBLEM INFO REQUEST FAILED"));
-    }
+    (async () => {
+      setGenericInfo(!info ? {} : (await requestInfo(url, info)) ?? {});
+    })();
   }, [info]);
 
   return genericInfo; // There should be no reason to set the information
-}
-
-/**
- * @param {*} url passed in url
- * @returns a promise with the json
- */
-export async function getRequest(url) {
-  const promise = await fetch(url).then((result) => {
-    return result.json();
-  });
-  return promise;
-}
-
-export async function getInfo(url, apiCall) {
-  return await fetch(url + `${apiCall}/info`).then((resp) => {
-    if (resp.ok) {
-      return resp.json();
-    }
-  });
-}
-
-export async function getProblemInfo(url, problem) {
-  return await fetch(url + `${problem}`).then((resp) => {
-    if (resp.ok) {
-      return resp.json();
-    }
-  });
 }
