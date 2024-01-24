@@ -1,6 +1,7 @@
 import { requestProblems, requestProblemGeneric } from "../../redux";
 import React, { useEffect, useState } from "react";
 
+// For initial startup defaults
 const DEFAULT_PROBLEM_NAME = "SAT3";
 
 export function useProblem(url) {
@@ -53,7 +54,6 @@ function useProblemName(problemNameMap) {
   const [problemName, setProblemName] = useState("");
 
   useEffect(() => {
-    // Default problem name
     if (problemNameMap.has(DEFAULT_PROBLEM_NAME)) {
       setProblemName(DEFAULT_PROBLEM_NAME);
     }

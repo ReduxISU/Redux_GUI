@@ -2,6 +2,12 @@ import { useGenericInfo } from "../ProblemProvider";
 import { requestReductionOptions, requestInfo, requestReductions, requestReducedInstanceFromPath } from "../../redux";
 import React, { useEffect, useState } from "react";
 
+// For initial startup defaults
+const DEFAULT_SAT3_CHOSEN_REDUCE_TO = "CLIQUE";
+const DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE = "SipserReduceToCliqueStandard";
+const DEFAULT_CLIQUE_CHOSEN_REDUCE_TO = "VERTEXCOVER";
+const DEFAULT_VERTEXCOVER_CHOSEN_REDUCTION_TYPE = "sipserReduceToVC";
+
 export function useReducer(url, problemName, problemType, problemInstance) {
   const state = {};
   [state.reduceToOptions] = useReduceToOptions(url, problemName, problemType);
@@ -54,33 +60,10 @@ function useReduceToOptions(url, problemName, problemType) {
   useEffect(() => {
     (async () => {
       setReduceToOptions(
-        problemName && problemType ? (await requestReductionOptions(url, problemName, problemType)) ?? [] : []
+        (problemName && problemType ? (await requestReductionOptions(url, problemName, problemType)) ?? [] : []).sort()
       );
     })();
   }, [problemName, problemType]);
-
-  // function initializeProblemJson(arr) {
-  //   // var elementChosen = false;
-  //   arr.map(function (element, index, array) {
-  //     if (!problemJson.includes(element)) {
-  //       if (element === "CLIQUE" && problemName === "SAT3") {
-  //         // stateVal = element;
-  //         setChosenReduceTo(element);
-  //         setReduceTo(element);
-  //         elementChosen = true;
-  //       } else if (problemName === "CLIQUE" && element === "VERTEXCOVER") {
-  //         setChosenReduceTo(element);
-  //         setReduceTo(element);
-  //         elementChosen = true;
-  //       }
-  //       if (!elementChosen) {
-  //         setChosenReduceTo(element);
-  //         setReduceTo(element);
-  //       }
-  //       problemJson.push(element);
-  //     }
-  //   }, 80);
-  // }
 
   return [reduceToOptions, setReduceToOptions];
 }
@@ -91,9 +74,10 @@ function useReductionTypeOptions(url, problemName, problemType, chosenReduceTo) 
   useEffect(() => {
     (async () => {
       setReductionTypeOptions(
-        problemName && problemType && chosenReduceTo
+        (problemName && problemType && chosenReduceTo
           ? (await requestPreparedReductions(url, problemName, chosenReduceTo, problemType)) ?? []
           : []
+        ).sort()
       );
     })();
   }, [problemType, chosenReduceTo]);
@@ -107,67 +91,6 @@ function useReductionTypeOptions(url, problemName, problemType, chosenReduceTo) 
     return [path.slice(0, -1)];
   }
 
-  // function initializeProblemJson(arr) {
-  //   let path = "";
-  //   arr.map((reduction) => {
-  //     path += reduction[0] + "-";
-  //   });
-  //   setReductionTypeOptions([path.slice(0, -1)]);
-
-  //   // if (arr.length == 1) {
-  //   //   arr = arr[0];
-  //   //   arr.map(function (element, index, array) {
-  //   //     if (!problemJson.includes(element)) {
-  //   //       // if (element === "SipserReduceToCliqueStandard" && chosenReduceTo === "CLIQUE") {
-  //   //       //   setChosenReductionType(element);
-  //   //       //   setReductionType("Sipser's Clique Reduction");
-
-  //   //       //   requestReducedInstance(props.url, element, problemInstance)
-  //   //       //     .then((data) => {
-  //   //       //       // propNo reduction method available. Please choose a reduce-tos.setInstance(data.reductionTo.instance);
-  //   //       //       setReducedInstance(data.reductionTo.instance);
-  //   //       //     })
-  //   //       //     .catch((error) => console.log("REDUCTION FAILED, one or more properties was invalid"));
-  //   //       // }
-
-  //   //       // // Auto populate "select reduction" field with sipserReduceToVC when reducing from Clique to Vertex Cover
-  //   //       // else if (element === "sipserReduceToVC" && chosenReduceTo === "VERTEXCOVER") {
-  //   //       //   setChosenReductionType(element);
-  //   //       //   setReductionType("Sipser's Vertex Cover Reduction");
-  //   //       //   requestReducedInstance(props.url, element, problemInstance)
-  //   //       //     .then((data) => {
-  //   //       //       // props.setInstance(data.reductionTo.instance);
-  //   //       //       setReducedInstance(data.reductionTo.instance);
-  //   //       //     })
-  //   //       //     .catch((error) => console.log("REDUCTION FAILED, one or more properties was invalid"));
-  //   //       // }
-  //   //       setChosenReductionType(element);
-  //   //       problemJson.push(element);
-  //   //     }
-  //   //   }, 80);
-  //   // } else {
-  //   //   let path = "";
-  //   //   arr.map((reduction) => {
-  //   //     path += reduction[0] + "-";
-  //   //   });
-  //   //   // if (path === "SipserReduceToCliqueStandard-sipserReduceToVC-" && chosenReduceTo === "VERTEXCOVER") {
-  //   //   //   setChosenReductionType(path.slice(0, -1));
-  //   //   //   setReductionType("Sipser's Clique Reduction - Sipser's Vertex Cover Reduction");
-  //   //   // }
-  //   //   problemJson.push(path.slice(0, -1));
-  //   // }
-  // }
-
-  // async function requestReducedInstance(url, reductionName, reduceFrom) {
-  //   var parsedInstance = reduceFrom.replaceAll("&", "%26");
-
-  //   return await fetch(url + reductionName + "/reduce?" + "problemInstance=" + parsedInstance).then((resp) => {
-  //     if (resp.ok) {
-  //       return resp.json();
-  //     }
-  //   });
-  // }
-
   return [reductionTypeOptions, setReductionTypeOptions];
 }
 
@@ -179,8 +102,15 @@ function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOption
   }, [problemName, chosenReduceTo]);
 
   useEffect(() => {
-    if (!reductionTypeOptions.length || reductionTypeOptions[0] === "") {
-      setChosenReductionType("");
+    if (chosenReduceTo === "CLIQUE" && reductionTypeOptions.includes(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE)) {
+      setChosenReductionType(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE);
+    } else if (
+      chosenReduceTo === "VERTEXCOVER" &&
+      reductionTypeOptions.includes(DEFAULT_VERTEXCOVER_CHOSEN_REDUCTION_TYPE)
+    ) {
+      setChosenReductionType(DEFAULT_VERTEXCOVER_CHOSEN_REDUCTION_TYPE);
+    } else {
+      setChosenReductionType(!reductionTypeOptions.length ? "" : reductionTypeOptions[0]);
     }
   }, [reductionTypeOptions]);
 
@@ -195,8 +125,12 @@ function useChosenReduceTo(problemName, reduceToOptions) {
   }, [problemName]);
 
   useEffect(() => {
-    if (!reduceToOptions.length) {
-      setChosenReduceTo("");
+    if (problemName === "SAT3" && reduceToOptions.includes(DEFAULT_SAT3_CHOSEN_REDUCE_TO)) {
+      setChosenReduceTo(DEFAULT_SAT3_CHOSEN_REDUCE_TO);
+    } else if (problemName === "CLIQUE" && reduceToOptions.includes(DEFAULT_CLIQUE_CHOSEN_REDUCE_TO)) {
+      setChosenReduceTo(DEFAULT_CLIQUE_CHOSEN_REDUCE_TO);
+    } else {
+      setChosenReduceTo(!reduceToOptions.length ? "" : reduceToOptions[0]);
     }
   }, [reduceToOptions]);
 
