@@ -18,7 +18,7 @@ export function useProblemInfo(url, problemName) {
 
   useEffect(() => {
     (async () => {
-      setProblemInfo(problemName ? requestProblemGeneric(url, problemName) ?? {} : {});
+      setProblemInfo(problemName ? (await requestProblemGeneric(url, problemName)) ?? {} : {});
     })();
   }, [problemName]);
 
