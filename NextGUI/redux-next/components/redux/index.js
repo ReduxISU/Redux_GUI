@@ -197,6 +197,17 @@ export async function requestProblems(url) {
 }
 
 /**
+ * @returns the generic instance of the `problem` with the given `instance`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestProblemGenericInstance(url, problem, instance) {
+  return await fetchJson(
+    `${url}${problem}Generic/instance?problemInstance=${instance}`,
+    () => `${problem} PROBLEM GENERIC INSTANCE REQUEST FAILED`
+  );
+}
+
+/**
  * @returns a generic default instance of the problem information.
  * @returns `undefined` on failure and logs the error.
  */

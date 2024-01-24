@@ -20,6 +20,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { Button, Switch } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh';
 
+import { requestProblemGenericInstance, requestReducedInstance } from '../redux';
 import { ProblemContext } from '../contexts/ProblemProvider';
 import VisualizationBox from '../widgets/VisualizationBox';
 import ProblemSection from '../widgets/ProblemSection';
@@ -105,9 +106,6 @@ export default function VisualizeRowReact(props) {
 
   const [problemVisualizationData, setProblemVisualizationData] = useState(defaultSat3VisualizationArr);
   const [reducedVisualizationData, setReducedVisualizationData] = useState(defaultCLIQUEVisualizationArr);
-  const [problemSolutionData, setProblemSolutionData] = useState(null);
-  const [rerender, setRerender] = useState(false); //This is an escape hatch to refresh svgs.
-  const [accordionOpened, setAccordionOpened] = useState(false);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
 
   let apiCompatibleInstance = problemInstance.replaceAll('&', "%26").replaceAll(' ', '');
@@ -148,23 +146,20 @@ export default function VisualizeRowReact(props) {
   useEffect(() => {
     apiCompatibleInstance = problemInstance.replaceAll('&', "%26").replaceAll(' ', '');
     if (problemName === "SAT3") {
-
-      getProblemVisualizationData(props.url, problemName, apiCompatibleInstance).then(data => {
+      requestProblemGenericInstance(props.url, problemName, apiCompatibleInstance).then(data => {
         setProblemVisualizationData(data.clauses);
-      }).catch((error) => { console.log(error) });
-      getReducedVisualizationData(props.url, chosenReductionType, apiCompatibleInstance).then(data => {
-        setReducedVisualizationData(data.reductionTo.clusterNodes)
-      }).catch((error) => { console.log(error) })
-
+      });
+      if (chosenReductionType) {
+        requestReducedInstance(props.url, chosenReductionType, apiCompatibleInstance).then(data => {
+          setReducedVisualizationData(data.reductionTo.clusterNodes)
+        });
+      }
     }
-
-
   }, [problemInstance]);
 
 
   function handleSwitch1Change(e) { // solution switch
     setShowSolution(e.target.checked);
-    setProblemSolutionData(defaultSat3SolutionArr);
     setShowGadgets(false);
   }
 
@@ -181,7 +176,6 @@ export default function VisualizeRowReact(props) {
 
     // if (!e.target.checked) {
     //   setDisableGadget(true);
-    //   //triggerRerender();
     // } else {
     //   setDisableGadget(false);
     // }
@@ -194,28 +188,6 @@ export default function VisualizeRowReact(props) {
     setShowGadgets(false);
     setShowReduction(false);
   }
-  function getProblemVisualizationData(url, name, instance) {
-    var fullUrl = `${url}${name}Generic/instance?problemInstance=${instance}`;
-    return fetch(fullUrl).then(resp => {
-      if (resp.ok) {
-        return resp.json()
-      }
-    });
-  }
-  function getReducedVisualizationData(url, reduction, instance) {
-
-    if (reduction !== null || reduction !== '') {
-      var fullUrl = `${url}${reduction}/reduce?problemInstance=${instance}`;
-      return fetch(fullUrl).then(resp => {
-        if (resp.ok) {
-          return resp.json()
-        }
-      });
-
-    }
-
-  }
-
 
   const logicProps = {
     solverOn: showSolution,
