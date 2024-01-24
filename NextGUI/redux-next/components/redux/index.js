@@ -201,8 +201,10 @@ export async function requestProblems(url) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestProblemGenericInstance(url, problem, instance) {
+  var preparedInstance = instance.replaceAll("&", "%26");
+
   return await fetchJson(
-    `${url}${problem}Generic/instance?problemInstance=${instance}`,
+    `${url}${problem}Generic/instance?problemInstance=${preparedInstance}`,
     () => `${problem} PROBLEM GENERIC INSTANCE REQUEST FAILED`
   );
 }

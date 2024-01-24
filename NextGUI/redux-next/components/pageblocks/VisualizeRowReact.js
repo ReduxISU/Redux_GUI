@@ -144,13 +144,12 @@ export default function VisualizeRowReact(props) {
   }, [showReduction])
 
   useEffect(() => {
-    apiCompatibleInstance = problemInstance.replaceAll('&', "%26").replaceAll(' ', '');
     if (problemName === "SAT3") {
-      requestProblemGenericInstance(props.url, problemName, apiCompatibleInstance).then(data => {
+      requestProblemGenericInstance(props.url, problemName, problemInstance).then(data => {
         setProblemVisualizationData(data.clauses);
       });
       if (chosenReductionType) {
-        requestReducedInstance(props.url, chosenReductionType, apiCompatibleInstance).then(data => {
+        requestReducedInstance(props.url, chosenReductionType, problemInstance).then(data => {
           setReducedVisualizationData(data.reductionTo.clusterNodes)
         });
       }
