@@ -261,10 +261,12 @@ export async function requestProblemGeneric(url, problem) {
 async function fetchJson(url, failMsg) {
   try {
     const resp = await fetch(url);
-    return resp.ok ? await resp.json() : undefined;
+    if (resp.ok) {
+      return await resp.json();
+    }
+    console.log(`${failMsg()}: ${resp.status} (${resp.statusText})`);
   } catch (error) {
-    // Should we log the caught `error`?
-    console.log(failMsg());
+    console.log(`${failMsg()}: ${error}`);
   }
   return undefined;
 }
