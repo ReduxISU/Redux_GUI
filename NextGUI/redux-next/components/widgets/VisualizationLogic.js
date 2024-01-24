@@ -45,7 +45,7 @@ export default function VisualizationLogic(props) {
                 }
             });
         }
-        else if (reductionType) {
+        else if (reductionType && reducedInstance) {
             requestMappedSolution(url, reductionType, problemInstance, reducedInstance, solution).then(data => {
                 if (data) {
                     setMappedSolution(data);
