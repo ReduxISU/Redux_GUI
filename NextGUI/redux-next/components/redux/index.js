@@ -4,11 +4,41 @@
  */
 
 /**
+ * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
+ * @returns the reduced `instance` list of reductions, the reduction path.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestReducedInstanceFromPath(url, reductionPath, instance) {
+  for (const path of reductionPath.split("-")) {
+    const reducedInst = await requestReducedInstance(url, path, instance);
+    if (!reducedInst) {
+      console.log(`${reductionPath} AT ${path} REDUCED INSTANCE FROM PATH REQUEST FAILED`);
+      return instance;
+    }
+    instance = reducedInst.reductionTo.instance;
+  }
+  return instance;
+}
+
+/**
+ * @returns the reduced `instance` from the specified `reduction`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestReducedInstance(url, reduction, instance) {
+  var preparedInstance = instance.replaceAll("&", "%26");
+
+  return await fetchJson(
+    `${url}${reduction}/reduce?problemInstance=${preparedInstance}`,
+    () => `${reduction} REDUCED INSTANCE REQUEST FAILED`
+  );
+}
+
+/**
  * @returns information regarding the problem/solver/verifier.
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestInfo(url, apiCall) {
-  return await fetchJson(`${url}${apiCall}/info`, `${apiCall} INFO REQUEST FAILED`);
+  return await fetchJson(`${url}${apiCall}/info`, () => `${apiCall} INFO REQUEST FAILED`);
 }
 
 /**

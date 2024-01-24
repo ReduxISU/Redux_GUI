@@ -13,10 +13,10 @@ import { useReducer } from "./Reducer";
 
 export function useProblemProvider(url) {
   const problem = useProblem(url);
-  const { problemName, problemType, problemNameMap, problemInfoMap } = problem;
+  const { problemName, problemType, problemNameMap, problemInfoMap, problemInstance } = problem;
   return {
     ...problem,
-    ...useReducer(url, problemName, problemType),
+    ...useReducer(url, problemName, problemType, problemInstance),
     ...useSolver(url, problemName, problemType, problemNameMap, problemInfoMap),
     ...useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap),
   };

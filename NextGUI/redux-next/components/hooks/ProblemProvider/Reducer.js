@@ -1,8 +1,8 @@
 import { useGenericInfo } from "../ProblemProvider";
-import { requestReductionOptions, requestInfo, requestReductions } from "../../redux";
+import { requestReductionOptions, requestInfo, requestReductions, requestReducedInstanceFromPath } from "../../redux";
 import React, { useEffect, useState } from "react";
 
-export function useReducer(url, problemName, problemType) {
+export function useReducer(url, problemName, problemType, problemInstance) {
   const state = {};
   [state.reduceToOptions] = useReduceToOptions(url, problemName, problemType);
   [state.chosenReduceTo, state.setChosenReduceTo] = useChosenReduceTo(problemName, state.reduceToOptions);
@@ -13,12 +13,39 @@ export function useReducer(url, problemName, problemType) {
     state.chosenReduceTo,
     state.reductionTypeOptions
   );
-  [state.reducedInstance, state.setReducedInstance] = useState("");
+  [state.reducedInstance, state.setReducedInstance] = useReducedInstance(
+    url,
+    problemInstance,
+    state.chosenReduceTo,
+    state.chosenReductionType
+  );
   return state;
 }
 
 export function useReducerInfo(url, reducer) {
   return useGenericInfo(url, (reducer ?? "").split("-")[0]);
+}
+
+function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductionType) {
+  const [reducedInstance, setReducedInstance] = useState("");
+
+  useEffect(() => {
+    setReducedInstance("");
+  }, [chosenReductionType, chosenReduceTo]);
+
+  // Automatically reduces the instance one the reduction type is chosen.
+  // This makes it so it's less input from the user but also makes the "Reduce" button effectly useless.
+  useEffect(() => {
+    (async () => {
+      setReducedInstance(
+        chosenReductionType && problemInstance
+          ? (await requestReducedInstanceFromPath(url, chosenReductionType, problemInstance)) ?? ""
+          : ""
+      );
+    })();
+  }, [chosenReductionType, problemInstance]);
+
+  return [reducedInstance, setReducedInstance];
 }
 
 function useReduceToOptions(url, problemName, problemType) {

@@ -15,6 +15,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { Card } from 'react-bootstrap'
 import { Button } from '@mui/material'
 
+import { requestReducedInstanceFromPath } from '../redux'
 import { ProblemContext } from '../contexts/ProblemProvider'
 import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
@@ -47,48 +48,16 @@ export default function ReduceToRowReact(props) {
     setReducedInstance,
   } = useContext(ProblemContext);
 
-  const [reducedInstanceLocal, setReducedInstanceLocal] = useState();
-
   const reduceToInfo = useProblemInfo(props.url, chosenReduceTo);
   const reducerInfo = useReducerInfo(props.url, chosenReductionType);
 
-  const reduceRequest = async () => {
-
-    if(chosenReductionType !== '' && chosenReductionType !== null){
-      let reductionPath = chosenReductionType.split("-")
-      let i = 0
-      let data = problemInstance
-      for(i; i<reductionPath.length-1; i++){
-        await requestReducedInstance(props.url, reductionPath[i], data).then(d=>{
-          data = d.reductionTo.instance
-        })
-      }
-      await requestReducedInstance(props.url, reductionPath[i], data).then(data => {
-
-        setReducedInstance(data.reductionTo.instance);
-        setReducedInstanceLocal(data.reductionTo.instance);
-        setReducedInstanceLocal(problemInstance);
-        
-        //var reducedInstance = data.reductionTo.instance;
-        // Gets the list of nodes in the raw expression
-        //const prettyFormat = createPrettyFormat(reducedInstance);
-
-      }).catch((error) => console.log("REDUCTION FAILED, one or more properties was invalid"))
-    }
-
+  async function reduceRequest() {
+    setReducedInstance(
+      chosenReductionType && problemInstance
+        ? (await requestReducedInstanceFromPath(props.url, chosenReductionType, problemInstance)) ?? ""
+        : ""
+    );
   }
-
-  // Automatically reduces the instance one the reduction type is chosen. 
-  // This makes it so it's less input from the user but also makes the "Reduce" button effectly useless. 
-  useEffect(() => {
-    reduceRequest();
-  }, [chosenReductionType, problemInstance]);
-  
-  useEffect(() => {
-    setReducedInstance('');
-  }, [chosenReductionType, chosenReduceTo])
-
-
 
   return (
     <ProblemSection defaultCollapsed={false}>
@@ -100,7 +69,7 @@ export default function ReduceToRowReact(props) {
           options={reduceToOptions}
           optionsMap={problemNameMap}
           disabled={!problemName}
-          disabledMessage={"No reductions available. Please select a problem."}
+          disabledMessage={"No reduction method available. Please choose a reduce-to."}
           extenderButtons={(input) => [
             {
               label: `Add new problem "${input}"`,
@@ -278,15 +247,4 @@ function checkProblemType(stringInstance, chosenReduceTo){
 // Parses the edges from the graph
 function getEdges(stringInstance){
   return stringInstance.match('((?<=}, {)[ -~]+)(?=}\\), )');
-}
-
-export async function requestReducedInstance(url, reductionName, reduceFrom) {
-  var parsedInstance = reduceFrom.replaceAll('&', '%26');
-
-  return await fetch(url + reductionName + '/reduce?' + "problemInstance=" + parsedInstance).then(resp => {
-    if (resp.ok) {
-
-      return resp.json();
-    }
-  })
 }
