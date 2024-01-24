@@ -146,11 +146,15 @@ export default function VisualizeRowReact(props) {
   useEffect(() => {
     if (problemName === "SAT3") {
       requestProblemGenericInstance(props.url, problemName, problemInstance).then(data => {
-        setProblemVisualizationData(data.clauses);
+        if (data) {
+          setProblemVisualizationData(data.clauses);
+        }
       });
       if (chosenReductionType) {
         requestReducedInstance(props.url, chosenReductionType, problemInstance).then(data => {
-          setReducedVisualizationData(data.reductionTo.clusterNodes)
+          if (data) {
+            setReducedVisualizationData(data.reductionTo.clusterNodes);
+          }
         });
       }
     }
