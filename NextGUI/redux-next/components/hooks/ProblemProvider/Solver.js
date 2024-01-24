@@ -2,14 +2,14 @@ import { useGenericInfo } from "../ProblemProvider";
 import { requestInfo, requestSolvers } from "../../redux";
 import React, { useEffect, useState } from "react";
 
-export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap) {
+export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance) {
   const state = {};
   /// Maps each problem name to its default solver name.
   [state.defaultSolverMap] = useDefaultSolverMap(url, problemInfoMap);
   [state.solverOptions] = useSolverOptions(url, problemName, problemType);
   [state.chosenSolver, state.setChosenSolver] = useChosenSolver(problemName, state.defaultSolverMap);
   [state.solverNameMap] = useSolverNameMap(url, problemNameMap);
-  [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(state.chosenSolver);
+  [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(problemInstance, state.chosenSolver);
   return state;
 }
 
@@ -23,12 +23,12 @@ export function useSolverInfo(url, solver) {
   );
 }
 
-function useSolvedInstance(chosenSolver) {
+function useSolvedInstance(problemInstance, chosenSolver) {
   const [solvedInstance, setSolvedInstance] = useState("");
 
   useEffect(() => {
     setSolvedInstance("");
-  }, [chosenSolver]);
+  }, [problemInstance, chosenSolver]);
 
   return [solvedInstance, setSolvedInstance];
 }

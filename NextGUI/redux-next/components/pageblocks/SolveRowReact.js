@@ -1,30 +1,34 @@
 /**
  * SolveRowReact.js
- * 
+ *
  * This component does the real grunt work of the SolveRowReact component. It uses passed in props to style and provide default text for its objects,
  * uses the global state values for the problem name and instance, sets global state values pertaining to reduction, and has a variety of listeners and API calls.
- * 
+ *
  * Essentialy, this is the brains of the SolveRowReact.js component and deals with the GUI's Solve "Row"
  * @author Alex Diviney
  */
 
+import React from "react";
+import { useContext } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Button } from "@mui/material";
 
-import React from 'react'
-import { useContext } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { Button } from '@mui/material'
+import { requestSolvedInstanceTemporarySat3CliqueSolver } from "../redux";
+import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
+import { ProblemContext } from "../contexts/ProblemProvider";
+import { useSolverInfo } from "../hooks/ProblemProvider";
+import ProblemSection from "../widgets/ProblemSection";
+import SearchBarExtensible from "../widgets/SearchBarExtensible";
 
-import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
-import { ProblemContext } from '../contexts/ProblemProvider';
-import { useSolverInfo } from '../hooks/ProblemProvider';
-import ProblemSection from '../widgets/ProblemSection';
-import SearchBarExtensible from '../widgets/SearchBarExtensible';
-
-const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" }
-const BUTTON = { buttonText: "Solve" }
-const CARD = { cardBodyText: "Solution:", cardHeaderText: "Solve" }
-const TOOLTIP = { header: "Solver Information", formalDef: "Choose a type of solver to see information about it", info: "" }
-const THEME = {colors:{grey:"#424242",orange:"#d4441c"}}
+const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" };
+const BUTTON = { buttonText: "Solve" };
+const CARD = { cardBodyText: "Solution:", cardHeaderText: "Solve" };
+const TOOLTIP = {
+  header: "Solver Information",
+  formalDef: "Choose a type of solver to see information about it",
+  info: "",
+};
+const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
 export default function SolveRowReact(props) {
   const {
@@ -39,38 +43,15 @@ export default function SolveRowReact(props) {
     problemNameMap,
     chosenReduceTo,
   } = useContext(ProblemContext);
-  
+
   const solverInfo = useSolverInfo(props.url, chosenSolver);
 
-  const handleSolve = () => {
-    if (chosenSolver !== null && chosenSolver !== '') {
-      
-      // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
-      // remove first if once this functionality is added for all problems, the else code block was the original
-      // functionality
-      if(chosenSolver == "CliqueBruteForce - via SipserReduceToCliqueStandard"){
-        var parsedInstanceSat = problemInstance.replaceAll('&', '%26');
-        var tempUrl = props.url + `SipserReduceToCliqueStandard/reduce?problemInstance=${parsedInstanceSat}`
-
-        makeRequest(tempUrl).then(reduction => {
-          var parsedInstanceClique = reduction.reductionTo.instance.replaceAll('&', '%26')
-          requestSolvedInstance(props.url,"CliqueBruteForce",reduction.reductionTo.instance).then(solution => {
-            tempUrl = props.url + `SipserReduceToCliqueStandard/reverseMappedSolution?problemFrom=${parsedInstanceSat}&problemTo=${parsedInstanceClique}&problemToSolution=${solution}`
-            makeRequest(tempUrl).then(mappedSolution => {
-              setSolvedInstance(mappedSolution);
-            }).catch((error) => console.log("TRANSITIVE SOLVE REQUEST FAILED"))
-          }).catch((error) => console.log("TRANSITIVE SOLVE REQUEST FAILED"))
-        }).catch((error) => console.log("TRANSITIVE SOLVE REQUEST FAILED"))
-
-      }
-      else{
-        requestSolvedInstance(props.url, chosenSolver, problemInstance).then(data => {
-          setSolvedInstance(data);
-        }).catch((error) => {console.log("SOLVE REQUEST INSTANCE FAILED")})
-      }
-    }
-
- 
+  async function handleSolve() {
+    setSolvedInstance(
+      chosenSolver && problemInstance
+        ? (await requestSolvedInstanceTemporarySat3CliqueSolver(props.url, chosenSolver, problemInstance)) ?? ""
+        : ""
+    );
   }
 
   return (
@@ -121,26 +102,4 @@ export default function SolveRowReact(props) {
       </ProblemSection.Body>
     </ProblemSection>
   );
-}
-
-async function requestSolvedInstance(url, sName, instance) {
-  var parsedInstance = instance.replaceAll('&', '%26');
-
-  let totalUrl = url + `${sName}/solve?problemInstance=${parsedInstance}`
-  return await fetch(totalUrl).then(resp => {
-    if (resp.ok) {
-      return resp.json();
-    }
-  })
-}
-
-
-//NOTE - Caleb - temporary fix to allow sat3 to be solved with clique, should be 
-//removed once functionality is implemented for all problems.
-async function makeRequest(url){
-  return await fetch(url).then(resp => {
-    if (resp.ok) {
-      return resp.json()
-    }
-  })
 }

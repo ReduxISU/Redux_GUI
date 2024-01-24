@@ -4,6 +4,52 @@
  */
 
 /**
+ * Temporary solution to allow solving 3 SAT with a Clique solver.
+ * All calls to this function should eventually be replace with `requestSolvedInstance`.
+ * An verbose name was purposefully chosen as a reminder to fix this.
+ * @returns the solved `instance` from the specified `solver`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver, instance) {
+  // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
+  // remove first if once this functionality is added for all problems, the else code block was the original
+  // functionality
+  if (solver == "CliqueBruteForce - via SipserReduceToCliqueStandard") {
+    const reduction = await requestReducedInstance(url, "SipserReduceToCliqueStandard", instance);
+    if (!reduction) {
+      return undefined;
+    }
+
+    const solution = await requestSolvedInstance(url, "CliqueBruteForce", reduction.reductionTo.instance);
+    if (!solution) {
+      return undefined;
+    }
+
+    const parsedInstanceSat = instance.replaceAll("&", "%26");
+    const parsedInstanceClique = reduction.reductionTo.instance.replaceAll("&", "%26");
+    const tempUrl = `${url}SipserReduceToCliqueStandard/reverseMappedSolution?problemFrom=${parsedInstanceSat}&problemTo=${parsedInstanceClique}&problemToSolution=${solution}`;
+    const mappedSolution = await fetchJson(tempUrl, "TRANSITIVE SOLVED REQUEST FAILED");
+
+    return mappedSolution;
+  } else {
+    return await requestSolvedInstance(url, solver, instance);
+  }
+}
+
+/**
+ * @returns the solved `instance` from the specified `solver`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestSolvedInstance(url, solver, instance) {
+  var preparedInstance = instance.replaceAll("&", "%26");
+
+  return await fetchJson(
+    `${url}${solver}/solve?problemInstance=${preparedInstance}`,
+    () => `${solver} SOLVED INSTANCE REQUEST FAILED`
+  );
+}
+
+/**
  * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
  * @returns the reduced `instance` list of reductions, the reduction path.
  * @returns `undefined` on failure and logs the error.

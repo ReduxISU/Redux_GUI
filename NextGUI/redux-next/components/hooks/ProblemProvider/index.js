@@ -17,7 +17,7 @@ export function useProblemProvider(url) {
   return {
     ...problem,
     ...useReducer(url, problemName, problemType, problemInstance),
-    ...useSolver(url, problemName, problemType, problemNameMap, problemInfoMap),
+    ...useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance),
     ...useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap),
   };
 }
