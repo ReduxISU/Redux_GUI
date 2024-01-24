@@ -167,7 +167,7 @@ export async function requestSolvers(url, problem, problemType = "NPC") {
 }
 
 /**
- * @returns an array or arrays of reductions implemented for reducing a problem to another problem.
+ * @returns an array of arrays of reductions implemented for reducing a problem to another problem.
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestReductions(url, problemFrom, problemTo, problemType = "NPC") {
