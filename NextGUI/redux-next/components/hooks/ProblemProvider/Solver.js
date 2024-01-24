@@ -101,22 +101,6 @@ function useSolverOptions(url, problemName, problemType) {
     })();
   }, [problemName, problemType]);
 
-  // function initializeProblemJson(arr) {
-  //   // Every problem should have a generic solver
-  //   arr.map(function (element, index, array) {
-  //     if (!problemJson.includes(element)) {
-  //       if (element === "Sat3BacktrackingSolver" && problemName === "SAT3") {
-  //         setChosenSolver(element);
-  //         setDefaultSolver("3SAT Backtracking Solver");
-  //       } else if (element === "CliqueBruteForce" && problemName === "CLIQUE") {
-  //         setChosenSolver(element);
-  //         setDefaultSolver("Clique Brute Force");
-  //       }
-  //       problemJson.push(element);
-  //     }
-  //   }, 80);
-  // }
-
   return [solverOptions, setSolverOptions];
 }
 

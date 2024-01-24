@@ -56,21 +56,6 @@ function useVerifierOptions(url, problemName, problemType) {
     })();
   }, [problemName, problemType]);
 
-  // function initializeProblemJson(arr) {
-  //   arr.map(function (element, index, array) {
-  //     if (!problemJson.includes(element)) {
-  //       if (element === "KadensSimpleVerifier" && problemName === "SAT3") {
-  //         setChosenVerifier(element);
-  //         setDefaultVerifier("Kaden Simple Verifier");
-  //       } else if (element === "CliqueVerifier" && problemName === "CLIQUE") {
-  //         setChosenVerifier(element);
-  //         setDefaultVerifier("Generic Verifier");
-  //       }
-  //       problemJson.push(element);
-  //     }
-  //   }, 80);
-  // }
-
   return [verifierOptions, setVerifierOptions];
 }
 
