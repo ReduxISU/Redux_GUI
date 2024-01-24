@@ -125,7 +125,13 @@ export default function ReduceToRowReact(props) {
       </ProblemSection.Header>
       
       <ProblemSection.Body>
-        <Card.Text>{createPrettyFormat(reducedInstance, chosenReduceTo)}</Card.Text>
+        {reducedInstance ? (
+          <ReduceInfo
+            instance={reducedInstance}
+            chosenReduceTo={chosenReduceTo}
+            problemName={problemNameMap.get(chosenReduceTo)}
+          />
+        ) : null}
 
         <div className="submitButton">
           <Button
@@ -143,60 +149,73 @@ export default function ReduceToRowReact(props) {
   );
 }
 
-// Returns a "pretty" version of the reduction string if possible.
-function createPrettyFormat(rawInstance, chosenReduceTo){
-  if (rawInstance === undefined){
-    return null;
-  }
-
-    const prettyInstace = checkProblemType(rawInstance, chosenReduceTo);
-    // Just turning the uppercase name the the chosen reduction to lowercase with a captial first letter(CLIQUE --> Clique)
-    var reductionToName = chosenReduceTo.toLowerCase();
-    var lowercaseName = reductionToName.charAt(0).toUpperCase() + reductionToName.slice(1);
-
+function ReduceInfo({ instance, chosenReduceTo, problemName }) {
+  const prettyInstance = checkProblemType(instance, chosenReduceTo);
 
   // Checks if this is actually a node / edge format. If not, show the original form.
-  if (prettyInstace === null){
+  if (!prettyInstance) {
+    return <Card.Text>{instance}</Card.Text>;
+  }
+  if (prettyInstance[0] === "GRAPH") {
     return (
-      <>{rawInstance}</>
+      <ReduceInfoGraph
+        instance={instance}
+        nodes={prettyInstance[1]}
+        edges={prettyInstance[2]}
+        k_value={prettyInstance[3]}
+        problemName={problemName}
+      />
     );
   }
-  if (prettyInstace[0] === "GRAPH"){
-    return (
-      <>
-        <p style={{fontSize: 20}}>
-          <b>Reduced {lowercaseName} Instance:</b>
-        </p>
-        
-        <p>{rawInstance}</p>
+  if (prettyInstance[0] === "BOOLEAN") {
+    return <ReduceInfoBool instance={instance} literals={prettyInstance[1]} clauses={prettyInstance[2]} />;
+  }
 
-        <p><b>Nodes:</b></p>
-        <p>{prettyInstace[1]}</p>
-        
-        <p><b>Edges:</b></p>
-        <p /*style={{wordBreak: 'breakWord', color: 'red'}}> */>
-          {prettyInstace[2]}</p>
-        <p><b>K value:</b> {prettyInstace[3]}</p>
-      </>
-    );}
-    
+  return <Card.Text>{instance}</Card.Text>;
+}
 
-    if(prettyInstace[0] === "BOOLEAN"){
-      return (
-        <>
-          <p><b>Literals:</b></p>
-          <p>{prettyInstace[1]}</p>
-          <p><b>Clauses:</b></p>
-          <p>{prettyInstace[2]}</p>  
-          <p><b>Original form:</b></p>
-          <p>{rawInstance}</p>
-        </>
-      );}  
+function ReduceInfoBool({ instance, literals, clauses }) {
+  return (
+    <Card.Text>
+      <p>
+        <b>Literals:</b>
+      </p>
+      <p>{literals}</p>
+      <p>
+        <b>Clauses:</b>
+      </p>
+      <p>{clauses}</p>
+      <p>
+        <b>Original form:</b>
+      </p>
+      <p>{instance}</p>
+    </Card.Text>
+  );
+}
 
-      else{
-        return (
-          <>{rawInstance}</>
-        );}
+function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
+  return (
+    <Card.Text>
+      <p style={{ fontSize: 20 }}>
+        <b>Reduced {problemName} Instance:</b>
+      </p>
+
+      <p>{instance}</p>
+
+      <p>
+        <b>Nodes:</b>
+      </p>
+      <p>{nodes}</p>
+
+      <p>
+        <b>Edges:</b>
+      </p>
+      <p /*style={{wordBreak: 'breakWord', color: 'red'}}> */>{edges}</p>
+      <p>
+        <b>K value:</b> {k_value}
+      </p>
+    </Card.Text>
+  );
 }
 
 /*Takes a raw instance and tried to parse it diffrent ways with regex. 
