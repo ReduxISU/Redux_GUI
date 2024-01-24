@@ -53,7 +53,7 @@ export default function ProblemSection({ children, defaultCollapsed = true }) {
 ProblemSection.Header = function Header({ children, title, titleWidth }) {
   return (
     <Card.Header>
-      <Stack direction="horizontal" gap={2}>
+      <Stack direction="row" gap={2}>
         <Box sx={{ width: titleWidth ?? "10%" }}>{title}</Box>
         {children}
         <ContextAwareToggle eventKey="0" colors={THEME.colors}>

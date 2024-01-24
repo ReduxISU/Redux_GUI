@@ -176,7 +176,7 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
 
 function ReduceInfoBool({ instance, literals, clauses }) {
   return (
-    <Card.Text>
+    <>
       <p>
         <b>Literals:</b>
       </p>
@@ -189,13 +189,13 @@ function ReduceInfoBool({ instance, literals, clauses }) {
         <b>Original form:</b>
       </p>
       <p>{instance}</p>
-    </Card.Text>
+    </>
   );
 }
 
 function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
   return (
-    <Card.Text>
+    <>
       <p style={{ fontSize: 20 }}>
         <b>Reduced {problemName} Instance:</b>
       </p>
@@ -214,7 +214,7 @@ function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
       <p>
         <b>K value:</b> {k_value}
       </p>
-    </Card.Text>
+    </>
   );
 }
 

@@ -10,17 +10,20 @@ export async function requestMappedSolutionTransitive(url, reductionPath, proble
   let problemFrom = problemInstance;
   let mappedSolution = solution;
   for (const reduction of reductionPath.split("-")) {
-    const problemTo = await requestReducedInstance(url, reduction, problemFrom)?.reductionTo?.instance;
-    if (!problemTo) {
-      console.log("REDUCTION FOR SOLUTION MAPPING REQUEST FAILED");
+    const reduced = await requestReducedInstance(url, reduction, problemFrom);
+    if (!reduced) {
+      console.log(`${reductionPath} AT ${reduction} REDUCTION FOR SOLUTION MAPPING REQUEST FAILED`);
       break;
     }
+    const problemTo = reduced.reductionTo.instance;
 
-    mappedSolution = await requestMappedSolution(url, reduction, problemFrom, problemTo, mappedSolution);
-    if (!mappedSolution) {
+    const solution = await requestMappedSolution(url, reduction, problemFrom, problemTo, mappedSolution);
+    if (!solution) {
       console.log("SOLUTION MAPPING REQUEST FAILED");
       break;
     }
+    mappedSolution = solution;
+
     problemFrom = problemTo;
   }
   return mappedSolution;
@@ -96,7 +99,7 @@ export async function requestVerifiedInstance(url, verifier, instance, certifica
 /**
  * Temporary solution to allow solving 3 SAT with a Clique solver.
  * All calls to this function should eventually be replace with `requestSolvedInstance`.
- * An verbose name was purposefully chosen as a reminder to fix this.
+ * A verbose name was purposefully chosen as a reminder to fix this.
  * @returns the solved `instance` from the specified `solver`.
  * @returns `undefined` on failure and logs the error.
  */

@@ -131,7 +131,7 @@ export default function ProblemRowReact(props) {
       </ProblemSection.Header>
 
       <ProblemSection.Body>
-        <Stack direction="horizontal" gap={1}>
+        <Stack direction="row" gap={1}>
           {CARD.cardBodyText}
           {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
           <TextField

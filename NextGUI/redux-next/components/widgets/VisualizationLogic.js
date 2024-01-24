@@ -2,7 +2,7 @@
 
 
 import Split from 'react-split'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container } from '@mui/material';
 import {No_Viz_Svg, No_Reduction_Viz_Svg} from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
@@ -28,31 +28,36 @@ export default function VisualizationLogic(props) {
 
     const handleBar = (sizes) => {}
 
-    
-    if(props.url && props.problemInstance){
+    useEffect(() => {
+      if (url && problemInstance) {
         if (defaultSolverMap.has(problemName)) {
-            requestSolvedInstanceTemporarySat3CliqueSolver(url,  defaultSolverMap.get(problemName), problemInstance ).then(data => {
-                if (data) {
-                    setSolution(data);
-                }
-            });
+          requestSolvedInstanceTemporarySat3CliqueSolver(url, defaultSolverMap.get(problemName), problemInstance).then(
+            (data) => {
+              if (data) {
+                setSolution(data);
+              }
+            }
+          );
         }
 
-        if(reductionType && reductionType.includes('-')){
-            requestMappedSolutionTransitive(url, reductionType, problemInstance, solution).then(data => {
-                if (data) {
-                    setMappedSolution(data);
-                }
-            });
+        if (reductionType && reductionType.includes("-")) {
+          requestMappedSolutionTransitive(url, reductionType, problemInstance, solution).then((data) => {
+            if (data) {
+              setMappedSolution(data);
+            }
+          });
+        } else if (reductionType && reducedInstance) {
+          requestMappedSolution(url, reductionType, problemInstance, reducedInstance, solution).then((data) => {
+            if (data) {
+              setMappedSolution(data);
+            }
+          });
         }
-        else if (reductionType && reducedInstance) {
-            requestMappedSolution(url, reductionType, problemInstance, reducedInstance, solution).then(data => {
-                if (data) {
-                    setMappedSolution(data);
-                }
-            });
-        }
+      }
+    }, [problemInstance, problemName, defaultSolverMap, reductionType, reducedInstance]);
 
+    
+    if(url && problemInstance){
         try{
             visualization = Visualizations.get(problemName)(solve, url, problemInstance, solution)
         } catch{
@@ -90,7 +95,7 @@ export default function VisualizationLogic(props) {
         return (
             <>
                 <Split
-                    class="wrap"
+                    className="wrap"
                     direction="horizontal"
                     style={{ height: 'inherit' }}
                     onDragStart={handleBar}
