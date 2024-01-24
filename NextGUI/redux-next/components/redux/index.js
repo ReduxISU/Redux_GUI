@@ -1,7 +1,40 @@
 /**
  * Functionality for interacting with the backend Redux API.
- * This is a reusable, stand-alone module that does not depend on other modules.
+ * This is a reusable, stand-alone module.
  */
+
+/**
+ * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
+ */
+export async function requestMappedSolutionTransitive(url, reductionPath, problemInstance, solution) {
+  let problemFrom = problemInstance;
+  let mappedSolution = solution;
+  for (const reduction of reductionPath.split("-")) {
+    const problemTo = await requestReducedInstance(url, reduction, problemFrom)?.reductionTo?.instance;
+    if (!problemTo) {
+      console.log("REDUCTION FOR SOLUTION MAPPING REQUEST FAILED");
+      break;
+    }
+
+    mappedSolution = await requestMappedSolution(url, reduction, problemFrom, problemTo, mappedSolution);
+    if (!mappedSolution) {
+      console.log("SOLUTION MAPPING REQUEST FAILED");
+      break;
+    }
+    problemFrom = problemTo;
+  }
+  return mappedSolution;
+}
+
+export async function requestMappedSolution(url, reduction, problemFrom, problemTo, solution) {
+  let preparedFrom = problemFrom.replaceAll("&", "%26");
+  let preparedTo = problemTo.replaceAll("&", "%26");
+
+  return await fetchJson(
+    `${url}${reduction}/mapSolution?problemFrom=${preparedFrom}&problemTo=${preparedTo}&problemFromSolution=${solution}`,
+    () => `${reduction} MAPPED SOLUTION REQUEST FAILED`
+  );
+}
 
 /**
  * @returns `true` if the specified verifier certificate is valid.

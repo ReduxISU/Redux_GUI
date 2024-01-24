@@ -18,7 +18,7 @@ import VisualizationLogic from './VisualizationLogic';
 
 export default function VisualizationBox({ reduceToggled, solveToggled, loading, problemVisualizationData, reducedVisualizationData, problemSolutionData, visualizationState, url,apiInstance }) {
 
-    const { problemName, chosenReduceTo,chosenReductionType, reducedInstance } = useContext(ProblemContext);
+    const { problemName, chosenReduceTo,chosenReductionType, reducedInstance, defaultSolverMap } = useContext(ProblemContext);
 
 
     // if (visualizationState.reductionOn && !loading) {
@@ -81,6 +81,7 @@ export default function VisualizationBox({ reduceToggled, solveToggled, loading,
     return (
         <>
             <VisualizationLogic
+                defaultSolverMap={defaultSolverMap}
                 problemName={problemName}
                 problemInstance={apiInstance} //passing a string that replaces and symbols with ascii values.
                 reductionName={chosenReduceTo}

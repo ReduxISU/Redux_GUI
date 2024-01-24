@@ -6,8 +6,8 @@ import { useState } from 'react';
 import { Container } from '@mui/material';
 import {No_Viz_Svg, No_Reduction_Viz_Svg} from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
-import defaultSolvers from '../Visualization/constants/DefaultSolvers';
 import ReducedVisualizations from '../Visualization/svgs/ReducedVizualizations';
+import { requestMappedSolution, requestMappedSolutionTransitive, requestSolvedInstanceTemporarySat3CliqueSolver } from '../redux';
 
 export default function VisualizationLogic(props) {
 
@@ -15,6 +15,7 @@ export default function VisualizationLogic(props) {
     const [mappedSolution, setMappedSolution] = useState();
     let visualization;
     let reducedVisualization;
+    let defaultSolverMap = props.defaultSolverMap;
     let problemName = props.problemName;
     let problemInstance = props.problemInstance;
     let reductionName = props.reductionName;
@@ -29,19 +30,27 @@ export default function VisualizationLogic(props) {
 
     
     if(props.url && props.problemInstance){
-        requestSolution(url,  defaultSolvers.get(problemName), problemInstance ).then(data => {
-            setSolution(data) 
-        }).catch((error) => console.log("SOLUTION REQUEST FAILED"))
+        if (defaultSolverMap.has(problemName)) {
+            requestSolvedInstanceTemporarySat3CliqueSolver(url,  defaultSolverMap.get(problemName), problemInstance ).then(data => {
+                if (data) {
+                    setSolution(data);
+                }
+            });
+        }
 
         if(reductionType && reductionType.includes('-')){
             requestMappedSolutionTransitive(url, reductionType, problemInstance, solution).then(data => {
-                setMappedSolution(data);
-            }).catch((error) => console.log("MAPPED SOLUTION REQUEST FAILED"))
+                if (data) {
+                    setMappedSolution(data);
+                }
+            });
         }
-        else{
+        else if (reductionType) {
             requestMappedSolution(url, reductionType, problemInstance, reducedInstance, solution).then(data => {
-                setMappedSolution(data);
-            }).catch((error) => console.log("SOLUTION MAPPING REQUEST FAILED"))
+                if (data) {
+                    setMappedSolution(data);
+                }
+            });
         }
 
         try{
@@ -106,52 +115,3 @@ export default function VisualizationLogic(props) {
         </>
     )
 }
-
-export function requestSolution(url, solver, problemFrom ) {
-    let parsedInstance = problemFrom.replaceAll('&', '%26');
-  
-        return fetch(url + solver + '/solve?' + "problemInstance=" + parsedInstance).then(resp => {
-        if (resp.ok) {
-            return resp.json();
-        }
-        }).catch((error) => console.log(error)) 
-}
-
-export function requestMappedSolution(url, reduction, problemFrom, problemTo, solution ) {
-    let parsedFrom = problemFrom.replaceAll('&', '%26');
-    let parsedTo = problemTo.replaceAll('&', '%26');
-    let fullUrl = url + reduction + '/mapSolution?' + "problemFrom=" + parsedFrom + "&problemTo=" + parsedTo + "&problemFromSolution=" + solution
-    return fetch(fullUrl).then(resp => {
-      if (resp.ok) {
-        return resp.json();
-      }
-    }).catch((error) => console.log(error))
-}
-
-export async function requestMappedSolutionTransitive(url, reduction, problemInstance, solution ) {
-    let problemFrom = problemInstance;
-    let mappedSolution = solution;
-    let problemTo;
-    let reductionList = reduction.split("-");
-    for(let i=0; i<reductionList.length; i++){
-        await requestReducedInstance(url, reductionList[i], problemFrom).then(data => {
-            problemTo = data.reductionTo.instance;
-        }).catch((error) => console.log("REDUCTION FOR SOLUTION MAPPING REQUEST FAILED"))
-        await requestMappedSolution(url, reductionList[i], problemFrom, problemTo, mappedSolution).then(data => {
-            mappedSolution = data;
-        }).catch((error) => console.log("SOLUTION MAPPING REQUEST FAILED"))
-        problemFrom = problemTo;
-    }
-    return mappedSolution;
-}
-
-export async function requestReducedInstance(url, reductionName, reduceFrom) {
-    var parsedInstance = reduceFrom.replaceAll('&', '%26');
-  
-    return await fetch(url + reductionName + '/reduce?' + "problemInstance=" + parsedInstance).then(resp => {
-      if (resp.ok) {
-  
-        return resp.json();
-      }
-    })
-  }
