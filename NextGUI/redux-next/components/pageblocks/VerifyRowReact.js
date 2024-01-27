@@ -47,11 +47,10 @@ export default function VerifyRowReact(props) {
   }, [verifierInfo]);
 
   async function handleVerify() {
-    const is_valid = await requestIsCertificateValid(props.url, problemName, certificate);
     setVerifyResult(
-      chosenVerifier && is_valid
-        ? await requestVerifiedInstance(props.url, chosenVerifier, problemInstance, certificate)
-        : "Invalid Input"
+      chosenVerifier
+        ? await requestVerifiedInstance(props.url, problemName, chosenVerifier, problemInstance, certificate)
+        : "Please select a verifier."
     );
   }
 

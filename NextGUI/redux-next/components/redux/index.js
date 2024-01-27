@@ -40,12 +40,10 @@ export async function requestMappedSolution(url, reduction, problemFrom, problem
 }
 
 /**
+ * This function is a temporary solution for validating user input until it is ported to the Redux API.
  * @returns `true` if the specified verifier certificate is valid.
  */
-export async function requestIsCertificateValid(url, problem, certificate) {
-  // This function is marked `async` and passed a `url`, so it can make requests in the future.
-  // This function body is a temporary solution of validating user input until it is ported to the Redux API.
-
+function isCertificateValid(problem, certificate) {
   var cleanInput = certificate.replace(new RegExp(/[( )]/g), ""); // Strips spaces and ()
   cleanInput = cleanInput.replaceAll(":", "=");
   var regexFormat = /[^,=:!{}\w]/; // Checks for special characters not including ,=:!{}
@@ -87,7 +85,12 @@ export async function requestIsCertificateValid(url, problem, certificate) {
  * @returns the verified `instance` results from the specified `verifier`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVerifiedInstance(url, verifier, instance, certificate) {
+export async function requestVerifiedInstance(url, problem, verifier, instance, certificate) {
+  // Temporary solution until certificate validation is moved to the Redux API
+  if (!isCertificateValid(problem, certificate)) {
+    return "Invalid Input"
+  }
+
   var preparedInstance = instance.replaceAll("&", "%26");
 
   return await fetchJson(
