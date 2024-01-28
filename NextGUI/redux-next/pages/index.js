@@ -16,10 +16,17 @@ import Button from 'react-bootstrap/Button'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Image from 'next/image'
 import isulogo from '../components/images/ISULogo.png'
-import ProblemProvider from '../components/contexts/ProblemProvider'
 import ResponsiveAppBar from '../components/widgets/ResponsiveAppBar'
 import { Box, createTheme, Grid, ThemeProvider, Typograph } from "@mui/material"
 import { Container } from 'react-bootstrap'
+import { useProblemProvider } from '../components/hooks/ProblemProvider'
+import { memo } from 'react';
+
+const ProblemRowMemo = memo(ProblemRowReact);
+const ReduceToRowMemo = memo(ReduceToRowReact);
+const VisualizeRowMemo = memo(VisualizeRowReact);
+const SolveRowMemo = memo(SolveRowReact);
+const VerifyRowMemo = memo(VerifyRowReact);
 
 //const reduxBaseUrl = 'http://redux.aws.cose.isu.edu:27000/';
 const reduxBaseUrl = process.env.NEXT_PUBLIC_REDUX_BASE_URL; //redux url. Note the trailing slash
@@ -59,6 +66,7 @@ function MainPageContent() {
     // }
   });
 
+  const {problem, solver, verifier, reducer} = useProblemProvider(reduxBaseUrl);
 
   return (
     <>
@@ -66,36 +74,29 @@ function MainPageContent() {
         <ResponsiveAppBar></ResponsiveAppBar>
 
       <div className="container my-5 ">{ /** This is an artifact from the old bootstrap code, may be deprecated */}
+        <div className="d-flex flex-column">
 
+          <div className="p-2 col-example">
+            <ProblemRowMemo url={reduxBaseUrl} {...problem}/>
+          </div>
+          <div className="p-2 col-example">
 
-      
-        <ProblemProvider url={reduxBaseUrl}>
-
-          <div className="d-flex flex-column">
-
-            <div className="p-2 col-example">
-              <ProblemRowReact url={reduxBaseUrl}></ProblemRowReact>
-            </div>
-            <div className="p-2 col-example">
-
-              <ReduceToRowReact url={reduxBaseUrl}></ReduceToRowReact>
-            </div>
-
-            <div className="p-2 col-example">
-              <VisualizeRowReact url={reduxBaseUrl}></VisualizeRowReact>
-            </div>
-            
-            <div className="p-2 col-example">
-              <SolveRowReact url={reduxBaseUrl}></SolveRowReact>
-            </div>
-            <div className="p-2 col-example">
-
-              <VerifyRowReact url={reduxBaseUrl}></VerifyRowReact>
-            </div>
-           
+            <ReduceToRowMemo url={reduxBaseUrl} {...problem} {...reducer}/>
           </div>
 
-        </ProblemProvider>
+          <div className="p-2 col-example">
+            <VisualizeRowMemo url={reduxBaseUrl} {...problem} {...reducer} defaultSolverMap={solver.defaultSolverMap}/>
+          </div>
+          
+          <div className="p-2 col-example">
+            <SolveRowMemo url={reduxBaseUrl} {...problem} {...solver} chosenReduceTo={reducer.chosenReduceTo}/>
+          </div>
+          <div className="p-2 col-example">
+
+            <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier}/>
+          </div>
+          
+        </div>
         </div>
 
 

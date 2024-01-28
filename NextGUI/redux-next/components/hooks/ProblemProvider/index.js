@@ -15,10 +15,10 @@ export function useProblemProvider(url) {
   const problem = useProblem(url);
   const { problemName, problemType, problemNameMap, problemInfoMap, problemInstance } = problem;
   return {
-    ...problem,
-    ...useReducer(url, problemName, problemType, problemInstance),
-    ...useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance),
-    ...useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap),
+    problem: problem,
+    reducer: useReducer(url, problemName, problemType, problemInstance),
+    solver: useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance),
+    verifier: useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap),
   };
 }
 

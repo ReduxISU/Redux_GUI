@@ -15,7 +15,6 @@ import { Button } from "@mui/material";
 
 import { requestSolvedInstanceTemporarySat3CliqueSolver } from "../redux";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
-import { ProblemContext } from "../contexts/ProblemProvider";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
@@ -30,26 +29,25 @@ const TOOLTIP = {
 };
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
-export default function SolveRowReact(props) {
-  const {
-    problemName,
-    problemInstance,
-    chosenSolver,
-    setChosenSolver,
-    solvedInstance,
-    setSolvedInstance,
-    solverOptions,
-    solverNameMap,
-    problemNameMap,
-    chosenReduceTo,
-  } = useContext(ProblemContext);
-
-  const solverInfo = useSolverInfo(props.url, chosenSolver);
+export default function SolveRowReact({
+  url,
+  problemName,
+  problemInstance,
+  chosenSolver,
+  setChosenSolver,
+  solvedInstance,
+  setSolvedInstance,
+  solverOptions,
+  solverNameMap,
+  problemNameMap,
+  chosenReduceTo,
+}) {
+  const solverInfo = useSolverInfo(url, chosenSolver);
 
   async function handleSolve() {
     setSolvedInstance(
       chosenSolver && problemInstance
-        ? (await requestSolvedInstanceTemporarySat3CliqueSolver(props.url, chosenSolver, problemInstance)) ?? ""
+        ? (await requestSolvedInstanceTemporarySat3CliqueSolver(url, chosenSolver, problemInstance)) ?? ""
         : ""
     );
   }
@@ -68,7 +66,7 @@ export default function SolveRowReact(props) {
           extenderButtons={(input) => {
             const extender = (problem) => ({
               label: `Add new ${problemNameMap.get(problem)} solution algorithm "${input}"`,
-              href: `${props.url}ProblemTemplate/?problemName=${input}`,
+              href: `${url}ProblemTemplate/?problemName=${input}`,
             });
             return !chosenReduceTo ? [extender(problemName)] : [extender(problemName), extender(chosenReduceTo)];
           }}

@@ -9,22 +9,25 @@ import Visualizations from '../Visualization/svgs/Visualizations.js'
 import ReducedVisualizations from '../Visualization/svgs/ReducedVizualizations';
 import { requestMappedSolution, requestMappedSolutionTransitive, requestSolvedInstanceTemporarySat3CliqueSolver } from '../redux';
 
-export default function VisualizationLogic(props) {
-
+export default function VisualizationLogic({
+  url,
+  defaultSolverMap,
+  problemName,
+  problemNameMap,
+  problemInstance,
+  reductionName,
+  chosenReductionType,
+  reductionNameMap,
+  reducedInstance,
+  visualizationState,
+  loading,
+}) {
     const [solution, setSolution] = useState();
     const [mappedSolution, setMappedSolution] = useState();
     let visualization;
     let reducedVisualization;
-    let defaultSolverMap = props.defaultSolverMap;
-    let problemName = props.problemName;
-    let problemInstance = props.problemInstance;
-    let reductionName = props.reductionName;
-    let reductionType = props.reductionType;
-    let reducedInstance = props.reducedInstance;
-    let visualizationState = props.visualizationState
-    let loading = props.loading
-    let url = props.url;
-    let solve = props.visualizationState.solverOn
+
+    const solve = visualizationState.solverOn
 
     const handleBar = (sizes) => {}
 
@@ -40,42 +43,42 @@ export default function VisualizationLogic(props) {
           );
         }
 
-        if (reductionType && reductionType.includes("-")) {
-          requestMappedSolutionTransitive(url, reductionType, problemInstance, solution).then((data) => {
+        if (chosenReductionType && chosenReductionType.includes("-")) {
+          requestMappedSolutionTransitive(url, chosenReductionType, problemInstance, solution).then((data) => {
             if (data) {
               setMappedSolution(data);
             }
           });
-        } else if (reductionType && reducedInstance) {
-          requestMappedSolution(url, reductionType, problemInstance, reducedInstance, solution).then((data) => {
+        } else if (chosenReductionType && reducedInstance) {
+          requestMappedSolution(url, chosenReductionType, problemInstance, reducedInstance, solution).then((data) => {
             if (data) {
               setMappedSolution(data);
             }
           });
         }
       }
-    }, [problemInstance, problemName, defaultSolverMap, reductionType, reducedInstance]);
+    }, [problemInstance, problemName, defaultSolverMap, chosenReductionType, reducedInstance]);
 
     
     if(url && problemInstance){
         try{
             visualization = Visualizations.get(problemName)(solve, url, problemInstance, solution)
         } catch{
-            visualization = <No_Viz_Svg></No_Viz_Svg>
+            visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)}/>
         }
 
-        if(props.visualizationState.reductionOn){
+        if(visualizationState.reductionOn){
             try{
-                reducedVisualization = ReducedVisualizations.get(reductionType)(solve, url, reducedInstance, mappedSolution)
+                reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, reducedInstance, mappedSolution)
 
                 //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
                 // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
                 if(reductionName == "CLIQUE"){
-                    reducedVisualization = ReducedVisualizations.get(reductionType)(solve, url, problemInstance, mappedSolution)
+                    reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
                 }
 
             } catch{
-                reducedVisualization = <No_Reduction_Viz_Svg></No_Reduction_Viz_Svg>
+                reducedVisualization = <No_Reduction_Viz_Svg reducedVisualization={reductionNameMap.get(chosenReductionType)}/>
             }
         }
     }

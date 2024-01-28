@@ -21,14 +21,23 @@ import { Button, Switch } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { requestProblemGenericInstance, requestReducedInstance } from '../redux';
-import { ProblemContext } from '../contexts/ProblemProvider';
 import VisualizationBox from '../widgets/VisualizationBox';
 import ProblemSection from '../widgets/ProblemSection';
 
 const CARD = { cardBodyText:"DEFAULT BODY", problemJson: 'DEFAULT' ,  problemInstance:'DEFAULT', cardHeaderText: "Visualize",problemText:"DEFAULT" }
 const SWITCHES = { switch1: "Highlight solution", switch2: "Highlight gadgets", switch3: "Show reduction" }
 
-export default function VisualizeRowReact(props) {
+export default function VisualizeRowReact({
+  url,
+  problemInstance,
+  problemName,
+  problemNameMap,
+  chosenReduceTo,
+  chosenReductionType,
+  reductionNameMap,
+  reducedInstance,
+  defaultSolverMap,
+}) {
   var visualization;
 
 
@@ -96,7 +105,6 @@ export default function VisualizeRowReact(props) {
   ];
 
 
-  const { problemName, problemInstance, chosenReduceTo, chosenReductionType, reduceToInstance } = useContext(ProblemContext);
   const [showSolution, setShowSolution] = useState(false);
   const [showGadgets, setShowGadgets] = useState(false);
   const [showReduction, setShowReduction] = useState(false);
@@ -145,13 +153,13 @@ export default function VisualizeRowReact(props) {
 
   useEffect(() => {
     if (problemName === "SAT3") {
-      requestProblemGenericInstance(props.url, problemName, problemInstance).then(data => {
+      requestProblemGenericInstance(url, problemName, problemInstance).then(data => {
         if (data) {
           setProblemVisualizationData(data.clauses);
         }
       });
       if (chosenReductionType) {
-        requestReducedInstance(props.url, chosenReductionType, problemInstance).then(data => {
+        requestReducedInstance(url, chosenReductionType, problemInstance).then(data => {
           if (data) {
             setReducedVisualizationData(data.reductionTo.clusterNodes);
           }
@@ -273,7 +281,15 @@ export default function VisualizeRowReact(props) {
           reducedVisualizationData={reducedVisualizationData}
           problemSolutionData={defaultSat3SolutionArr}
           visualizationState={logicProps}
-          url={props.url}
+          url={url}
+
+          problemName={problemName}
+          problemNameMap={problemNameMap}
+          chosenReduceTo={chosenReduceTo}
+          chosenReductionType={chosenReductionType}
+          reductionNameMap={reductionNameMap}
+          reducedInstance={reducedInstance}
+          defaultSolverMap={defaultSolverMap}
         ></VisualizationBox>
         {/* <VisualizationLogic
                props={logicProps}>

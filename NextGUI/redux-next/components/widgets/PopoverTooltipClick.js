@@ -13,7 +13,6 @@ import { OverlayTrigger, Tooltip,Popover,Button} from 'react-bootstrap';
 import { SvgIcon } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useEffect,useContext } from 'react';
-import { ProblemContext } from '../contexts/ProblemProvider';
 import { getThemeProps } from '@mui/system';
 
 function popOver(props) {

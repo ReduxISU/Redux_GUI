@@ -15,7 +15,6 @@ import { Stack } from '@mui/material'
 import TextField from '@mui/material/TextField';
 
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
-import { ProblemContext } from '../contexts/ProblemProvider'
 import { useProblemInfo } from '../hooks/ProblemProvider'
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
@@ -27,15 +26,9 @@ const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
- * 
- * @param {*} props passed down props from ProblemRowReact. Note that Technically, these props could be passed down from anywhere
- * @returns 
  */
-export default function ProblemRowReact(props) {
-
-  const { problemName, setProblemName, problemNameMap, setProblemInstance } = useContext(ProblemContext); //We are giving this row access to basically all global state. This will allow us to reset a page on problem change.
-
-  const problemInfo = useProblemInfo(props.url, problemName);
+export default function ProblemRowReact({ url, problemName, setProblemName, problemNameMap, setProblemInstance }) {
+  const problemInfo = useProblemInfo(url, problemName);
   const [problemLocalInstance, setProblemLocalInstance] = useState("")
   const defaultInstanceParsed = {
                 test: true,
@@ -113,7 +106,7 @@ export default function ProblemRowReact(props) {
           extenderButtons={(input) => [
             {
               label: `Add new problem "${input}"`,
-              href: `${props.url}ProblemTemplate/?problemName=${input}`,
+              href: `${url}ProblemTemplate/?problemName=${input}`,
             },
           ]}
         />{" "}

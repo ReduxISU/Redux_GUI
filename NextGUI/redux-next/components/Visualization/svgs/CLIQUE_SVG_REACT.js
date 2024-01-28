@@ -2,7 +2,6 @@ import React from 'react'
 import { getClique } from './Sat3ToCliqueReduction'
 import dynamic from "next/dynamic";
 import { useRef,useState,useEffect,useContext } from 'react';
-import {ProblemContext} from '../../contexts/ProblemProvider'
 
 /// SAT3_SVG_React.js
 /// This is a wrapper for the SAT3 visualization instance. It allows us to use the visualization as a react component, and also disables
@@ -115,7 +114,6 @@ function CliqueSvgReact(props) { //props.url, props.reductionName, props.problem
         }
       ]
     let ref = useRef(null);
-    // const { problemInstance } = useContext(ProblemContext)
     const [jsonData, setJsonData] = useState(defaultArr);
     useEffect(() => {
         if (props.solveSwitch) {

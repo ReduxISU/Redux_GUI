@@ -269,7 +269,7 @@ async function fetchJson(url, failMsg) {
     }
     console.log(`${failMsg()}: ${resp.status} (${resp.statusText})`);
   } catch (error) {
-    console.log(`${failMsg()}: ${error}`);
+    console.log(`${failMsg()}: `, error);
   }
   return undefined;
 }

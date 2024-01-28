@@ -16,7 +16,6 @@ import { Card } from 'react-bootstrap'
 import { Button } from '@mui/material'
 
 import { requestReducedInstanceFromPath } from '../redux'
-import { ProblemContext } from '../contexts/ProblemProvider'
 import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import ProblemSection from '../widgets/ProblemSection';
@@ -31,30 +30,28 @@ const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to 
 const TOOLTIP2 = { header: "Reduction Type", formalDef: "Choose a type of reduction to see information about it", info: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } }
 
-export default function ReduceToRowReact(props) {
-
-  const {
-    problemName,
-    problemNameMap,
-    problemInstance,
-    reductionNameMap,
-    reduceToOptions,
-    chosenReduceTo,
-    setChosenReduceTo,
-    reductionTypeOptions,
-    chosenReductionType,
-    setChosenReductionType,
-    reducedInstance,
-    setReducedInstance,
-  } = useContext(ProblemContext);
-
-  const reduceToInfo = useProblemInfo(props.url, chosenReduceTo);
-  const reducerInfo = useReducerInfo(props.url, chosenReductionType);
+export default function ReduceToRowReact({
+  url,
+  problemName,
+  problemNameMap,
+  problemInstance,
+  reductionNameMap,
+  reduceToOptions,
+  chosenReduceTo,
+  setChosenReduceTo,
+  reductionTypeOptions,
+  chosenReductionType,
+  setChosenReductionType,
+  reducedInstance,
+  setReducedInstance,
+}) {
+  const reduceToInfo = useProblemInfo(url, chosenReduceTo);
+  const reducerInfo = useReducerInfo(url, chosenReductionType);
 
   async function reduceRequest() {
     setReducedInstance(
       chosenReductionType && problemInstance
-        ? (await requestReducedInstanceFromPath(props.url, chosenReductionType, problemInstance)) ?? ""
+        ? (await requestReducedInstanceFromPath(url, chosenReductionType, problemInstance)) ?? ""
         : ""
     );
   }
@@ -73,7 +70,7 @@ export default function ReduceToRowReact(props) {
           extenderButtons={(input) => [
             {
               label: `Add new problem "${input}"`,
-              href: `${props.url}ProblemTemplate/?problemName=${input}`,
+              href: `${url}ProblemTemplate/?problemName=${input}`,
             },
           ]}
         />{" "}
@@ -107,7 +104,7 @@ export default function ReduceToRowReact(props) {
           extenderButtons={(input) => [
             {
               label: `Add new reduction "${input}"`,
-              href: `${props.url}ProblemTemplate/?problemName=${input}`,
+              href: `${url}ProblemTemplate/?problemName=${input}`,
             },
           ]}
         />
