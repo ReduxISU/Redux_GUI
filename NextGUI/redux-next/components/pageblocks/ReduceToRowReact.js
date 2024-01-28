@@ -63,7 +63,8 @@ export default function ReduceToRowReact({
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={chosenReduceTo}
           onSelect={setChosenReduceTo}
-          options={reduceToOptions}
+          optionsHighlight={reduceToOptions}
+          options={[...problemNameMap.keys()].filter(x => x !== problemName)} // Cannot reduce to current problem
           optionsMap={problemNameMap}
           disabled={!problemName}
           disabledMessage={"No reduction method available. Please choose a reduce-to."}
@@ -104,7 +105,7 @@ export default function ReduceToRowReact({
           extenderButtons={(input) => [
             {
               label: `Add new reduction "${input}"`,
-              href: `${url}ProblemTemplate/?problemName=${input}`,
+              href: `${url}ProblemTemplate/reduction?problemFrom=${problemName}&problemTo=${chosenReduceTo}&reductionName=${input}`,
             },
           ]}
         />

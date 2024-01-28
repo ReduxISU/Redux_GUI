@@ -66,7 +66,7 @@ export default function SolveRowReact({
           extenderButtons={(input) => {
             const extender = (problem) => ({
               label: `Add new ${problemNameMap.get(problem)} solution algorithm "${input}"`,
-              href: `${url}ProblemTemplate/?problemName=${input}`,
+              href: `${url}ProblemTemplate/solver?problemName=${problemName}&solverName=${input}`,
             });
             return !chosenReduceTo ? [extender(problemName)] : [extender(problemName), extender(chosenReduceTo)];
           }}

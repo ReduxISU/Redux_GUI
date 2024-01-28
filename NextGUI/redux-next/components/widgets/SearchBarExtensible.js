@@ -7,6 +7,7 @@ export default function SearchBarExtensible({
   placeholder,
   options,
   optionsMap,
+  optionsHighlight = null,
   disabled = false,
   disabledMessage = "",
   extenderButtons = [],
@@ -32,7 +33,9 @@ export default function SearchBarExtensible({
           onSelect(value);
         }
       }}
-      options={options.map((x) => optionsMap.get(x) ?? x)}
+      options={options
+        .sort(optionsHighlight ? (a, b) => sortHighlights(a, b, optionsHighlight) : undefined)
+        .map((x) => optionsMap.get(x) ?? x)}
       disabled={disabled}
       selectOnFocus
       clearOnBlur
@@ -48,8 +51,26 @@ export default function SearchBarExtensible({
           InputProps={disabled ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }}
         />
       )}
+      // For rendering highlighted options with greater opacity
+      renderOption={
+        optionsHighlight
+          ? (props, option) => (
+              <li
+                {...props}
+                style={optionsHighlight.includes(getKeyByValue(optionsMap, option)) ? null : { opacity: 0.5 }}
+              >
+                {option}
+              </li>
+            )
+          : null
+      }
     />
   );
+}
+
+/// Gives greater precedence to options contained in the `highlights` arrays.
+function sortHighlights(a, b, highlights) {
+  return -(highlights.indexOf(a) - highlights.indexOf(b));
 }
 
 function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
