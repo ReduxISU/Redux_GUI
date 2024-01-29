@@ -88,7 +88,7 @@ function useReductionTypeOptions(url, problemName, problemType, chosenReduceTo) 
     for (const reduction of reductions) {
       path += reduction[0] + "-";
     }
-    return [path.slice(0, -1)];
+    return path !== "" ? [path.slice(0, -1)] : [];
   }
 
   return [reductionTypeOptions, setReductionTypeOptions];
