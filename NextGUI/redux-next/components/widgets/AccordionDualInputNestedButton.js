@@ -104,7 +104,7 @@ function AccordionDualInputNestedButton(props) {
   useEffect(() => {
     REDUCETOOPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/Problem_ReductionsRefactor/' + '?chosenProblem=' + problemName + '&problemType=' + problemType
     requestProblemData(props.accordion.INPUTURL.url, chosenReduceTo).then(data => {
-      setToolTip({ header: data.problemName, formalDef: data.formalDefinition, info: data.problemDefinition }) //updates TOOLTIP
+      setToolTip({ header: data.problemName, formalDef: data.formalDefinition, info: data.problemDefinition, credit: "This was contributed by: " + data.contributors.join(", ")}) //updates TOOLTIP
     }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
 
     setReducedInstance('');;
@@ -116,7 +116,7 @@ function AccordionDualInputNestedButton(props) {
     if(chosenReductionType !== '' && chosenReductionType !== null){
       let reductionType = chosenReductionType.split("-")[0];
       requestReductionData(props.accordion.INPUTURL.url, reductionType).then(data => {
-        setToolTip2({ header: data.reductionName, formalDef: data.reductionDefinition, info: data.source }) //updates TOOLTIP
+        setToolTip2({ header: data.reductionName, formalDef: data.reductionDefinition, info: data.source, credit: "This was contributed by: " + data.contributors.join(", ") }) //updates TOOLTIP
       }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
     }
 

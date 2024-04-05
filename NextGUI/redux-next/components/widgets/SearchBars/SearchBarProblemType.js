@@ -61,7 +61,7 @@ export default function SearchBarProblemType(props) {
       clearOnBlur
       handleHomeEndKeys
       id="search-bar"
-      options={Array.from(problemNameMap, ([problem, label]) => (label))}
+      options={Array.from(problemNameMap, ([problem, label]) => (label)).sort()}
       getOptionLabel={(option) => {
         // Value selected with enter, right from the input
         if (typeof option === 'string') {
@@ -124,6 +124,7 @@ export default function SearchBarProblemType(props) {
         requestProblemNameMap(props.url, data).then(problemNames => {
           setProblemNameMap(problemNames);
         })
+
         requestDefaultSolverMap(props.url, data).then(defaultSolverNames => {
           requestDefaultSolverFileMap(props.url, data, defaultSolverNames).then(defaultSolverFileNames => {
             setDefaultSolverMap(defaultSolverFileNames);
@@ -139,11 +140,10 @@ export default function SearchBarProblemType(props) {
         requestVerifierNameMap(props.url, data).then(verifierMap => {
           setVerifierNameMap(verifierMap);
         })
+        
         requestSolverNameMap(props.url, data).then(solverMap => {
           setSolverNameMap(solverMap);
         })
-
-
       })
         .catch((error) => console.log("GET REQUEST FAILED", error));
 

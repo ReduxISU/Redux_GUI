@@ -16,8 +16,8 @@ const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
 
 const BUTTON = { buttonText: "Reduce" }
 const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" }
-const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to reduce your original problem to to see information about it", info: "" }
-const TOOLTIP2 = { header: "Reduction Type", formalDef: "Choose a type of reduction to see information about it", info: "" }
+const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to reduce your original problem to to see information about it", info: "", credit: "" }
+const TOOLTIP2 = { header: "Reduction Type", formalDef: "Choose a type of reduction to see information about it", info: "", credit: "" }
 
 const REDUCETO = { reduceTo: ["", ""] }
 

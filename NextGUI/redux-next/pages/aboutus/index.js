@@ -57,6 +57,7 @@ export default function AboutUsPage() {
                                 <li>Garret Stouffer</li>
                                 <li>Porter Glines</li>
                                 <li>Show Pratoomratana</li>
+                                <li>Russell Phillips</li>
                                 {/* Add more student names here */}
                             </ul>
                         </Card.Body>

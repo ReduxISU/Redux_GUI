@@ -21,7 +21,7 @@ function VerifyRowReact(props) {
     const BUTTON = { buttonText: "Verify" }
     const CARD = { cardBodyText: "Enter a certificate:", cardHeaderText: "Verify" }
     const INPUTURL = { url: props.reduxBaseUrl }
-    const TOOLTIP = { header: "Problem Verifier", formalDef: "Choose a verifier to see information about it", info: "" }
+    const TOOLTIP = { header: "Problem Verifier", formalDef: "Choose a verifier to see information about it", info: "", credit: "" }
     const THEME = {colors:{grey:"#424242",orange:"#d4441c"}}
 
 

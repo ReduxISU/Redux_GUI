@@ -20,7 +20,7 @@ import { Component,useEffect } from 'react';
 const ACCORDION_FORM_ONE = { placeHolder: "Select problem" }
 const ACCORDION_FORM_TWO = { placeHolder: "default instance" }
 var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem",problemInstance:"" }
-const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "" }
+const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
 
 function ProblemRowReact(props) {
     const INPUTURL = { url: props.reduxBaseUrl }

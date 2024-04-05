@@ -60,7 +60,7 @@ function AccordionVerifier(props) {
     setVerifyResult("");
     SOLVEROPTIONSURL = props.accordion.INPUTURL.url + 'Navigation/Problem_VerifiersRefactor/' + '?chosenProblem=' + problemName + '&problemType=' + problemType
     requestVerifyData(props.accordion.INPUTURL.url, chosenVerifier).then(data => {
-      setToolTip({ header: data.verifierName, formalDef: data.verifierDefinition, info: data.source }) //updates TOOLTIP
+      setToolTip({ header: data.verifierName, formalDef: data.verifierDefinition, info: data.source, credit: "This was contributed by: " + data.contributors.join(", ") }) //updates TOOLTIP
       setVerifiedInstance(data.certificate)
     }).catch((error) => console.log("TOOLTIP SET ERROR API CALL", error))
 
