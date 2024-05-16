@@ -7,6 +7,7 @@ import { Container } from '@mui/material';
 import {No_Viz_Svg, No_Reduction_Viz_Svg} from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
 import ReducedVisualizations from '../Visualization/svgs/ReducedVizualizations';
+import defaultSolvers from '../Visualization/constants/DefaultSolvers';
 import { requestMappedSolution, requestMappedSolutionTransitive, requestSolvedInstanceTemporarySat3CliqueSolver } from '../redux';
 
 export default function VisualizationLogic({
@@ -22,7 +23,7 @@ export default function VisualizationLogic({
   visualizationState,
   loading,
 }) {
-    const [solution, setSolution] = useState();
+    const [solution, setSolution] = useState("");
     const [mappedSolution, setMappedSolution] = useState();
     let visualization;
     let reducedVisualization;
@@ -32,33 +33,28 @@ export default function VisualizationLogic({
     const handleBar = (sizes) => {}
 
     useEffect(() => {
-      if (url && problemInstance) {
-        if (defaultSolverMap.has(problemName)) {
-          requestSolvedInstanceTemporarySat3CliqueSolver(url, defaultSolverMap.get(problemName), problemInstance).then(
-            (data) => {
-              if (data) {
-                setSolution(data);
-              }
-            }
-          );
-        }
-
-        if (chosenReductionType && chosenReductionType.includes("-")) {
-          requestMappedSolutionTransitive(url, chosenReductionType, problemInstance, solution).then((data) => {
-            if (data) {
-              setMappedSolution(data);
-            }
-          });
-        } else if (chosenReductionType && reducedInstance) {
-          requestMappedSolution(url, chosenReductionType, problemInstance, reducedInstance, solution).then((data) => {
-            if (data) {
-              setMappedSolution(data);
-            }
-          });
-        }
+      if (url && problemInstance && defaultSolverMap.has(problemName)) {
+        requestSolvedInstanceTemporarySat3CliqueSolver(url, /*defaultSolvers.get(problemName) || */defaultSolverMap.get(problemName), problemInstance).then(
+          (data) => {
+            setSolution(data ?? "");
+          }
+        );
       }
     }, [problemInstance, problemName, defaultSolverMap, chosenReductionType, reducedInstance]);
 
+    useEffect(() => {
+      if (url && problemInstance && chosenReductionType && solution) {
+        if (chosenReductionType.includes("-")) {
+          requestMappedSolutionTransitive(url, chosenReductionType, problemInstance, solution).then((data) => {
+            setMappedSolution(data ?? "");
+          });
+        } else if (reducedInstance) {
+          requestMappedSolution(url, chosenReductionType, problemInstance, reducedInstance, solution).then((data) => {
+            setMappedSolution(data ?? "");
+          });
+        }
+      }
+    }, [solution])
     
     if(url && problemInstance){
         try{
