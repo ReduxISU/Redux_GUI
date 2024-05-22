@@ -1,11 +1,9 @@
 import * as d3 from 'd3'
 import VisColors from '../constants/VisColors';
-import { ProblemContext } from '../../contexts/ProblemProvider';
 // import { Constants } from 'two.js/src/constants';
 
 
 
-// const { problemName, problemInstance, chosenReductionType, reduceToInstance } = useContext(ProblemContext);
 var width = 400;
 var height = 350;
 

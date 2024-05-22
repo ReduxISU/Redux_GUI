@@ -7,15 +7,9 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { ProblemContext } from '../../contexts/ProblemProvider';
 
 
-export const No_Viz_Svg = () => {
-    
-    const {problemName, problemNameMap} = useContext(ProblemContext)
-    const niceProblemName = problemNameMap.get(problemName)
-
-    
+export function No_Viz_Svg({ niceProblemName }) {
     return (
         
         <Box
@@ -49,11 +43,7 @@ export const No_Viz_Svg = () => {
 
 
 
-export const No_Reduction_Viz_Svg = () => {
-    
-    const {chosenReductionType,reductionNameMap} = useContext(ProblemContext)
-    const niceReductionName = reductionNameMap.get(chosenReductionType)
-    
+export function No_Reduction_Viz_Svg({ niceReductionName }) {
     return (
         
         <Box>    

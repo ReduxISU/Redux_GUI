@@ -46,7 +46,7 @@ export default function AboutUsPage() {
                             <b>{"Contributors"}</b>
                         </Card.Header>
                         <Card.Body style={cardBodyStyle}>
-                            <p>This project was started by Dr.<a href="https://www2.cose.isu.edu/~bodipaul/index.php" target="_blank" rel="noopener noreferrer">Paul Bodily</a>, who is also the ISU Faculty Sponsor of the project. The students who have contributed to the creation of the application are:</p>
+                            <p>This project was started by Dr. <a href="https://www2.cose.isu.edu/~bodipaul/index.php" target="_blank" rel="noopener noreferrer">Paul Bodily</a>, who is also the ISU Faculty Sponsor of the project. The students who have contributed to the creation of the application are:</p>
                             <ul style={{ listStyle: "none", textAlign: "left", paddingLeft: "20px" }}>
                                 <li>Kaden Marchetti</li>
                                 <li>Caleb Eardley</li>
@@ -58,6 +58,8 @@ export default function AboutUsPage() {
                                 <li>Porter Glines</li>
                                 <li>Show Pratoomratana</li>
                                 <li>Russell Phillips</li>
+                                <li>Michael Crapse</li>
+                                <li>Ian Gonzalez</li>
                                 {/* Add more student names here */}
                             </ul>
                         </Card.Body>

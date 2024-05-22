@@ -8,7 +8,6 @@ import CLIQUE_SVG_REACT from '../Visualization/svgs/CLIQUE_SVG_REACT';
 import { Container } from '@mui/material';
 import TEST_SVG_REACT from '../Visualization/svgs/TEST_SVG_REACT';
 import Split from 'react-split'
-import { ProblemContext } from '../contexts/ProblemProvider';
 import VisualizationLogic from './VisualizationLogic';
 
 
@@ -16,9 +15,25 @@ import VisualizationLogic from './VisualizationLogic';
 
 
 
-export default function VisualizationBox({ reduceToggled, solveToggled, loading, problemVisualizationData, reducedVisualizationData, problemSolutionData, visualizationState, url,apiInstance }) {
-
-    const { problemName, chosenReduceTo,chosenReductionType, reducedInstance } = useContext(ProblemContext);
+export default function VisualizationBox({
+    reduceToggled,
+    solveToggled,
+    loading,
+    problemVisualizationData,
+    reducedVisualizationData,
+    problemSolutionData,
+    visualizationState,
+    url,
+    apiInstance,
+  
+    problemName,
+    problemNameMap,
+    chosenReduceTo,
+    chosenReductionType,
+    reductionNameMap,
+    reducedInstance,
+    defaultSolverMap,
+  }) {
 
 
     // if (visualizationState.reductionOn && !loading) {
@@ -81,10 +96,14 @@ export default function VisualizationBox({ reduceToggled, solveToggled, loading,
     return (
         <>
             <VisualizationLogic
+                defaultSolverMap={defaultSolverMap}
                 problemName={problemName}
+                problemNameMap={problemNameMap}
                 problemInstance={apiInstance} //passing a string that replaces and symbols with ascii values.
                 reductionName={chosenReduceTo}
                 reductionType={chosenReductionType}
+                chosenReductionType={chosenReductionType}
+                reductionNameMap={reductionNameMap}
                 reducedInstance ={reducedInstance}
                 url={url}
                 loading={loading}

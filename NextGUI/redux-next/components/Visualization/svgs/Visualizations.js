@@ -18,6 +18,7 @@ const Visualizations = new Map([
             <SAT3_SVG_React 
                 solutionData={solution}
                 data={problemInstance}
+                problemInstance={problemInstance}
                 showSolution={solve}
                 url={url}
             ></SAT3_SVG_React>  
