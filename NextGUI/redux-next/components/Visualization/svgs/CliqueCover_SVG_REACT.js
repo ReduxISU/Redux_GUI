@@ -37,29 +37,29 @@ function ForceGraph({ w, h, charge, apiCall, problemInstance }) {
                 .data(data.links)
                 .join("line")
                 .style("stroke", function (d) {
-                    if (d.attribute1 == "1") {
-                        return "#FF8BB0" //Highlight solutions color
+                    if (d.attribute2 == "1") {
+                        return VisColors.Rose
                     }
-                    else if (d.attribute1 == "2") {
-                        return "#FF8247" // Highlight solutions color
+                    else if (d.attribute2 == "2") {
+                        return VisColors.Purple
                     }
-                    else if (d.attribute1 == "3") {
-                        return "#00B8FF" // Highlight solutions color 
+                    else if (d.attribute2 == "3") {
+                        return VisColors.Sand
                     }
-                    else if (d.attribute1 == "4") {
-                        return "#4D8273" // Highlight solutions color
+                    else if (d.attribute2 == "4") {
+                        return VisColors.Green
                     }
-                    else if (d.attribute1 == "5") {
-                        return "#FF4A3D" // Highlight solutions color 
+                    else if (d.attribute2 == "5") {
+                        return VisColors.Cyan
                     }
-                    else if (d.attribute1 == "6") {
-                        return "#615C4B" // Highlight solutions color
+                    else if (d.attribute2 == "6") {
+                        return VisColors.Wine
                     }
-                    else if (d.attribute1 == "7") {
-                        return "#174257" // Highlight solutions color
+                    else if (d.attribute2 == "7") {
+                        return VisColors.Teal
                     }
-                    else if (d.attribute1 == "0") {
-                        return VisColors.Solution // Highlight solutions color
+                    else if (d.attribute2 == "0") {
+                        return VisColors.Olive
                     } else {
                         return VisColors.Background
                     }
@@ -86,35 +86,32 @@ function ForceGraph({ w, h, charge, apiCall, problemInstance }) {
                 })
                 .attr("r", 20)
                 .attr("fill", function (d) {
-                    //return "#FFC300";
-                    //"#00e676"
                     if (d.attribute2 == "1") {
-                        return "#FF8BB0" //Highlight solutions color: green 
+                        return VisColors.Rose
                     }
                     else if (d.attribute2 == "2") {
-                        return "#FF8247" // Highlight solutions color
+                        return VisColors.Purple
                     }
                     else if (d.attribute2 == "3") {
-                        return "#00B8FF" // Highlight solutions color 
+                        return VisColors.Sand
                     }
                     else if (d.attribute2 == "4") {
-                        return "#4D8273" // Highlight solutions color
+                        return VisColors.Green
                     }
                     else if (d.attribute2 == "5") {
-                        return "#FF4A3D" // Highlight solutions color 
+                        return VisColors.Cyan
                     }
                     else if (d.attribute2 == "6") {
-                        return "#615C4B" // Highlight solutions color
+                        return VisColors.Wine
                     }
                     else if (d.attribute2 == "7") {
-                        return "#174257" // Highlight solutions color
+                        return VisColors.Teal
                     }
                     else if (d.attribute2 == "0") {
-                        return VisColors.Solution // Highlight solutions color
+                        return VisColors.Olive
                     } else {
                         return VisColors.Background
                     }
-
                 })
                 .on("mouseover", function (d) {
                     let dName = d.target.__data__.name.replaceAll('!', 'NOT')

@@ -21,8 +21,9 @@ import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select problem" }
-const CARD = { cardBodyText: "Instance", cardHeaderText: "Problem",problemInstance:"" }
-const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "" }
+const ACCORDION_FORM_TWO = { placeHolder: "default instance" }
+var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem",problemInstance:"" }
+const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
