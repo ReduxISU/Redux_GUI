@@ -61,6 +61,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
         reader.onload = function (e) {
           const content = e.target.result;
           setProblemLocalInstance(content);
+          handleChangeInstance({ target: { value: content } }); // Trigger handleChangeInstance
         };
         reader.readAsText(file);
       }
@@ -155,17 +156,21 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           <TextField
             error={!instanceParsed.test}
             id="outlined-error"
+            className="hide-scrollbar"
             label={!instanceParsed.test ? "Incorrect Format" : "Problem Instance"}
             sx={{ width: "100%" }}
             value={problemLocalInstance}
             onChange={handleChangeInstance}
-            helperText={!instanceParsed.test ? "Problem failed? Try: " + instanceParsed.exampleStr : ""} // Only displays the "Incorrect format" stuff when the input is activly wrong
+            helperText={!instanceParsed.test ? "Problem failed? Try: " + instanceParsed.exampleStr : ""}
+            multiline
+            maxRows={5} 
           ></TextField>
           <Button
             size="large"
             color="white"
             style={{ backgroundColor: THEME.colors.grey }}
             onClick={openFileDialog}
+            className="fixed-button"
           >
             {UPLOAD_BUTTON.buttonText}
           </Button>
