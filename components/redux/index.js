@@ -91,10 +91,9 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
     return "Invalid Input"
   }
 
-  var preparedInstance = instance.replaceAll("&", "%26");
-
-  return await fetchJson(
-    `${url}${verifier}/verify?problemInstance=${preparedInstance}&certificate=${certificate}`,
+  return await fetchPostJson(
+    `${url}${verifier}/verify`,
+    {problemInstance: instance, certificate: certificate},
     () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`
   );
 }
