@@ -30,11 +30,9 @@ export async function requestMappedSolutionTransitive(url, reductionPath, proble
 }
 
 export async function requestMappedSolution(url, reduction, problemFrom, problemTo, solution) {
-  let preparedFrom = problemFrom.replaceAll("&", "%26");
-  let preparedTo = problemTo.replaceAll("&", "%26");
-
-  return await fetchJson(
-    `${url}${reduction}/mapSolution?problemFrom=${preparedFrom}&problemTo=${preparedTo}&problemFromSolution=${solution}`,
+  return await fetchPostJson(
+    `${url}${reduction}/mapSolution`,
+    {problemFrom: problemFrom, problemTo: problemTo, problemFromSolution: solution},
     () => `${reduction} MAPPED SOLUTION REQUEST FAILED`
   );
 }
