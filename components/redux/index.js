@@ -136,10 +136,9 @@ export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestSolvedInstance(url, solver, instance) {
-  var preparedInstance = instance.replaceAll("&", "%26");
-
-  return await fetchJson(
-    `${url}${solver}/solve?problemInstance=${preparedInstance}`,
+  return await fetchPostJson(
+    `${url}${solver}/solve`,
+    instance,
     () => `${solver} SOLVED INSTANCE REQUEST FAILED`
   );
 }
