@@ -80,8 +80,8 @@ function MainPageContent() {
             <div className="p-2 col-example">
               <ProblemRowMemo url={reduxBaseUrl} {...problem} />
             </div>
-            <div className="p-2 col-example">
 
+            <div className="p-2 col-example">
               <ReduceToRowMemo url={reduxBaseUrl} {...problem} {...reducer} />
             </div>
 
@@ -92,12 +92,13 @@ function MainPageContent() {
             <div className="p-2 col-example">
               <SolveRowMemo url={reduxBaseUrl} {...problem} {...solver} chosenReduceTo={reducer.chosenReduceTo} />
             </div>
-            <div className="p-2 col-example">
 
+            <div className="p-2 col-example">
               <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />
             </div>
+
             <div>
-              <CookieConsent />
+              <CookieConsent problem={problem} solver={solver} verifier={verifier} reducer={reducer} />
             </div>
 
           </div>
