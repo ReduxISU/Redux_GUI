@@ -118,10 +118,11 @@ export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver
       return undefined;
     }
 
-    const parsedInstanceSat = instance.replaceAll("&", "%26");
-    const parsedInstanceClique = reduction.reductionTo.instance.replaceAll("&", "%26");
-    const tempUrl = `${url}SipserReduceToCliqueStandard/reverseMappedSolution?problemFrom=${parsedInstanceSat}&problemTo=${parsedInstanceClique}&problemToSolution=${solution}`;
-    const mappedSolution = await fetchJson(tempUrl, "TRANSITIVE SOLVED REQUEST FAILED");
+    const mappedSolution = await fetchPostJson(
+      `${url}SipserReduceToCliqueStandard/reverseMappedSolution`,
+      {problemFrom: instance, problemTo: reduction.reductionTo.instance, problemFromSolution: solution},
+      () => "TRANSITIVE SOLVED REQUEST FAILED"
+    );
 
     return mappedSolution;
   } else {
