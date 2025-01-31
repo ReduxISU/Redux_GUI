@@ -167,10 +167,9 @@ export async function requestReducedInstanceFromPath(url, reductionPath, instanc
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestReducedInstance(url, reduction, instance) {
-  var preparedInstance = instance.replaceAll("&", "%26");
-
-  return await fetchJson(
-    `${url}${reduction}/reduce?problemInstance=${preparedInstance}`,
+  return await fetchPostJson(
+    `${url}${reduction}/reduce`,
+    instance,
     () => `${reduction} REDUCED INSTANCE REQUEST FAILED`
   );
 }
@@ -264,6 +263,30 @@ export async function requestProblemGeneric(url, problem) {
 async function fetchJson(url, failMsg) {
   try {
     const resp = await fetch(url);
+    if (resp.ok) {
+      return await resp.json();
+    }
+    console.log(`${failMsg()}: ${resp.status} (${resp.statusText})`);
+  } catch (error) {
+    console.log(`${failMsg()}: `, error);
+  }
+  return undefined;
+}
+
+/**
+ * @param failMsg The message that is logged on failure. Message is lazily evaluated.
+ * @returns the JSON format of the fetch request.
+ * @returns `undefined` on failure and logs the error.
+ */
+async function fetchPostJson(url, body, failMsg) {
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8'
+      }
+    });
     if (resp.ok) {
       return await resp.json();
     }
