@@ -67,18 +67,18 @@ function useChosenVerifier(problemName, defaultVerifierMap) {
   useEffect(() => {
     if(!problemName || defaultVerifierMap.size === 0) return;
 
+    let verifierVar = !problemName ? "" : defaultVerifierMap.get(problemName);
+
     if (isFirstRender.current) {
       //First render read from Cookie
       const verifierFromCookie = getCookieValue("allData", "verifier");
       if (verifierFromCookie) {
-        setChosenVerifier(verifierFromCookie);
-      } else {
-        setChosenVerifier(!problemName ? "" : defaultVerifierMap.get(problemName));
-      }
-      isFirstRender.current = false;
-    } else {
-      setChosenVerifier(!problemName ? "" : defaultVerifierMap.get(problemName));
-    }
+        verifierVar = verifierFromCookie;
+      } 
+    } 
+
+    setChosenVerifier(verifierVar);
+    isFirstRender.current = false;
   }, [problemName, defaultVerifierMap]);
 
   return [chosenVerifier, setChosenVerifier];

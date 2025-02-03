@@ -112,19 +112,17 @@ function useChosenSolver(problemName, defaultSolverMap) {
   useEffect(() => {
     if(!problemName || defaultSolverMap.size === 0) return;
     
+    let solverVar = !problemName ? "" : defaultSolverMap.get(problemName);
     if (isFirstRender.current) {
       // First render: read from cookie
       const solverFromCookie = getCookieValue("allData", "solver");
-    
       if (solverFromCookie) {
-        setChosenSolver(solverFromCookie);
-      } else {
-        setChosenSolver(!problemName ? "" : defaultSolverMap.get(problemName));
-      }
-      isFirstRender.current = false;
-    } else {
-      setChosenSolver(!problemName ? "" : defaultSolverMap.get(problemName));
-    }
+        solverVar = solverFromCookie;
+      } 
+    } 
+
+    setChosenSolver(solverVar);
+    isFirstRender.current = false;
   }, [problemName, defaultSolverMap]);
 
   return [chosenSolver, setChosenSolver];
