@@ -1,7 +1,6 @@
 import { useGenericInfo } from "../ProblemProvider";
 import { requestReductionOptions, requestInfo, requestReductions, requestReducedInstanceFromPath } from "../../redux";
-import React, { useEffect, useState, useRef } from "react";
-import { getCookie, getCookieValue } from '../../widgets/CookieConsent';
+import React, { useEffect, useState } from "react";
 
 // For initial startup defaults
 const DEFAULT_SAT3_CHOSEN_REDUCE_TO = "CLIQUE";
@@ -97,26 +96,12 @@ function useReductionTypeOptions(url, problemName, problemType, chosenReduceTo) 
 
 function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOptions) {
   const [chosenReductionType, setChosenReductionType] = useState("");
-  const isFirstRender = useRef(true);
 
   useEffect(() => {
     setChosenReductionType("");
   }, [problemName, chosenReduceTo]);
 
   useEffect(() => {
-    if(reductionTypeOptions.length === 0) return;
-
-    if (isFirstRender.current) {
-      //First render read from Cookie
-      const reductionTypeFromCookie = getCookieValue("allData", "reductionType");
-      if (reductionTypeFromCookie) {
-        setChosenReductionType(reductionTypeFromCookie);
-        isFirstRender.current = false;
-        return;
-      }
-      isFirstRender.current = false;
-    } 
-
     if (chosenReduceTo === "CLIQUE" && reductionTypeOptions.includes(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE)) {
       setChosenReductionType(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE);
     } else if (
@@ -134,26 +119,12 @@ function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOption
 
 function useChosenReduceTo(problemName, reduceToOptions) {
   const [chosenReduceTo, setChosenReduceTo] = useState("");
-  const isFirstRender = useRef(true);
 
   useEffect(() => {
     setChosenReduceTo("");
   }, [problemName]);
 
   useEffect(() => {
-    if(reduceToOptions.length === 0) return;
-
-    if (isFirstRender.current) {
-      //First render read from Cookie
-      const reduceToFromCookie = getCookieValue("allData", "reduceTo");
-      if (reduceToFromCookie) {
-        setChosenReduceTo(reduceToFromCookie);
-        isFirstRender.current = false;
-        return;
-      }
-      isFirstRender.current = false;
-    } 
-
     if (problemName === "SAT3" && reduceToOptions.includes(DEFAULT_SAT3_CHOSEN_REDUCE_TO)) {
       setChosenReduceTo(DEFAULT_SAT3_CHOSEN_REDUCE_TO);
     } else if (problemName === "CLIQUE" && reduceToOptions.includes(DEFAULT_CLIQUE_CHOSEN_REDUCE_TO)) {

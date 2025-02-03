@@ -1,0 +1,7 @@
+obj/
+.vscode/
+.vs/
+bin/
+node_modules/
+node_modules
+.next/
