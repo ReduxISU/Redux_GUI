@@ -71,8 +71,7 @@ function CookieConsent({ problem, solver, verifier, reducer }) {
         };
         
         setCookie("allData", JSON.stringify(allData), 30);
-        
-        event.returnValue = "Are you sure you want to leave? Your data will be saved.";
+
       }
     };
   
