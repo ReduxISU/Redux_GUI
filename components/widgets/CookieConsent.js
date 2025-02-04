@@ -1,87 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Snackbar, Button } from '@mui/material';
-import { reduce } from 'd3';
 
-const setCookie = (name, value, days) => {
-  let expires = "";
-  if (days) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    expires = "; expires=" + date.toUTCString();
-  }
-  document.cookie = name + "=" + (value || "") + expires + "; path=/";
-};
-
-const getCookie = (name) => {
-  const nameEQ = name + "=";
-  const ca = document.cookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-  }
-  return null;
-};
-
-const getCookieValue = (cookieName, key) => {
-  const cookie = getCookie(cookieName);
-  if (cookie) {
-    try {
-      const data = JSON.parse(cookie);
-      return data[key] || null;
-    } catch (error) {
-      console.error("Error parsing JSON from cookie:", error);
-      return null;
-    }
-  }
-  return null;
-};
-
-function CookieConsent({ problem, solver, verifier, reducer }) {
+function CookieConsent() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const consent = getCookie('cookieConsent');
+    const consent = document.cookie.split(';').some(cookie => cookie.trim().startsWith('cookieConsent='));
     if (!consent) {
       setOpen(true);
     }
   }, []);
 
-  const handleAccept = useCallback(() => {
-    setCookie("cookieConsent", "true", 365);
+  const handleAccept = () => {
+    document.cookie = "cookieConsent=true; path=/";
     setOpen(false);
-  }, []);
+  };
 
-  const handleDecline = useCallback(() => {
-    setCookie("cookieConsent", "false", 365);
+  const handleDecline = () => {
+    document.cookie = "cookieConsent=false; path=/";
     setOpen(false);
-  }, []);
-
-  useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      const consent = getCookie("cookieConsent");
-      if (consent === "true") {
-        const allData = {
-          problem: problem.problemName ?? "",
-          instance: problem.problemInstance ?? "",
-          solver: solver.chosenSolver ?? "",
-          reduceTo: reducer.chosenReduceTo ?? "",
-          reductionType: reducer.chosenReductionType ?? "",
-          verifier: verifier.chosenVerifier ?? "",
-        };
-        
-        setCookie("allData", JSON.stringify(allData), 30);
-        
-        event.returnValue = "Are you sure you want to leave? Your data will be saved.";
-      }
-    };
-  
-    window.addEventListener('beforeunload', handleBeforeUnload);
-  
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [problem, solver, verifier, reducer]);
+  };
 
   return (
     <Snackbar
@@ -101,5 +39,4 @@ function CookieConsent({ problem, solver, verifier, reducer }) {
   );
 }
 
-export { getCookie, getCookieValue };
 export default CookieConsent;

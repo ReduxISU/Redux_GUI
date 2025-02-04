@@ -8,7 +8,7 @@
  * @author Alex Diviney
  */
 
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Stack } from '@mui/material'
@@ -20,7 +20,6 @@ import { useProblemInfo } from '../hooks/ProblemProvider'
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
-import { getCookie, getCookieValue } from '../widgets/CookieConsent';
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select problem" }
 const ACCORDION_FORM_TWO = { placeHolder: "default instance" }
@@ -49,7 +48,6 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   const [instanceParsed, setInstanceParsed] = useState(defaultInstanceParsed);
   const [seconds, setSeconds] = useState(1);
   const [timerIsActive, setTimerActive] = useState(false);
-  const isFirstRender = useRef(true);
 
   function openFileDialog() {
     const input = document.createElement('input');
@@ -103,29 +101,10 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
 
   //Updates the problem instance on problem name change to be the default instance of the new problem.
   useEffect(() => {
-
-    const problem = problemInfo ? problemInfo : false;
-    if(!problem.problemName) return;
-    
-    if (isFirstRender.current) {
-      // First render: read from cookie
-      const instanceFromCookie = getCookieValue("allData", "instance");
-  
-      if(instanceFromCookie) {
-        setProblemLocalInstance(instanceFromCookie);
-        setProblemInstance(instanceFromCookie);
-      }
-      else {
-        setProblemLocalInstance(problem.defaultInstance ?? "");
-        setProblemInstance(problem.defaultInstance ?? "");
-      }
-      isFirstRender.current = false;
-    }
-    else {
-      setProblemLocalInstance(problem.defaultInstance ?? "");
-      setProblemInstance(problem.defaultInstance ?? "");
-    }
-  }, [problemInfo])
+    const problem = problemName ? problemInfo : {};
+    setProblemLocalInstance(problem.defaultInstance ?? "");
+    setProblemInstance(problem.defaultInstance ?? "");
+  }, [problemName, problemInfo])
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {
