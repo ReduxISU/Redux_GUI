@@ -14,6 +14,7 @@ import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Card } from 'react-bootstrap'
 import { Button } from '@mui/material'
+import DownloadIcon from '@mui/icons-material/Download';
 
 import { requestReducedInstanceFromPath } from '../redux'
 import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
@@ -25,7 +26,6 @@ const ACCORDION_FORM_ONE = { placeHolder: "Select Problem To Reduce To", problem
 const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
 
 const REDUCE_BUTTON = { buttonText: "Reduce" }
-const DOWNLOAD_BUTTON = { buttonText: "Download" }
 const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" }
 const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to reduce your original problem to to see information about it", info: "" }
 const TOOLTIP2 = { header: "Reduction Type", formalDef: "Choose a type of reduction to see information about it", info: "" }
@@ -153,7 +153,7 @@ export default function ReduceToRowReact({
             onClick={handleDownload}
             disabled={!chosenReductionType}
           >
-            {DOWNLOAD_BUTTON.buttonText}
+            <DownloadIcon />
           </Button>
           <Button
             size="large"

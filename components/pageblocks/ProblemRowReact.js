@@ -14,6 +14,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { Stack } from '@mui/material'
 import TextField from '@mui/material/TextField';
 import { Button } from "@mui/material";
+import FolderIcon from '@mui/icons-material/Folder';
+import DownloadIcon from '@mui/icons-material/Download';
 
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import { useProblemInfo } from '../hooks/ProblemProvider'
@@ -24,7 +26,6 @@ import { getCookie, getCookieValue } from '../widgets/CookieConsent';
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select problem" }
 const ACCORDION_FORM_TWO = { placeHolder: "default instance" }
-const UPLOAD_BUTTON = { buttonText: "Upload" }
 var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstance: "" }
 const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
 
@@ -72,6 +73,19 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     input.click();
   }
 
+  async function handleDownload() {
+    const blob = new Blob([problemLocalInstance], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = "query";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
 
   //Updates state on problemName changing.
   useEffect(() => {
@@ -105,13 +119,13 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   useEffect(() => {
 
     const problem = problemInfo ? problemInfo : false;
-    if(!problem.problemName) return;
-    
+    if (!problem.problemName) return;
+
     if (isFirstRender.current) {
       // First render: read from cookie
       const instanceFromCookie = getCookieValue("allData", "instance");
-  
-      if(instanceFromCookie) {
+
+      if (instanceFromCookie) {
         setProblemLocalInstance(instanceFromCookie);
         setProblemInstance(instanceFromCookie);
       }
@@ -184,17 +198,28 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
             onChange={handleChangeInstance}
             helperText={!instanceParsed.test ? "Problem failed? Try: " + instanceParsed.exampleStr : ""}
             multiline
-            maxRows={5} 
+            maxRows={5}
           ></TextField>
-          <Button
-            size="large"
-            color="white"
-            style={{ backgroundColor: THEME.colors.grey }}
-            onClick={openFileDialog}
-            className="fixed-button"
-          >
-            {UPLOAD_BUTTON.buttonText}
-          </Button>
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
+            <Button
+              size="large"
+              color="white"
+              style={{ backgroundColor: THEME.colors.grey }}
+              onClick={openFileDialog}
+              className="fixed-button"
+            >
+              <FolderIcon />
+            </Button>
+            <Button
+              size="large"
+              color="white"
+              style={{ backgroundColor: THEME.colors.grey }}
+              onClick={handleDownload}
+              className="fixed-button"
+            >
+              <DownloadIcon />
+            </Button>
+          </div>
         </Stack>
       </ProblemSection.Body>
     </ProblemSection>

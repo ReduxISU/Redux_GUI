@@ -12,6 +12,7 @@ import React from "react";
 import { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "@mui/material";
+import DownloadIcon from '@mui/icons-material/Download';
 
 import { requestSolvedInstanceTemporarySat3CliqueSolver } from "../redux";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
@@ -21,7 +22,6 @@ import SearchBarExtensible from "../widgets/SearchBarExtensible";
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" };
 const SOLVE_BUTTON = { buttonText: "Solve" };
-const DOWNLOAD_BUTTON = { buttonText: "Download" };
 const CARD = { cardBodyText: "Solution:", cardHeaderText: "Solve" };
 const TOOLTIP = {
   header: "Solver Information",
@@ -108,7 +108,7 @@ export default function SolveRowReact({
             onClick={handleDownload}
             disabled={!chosenSolver}
           >
-            {DOWNLOAD_BUTTON.buttonText}
+            <DownloadIcon />
           </Button>
           <Button
             size="large"
