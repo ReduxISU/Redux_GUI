@@ -24,8 +24,7 @@ import SearchBarExtensible from '../widgets/SearchBarExtensible';
 const ACCORDION_FORM_ONE = { placeHolder: "Select Problem To Reduce To", problemName: "ACCORDION FORM ONE PROBLEM NAME" }
 const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
 
-const REDUCE_BUTTON = { buttonText: "Reduce" }
-const DOWNLOAD_BUTTON = { buttonText: "Download" }
+const BUTTON = { buttonText: "Reduce" }
 const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" }
 const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to reduce your original problem to to see information about it", info: "" }
 const TOOLTIP2 = { header: "Reduction Type", formalDef: "Choose a type of reduction to see information about it", info: "" }
@@ -57,23 +56,10 @@ export default function ReduceToRowReact({
     );
   }
 
-  async function handleDownload() {
-    const blob = new Blob([reducedInstance], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = "query";
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText} titleWidth={"22%"}>
-        <SearchBarExtensible
+      <SearchBarExtensible
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={chosenReduceTo}
           onSelect={setChosenReduceTo}
@@ -93,10 +79,10 @@ export default function ReduceToRowReact({
           toolTip={
             chosenReduceTo
               ? {
-                header: reduceToInfo.problemName ?? "",
-                formalDef: reduceToInfo.formalDefinition ?? "",
-                info: (reduceToInfo.problemDefinition ?? "") + (reduceToInfo.source ?? ""),
-              }
+                  header: reduceToInfo.problemName ?? "",
+                  formalDef: reduceToInfo.formalDefinition ?? "",
+                  info: (reduceToInfo.problemDefinition ?? "") + (reduceToInfo.source ?? ""),
+                }
               : TOOLTIP1
           }
         ></PopoverTooltipClick>
@@ -127,15 +113,15 @@ export default function ReduceToRowReact({
           toolTip={
             chosenReductionType
               ? {
-                header: reducerInfo.reductionName ?? "",
-                formalDef: reducerInfo.reductionDefinition ?? "",
-                info: reducerInfo.source ?? "",
-              }
+                  header: reducerInfo.reductionName ?? "",
+                  formalDef: reducerInfo.reductionDefinition ?? "",
+                  info: reducerInfo.source ?? "",
+                }
               : TOOLTIP2
           }
         ></PopoverTooltipClick>
       </ProblemSection.Header>
-
+      
       <ProblemSection.Body>
         {reducedInstance ? (
           <ReduceInfo
@@ -150,19 +136,10 @@ export default function ReduceToRowReact({
             size="large"
             color="white"
             style={{ backgroundColor: THEME.colors.grey }}
-            onClick={handleDownload}
-            disabled={!chosenReductionType}
-          >
-            {DOWNLOAD_BUTTON.buttonText}
-          </Button>
-          <Button
-            size="large"
-            color="white"
-            style={{ backgroundColor: THEME.colors.grey }}
             onClick={reduceRequest}
             disabled={!chosenReductionType}
           >
-            {REDUCE_BUTTON.buttonText}
+            {BUTTON.buttonText}
           </Button>
         </div>
       </ProblemSection.Body>
@@ -243,32 +220,32 @@ function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
 If any of them match it return both a "pretty" version of the instance in a array [0] defines the type(Boolean, graph etc.).
 In the case of a graph nodes and edges are returned in [1] and [2] respectively.
 SAT or boolean form is only the "pretty" form in [1] and [2] is an empty string.*/
-function checkProblemType(stringInstance, chosenReduceTo) {
+function checkProblemType(stringInstance, chosenReduceTo){
   const spacedInstance = stringInstance.replace(/,/g, ', ');
   const kValue = stringInstance.match('(\\d+)(?!.*\\d)'); // Gets the K value from the string.
 
   // Regex for undirected graph
   const prettyUndirectedNodes = spacedInstance.match('((?<=\\(\\({)[ -~]+)(?=}, {{)');
   const prettyUndirectedEdges = getEdges(spacedInstance);
-  if (prettyUndirectedNodes != null) {
+  if (prettyUndirectedNodes != null){
     return ["GRAPH", prettyUndirectedNodes[0], prettyUndirectedEdges[0], kValue[0]];
   }
 
   // Regex for directed graph. Consequently the edge regex is the same for both directed and undirected. Shouldn't be a problem, but good to note.
   const prettyDirectedNodes = spacedInstance.match('((?<=\\(\\({)[ -~]+)(?=}, {\\()');
   const prettyDirectedEdges = getEdges(spacedInstance);
-  if (prettyDirectedNodes != null && (chosenReduceTo == "ARCSET" || chosenReduceTo == "TSP")) {
+  if(prettyDirectedNodes != null && (chosenReduceTo == "ARCSET" || chosenReduceTo == "TSP")){
     return ["GRAPH", prettyDirectedNodes[0], prettyDirectedEdges[0], kValue[0]];
   }
 
   // Regex for Boolean problems.Getting rid of all the characters we don't need and spliting to get all the literals.
   const literalArray = stringInstance.replaceAll("(", "")
-    .replaceAll(")", "|") // Replace with a | for splitting
-    .replaceAll("&", "")
-    .split("|");
-  const uniqueLiterals = new Set(literalArray); // Getting rid of duplicate literals
+                                      .replaceAll(")", "|") // Replace with a | for splitting
+                                      .replaceAll("&", "")
+                                      .split("|");
+  const uniqueLiterals = new Set (literalArray); // Getting rid of duplicate literals
   var literalString = ""
-  uniqueLiterals.forEach((literal) => {
+  uniqueLiterals.forEach((literal)=>{
     literalString += literal + ", "
   })
   literalString = literalString.match('(?:.)+(?=, , )'); // Getting rid of trailing commas.
@@ -276,7 +253,7 @@ function checkProblemType(stringInstance, chosenReduceTo) {
   const clauses = stringInstance.replaceAll("|", " | ").replaceAll("&", ", ")
 
   // Literals and clauses.
-  if (clauses != "" && literalString != "" && (chosenReduceTo == "SAT" || chosenReduceTo == "3SAT")) {
+  if(clauses != "" && literalString != "" && (chosenReduceTo == "SAT" || chosenReduceTo == "3SAT")){
     return ["BOOLEAN", literalString, clauses];
   }
 
@@ -285,6 +262,6 @@ function checkProblemType(stringInstance, chosenReduceTo) {
 }
 
 // Parses the edges from the graph
-function getEdges(stringInstance) {
+function getEdges(stringInstance){
   return stringInstance.match('((?<=}, {)[ -~]+)(?=}\\), )');
 }

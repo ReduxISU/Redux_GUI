@@ -23,9 +23,8 @@ a {
   text-align: right;
 }
 .submitButton{
-  display: flex;
-  gap: 10px; 
-  justify-content: flex-end;
+  text-align:right;
+  
 }
 .centerImage{
   text-align: center;
