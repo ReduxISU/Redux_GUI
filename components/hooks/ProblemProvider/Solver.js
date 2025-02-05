@@ -1,6 +1,7 @@
 import { useGenericInfo } from "../ProblemProvider";
 import { requestInfo, requestSolvers } from "../../redux";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { getCookie, getCookieValue } from '../../widgets/CookieConsent';
 
 export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance) {
   const state = {};
@@ -106,9 +107,22 @@ function useSolverOptions(url, problemName, problemType) {
 
 function useChosenSolver(problemName, defaultSolverMap) {
   const [chosenSolver, setChosenSolver] = useState("");
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    setChosenSolver(!problemName ? "" : defaultSolverMap.get(problemName)); // Gets the file name of default solver
+    if(!problemName || defaultSolverMap.size === 0) return;
+    
+    let solverVar = !problemName ? "" : defaultSolverMap.get(problemName);
+    if (isFirstRender.current) {
+      // First render: read from cookie
+      const solverFromCookie = getCookieValue("allData", "solver");
+      if (solverFromCookie) {
+        solverVar = solverFromCookie;
+      } 
+    } 
+    
+    setChosenSolver(solverVar);
+    isFirstRender.current = false;
   }, [problemName, defaultSolverMap]);
 
   return [chosenSolver, setChosenSolver];

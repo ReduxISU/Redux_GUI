@@ -14,6 +14,7 @@ import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Card } from 'react-bootstrap'
 import { Button } from '@mui/material'
+import DownloadIcon from '@mui/icons-material/Download';
 
 import { requestReducedInstanceFromPath } from '../redux'
 import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
@@ -24,7 +25,7 @@ import SearchBarExtensible from '../widgets/SearchBarExtensible';
 const ACCORDION_FORM_ONE = { placeHolder: "Select Problem To Reduce To", problemName: "ACCORDION FORM ONE PROBLEM NAME" }
 const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
 
-const BUTTON = { buttonText: "Reduce" }
+const REDUCE_BUTTON = { buttonText: "Reduce" }
 const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" }
 const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to reduce your original problem to to see information about it", info: "" }
 const TOOLTIP2 = { header: "Reduction Type", formalDef: "Choose a type of reduction to see information about it", info: "" }
@@ -54,6 +55,19 @@ export default function ReduceToRowReact({
         ? (await requestReducedInstanceFromPath(url, chosenReductionType, problemInstance)) ?? ""
         : ""
     );
+  }
+
+  async function handleDownload() {
+    const blob = new Blob([reducedInstance], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = "query";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   return (
@@ -132,6 +146,15 @@ export default function ReduceToRowReact({
         ) : null}
 
         <div className="submitButton">
+        <Button
+            size="large"
+            color="white"
+            style={{ backgroundColor: THEME.colors.grey }}
+            onClick={handleDownload}
+            disabled={!chosenReductionType}
+          >
+            <DownloadIcon />
+          </Button>
           <Button
             size="large"
             color="white"
@@ -139,7 +162,7 @@ export default function ReduceToRowReact({
             onClick={reduceRequest}
             disabled={!chosenReductionType}
           >
-            {BUTTON.buttonText}
+            {REDUCE_BUTTON.buttonText}
           </Button>
         </div>
       </ProblemSection.Body>
