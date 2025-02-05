@@ -116,23 +116,21 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   useEffect(() => {
     const problem = problemInfo ? problemInfo : false;
     if (!problem.problemName) return;
+
+    problemVal = problem.defaultInstance ?? "";
     if (isFirstRender.current) {
       // First render: read from cookie
       const instanceFromCookie = getCookieValue("allData", "instance");
       if (instanceFromCookie) {
-        setProblemLocalInstance(instanceFromCookie);
-        setProblemInstance(instanceFromCookie);
+        problemVal = instanceFromCookie;
       }
-      else {
-        setProblemLocalInstance(problem.defaultInstance ?? "");
-        setProblemInstance(problem.defaultInstance ?? "");
-      }
+  
       isFirstRender.current = false;
     }
-    else {
-      setProblemLocalInstance(problem.defaultInstance ?? "");
-      setProblemInstance(problem.defaultInstance ?? "");
-    }
+    
+    setProblemLocalInstance(problemVal);
+    setProblemInstance(problemVal);
+    
   }, [problemInfo])
 
   //Local state that handles problem instance change without triggering mass refreshing.
