@@ -117,7 +117,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     const problem = problemInfo ? problemInfo : false;
     if (!problem.problemName) return;
 
-    problemVal = problem.defaultInstance ?? "";
+    let problemVal = problem.defaultInstance ?? "";
     if (isFirstRender.current) {
       // First render: read from cookie
       const instanceFromCookie = getCookieValue("allData", "instance");
