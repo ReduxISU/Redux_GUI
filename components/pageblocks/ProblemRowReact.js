@@ -22,11 +22,10 @@ import { useProblemInfo } from '../hooks/ProblemProvider'
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
-import { getCookie, getCookieValue } from '../widgets/CookieConsent';
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select problem" }
 const ACCORDION_FORM_TWO = { placeHolder: "default instance" }
-var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem",problemInstance:"" }
+var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstance: "" }
 const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
@@ -37,12 +36,12 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   const problemInfo = useProblemInfo(url, problemName);
   const [problemLocalInstance, setProblemLocalInstance] = useState("")
   const defaultInstanceParsed = {
-                test: true,
-                input: "No Input, Default String",
-                regex: "There is no regex string for this problem, parsing is likely not enabled",
-                type: "No input, default string",
-                exampleStr: "" // No input, default string
-                
+    test: true,
+    input: "No Input, Default String",
+    regex: "There is no regex string for this problem, parsing is likely not enabled",
+    type: "No input, default string",
+    exampleStr: "" // No input, default string
+
   }
 
 
@@ -118,28 +117,29 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     if (!problem.problemName) return;
 
     let problemVal = problem.defaultInstance ?? "";
+    const storedData = localStorage.getItem('problemData');
+
     if (isFirstRender.current) {
-      // First render: read from cookie
-      const instanceFromCookie = getCookieValue("allData", "instance");
-      if (instanceFromCookie) {
-        problemVal = instanceFromCookie;
+      // First render: read from localStorage
+      if (storedData) {
+        const allData = JSON.parse(storedData);
+        problemVal = allData.problem.problemInstance;
       }
-  
       isFirstRender.current = false;
     }
-    
+
     setProblemLocalInstance(problemVal);
     setProblemInstance(problemVal);
-    
+
   }, [problemInfo])
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {
     try {
     }
-    catch (error) {console.log("Couldn't clean problem instance: ", error);}
+    catch (error) { console.log("Couldn't clean problem instance: ", error); }
     setProblemLocalInstance(event.target.value)
-    if (!instanceParsed.test){
+    if (!instanceParsed.test) {
       defaultInstanceParsed.exampleStr = "";
     }
     if (!timerIsActive) {
@@ -167,10 +167,10 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           toolTip={
             problemName
               ? {
-                  header: problemInfo.problemName ?? "",
-                  formalDef: problemInfo.formalDefinition ?? "",
-                  info: (problemInfo.problemDefinition ?? "") + (problemInfo.source ?? ""),
-                }
+                header: problemInfo.problemName ?? "",
+                formalDef: problemInfo.formalDefinition ?? "",
+                info: (problemInfo.problemDefinition ?? "") + (problemInfo.source ?? ""),
+              }
               : TOOLTIP
           }
         ></PopoverTooltipClick>
@@ -188,9 +188,9 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
             value={problemLocalInstance}
             onChange={handleChangeInstance}
             helperText={!instanceParsed.test ? "Problem failed? Try: " + instanceParsed.exampleStr : ""} // Only displays the "Incorrect format" stuff when the input is activly wrong
-            className="hide-scrollbar"  
+            className="hide-scrollbar"
             multiline
-            maxRows={5}        
+            maxRows={5}
           ></TextField>
           <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
             <Button

@@ -1,6 +1,5 @@
 import { requestProblems, requestProblemGeneric } from "../../redux";
 import React, { useEffect, useState } from "react";
-import { getCookie, getCookieValue } from '../../widgets/CookieConsent';
 
 // For initial startup defaults
 const DEFAULT_PROBLEM_NAME = "SAT3";
@@ -56,8 +55,12 @@ function useProblemName(problemNameMap) {
   const [problemName, setProblemName] = useState("");
 
   useEffect(() => {
-    let problemCookie = getCookieValue("allData","problem");
-    if(problemCookie && problemNameMap.has(problemCookie)) setProblemName(problemCookie);
+    const storedData = localStorage.getItem('problemData');
+    
+    if(storedData) {
+      const allData = JSON.parse(storedData);
+      setProblemName(allData.problem.problemName);
+    }
     else if(problemNameMap.has(DEFAULT_PROBLEM_NAME)) {
       setProblemName(DEFAULT_PROBLEM_NAME);
     }

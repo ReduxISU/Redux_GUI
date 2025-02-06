@@ -1,7 +1,6 @@
 import { useGenericInfo } from "../ProblemProvider";
 import { requestReductionOptions, requestInfo, requestReductions, requestReducedInstanceFromPath } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
-import { getCookie, getCookieValue } from '../../widgets/CookieConsent';
 
 // For initial startup defaults
 const DEFAULT_SAT3_CHOSEN_REDUCE_TO = "CLIQUE";
@@ -106,16 +105,18 @@ function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOption
   useEffect(() => {
     if(reductionTypeOptions.length === 0) return;
 
+    const storedData = localStorage.getItem('problemData');
+
     if (isFirstRender.current) {
-      //First render read from Cookie
-      const reductionTypeFromCookie = getCookieValue("allData", "reductionType");
-      if (reductionTypeFromCookie) {
-        setChosenReductionType(reductionTypeFromCookie);
+      // First render: read from localStorage
+      if (storedData) {
+        const allData = JSON.parse(storedData);
+        setChosenReductionType(allData.reducer.chosenReductionType);
         isFirstRender.current = false;
         return;
       }
       isFirstRender.current = false;
-    } 
+    }
 
     if (chosenReduceTo === "CLIQUE" && reductionTypeOptions.includes(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE)) {
       setChosenReductionType(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE);
@@ -142,12 +143,13 @@ function useChosenReduceTo(problemName, reduceToOptions) {
 
   useEffect(() => {
     if(reduceToOptions.length === 0) return;
-    
+    const storedData = localStorage.getItem('problemData');
+
     if (isFirstRender.current) {
-      //First render read from Cookie
-      const reduceToFromCookie = getCookieValue("allData", "reduceTo");
-      if (reduceToFromCookie) {
-        setChosenReduceTo(reduceToFromCookie);
+      // First render: read from localStorage
+      if (storedData) {
+        const allData = JSON.parse(storedData);
+        setChosenReduceTo(allData.reducer.chosenReduceTo);
         isFirstRender.current = false;
         return;
       }

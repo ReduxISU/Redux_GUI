@@ -20,8 +20,8 @@ import ResponsiveAppBar from '../components/widgets/ResponsiveAppBar'
 import { Box, createTheme, Grid, ThemeProvider, Typograph } from "@mui/material"
 import { Container } from 'react-bootstrap'
 import { useProblemProvider } from '../components/hooks/ProblemProvider'
-import { memo } from 'react';
-import CookieConsent from '../components/widgets/CookieConsent';
+import { useEffect, memo } from 'react';
+import { useUnload } from '../components/eventHandlers/handleUnload';
 
 const ProblemRowMemo = memo(ProblemRowReact);
 const ReduceToRowMemo = memo(ReduceToRowReact);
@@ -69,6 +69,8 @@ function MainPageContent() {
 
   const { problem, solver, verifier, reducer } = useProblemProvider(reduxBaseUrl);
 
+  useUnload(problem, solver, verifier, reducer);
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -95,10 +97,6 @@ function MainPageContent() {
             <div className="p-2 col-example">
 
               <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />
-            </div>
-
-            <div>
-              <CookieConsent problem={problem} solver={solver} verifier={verifier} reducer={reducer} />
             </div>
 
           </div>

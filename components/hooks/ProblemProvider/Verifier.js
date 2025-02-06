@@ -1,7 +1,6 @@
 import { useGenericInfo } from "../ProblemProvider";
 import { requestInfo, requestVerifiers } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
-import { getCookie, getCookieValue } from '../../widgets/CookieConsent';
 
 export function useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap) {
   const state = {};
@@ -68,16 +67,19 @@ function useChosenVerifier(problemName, defaultVerifierMap) {
     if(!problemName || defaultVerifierMap.size === 0) return;
 
     let verifierVar = !problemName ? "" : defaultVerifierMap.get(problemName);
+    const storedData = localStorage.getItem('problemData');
+
     if (isFirstRender.current) {
-      //First render read from Cookie
-      const verifierFromCookie = getCookieValue("allData", "verifier");
-      if (verifierFromCookie) {
-        verifierVar = verifierFromCookie;
-      } 
-    } 
+      // First render: read from localStorage
+      if (storedData) {
+        const allData = JSON.parse(storedData);
+        verifierVar = allData.verifier.chosenVerifier;
+        
+      }
+      isFirstRender.current = false;
+    }
     
     setChosenVerifier(verifierVar);
-    isFirstRender.current = false;
   }, [problemName, defaultVerifierMap]);
 
   return [chosenVerifier, setChosenVerifier];
