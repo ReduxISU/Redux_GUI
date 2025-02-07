@@ -59,7 +59,7 @@ function useProblemName(problemNameMap) {
     
     if(storedData) {
       const allData = JSON.parse(storedData);
-      setProblemName(allData.problem.problemName);
+      setProblemName(allData.problem);
     }
     else if(problemNameMap.has(DEFAULT_PROBLEM_NAME)) {
       setProblemName(DEFAULT_PROBLEM_NAME);

@@ -123,7 +123,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
       // First render: read from localStorage
       if (storedData) {
         const allData = JSON.parse(storedData);
-        problemVal = allData.problem.problemInstance;
+        problemVal = allData.instance;
       }
       isFirstRender.current = false;
     }
