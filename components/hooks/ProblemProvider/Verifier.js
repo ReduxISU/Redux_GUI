@@ -73,7 +73,7 @@ function useChosenVerifier(problemName, defaultVerifierMap) {
       // First render: read from localStorage
       if (storedData) {
         const allData = JSON.parse(storedData);
-        verifierVar = allData.verifier.chosenVerifier;
+        verifierVar = allData.verifier;
         
       }
       isFirstRender.current = false;

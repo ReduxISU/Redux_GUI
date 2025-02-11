@@ -111,9 +111,9 @@ function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOption
       // First render: read from localStorage
       if (storedData) {
         const allData = JSON.parse(storedData);
-        setChosenReductionType(allData.reducer.chosenReductionType);
+        setChosenReductionType(allData.reductionType);
         isFirstRender.current = false;
-        return;
+        if(allData.reductionType !== "") return;
       }
       isFirstRender.current = false;
     }
@@ -149,9 +149,9 @@ function useChosenReduceTo(problemName, reduceToOptions) {
       // First render: read from localStorage
       if (storedData) {
         const allData = JSON.parse(storedData);
-        setChosenReduceTo(allData.reducer.chosenReduceTo);
+        setChosenReduceTo(allData.reduceTo);
         isFirstRender.current = false;
-        return;
+        if(allData.reduceTo !== "") return;
       }
       isFirstRender.current = false;
     } 

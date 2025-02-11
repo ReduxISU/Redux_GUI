@@ -22,6 +22,8 @@ import { Container } from 'react-bootstrap'
 import { useProblemProvider } from '../components/hooks/ProblemProvider'
 import { useEffect, memo } from 'react';
 import { useUnload } from '../components/eventHandlers/handleUnload';
+import ShareButton from '../components/widgets/ShareButton';
+import { handleParameters } from '../components/eventHandlers/handleParameters';
 
 const ProblemRowMemo = memo(ProblemRowReact);
 const ReduceToRowMemo = memo(ReduceToRowReact);
@@ -67,6 +69,8 @@ function MainPageContent() {
     // }
   });
 
+  handleParameters();
+
   const { problem, solver, verifier, reducer } = useProblemProvider(reduxBaseUrl);
 
   useUnload(problem, solver, verifier, reducer);
@@ -78,6 +82,10 @@ function MainPageContent() {
 
         <div className="container my-5 ">{ /** This is an artifact from the old bootstrap code, may be deprecated */}
           <div className="d-flex flex-column">
+
+            <div className="p-2 col-example">
+              <ShareButton problem={problem} solver={solver} verifier={verifier} reducer={reducer} />
+            </div>
 
             <div className="p-2 col-example">
               <ProblemRowMemo url={reduxBaseUrl} {...problem} />

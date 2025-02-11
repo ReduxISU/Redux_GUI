@@ -118,7 +118,7 @@ function useChosenSolver(problemName, defaultSolverMap) {
       // First render: read from localStorage
       if (storedData) {
         const allData = JSON.parse(storedData);
-        solverVar = allData.solver.chosenSolver;
+        solverVar = allData.solver;
       }
       isFirstRender.current = false;
     }

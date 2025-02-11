@@ -3,7 +3,14 @@ import { useEffect } from 'react';
 export const useUnload = (problem, solver, verifier, reducer) => {
     useEffect(() => {
         const handleBeforeUnload = () => {
-            const data = { problem, solver, verifier, reducer };
+            const data = {
+                problem: problem.problemName ?? "",
+                instance: problem.problemInstance ?? "",
+                solver: solver.chosenSolver ?? "",
+                reduceTo: reducer.chosenReduceTo ?? "",
+                reductionType: reducer.chosenReductionType ?? "",
+                verifier: verifier.chosenVerifier ?? "",
+            };
             localStorage.setItem('problemData', JSON.stringify(data));
         };
 
