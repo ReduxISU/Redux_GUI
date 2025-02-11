@@ -1,6 +1,6 @@
 import { useGenericInfo } from "../ProblemProvider";
 import { requestInfo, requestVerifiers } from "../../redux";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 export function useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap) {
   const state = {};
@@ -61,9 +61,25 @@ function useVerifierOptions(url, problemName, problemType) {
 
 function useChosenVerifier(problemName, defaultVerifierMap) {
   const [chosenVerifier, setChosenVerifier] = useState("");
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    setChosenVerifier(!problemName ? "" : defaultVerifierMap.get(problemName));
+    if(!problemName || defaultVerifierMap.size === 0) return;
+
+    let verifierVar = !problemName ? "" : defaultVerifierMap.get(problemName);
+    const storedData = localStorage.getItem('problemData');
+
+    if (isFirstRender.current) {
+      // First render: read from localStorage
+      if (storedData) {
+        const allData = JSON.parse(storedData);
+        verifierVar = allData.verifier.chosenVerifier;
+        
+      }
+      isFirstRender.current = false;
+    }
+    
+    setChosenVerifier(verifierVar);
   }, [problemName, defaultVerifierMap]);
 
   return [chosenVerifier, setChosenVerifier];

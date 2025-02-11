@@ -12,6 +12,7 @@ import React from "react";
 import { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "@mui/material";
+import DownloadIcon from '@mui/icons-material/Download';
 
 import { requestSolvedInstanceTemporarySat3CliqueSolver } from "../redux";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
@@ -20,7 +21,7 @@ import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" };
-const BUTTON = { buttonText: "Solve" };
+const SOLVE_BUTTON = { buttonText: "Solve" };
 const CARD = { cardBodyText: "Solution:", cardHeaderText: "Solve" };
 const TOOLTIP = {
   header: "Solver Information",
@@ -50,6 +51,19 @@ export default function SolveRowReact({
         ? (await requestSolvedInstanceTemporarySat3CliqueSolver(url, chosenSolver, problemInstance)) ?? ""
         : ""
     );
+  }
+
+  async function handleDownload() {
+    const blob = new Blob([solvedInstance], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = "query";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   return (
@@ -87,6 +101,15 @@ export default function SolveRowReact({
       <ProblemSection.Body>
         {CARD.cardBodyText + " " + solvedInstance}
         <div className="submitButton">
+        <Button
+            size="large"
+            color="white"
+            style={{ backgroundColor: THEME.colors.grey }}
+            onClick={handleDownload}
+            disabled={!chosenSolver}
+          >
+            <DownloadIcon />
+          </Button>
           <Button
             size="large"
             color="white"
@@ -94,7 +117,7 @@ export default function SolveRowReact({
             onClick={handleSolve}
             disabled={!chosenSolver}
           >
-            {BUTTON.buttonText}
+            {SOLVE_BUTTON.buttonText}
           </Button>
         </div>
       </ProblemSection.Body>
