@@ -36,7 +36,14 @@ const handleShare = async (problem, solver, verifier, reducer) => {
             console.error('Error sharing content:', error);
         }
     } else {
-        alert('Web Share API is not supported in your browser.');
+        // Fallback: Copy the URL to the clipboard
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            alert('Web Share API is not supported in your browser. The share URL has been copied to your clipboard.');
+        } catch (error) {
+            console.error('Error copying URL to clipboard:', error);
+            alert('Failed to copy the share URL to the clipboard.');
+        }
     }
 };
 
