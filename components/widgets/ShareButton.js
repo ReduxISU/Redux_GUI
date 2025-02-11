@@ -43,12 +43,12 @@ const handleShare = async (problem, solver, verifier, reducer) => {
 const ShareButton = ({ problem, solver, verifier, reducer }) => (
     <Button 
     variant="primary" 
-    className="fixed-button" 
+    className="corner-button" 
     size="large"
     color="white"
     style={{ backgroundColor: THEME.colors.grey }}
     onClick={() => handleShare(problem, solver, verifier, reducer)}>
-        <ShareIcon /> Share
+        <ShareIcon />
     </Button>
 );
 
