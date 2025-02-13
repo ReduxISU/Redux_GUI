@@ -37,7 +37,7 @@ export default function VisualizeRowReact({
   chosenReductionType,
   reductionNameMap,
   reducedInstance,
-  defaultSolverMap,
+  chosenSolver,
 }) {
   var visualization;
 
@@ -335,7 +335,7 @@ export default function VisualizeRowReact({
           chosenReductionType={chosenReductionType}
           reductionNameMap={reductionNameMap}
           reducedInstance={reducedInstance}
-          defaultSolverMap={defaultSolverMap}
+          chosenSolver={chosenSolver}
         ></VisualizationBox>
         {/* <VisualizationLogic
                props={logicProps}>
