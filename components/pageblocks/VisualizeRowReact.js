@@ -17,14 +17,15 @@ import { useContext, useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Stack, OverlayTrigger, Popover } from 'react-bootstrap'
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { Button, Switch } from '@mui/material'
+import { Button, Switch, Radio, RadioGroup, FormControl, IconButton, TextField } from '@mui/material';
+import { SkipPrevious, SkipNext, FastRewind, FastForward } from '@mui/icons-material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { requestProblemGenericInstance, requestReducedInstance } from '../redux';
 import VisualizationBox from '../widgets/VisualizationBox';
 import ProblemSection from '../widgets/ProblemSection';
 
-const CARD = { cardBodyText:"DEFAULT BODY", problemJson: 'DEFAULT' ,  problemInstance:'DEFAULT', cardHeaderText: "Visualize",problemText:"DEFAULT" }
+const CARD = { cardBodyText: "DEFAULT BODY", problemJson: 'DEFAULT', problemInstance: 'DEFAULT', cardHeaderText: "Visualize", problemText: "DEFAULT" }
 const SWITCHES = { switch1: "Highlight solution", switch2: "Highlight gadgets", switch3: "Show reduction" }
 
 export default function VisualizeRowReact({
@@ -115,6 +116,7 @@ export default function VisualizeRowReact({
   const [problemVisualizationData, setProblemVisualizationData] = useState(defaultSat3VisualizationArr);
   const [reducedVisualizationData, setReducedVisualizationData] = useState(defaultCLIQUEVisualizationArr);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
 
 
@@ -137,17 +139,17 @@ export default function VisualizeRowReact({
 
   useEffect(() => {
 
-    if(!chosenReductionType){
+    if (!chosenReductionType) {
       setDisableReduction(true);
       setShowReduction(false);
     }
-    else{setDisableReduction(false);}
-    
+    else { setDisableReduction(false); }
+
   }, [chosenReductionType])
 
   useEffect(() => {
     // (showReduction === true) ? setDisableGadget(false) : setDisableGadget(true);
-   
+
   }, [showReduction])
 
   useEffect(() => {
@@ -199,6 +201,29 @@ export default function VisualizeRowReact({
     setShowReduction(false);
   }
 
+  function handleRadioChange(e) {
+    const value = e.target.value;
+    switch (value) {
+      case 'start':
+        setCurrentStep(0);
+        break;
+      case 'back':
+        setCurrentStep(prev => Math.max(prev - 1, 0));
+        break;
+      case 'current':
+        // Keep the current step as is
+        break;
+      case 'forward':
+        setCurrentStep(prev => Math.min(prev + 1, problemVisualizationData.length - 1));
+        break;
+      case 'end':
+        setCurrentStep(problemVisualizationData.length - 1);
+        break;
+      default:
+        break;
+    }
+  }
+
   const logicProps = {
     solverOn: showSolution,
     reductionOn: showReduction,
@@ -218,6 +243,28 @@ export default function VisualizeRowReact({
             Refresh
           </Button>
         </div>
+
+        <IconButton onClick={() => setCurrentStep(0)}>
+          <SkipPrevious />
+        </IconButton>
+        <IconButton onClick={() => setCurrentStep(currentStep - 1)}>
+          <FastRewind />
+        </IconButton>
+        <TextField
+          type="number"
+          variant="filled"
+          value={currentStep}
+          onChange={(e) => setCurrentStep(Number(e.target.value))}
+          inputProps={{ min: 0, max: problemVisualizationData.length - 1}}
+          className="no-spinner"
+          style={{ width: '150px' }}
+        />
+        <IconButton onClick={() => setCurrentStep(currentStep + 1)}>
+          <FastForward />
+        </IconButton>
+        <IconButton onClick={() => setCurrentStep(100)}>
+          <SkipNext />
+        </IconButton>
 
         <Stack
           style={{ width: "100%", flexDirection: "row-reverse" }}
