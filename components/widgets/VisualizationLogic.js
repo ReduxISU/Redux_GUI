@@ -12,7 +12,7 @@ import { requestMappedSolution, requestMappedSolutionTransitive, requestSolvedIn
 
 export default function VisualizationLogic({
   url,
-  chosenSolver,
+  defaultSolverMap,
   problemName,
   problemNameMap,
   problemInstance,
@@ -33,14 +33,14 @@ export default function VisualizationLogic({
     const handleBar = (sizes) => {}
 
     useEffect(() => {
-      if (url && problemInstance) {
-        requestSolvedInstanceTemporarySat3CliqueSolver(url, /*defaultSolvers.get(problemName) || */chosenSolver, problemInstance).then(
+      if (url && problemInstance && defaultSolverMap.has(problemName)) {
+        requestSolvedInstanceTemporarySat3CliqueSolver(url, /*defaultSolvers.get(problemName) || */defaultSolverMap.get(problemName), problemInstance).then(
           (data) => {
             setSolution(data ?? "");
           }
         );
       }
-    }, [problemInstance, problemName, chosenReductionType, reducedInstance, chosenSolver]);
+    }, [problemInstance, problemName, defaultSolverMap, chosenReductionType, reducedInstance]);
 
     useEffect(() => {
       if (url && problemInstance && chosenReductionType && solution) {

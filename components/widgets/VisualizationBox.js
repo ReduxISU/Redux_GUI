@@ -32,7 +32,7 @@ export default function VisualizationBox({
     chosenReductionType,
     reductionNameMap,
     reducedInstance,
-    chosenSolver,
+    defaultSolverMap,
   }) {
 
 
@@ -96,7 +96,7 @@ export default function VisualizationBox({
     return (
         <>
             <VisualizationLogic
-                chosenSolver={chosenSolver}
+                defaultSolverMap={defaultSolverMap}
                 problemName={problemName}
                 problemNameMap={problemNameMap}
                 problemInstance={problemInstance}
