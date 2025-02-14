@@ -143,6 +143,18 @@ export async function requestSolvedInstance(url, solver, instance) {
 }
 
 /**
+ * @returns the `steps` from the specified `solver`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestSolverSteps(url, solver, instance) {
+  return await fetchPostJson(
+    `${url}${solver}/steps`,
+    instance,
+    () => `${solver} SOLVED INSTANCE REQUEST FAILED`
+  );
+}
+
+/**
  * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
  * @returns the reduced `instance` list of reductions, the reduction path.
  * @returns `undefined` on failure and logs the error.

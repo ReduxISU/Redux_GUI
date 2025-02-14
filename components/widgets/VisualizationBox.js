@@ -33,6 +33,8 @@ export default function VisualizationBox({
     reductionNameMap,
     reducedInstance,
     chosenSolver,
+    currentStep,
+    allSteps,
   }) {
 
 
@@ -111,6 +113,8 @@ export default function VisualizationBox({
                 reducedVisualizationData={reducedVisualizationData}
                 problemVisualizationData={problemVisualizationData}
                 visualizationState={visualizationState}
+                currentStep={currentStep}
+                allSteps={allSteps}
             // solverOn={true}
             // reductionOn={reduceToggled}
             // gadgetsOn={false}

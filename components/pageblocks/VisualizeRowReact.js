@@ -21,7 +21,7 @@ import { Button, Switch, Radio, RadioGroup, FormControl, IconButton, TextField }
 import { SkipPrevious, SkipNext, FastRewind, FastForward } from '@mui/icons-material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
-import { requestProblemGenericInstance, requestReducedInstance } from '../redux';
+import { requestProblemGenericInstance, requestReducedInstance, requestSolverSteps } from '../redux';
 import VisualizationBox from '../widgets/VisualizationBox';
 import ProblemSection from '../widgets/ProblemSection';
 
@@ -117,7 +117,7 @@ export default function VisualizeRowReact({
   const [reducedVisualizationData, setReducedVisualizationData] = useState(defaultCLIQUEVisualizationArr);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-
+  const [allSteps, setAllSteps] = useState([]);
 
 
 
@@ -151,6 +151,12 @@ export default function VisualizeRowReact({
     // (showReduction === true) ? setDisableGadget(false) : setDisableGadget(true);
 
   }, [showReduction])
+
+  useEffect(() => {
+    requestSolverSteps(url, chosenSolver, problemInstance).then(steps => {
+      if(steps) setAllSteps(steps);
+    });
+  }, [problemInstance, chosenSolver]);
 
   useEffect(() => {
     if (problemName === "SAT3") {
@@ -201,8 +207,13 @@ export default function VisualizeRowReact({
     setShowReduction(false);
   }
 
-  function handleRadioChange(e) {
-    const value = e.target.value;
+  const logicProps = {
+    solverOn: showSolution,
+    reductionOn: showReduction,
+    gadgetsOn: showGadgets,
+  }
+
+  function handleRadioChange(value) {
     switch (value) {
       case 'start':
         setCurrentStep(0);
@@ -210,24 +221,16 @@ export default function VisualizeRowReact({
       case 'back':
         setCurrentStep(prev => Math.max(prev - 1, 0));
         break;
-      case 'current':
-        // Keep the current step as is
-        break;
       case 'forward':
-        setCurrentStep(prev => Math.min(prev + 1, problemVisualizationData.length - 1));
+        setCurrentStep(prev => Math.min(prev + 1, allSteps.length - 1));
         break;
       case 'end':
-        setCurrentStep(problemVisualizationData.length - 1);
+        setCurrentStep(allSteps.length);
+        //handleSwitch1Change();
         break;
       default:
         break;
     }
-  }
-
-  const logicProps = {
-    solverOn: showSolution,
-    reductionOn: showReduction,
-    gadgetsOn: showGadgets,
   }
 
   return (
@@ -244,10 +247,10 @@ export default function VisualizeRowReact({
           </Button>
         </div>
 
-        <IconButton onClick={() => setCurrentStep(0)}>
+        <IconButton onClick={() => handleRadioChange('start')}>
           <SkipPrevious />
         </IconButton>
-        <IconButton onClick={() => setCurrentStep(currentStep - 1)}>
+        <IconButton onClick={() => handleRadioChange('back')}>
           <FastRewind />
         </IconButton>
         <TextField
@@ -255,14 +258,14 @@ export default function VisualizeRowReact({
           variant="filled"
           value={currentStep}
           onChange={(e) => setCurrentStep(Number(e.target.value))}
-          inputProps={{ min: 0, max: problemVisualizationData.length - 1}}
+          inputProps={{ min: 0, max: allSteps.length }}
           className="no-spinner"
           style={{ width: '150px' }}
         />
-        <IconButton onClick={() => setCurrentStep(currentStep + 1)}>
+        <IconButton onClick={() => handleRadioChange('forward')}>
           <FastForward />
         </IconButton>
-        <IconButton onClick={() => setCurrentStep(100)}>
+        <IconButton onClick={() => handleRadioChange('end')}>
           <SkipNext />
         </IconButton>
 
@@ -336,6 +339,8 @@ export default function VisualizeRowReact({
           reductionNameMap={reductionNameMap}
           reducedInstance={reducedInstance}
           chosenSolver={chosenSolver}
+          currentStep={currentStep}
+          allSteps={allSteps}
         ></VisualizationBox>
         {/* <VisualizationLogic
                props={logicProps}>
