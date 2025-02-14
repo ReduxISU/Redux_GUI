@@ -119,8 +119,7 @@ export default function VisualizeRowReact({
   const [currentStep, setCurrentStep] = useState(0);
   const [allSteps, setAllSteps] = useState([]);
 
-
-
+  const isDisabled = showGadgets || showReduction;
 
   useEffect(() => {
     if (svgIsLoading) {
@@ -129,7 +128,12 @@ export default function VisualizeRowReact({
   }, [svgIsLoading])
 
 
-
+  useEffect(() => {
+    // Reset allSteps when problemInstance or problemName changes
+    setAllSteps([]);
+    setCurrentStep(0);
+    setShowSolution(false);
+  }, [problemInstance, problemName, chosenSolver]);
 
   useEffect(() => {
     (problemName !== '' && problemName !== null) ? setDisableSolution(false) : setDisableSolution(true);
@@ -148,13 +152,16 @@ export default function VisualizeRowReact({
   }, [chosenReductionType])
 
   useEffect(() => {
-    // (showReduction === true) ? setDisableGadget(false) : setDisableGadget(true);
-
-  }, [showReduction])
+    if (currentStep === allSteps.length + 1) {
+      setShowSolution(true);
+    } else {
+      setShowSolution(false);
+    }
+  }, [currentStep, allSteps.length]);
 
   useEffect(() => {
     requestSolverSteps(url, chosenSolver, problemInstance).then(steps => {
-      if(steps) setAllSteps(steps);
+      if (steps) setAllSteps(steps);
     });
   }, [problemInstance, chosenSolver]);
 
@@ -179,6 +186,8 @@ export default function VisualizeRowReact({
   function handleSwitch1Change(e) { // solution switch
     setShowSolution(e.target.checked);
     setShowGadgets(false);
+    if (e.target.checked) setCurrentStep(allSteps.length + 1);
+    else setCurrentStep(0);
   }
 
   function handleSwitch2Change(e) { //gadget switch.
@@ -186,11 +195,12 @@ export default function VisualizeRowReact({
     // setShowGadgets(false);
     setShowGadgets(e.target.checked);
     setShowSolution(false);
+    setCurrentStep(0);
   }
 
   function handleSwitch3Change(e) { //Reduction Switch
     setShowReduction(e.target.checked);
-
+    setCurrentStep(0);
 
     // if (!e.target.checked) {
     //   setDisableGadget(true);
@@ -201,10 +211,11 @@ export default function VisualizeRowReact({
   }
 
   function handleRefreshButton(e) {
-    setSvgIsLoading(true)
+    setSvgIsLoading(true);
     setShowSolution(false);
     setShowGadgets(false);
     setShowReduction(false);
+    setCurrentStep(0);
   }
 
   const logicProps = {
@@ -222,11 +233,10 @@ export default function VisualizeRowReact({
         setCurrentStep(prev => Math.max(prev - 1, 0));
         break;
       case 'forward':
-        setCurrentStep(prev => Math.min(prev + 1, allSteps.length - 1));
+        setCurrentStep(prev => Math.min(prev + 1, allSteps.length + 1));
         break;
       case 'end':
-        setCurrentStep(allSteps.length);
-        //handleSwitch1Change();
+        setCurrentStep(allSteps.length + 1);
         break;
       default:
         break;
@@ -247,27 +257,58 @@ export default function VisualizeRowReact({
           </Button>
         </div>
 
-        <IconButton onClick={() => handleRadioChange('start')}>
-          <SkipPrevious />
-        </IconButton>
-        <IconButton onClick={() => handleRadioChange('back')}>
-          <FastRewind />
-        </IconButton>
-        <TextField
-          type="number"
-          variant="filled"
-          value={currentStep}
-          onChange={(e) => setCurrentStep(Number(e.target.value))}
-          inputProps={{ min: 0, max: allSteps.length }}
-          className="no-spinner"
-          style={{ width: '150px' }}
-        />
-        <IconButton onClick={() => handleRadioChange('forward')}>
-          <FastForward />
-        </IconButton>
-        <IconButton onClick={() => handleRadioChange('end')}>
-          <SkipNext />
-        </IconButton>
+        <OverlayTrigger
+        placement="bottom"
+        overlay={
+          isDisabled ? (
+            <Popover id="popover-basic">
+              <Popover.Body>{"Radio buttons and text box are disabled when gadgets or reduction is on."}</Popover.Body>
+            </Popover>
+          ) : <></>
+        }
+      >
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton onClick={() => handleRadioChange('start')} disabled={isDisabled}>
+            <FastRewind />
+          </IconButton>
+          <IconButton onClick={() => handleRadioChange('back')} disabled={isDisabled}>
+            <SkipPrevious />
+          </IconButton>
+          <TextField
+            type="number"
+            variant="filled"
+            value={currentStep}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === '') {
+                setCurrentStep(''); // Allow the text box to be empty
+              } else {
+                const numValue = Number(value);
+                if (numValue >= 0 && numValue <= allSteps.length + 1) {
+                  setCurrentStep(numValue);
+                }
+              }
+            }}
+            inputProps={{
+              min: 0,
+              max: allSteps.length + 1,
+              onInput: (e) => {
+                const value = e.target.value;
+                if (value < 0 || value > allSteps.length + 1) e.target.value = currentStep; // Reset to currentStep if out of range
+              }
+            }}
+            className="no-spinner"
+            style={{ width: '70px' }}
+            disabled={isDisabled}
+          />
+          <IconButton onClick={() => handleRadioChange('forward')} disabled={isDisabled}>
+            <SkipNext />
+          </IconButton>
+          <IconButton onClick={() => handleRadioChange('end')} disabled={isDisabled}>
+            <FastForward />
+          </IconButton>
+        </div>
+      </OverlayTrigger>
 
         <Stack
           style={{ width: "100%", flexDirection: "row-reverse" }}
