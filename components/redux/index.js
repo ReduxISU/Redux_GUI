@@ -136,7 +136,7 @@ export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver
  */
 export async function requestSolvedInstance(url, solver, instance) {
   return await fetchPostJson(
-    `${url}${solver}/solve`,
+    `${url}ProblemProvider/solve?solver=${solver}`,
     instance,
     () => `${solver} SOLVED INSTANCE REQUEST FAILED`
   );
