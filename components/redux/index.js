@@ -90,8 +90,8 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
   }
 
   return await fetchPostJson(
-    `${url}ProblemProvider/verify`,
-    {verifier: verifier, problemInstance: instance, certificate: certificate},
+    `${url}ProblemProvider/verify?verifier${verifier}`,
+    {problemInstance: instance, certificate: certificate},
     () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`
   );
 }
