@@ -90,7 +90,7 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
   }
 
   return await fetchPostJson(
-    `${url}ProblemProvider/verify?verifier${verifier}`,
+    `${url}ProblemProvider/verify?verifier=${verifier}`,
     {problemInstance: instance, certificate: certificate},
     () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`
   );
@@ -237,7 +237,7 @@ export async function requestProblems(url) {
  */
 export async function requestProblemGenericInstance(url, problem, instance) {
   return await fetchPostJson(
-    `${url}${problem}Generic/instance`,
+    `${url}ProblemProvider/problemInstance?problem=${problem}`,
     instance,
     () => `${problem} PROBLEM GENERIC INSTANCE REQUEST FAILED`
   );
@@ -248,7 +248,7 @@ export async function requestProblemGenericInstance(url, problem, instance) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestProblemGeneric(url, problem) {
-  return await fetchJson(`${url}${problem}Generic`, () => `${problem} GENERIC REQUEST FAILED`);
+  return await fetchJson(`${url}ProblemProvider/problemInfo?problem=${problem}`, () => `${problem} PROBLEM GENERIC REQUEST FAILED`);
 }
 
 /**
