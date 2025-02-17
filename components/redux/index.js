@@ -252,6 +252,30 @@ export async function requestProblemGenericInstance(url, problem, instance) {
 }
 
 /**
+ * @returns the graph visualization of the problem instance.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestVisualization(url, problem, instance) {
+  // TODO: convert to POST request for problem instance
+  return await fetchJson(
+    `${url}${problem}Generic/visualize?problemInstance=${instance}`,
+    () => `${problem} VISUALIZE REQUEST FAILED`
+  );
+}
+
+/**
+ * @returns the solved graph visualization of the problem instance.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestSolvedVisualization(url, problem, instance, solution) {
+  // TODO: convert to POST request for problem instance
+  return await fetchJson(
+    `${url}${problem}Generic/solvedVisualization?problemInstance=${instance}&solution=${solution}`,
+    () => `${problem} VISUALIZE REQUEST FAILED`
+  );
+}
+
+/**
  * @param failMsg The message that is logged on failure. Message is lazily evaluated.
  * @returns the JSON format of the fetch request.
  * @returns `undefined` on failure and logs the error.

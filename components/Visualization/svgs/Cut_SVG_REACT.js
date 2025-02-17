@@ -4,9 +4,10 @@
 import * as d3 from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
 import VisColors from '../constants/VisColors';
+import {requestVisualization, requestSolvedVisualization} from "../../redux";
 
 
-function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }) {
+function DirectedForceGraph({ w, h, charge, url, solve, problemName, problemInstance, solution, reductionType = "" }) {
   const [animatedNodes, setAnimatedNodes] = useState([]);
   const [animatedLinks, setAnimatedLinks] = useState([]);
   const margin = { top: 200, right: 30, bottom: 30, left: 200 },
@@ -55,8 +56,8 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
     svg.call(zoomBehavior.transform, d3.zoomIdentity.translate(width / 2, height / 2));
 
 
-    const problemUrl = apiCall;
-    d3.json(problemUrl).then(function (data) {
+    const apiCall = solve ? requestVisualization(url, problemName, problemInstance) : requestSolvedVisualization(url, problemName, problemInstance, solution);
+    apiCall.then(function (data) {
       // Initialize the links
       const link = svg
         .selectAll("line")
@@ -205,7 +206,7 @@ function DirectedForceGraph({ w, h, charge, apiCall, solve, reductionType = "" }
 
     }).catch(error => console.log("CUT VISUALIZATION FAILED"));
 
-  }, [solve, apiCall])
+  }, [solve, problemName, problemInstance, solution])
   return (
     <svg
       width={width}
@@ -256,9 +257,8 @@ export default function CutSvgReact(props) {
         w={700}
         h={700}
         charge={charge}
-        apiCall={props.apiCall}
         solve={props.solveSwitch}
-        reductionType={props.reductionType}
+        {...props}
       />
     </>
   );
