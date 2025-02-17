@@ -1,5 +1,4 @@
-import { useGenericInfo } from "../ProblemProvider";
-import { requestReductionOptions, requestInfo, requestReductions, requestReducedInstanceFromPath } from "../../redux";
+import { requestReductionOptions, requestReductionInfo, requestReductions, requestReducedInstanceFromPath } from "../../redux";
 import React, { useEffect, useState } from "react";
 
 // For initial startup defaults
@@ -29,7 +28,15 @@ export function useReducer(url, problemName, problemType, problemInstance) {
 }
 
 export function useReducerInfo(url, reducer) {
-  return useGenericInfo(url, (reducer ?? "").split("-")[0]);
+  const [genericInfo, setGenericInfo] = useState({});
+
+  useEffect(() => {
+    (async () => {
+      setGenericInfo(!reducer ? {} : (await requestReductionInfo(url, (reducer ?? "").split("-")[0])) ?? {});
+    })();
+  }, [reducer]);
+
+  return genericInfo; // There should be no reason to set the information
 }
 
 function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductionType) {
@@ -156,7 +163,7 @@ function useReductionNameMap(url, problemName, chosenReduceTo) {
     const reductions = (await requestReductions(url, problemFrom, problemTo)) ?? [];
     for (const r of reductions) {
       for (const reduction of r) {
-        const info = await requestInfo(url, reduction);
+        const info = await requestReductionInfo(url, reduction);
         if (info) {
           map.set(reduction, info.reductionName);
         }

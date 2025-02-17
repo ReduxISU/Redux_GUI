@@ -176,6 +176,14 @@ export async function requestReducedInstance(url, reduction, instance) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestInfo(url, apiCall) {
+  return await fetchJson(`${url}ProblemProvider/info?interface=${apiCall}`, () => `${apiCall} INFO REQUEST FAILED`);
+}
+
+/**
+ * @returns information regarding the reduction.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestReductionInfo(url, apiCall) {
   return await fetchJson(`${url}${apiCall}/info`, () => `${apiCall} INFO REQUEST FAILED`);
 }
 
@@ -241,14 +249,6 @@ export async function requestProblemGenericInstance(url, problem, instance) {
     instance,
     () => `${problem} PROBLEM GENERIC INSTANCE REQUEST FAILED`
   );
-}
-
-/**
- * @returns a generic default instance of the problem information.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestProblemGeneric(url, problem) {
-  return await fetchJson(`${url}ProblemProvider/problemInfo?problem=${problem}`, () => `${problem} PROBLEM GENERIC REQUEST FAILED`);
 }
 
 /**
