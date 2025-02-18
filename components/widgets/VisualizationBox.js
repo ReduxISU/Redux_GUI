@@ -98,7 +98,7 @@ export default function VisualizationBox({
     return (
         <>
             <VisualizationLogic
-                defaultSolverMap={defaultSolverMap}
+                chosenSolver={chosenSolver}
                 problemName={problemName}
                 problemNameMap={problemNameMap}
                 problemInstance={problemInstance}

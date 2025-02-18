@@ -17,14 +17,15 @@ import { useContext, useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Stack, OverlayTrigger, Popover } from 'react-bootstrap'
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { Button, Switch } from '@mui/material'
+import { Button, Switch, Radio, RadioGroup, FormControl, IconButton, TextField } from '@mui/material';
+import { SkipPrevious, SkipNext, FastRewind, FastForward } from '@mui/icons-material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { requestProblemGenericInstance, requestReducedInstance, requestSolverSteps } from '../redux';
 import VisualizationBox from '../widgets/VisualizationBox';
 import ProblemSection from '../widgets/ProblemSection';
 
-const CARD = { cardBodyText:"DEFAULT BODY", problemJson: 'DEFAULT' ,  problemInstance:'DEFAULT', cardHeaderText: "Visualize",problemText:"DEFAULT" }
+const CARD = { cardBodyText: "DEFAULT BODY", problemJson: 'DEFAULT', problemInstance: 'DEFAULT', cardHeaderText: "Visualize", problemText: "DEFAULT" }
 const SWITCHES = { switch1: "Highlight solution", switch2: "Highlight gadgets", switch3: "Show reduction" }
 
 export default function VisualizeRowReact({
@@ -36,7 +37,7 @@ export default function VisualizeRowReact({
   chosenReductionType,
   reductionNameMap,
   reducedInstance,
-  defaultSolverMap,
+  chosenSolver,
 }) {
   var visualization;
 
@@ -118,7 +119,6 @@ export default function VisualizeRowReact({
   const [currentStep, setCurrentStep] = useState(0);
   const [allSteps, setAllSteps] = useState([]);
 
-
   const isDisabled = showGadgets || showReduction;
 
   useEffect(() => {
@@ -143,12 +143,12 @@ export default function VisualizeRowReact({
 
   useEffect(() => {
 
-    if(!chosenReductionType){
+    if (!chosenReductionType) {
       setDisableReduction(true);
       setShowReduction(false);
     }
-    else{setDisableReduction(false);}
-    
+    else { setDisableReduction(false); }
+
   }, [chosenReductionType])
 
   useEffect(() => {
@@ -164,7 +164,6 @@ export default function VisualizeRowReact({
       if (steps) setAllSteps(steps);
     });
   }, [problemInstance, chosenSolver]);
-
 
   useEffect(() => {
     if (problemName === "SAT3") {
@@ -243,7 +242,7 @@ export default function VisualizeRowReact({
         break;
     }
   }
-  
+
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText}>
