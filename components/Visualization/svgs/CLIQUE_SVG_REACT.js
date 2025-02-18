@@ -2,6 +2,7 @@ import React from 'react'
 import { getClique } from './Sat3ToCliqueReduction'
 import dynamic from "next/dynamic";
 import { useRef,useState,useEffect,useContext } from 'react';
+import { requestReducedInstance } from '../../redux';
 
 /// SAT3_SVG_React.js
 /// This is a wrapper for the SAT3 visualization instance. It allows us to use the visualization as a react component, and also disables
@@ -125,10 +126,10 @@ function CliqueSvgReact(props) { //props.url, props.reductionName, props.problem
                
             })
         }
-        else if (!props.solveSwitch) {
-            getReducedVisualizationData(props.url, props.reductionType, "reduce", props.problemInstance).then(data => {
+        else if (!props.solveSwitch && props.reductionType) {
+            requestReducedInstance(props.url, props.reductionType, props.problemInstance).then(data => {
                 setJsonData(data.reductionTo.clusterNodes)
-            }).catch((error) => {console.log("CLIQUE_SVG_REACT solver switch off switch faled to fetch data")})
+            }).catch((error) => {console.log("CLIQUE_SVG_REACT solver switch off switch failed to fetch data")})
         }
         
     }, [props.problemInstance,props.solveSwitch, props.solutionData])
@@ -144,24 +145,10 @@ function CliqueSvgReact(props) { //props.url, props.reductionName, props.problem
 )     
 }
 
-
-function getReducedVisualizationData(url, reduction, suffix, instance) {
-
-    if(reduction !== null || reduction !== ''){
-      var fullUrl = `${url}${reduction}/${suffix}?problemInstance=${instance}`;
-        return fetch(fullUrl).then(resp => {
-          if (resp.ok) {
-              return resp.json()
-          }
-      });
-
-    }
-    
-  }
 function getReducedVisualizationDataSolved(url, reduction, suffix, instance, solution) {
-
+    var apiInstance = instance.replaceAll('&', "%26").replaceAll(' ', '');
     if(reduction !== null || reduction !== ''){
-      var fullUrl = `${url}${reduction}/${suffix}?problemInstance=${instance}&solution=${solution}`;
+      var fullUrl = `${url}${reduction}/${suffix}?problemInstance=${apiInstance}&solution=${solution}`;
       return fetch(fullUrl).then(resp => {
         if (resp.ok) {
             return resp.json()

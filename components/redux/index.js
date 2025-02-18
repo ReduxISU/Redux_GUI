@@ -30,11 +30,9 @@ export async function requestMappedSolutionTransitive(url, reductionPath, proble
 }
 
 export async function requestMappedSolution(url, reduction, problemFrom, problemTo, solution) {
-  let preparedFrom = problemFrom.replaceAll("&", "%26");
-  let preparedTo = problemTo.replaceAll("&", "%26");
-
-  return await fetchJson(
-    `${url}${reduction}/mapSolution?problemFrom=${preparedFrom}&problemTo=${preparedTo}&problemFromSolution=${solution}`,
+  return await fetchPostJson(
+    `${url}${reduction}/mapSolution`,
+    {problemFrom: problemFrom, problemTo: problemTo, problemFromSolution: solution},
     () => `${reduction} MAPPED SOLUTION REQUEST FAILED`
   );
 }
@@ -91,10 +89,9 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
     return "Invalid Input"
   }
 
-  var preparedInstance = instance.replaceAll("&", "%26");
-
-  return await fetchJson(
-    `${url}${verifier}/verify?problemInstance=${preparedInstance}&certificate=${certificate}`,
+  return await fetchPostJson(
+    `${url}${verifier}/verify`,
+    {problemInstance: instance, certificate: certificate},
     () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`
   );
 }
@@ -121,10 +118,11 @@ export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver
       return undefined;
     }
 
-    const parsedInstanceSat = instance.replaceAll("&", "%26");
-    const parsedInstanceClique = reduction.reductionTo.instance.replaceAll("&", "%26");
-    const tempUrl = `${url}SipserReduceToCliqueStandard/reverseMappedSolution?problemFrom=${parsedInstanceSat}&problemTo=${parsedInstanceClique}&problemToSolution=${solution}`;
-    const mappedSolution = await fetchJson(tempUrl, "TRANSITIVE SOLVED REQUEST FAILED");
+    const mappedSolution = await fetchPostJson(
+      `${url}SipserReduceToCliqueStandard/reverseMappedSolution`,
+      {problemFrom: instance, problemTo: reduction.reductionTo.instance, problemFromSolution: solution},
+      () => "TRANSITIVE SOLVED REQUEST FAILED"
+    );
 
     return mappedSolution;
   } else {
@@ -137,10 +135,9 @@ export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestSolvedInstance(url, solver, instance) {
-  var preparedInstance = instance.replaceAll("&", "%26");
-
-  return await fetchJson(
-    `${url}${solver}/solve?problemInstance=${preparedInstance}`,
+  return await fetchPostJson(
+    `${url}${solver}/solve`,
+    instance,
     () => `${solver} SOLVED INSTANCE REQUEST FAILED`
   );
 }
@@ -167,10 +164,9 @@ export async function requestReducedInstanceFromPath(url, reductionPath, instanc
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestReducedInstance(url, reduction, instance) {
-  var preparedInstance = instance.replaceAll("&", "%26");
-
-  return await fetchJson(
-    `${url}${reduction}/reduce?problemInstance=${preparedInstance}`,
+  return await fetchPostJson(
+    `${url}${reduction}/reduce`,
+    instance,
     () => `${reduction} REDUCED INSTANCE REQUEST FAILED`
   );
 }
@@ -240,10 +236,9 @@ export async function requestProblems(url) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestProblemGenericInstance(url, problem, instance) {
-  var preparedInstance = instance.replaceAll("&", "%26");
-
-  return await fetchJson(
-    `${url}${problem}Generic/instance?problemInstance=${preparedInstance}`,
+  return await fetchPostJson(
+    `${url}${problem}Generic/instance`,
+    instance,
     () => `${problem} PROBLEM GENERIC INSTANCE REQUEST FAILED`
   );
 }
@@ -264,6 +259,30 @@ export async function requestProblemGeneric(url, problem) {
 async function fetchJson(url, failMsg) {
   try {
     const resp = await fetch(url);
+    if (resp.ok) {
+      return await resp.json();
+    }
+    console.log(`${failMsg()}: ${resp.status} (${resp.statusText})`);
+  } catch (error) {
+    console.log(`${failMsg()}: `, error);
+  }
+  return undefined;
+}
+
+/**
+ * @param failMsg The message that is logged on failure. Message is lazily evaluated.
+ * @returns the JSON format of the fetch request.
+ * @returns `undefined` on failure and logs the error.
+ */
+async function fetchPostJson(url, body, failMsg) {
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8'
+      }
+    });
     if (resp.ok) {
       return await resp.json();
     }

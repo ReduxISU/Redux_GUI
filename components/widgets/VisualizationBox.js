@@ -24,7 +24,7 @@ export default function VisualizationBox({
     problemSolutionData,
     visualizationState,
     url,
-    apiInstance,
+    problemInstance,
   
     problemName,
     problemNameMap,
@@ -99,7 +99,7 @@ export default function VisualizationBox({
                 defaultSolverMap={defaultSolverMap}
                 problemName={problemName}
                 problemNameMap={problemNameMap}
-                problemInstance={apiInstance} //passing a string that replaces and symbols with ascii values.
+                problemInstance={problemInstance}
                 reductionName={chosenReduceTo}
                 reductionType={chosenReductionType}
                 chosenReductionType={chosenReductionType}
