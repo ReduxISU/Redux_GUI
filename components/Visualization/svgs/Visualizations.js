@@ -11,6 +11,7 @@ import WeightedCutSvgReact from "./WeightedCut_SVG_REACT";
 import DirHamiltonianSvgReact from "./DirHamiltonian_SVG_React";
 import TSPSvgReact from "./TSP_SVG_React";
 import NodeSetSvgReact from "./NodeSet_SVG_React";
+import SubgraphIsomorphismSvgReact  from "./SUBGRAPH_ISOMORPHISM_SVG_REACT";
 
 const Visualizations = new Map([
     ["SAT3" , (solve, url, problemInstance, solution) => {
@@ -70,6 +71,15 @@ const Visualizations = new Map([
             <CliqueCoverSvgReact 
                 apiCall={apiCall} 
             ></CliqueCoverSvgReact>
+        )
+    }],
+    // Added - sabal
+    ["SUBGRAPHISOMORPHISM", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("SUBGRAPHISOMORPHISM", solve, url, problemInstance, solution)
+        return(
+            <SubgraphIsomorphismSvgReact 
+                apiCall={apiCall} 
+            ></SubgraphIsomorphismSvgReact>
         )
     }],
     ["GRAPHCOLORING", (solve, url, problemInstance, solution)=>{

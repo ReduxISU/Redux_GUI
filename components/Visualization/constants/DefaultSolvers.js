@@ -8,6 +8,7 @@ const defaultSolvers = new Map([
     ["ARCSET", "ArcSetBruteForce"],
     ["CUT","CutBruteForce"],
     ["CLIQUECOVER","CliqueCoverBruteForce"],
+    ["SUBGRAPHISOMORPHISM","SubgraphIsomorphismBruteForce"],
     ["GRAPHCOLORING","GraphColoringBruteForce"],
     ["HAMILTONIAN","HamiltonianBruteForce"],
     ["STEINERTREE","SteinerTreeBruteForce"],

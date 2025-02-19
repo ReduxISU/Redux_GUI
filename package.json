@@ -25,7 +25,8 @@
     "react": "^18.1.0",
     "react-bootstrap": "^2.4.0",
     "react-dom": "18.1.0",
-    "react-split": "^2.0.14"
+    "react-split": "^2.0.14",
+    "redux-next": "file:"
   },
   "devDependencies": {
     "eslint": "8.16.0",

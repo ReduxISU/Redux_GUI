@@ -22,6 +22,7 @@ import WeightedCutSvgReact from '../Visualization/svgs/WeightedCut_SVG_REACT';
 import DirHamiltonianSvgReact from '../Visualization/svgs/DirHamiltonian_SVG_React';
 import TSPSvgReact from '../Visualization/svgs/TSP_SVG_React';
 import NodeSetSvgReact from '../Visualization/svgs/NodeSet_SVG_React';
+import SubgraphIsomorphismSvgReact from '../Visualization/svgs/SUBGRAPH_ISOMORPHISM_SVG_REACT.JS';
 
 
 export default function VisualizationLogic(props) {
@@ -310,7 +311,7 @@ export default function VisualizationLogic(props) {
 
     //Clique Cover
 
-    else if (problemName == "CLIQUECOVER"){
+    else if (problemName == "CLIQUECOVER"){     
         if(props.url && props.problemInstance){
             requestSolution(props.url,"CliqueCoverBruteForce",props.problemInstance).then(data => {
                 setSolution(data) 
@@ -330,6 +331,31 @@ export default function VisualizationLogic(props) {
                 apiCall={apiCall} 
                 instance={props.problemInstance}
             ></CliqueCoverSvgReact>
+
+        
+    }
+
+    // added sabal
+    else if (problemName == "SUBGRAPHISOMORPHISM"){
+        if(props.url && props.problemInstance){
+            requestSolution(props.url,"SubgraphIsomorphismBruteForce",props.problemInstance).then(data => {
+                setSolution(data) 
+            }).catch((error) => console.log("SOLUTION REQUEST FAILED"))
+        }
+        
+        //solution on
+        if(props.visualizationState.solverOn){
+            apiCall = props.url +"SUBGRAPHISOMORPHISMGeneric/solvedVisualization?problemInstance="+ props.problemInstance+ "&solution=" + solution;
+        }
+        //solution off
+        else{
+            apiCall = props.url +"SUBGRAPHISOMORPHISMGeneric/visualize?problemInstance="+ props.problemInstance;
+        }
+        visualization = 
+            <SubgraphIsomorphismSvgReact 
+                apiCall={apiCall} 
+                instance={props.problemInstance}
+            ></SubgraphIsomorphismSvgReact>
 
         
     }
@@ -568,12 +594,11 @@ export default function VisualizationLogic(props) {
 
 export function requestSolution(url, solver, problemFrom ) {
     let parsedInstance = problemFrom.replaceAll('&', '%26');
-  
-        return fetch(url + solver + '/solve?' + "problemInstance=" + parsedInstance).then(resp => {
-        if (resp.ok) {
-            return resp.json();
-        }
-        }).catch((error) => console.log(error)) 
+    return fetch(url + solver + '/solve?' + "problemInstance=" + parsedInstance).then(resp => {
+    if (resp.ok) {
+        return resp.json();
+    }
+    }).catch((error) => console.log(error)) 
 }
 
 export function requestMappedSolution(url, reduction, problemFrom, problemTo, solution ) {
