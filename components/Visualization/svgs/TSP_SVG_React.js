@@ -36,7 +36,7 @@ function DirectedForceGraph({ w, h, charge, url, solve, problemName, problemInst
 
     initDefinitions(svg);
 
-    const apiCall = solve ? requestVisualization(url, problemName, problemInstance) : requestSolvedVisualization(url, problemName, problemInstance, solution);
+    const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
     apiCall.then(function (data) {
       // Initialize the links
       const link = svg

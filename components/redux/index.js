@@ -256,11 +256,20 @@ export async function requestProblemGenericInstance(url, problem, instance) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestVisualization(url, problem, instance) {
-  // TODO: convert to POST request for problem instance
-  return await fetchJson(
-    `${url}${problem}Generic/visualize?problemInstance=${instance}`,
-    () => `${problem} VISUALIZE REQUEST FAILED`
-  );
+  if (problem === "sipserReduceToVC") {
+    // HACK: handle special case for sipserReduceToVC and use POST request instead of GET
+    var preparedInstance = instance.replaceAll("&", "%26");
+    return await fetchJson(
+      `${url}${problem}Generic/visualize?problemInstance=${preparedInstance}`,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  } else {
+    return await fetchPostJson(
+      `${url}ProblemProvider/visualize?problem=${problem}`,
+      instance,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  }
 }
 
 /**
@@ -269,10 +278,19 @@ export async function requestVisualization(url, problem, instance) {
  */
 export async function requestSolvedVisualization(url, problem, instance, solution) {
   // TODO: convert to POST request for problem instance
-  return await fetchJson(
-    `${url}${problem}Generic/solvedVisualization?problemInstance=${instance}&solution=${solution}`,
-    () => `${problem} VISUALIZE REQUEST FAILED`
-  );
+  var preparedSolution = solution.replaceAll("&", "%26");
+  var preparedInstance = instance.replaceAll("&", "%26");
+  if (problem == "SipserReduceToCliqueStandard") {
+    return await fetchJson(
+      `${url}${problem}/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  } else {
+    return await fetchJson(
+      `${url}${problem}Generic/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  }
 }
 
 /**
