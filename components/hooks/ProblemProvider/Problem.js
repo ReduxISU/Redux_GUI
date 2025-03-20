@@ -18,6 +18,7 @@ export function useProblemInfo(url, problemName) {
   const [problemInfo, setProblemInfo] = useState({});
 
   useEffect(() => {
+    if(!problemName) return;
     (async () => {
       setProblemInfo(problemName ? (await requestInfo(url, problemName)) ?? {} : {});
     })();
@@ -54,7 +55,13 @@ function useProblemName(problemNameMap) {
   const [problemName, setProblemName] = useState("");
 
   useEffect(() => {
-    if (problemNameMap.has(DEFAULT_PROBLEM_NAME)) {
+    const storedData = localStorage.getItem('problemData');
+    
+    if(storedData) {
+      const allData = JSON.parse(storedData);
+      setProblemName(allData.problem);
+    }
+    else if(problemNameMap.has(DEFAULT_PROBLEM_NAME)) {
       setProblemName(DEFAULT_PROBLEM_NAME);
     }
   }, [problemNameMap]);

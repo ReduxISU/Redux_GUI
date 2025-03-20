@@ -1,6 +1,6 @@
 import { useGenericInfo } from "../ProblemProvider";
 import { requestInfo, requestSolvers } from "../../redux";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance) {
   const state = {};
@@ -106,9 +106,25 @@ function useSolverOptions(url, problemName, problemType) {
 
 function useChosenSolver(problemName, defaultSolverMap) {
   const [chosenSolver, setChosenSolver] = useState("");
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    setChosenSolver(!problemName ? "" : defaultSolverMap.get(problemName)); // Gets the file name of default solver
+    if (!problemName || defaultSolverMap.size === 0) return;
+
+    let solverVar = !problemName ? "" : defaultSolverMap.get(problemName);
+    const storedData = localStorage.getItem('problemData');
+
+    if (isFirstRender.current) {
+      // First render: read from localStorage
+      if (storedData) {
+        const allData = JSON.parse(storedData);
+        solverVar = allData.solver;
+      }
+      isFirstRender.current = false;
+    }
+
+    setChosenSolver(solverVar);
+
   }, [problemName, defaultSolverMap]);
 
   return [chosenSolver, setChosenSolver];
