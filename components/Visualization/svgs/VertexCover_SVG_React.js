@@ -6,6 +6,7 @@ import { text } from "d3";
 import { useEffect, useMemo, useRef, useState} from "react";
 import VisColors from '../constants/VisColors';
 import { showSolution } from "./Sat3ToCliqueInstance";
+import {requestVisualization, requestSolvedVisualization} from "../../redux";
 
 function getProblemSolutionData(url, solver, instance) {
   var fullUrl = `${url}${solver}/solve?problemInstance=${instance}`;
@@ -16,7 +17,7 @@ function getProblemSolutionData(url, solver, instance) {
   });
 }
 
-function ForceGraph({ w, h, charge,apiCall,problemInstance,solve,reduceFrom,reduceFromInstance,url,reduceFromData }) {
+function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, solution, reduceFrom, reduceFromInstance, reduceFromData }) {
   const [animatedNodes, setAnimatedNodes] = useState([]);
   const [animatedLinks, setAnimatedLinks] = useState([]);
   const margin = {top: 200, right: 30, bottom: 30, left: 200},
@@ -40,8 +41,8 @@ function ForceGraph({ w, h, charge,apiCall,problemInstance,solve,reduceFrom,redu
     .attr("transform",
         `translate(${margin.left}, ${margin.top})`);
 
-  const problemUrl = apiCall;
-  d3.json(problemUrl).then( function( data) {
+  const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
+  apiCall.then( function( data) {
     // Initialize the links
     const link = svg
       .selectAll("line")
@@ -152,7 +153,7 @@ function ticked() {
     
 }).catch(error => console.log("VERTEX COVER VISUALIZATION FAILED"));
  
-      }, [solve, apiCall])
+      }, [url, solve, problemName, problemInstance, solution])
   return (
     <svg 
         width={width}
@@ -203,13 +204,8 @@ export default function VertexCoverSvgReact(props) {
       w={700} 
       h={700} 
       charge={charge} 
-      apiCall={props.apiCall} 
-      problemInstance = {props.instance}
       solve = {props.solveSwitch}
-      reduceFrom = {props.reduceFrom}
-      reduceFromInstance = {props.reduceFromInstance}
-      reduceFromData = {props.reduceFromData}
-      url = {props.url}
+      {...props}
       />
     </>
   );

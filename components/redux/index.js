@@ -90,7 +90,7 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
   }
 
   return await fetchPostJson(
-    `${url}${verifier}/verify`,
+    `${url}ProblemProvider/verify?verifier=${verifier}`,
     {problemInstance: instance, certificate: certificate},
     () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`
   );
@@ -136,7 +136,7 @@ export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver
  */
 export async function requestSolvedInstance(url, solver, instance) {
   return await fetchPostJson(
-    `${url}${solver}/solve`,
+    `${url}ProblemProvider/solve?solver=${solver}`,
     instance,
     () => `${solver} SOLVED INSTANCE REQUEST FAILED`
   );
@@ -176,6 +176,14 @@ export async function requestReducedInstance(url, reduction, instance) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestInfo(url, apiCall) {
+  return await fetchJson(`${url}ProblemProvider/info?interface=${apiCall}`, () => `${apiCall} INFO REQUEST FAILED`);
+}
+
+/**
+ * @returns information regarding the reduction.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestReductionInfo(url, apiCall) {
   return await fetchJson(`${url}${apiCall}/info`, () => `${apiCall} INFO REQUEST FAILED`);
 }
 
@@ -237,18 +245,52 @@ export async function requestProblems(url) {
  */
 export async function requestProblemGenericInstance(url, problem, instance) {
   return await fetchPostJson(
-    `${url}${problem}Generic/instance`,
+    `${url}ProblemProvider/problemInstance?problem=${problem}`,
     instance,
     () => `${problem} PROBLEM GENERIC INSTANCE REQUEST FAILED`
   );
 }
 
 /**
- * @returns a generic default instance of the problem information.
+ * @returns the graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestProblemGeneric(url, problem) {
-  return await fetchJson(`${url}${problem}Generic`, () => `${problem} GENERIC REQUEST FAILED`);
+export async function requestVisualization(url, problem, instance) {
+  if (problem === "sipserReduceToVC") {
+    // HACK: handle special case for sipserReduceToVC and use POST request instead of GET
+    var preparedInstance = instance.replaceAll("&", "%26");
+    return await fetchJson(
+      `${url}${problem}Generic/visualize?problemInstance=${preparedInstance}`,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  } else {
+    return await fetchPostJson(
+      `${url}ProblemProvider/visualize?problem=${problem}`,
+      instance,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  }
+}
+
+/**
+ * @returns the solved graph visualization of the problem instance.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestSolvedVisualization(url, problem, instance, solution) {
+  // TODO: convert to POST request for problem instance
+  var preparedSolution = solution.replaceAll("&", "%26");
+  var preparedInstance = instance.replaceAll("&", "%26");
+  if (problem == "SipserReduceToCliqueStandard") {
+    return await fetchJson(
+      `${url}${problem}/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  } else {
+    return await fetchJson(
+      `${url}${problem}Generic/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  }
 }
 
 /**
