@@ -11,6 +11,7 @@ import WeightedCutSvgReact from "./WeightedCut_SVG_REACT";
 import DirHamiltonianSvgReact from "./DirHamiltonian_SVG_React";
 import TSPSvgReact from "./TSP_SVG_React";
 import NodeSetSvgReact from "./NodeSet_SVG_React";
+import StandardGraphSvgReact from "./StandardGraph_SVG_React";
 import { requestSolverSteps } from "../../redux";
 
 const Visualizations = new Map([

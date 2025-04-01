@@ -80,7 +80,7 @@ function MainPageContent() {
       <ThemeProvider theme={theme}>
         <ResponsiveAppBar></ResponsiveAppBar>
 
-        <div className="container my-5 ">{ /** This is an artifact from the old bootstrap code, may be deprecated */}
+        <div className="container-fluid">{ /** This is an artifact from the old bootstrap code, may be deprecated */}
           <div className="d-flex flex-column">
 
             <div className="p-2 col-example">
