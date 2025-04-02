@@ -2,7 +2,7 @@ import React from 'react'
 import { getClique } from './Sat3ToCliqueReduction'
 import dynamic from "next/dynamic";
 import { useRef,useState,useEffect,useContext } from 'react';
-import { requestReducedInstance } from '../../redux';
+import { requestReducedInstance, requestSolvedVisualization } from '../../redux';
 
 /// SAT3_SVG_React.js
 /// This is a wrapper for the SAT3 visualization instance. It allows us to use the visualization as a react component, and also disables
@@ -118,7 +118,7 @@ function CliqueSvgReact(props) { //props.url, props.reductionName, props.problem
     const [jsonData, setJsonData] = useState(defaultArr);
     useEffect(() => {
         if (props.solveSwitch) {
-            getReducedVisualizationDataSolved(props.url, props.reductionType, "solvedVisualization", props.problemInstance,props.solutionData).then(data => {
+          requestSolvedVisualization(props.url, props.reductionType, props.problemInstance, props.solutionData).then(data => {
                 setJsonData(data)
                 if (typeof data  === 'undefined') {
                     setJsonData(data2)

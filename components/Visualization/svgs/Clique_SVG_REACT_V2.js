@@ -2,8 +2,9 @@ import { Container } from "@mui/material";
 import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
 import VisColors from '../constants/VisColors';
+import {requestVisualization, requestSolvedVisualization} from "../../redux";
 
-function ForceGraph({ w, h, charge, apiCall, steps, currentStep, problemInstance }) {
+function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, solution, steps, currentStep}) {
   const margin = { top: 200, right: 30, bottom: 30, left: 200 },
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
@@ -20,13 +21,13 @@ function ForceGraph({ w, h, charge, apiCall, steps, currentStep, problemInstance
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    const problemUrl = apiCall;
+    const apiCall = (solve) => solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
 
     // Ensure steps is resolved before using it
     Promise.resolve(steps).then(resolvedSteps => {
       const fetchData = currentStep >= 1 && currentStep <= resolvedSteps.length
         ? Promise.resolve(resolvedSteps[currentStep - 1])
-        : d3.json(problemUrl);
+        : apiCall(solve);
 
       fetchData.then(function (data) {
         // Clear previous elements
@@ -113,7 +114,7 @@ function ForceGraph({ w, h, charge, apiCall, steps, currentStep, problemInstance
         }
       }).catch(error => console.error("Error fetching data:", error));
     }).catch(error => console.error("Error resolving steps:", error));
-  }, [apiCall, currentStep, steps]);
+  }, [url, solve, problemInstance, currentStep, steps]);
 
   return (
     <svg
@@ -145,6 +146,7 @@ export default function CliqueSvgReactV2(props) {
         steps={props.problemSteps}
         currentStep={props.currentStep}
         problemInstance={props.instance}
+        {...props}
       />
     </Container>
   );
