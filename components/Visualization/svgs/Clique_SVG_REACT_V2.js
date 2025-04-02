@@ -6,9 +6,10 @@ import * as d3 from "d3";
 import { text } from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
 import VisColors from '../constants/VisColors';
+import {requestVisualization, requestSolvedVisualization} from "../../redux";
 
 
-function ForceGraph({ w, h, charge,apiCall,problemInstance }) {
+function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, solution }) {
 
 
     const margin = {top: 200, right: 30, bottom: 30, left: 200},
@@ -30,8 +31,9 @@ function ForceGraph({ w, h, charge,apiCall,problemInstance }) {
         .attr("viewBox", "0 0 600 400")
         .append("g")
         .attr("transform",`translate(${margin.left}, ${margin.top})`);
-      const problemUrl = apiCall;
-      d3.json(problemUrl).then(function (data) {
+
+      const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
+      apiCall.then(function (data) {
 
 // Initialize the links
       const link = svg
@@ -141,7 +143,7 @@ function ticked() {
     
 }).catch(error => {return error});
  
-      }, [apiCall])
+      }, [solve, problemName, problemInstance, solution])
       return (
           <svg 
               width={width}
@@ -174,7 +176,7 @@ export default function CliqueSvgReactV2(props) {
         value={charge}
         onChange={(e) => setCharge(e.target.value)}
       /> */}
-     <ForceGraph w={700} h={700} charge={charge} apiCall={props.apiCall} problemInstance ={props.instance}  />
+     <ForceGraph w={700} h={700} charge={charge} {...props}  />
     </Container>
   );
 }

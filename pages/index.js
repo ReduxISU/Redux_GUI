@@ -23,7 +23,7 @@ import { useProblemProvider } from '../components/hooks/ProblemProvider'
 import { useEffect, memo } from 'react';
 import { useUnload } from '../components/eventHandlers/handleUnload';
 import ShareButton from '../components/widgets/ShareButton';
-import { handleParameters } from '../components/eventHandlers/handleParameters';
+import { useHandleParameters } from '../components/eventHandlers/handleParameters';
 
 const ProblemRowMemo = memo(ProblemRowReact);
 const ReduceToRowMemo = memo(ReduceToRowReact);
@@ -69,7 +69,7 @@ function MainPageContent() {
     // }
   });
 
-  handleParameters();
+  useHandleParameters();
 
   const { problem, solver, verifier, reducer } = useProblemProvider(reduxBaseUrl);
 

@@ -1,4 +1,4 @@
-import { requestProblems, requestProblemGeneric } from "../../redux";
+import { requestProblems, requestInfo } from "../../redux";
 import React, { useEffect, useState } from "react";
 
 // For initial startup defaults
@@ -20,7 +20,7 @@ export function useProblemInfo(url, problemName) {
   useEffect(() => {
     if(!problemName) return;
     (async () => {
-      setProblemInfo(problemName ? (await requestProblemGeneric(url, problemName)) ?? {} : {});
+      setProblemInfo(problemName ? (await requestInfo(url, problemName)) ?? {} : {});
     })();
   }, [problemName]);
 
@@ -40,7 +40,7 @@ function useProblemInfoMap(url) {
   async function requestProblemInfoMap(url, problems) {
     let map = new Map();
     for (const problem of problems) {
-      const info = await requestProblemGeneric(url, problem);
+      const info = await requestInfo(url, problem);
       if (info) {
         map.set(problem, info);
       }
