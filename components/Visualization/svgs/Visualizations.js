@@ -11,6 +11,8 @@ import WeightedCutSvgReact from "./WeightedCut_SVG_REACT";
 import DirHamiltonianSvgReact from "./DirHamiltonian_SVG_React";
 import TSPSvgReact from "./TSP_SVG_React";
 import NodeSetSvgReact from "./NodeSet_SVG_React";
+import StandardGraphSvgReact from "./StandardGraph_SVG_React";
+import { requestSolverSteps } from "../../redux";
 
 import { requestVisualization, requestSolvedVisualization } from "../../redux";
 
@@ -27,10 +29,12 @@ const Visualizations = new Map([
             ></SAT3_SVG_React>  
         )
     }],
-    ["CLIQUE", (solve, url, problemInstance, solution)=>{
+    ["CLIQUE", (solve, url, problemInstance, solution, currentStep, allSteps)=>{
         return(
         <CliqueSvgReactV2 
             problemName={"CLIQUE"}
+            problemSteps={allSteps}
+            currentStep={currentStep}
             solve={solve}
             url={url}
             problemInstance={problemInstance}
@@ -171,5 +175,9 @@ const Visualizations = new Map([
         )
     }],
 ])
+
+function getSteps(url, solver, problemInstance) {
+    return requestSolverSteps(url, solver, problemInstance);
+}
 
 export default Visualizations;

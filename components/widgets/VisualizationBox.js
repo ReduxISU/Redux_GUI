@@ -32,7 +32,9 @@ export default function VisualizationBox({
     chosenReductionType,
     reductionNameMap,
     reducedInstance,
-    defaultSolverMap,
+    chosenSolver,
+    currentStep,
+    allSteps,
   }) {
 
 
@@ -96,7 +98,7 @@ export default function VisualizationBox({
     return (
         <>
             <VisualizationLogic
-                defaultSolverMap={defaultSolverMap}
+                chosenSolver={chosenSolver}
                 problemName={problemName}
                 problemNameMap={problemNameMap}
                 problemInstance={problemInstance}
@@ -111,6 +113,8 @@ export default function VisualizationBox({
                 reducedVisualizationData={reducedVisualizationData}
                 problemVisualizationData={problemVisualizationData}
                 visualizationState={visualizationState}
+                currentStep={currentStep}
+                allSteps={allSteps}
             // solverOn={true}
             // reductionOn={reduceToggled}
             // gadgetsOn={false}

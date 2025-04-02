@@ -17,14 +17,15 @@ import { useContext, useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Stack, OverlayTrigger, Popover } from 'react-bootstrap'
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { Button, Switch } from '@mui/material'
+import { Button, Switch, Radio, RadioGroup, FormControl, IconButton, TextField } from '@mui/material';
+import { SkipPrevious, SkipNext, FastRewind, FastForward } from '@mui/icons-material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
-import { requestProblemGenericInstance, requestReducedInstance } from '../redux';
+import { requestProblemGenericInstance, requestReducedInstance, requestSolverSteps } from '../redux';
 import VisualizationBox from '../widgets/VisualizationBox';
 import ProblemSection from '../widgets/ProblemSection';
 
-const CARD = { cardBodyText:"DEFAULT BODY", problemJson: 'DEFAULT' ,  problemInstance:'DEFAULT', cardHeaderText: "Visualize",problemText:"DEFAULT" }
+const CARD = { cardBodyText: "DEFAULT BODY", problemJson: 'DEFAULT', problemInstance: 'DEFAULT', cardHeaderText: "Visualize", problemText: "DEFAULT" }
 const SWITCHES = { switch1: "Highlight solution", switch2: "Highlight gadgets", switch3: "Show reduction" }
 
 export default function VisualizeRowReact({
@@ -36,7 +37,7 @@ export default function VisualizeRowReact({
   chosenReductionType,
   reductionNameMap,
   reducedInstance,
-  defaultSolverMap,
+  chosenSolver,
 }) {
   var visualization;
 
@@ -115,10 +116,10 @@ export default function VisualizeRowReact({
   const [problemVisualizationData, setProblemVisualizationData] = useState(defaultSat3VisualizationArr);
   const [reducedVisualizationData, setReducedVisualizationData] = useState(defaultCLIQUEVisualizationArr);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [allSteps, setAllSteps] = useState([]);
 
-
-
-
+  const isDisabled = showGadgets || showReduction;
 
   useEffect(() => {
     if (svgIsLoading) {
@@ -127,7 +128,12 @@ export default function VisualizeRowReact({
   }, [svgIsLoading])
 
 
-
+  useEffect(() => {
+    // Reset allSteps when problemInstance or problemName changes
+    setAllSteps([]);
+    setCurrentStep(0);
+    setShowSolution(false);
+  }, [problemInstance, problemName, chosenSolver]);
 
   useEffect(() => {
     (problemName !== '' && problemName !== null) ? setDisableSolution(false) : setDisableSolution(true);
@@ -137,18 +143,27 @@ export default function VisualizeRowReact({
 
   useEffect(() => {
 
-    if(!chosenReductionType){
+    if (!chosenReductionType) {
       setDisableReduction(true);
       setShowReduction(false);
     }
-    else{setDisableReduction(false);}
-    
+    else { setDisableReduction(false); }
+
   }, [chosenReductionType])
 
   useEffect(() => {
-    // (showReduction === true) ? setDisableGadget(false) : setDisableGadget(true);
-   
-  }, [showReduction])
+    if (currentStep === allSteps.length + 1) {
+      setShowSolution(true);
+    } else {
+      setShowSolution(false);
+    }
+  }, [currentStep, allSteps.length]);
+
+  useEffect(() => {
+    requestSolverSteps(url, chosenSolver, problemInstance).then(steps => {
+      if (steps) setAllSteps(steps);
+    });
+  }, [problemInstance, chosenSolver]);
 
   useEffect(() => {
     if (problemName === "SAT3") {
@@ -171,6 +186,8 @@ export default function VisualizeRowReact({
   function handleSwitch1Change(e) { // solution switch
     setShowSolution(e.target.checked);
     setShowGadgets(false);
+    if (e.target.checked) setCurrentStep(allSteps.length + 1);
+    else setCurrentStep(0);
   }
 
   function handleSwitch2Change(e) { //gadget switch.
@@ -178,11 +195,12 @@ export default function VisualizeRowReact({
     // setShowGadgets(false);
     setShowGadgets(e.target.checked);
     setShowSolution(false);
+    setCurrentStep(0);
   }
 
   function handleSwitch3Change(e) { //Reduction Switch
     setShowReduction(e.target.checked);
-
+    setCurrentStep(0);
 
     // if (!e.target.checked) {
     //   setDisableGadget(true);
@@ -193,16 +211,36 @@ export default function VisualizeRowReact({
   }
 
   function handleRefreshButton(e) {
-    setSvgIsLoading(true)
+    setSvgIsLoading(true);
     setShowSolution(false);
     setShowGadgets(false);
     setShowReduction(false);
+    setCurrentStep(0);
   }
 
   const logicProps = {
     solverOn: showSolution,
     reductionOn: showReduction,
     gadgetsOn: showGadgets,
+  }
+
+  function handleRadioChange(value) {
+    switch (value) {
+      case 'start':
+        setCurrentStep(0);
+        break;
+      case 'back':
+        setCurrentStep(prev => Math.max(prev - 1, 0));
+        break;
+      case 'forward':
+        setCurrentStep(prev => Math.min(prev + 1, allSteps.length + 1));
+        break;
+      case 'end':
+        setCurrentStep(allSteps.length + 1);
+        break;
+      default:
+        break;
+    }
   }
 
   return (
@@ -218,6 +256,59 @@ export default function VisualizeRowReact({
             Refresh
           </Button>
         </div>
+
+        <OverlayTrigger
+        placement="bottom"
+        overlay={
+          isDisabled ? (
+            <Popover id="popover-basic">
+              <Popover.Body>{"Radio buttons and text box are disabled when gadgets or reduction is on."}</Popover.Body>
+            </Popover>
+          ) : <></>
+        }
+      >
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton onClick={() => handleRadioChange('start')} disabled={isDisabled}>
+            <FastRewind />
+          </IconButton>
+          <IconButton onClick={() => handleRadioChange('back')} disabled={isDisabled}>
+            <SkipPrevious />
+          </IconButton>
+          <TextField
+            type="number"
+            variant="filled"
+            value={currentStep}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === '') {
+                setCurrentStep(''); // Allow the text box to be empty
+              } else {
+                const numValue = Number(value);
+                if (numValue >= 0 && numValue <= allSteps.length + 1) {
+                  setCurrentStep(numValue);
+                }
+              }
+            }}
+            inputProps={{
+              min: 0,
+              max: allSteps.length + 1,
+              onInput: (e) => {
+                const value = e.target.value;
+                if (value < 0 || value > allSteps.length + 1) e.target.value = currentStep; // Reset to currentStep if out of range
+              }
+            }}
+            className="no-spinner"
+            style={{ width: '70px' }}
+            disabled={isDisabled}
+          />
+          <IconButton onClick={() => handleRadioChange('forward')} disabled={isDisabled}>
+            <SkipNext />
+          </IconButton>
+          <IconButton onClick={() => handleRadioChange('end')} disabled={isDisabled}>
+            <FastForward />
+          </IconButton>
+        </div>
+      </OverlayTrigger>
 
         <Stack
           style={{ width: "100%", flexDirection: "row-reverse" }}
@@ -288,7 +379,9 @@ export default function VisualizeRowReact({
           chosenReductionType={chosenReductionType}
           reductionNameMap={reductionNameMap}
           reducedInstance={reducedInstance}
-          defaultSolverMap={defaultSolverMap}
+          chosenSolver={chosenSolver}
+          currentStep={currentStep}
+          allSteps={allSteps}
         ></VisualizationBox>
         {/* <VisualizationLogic
                props={logicProps}>

@@ -80,7 +80,7 @@ function MainPageContent() {
       <ThemeProvider theme={theme}>
         <ResponsiveAppBar></ResponsiveAppBar>
 
-        <div className="container my-5 ">{ /** This is an artifact from the old bootstrap code, may be deprecated */}
+        <div className="container-fluid">{ /** This is an artifact from the old bootstrap code, may be deprecated */}
           <div className="d-flex flex-column">
 
             <div className="p-2 col-example">
@@ -96,7 +96,7 @@ function MainPageContent() {
             </div>
 
             <div className="p-2 col-example">
-              <VisualizeRowMemo url={reduxBaseUrl} {...problem} {...reducer} defaultSolverMap={solver.defaultSolverMap} />
+              <VisualizeRowMemo url={reduxBaseUrl} {...problem} {...reducer} chosenSolver={solver.chosenSolver} />
             </div>
 
             <div className="p-2 col-example">
