@@ -246,9 +246,9 @@ export default function VisualizeRowReact({
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText}>
-        <div>
+        <div style={{display: "flex",  alignItems: "center",  }}>
           <Button
-            style={{ backgroundColor: "#43a047" }}
+            style={{backgroundColor: "#43a047"}}
             variant="outlined"
             startIcon={<RefreshIcon />}
             onClick={handleRefreshButton}

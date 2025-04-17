@@ -11,9 +11,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Stack } from '@mui/material'
+import { Stack, Box, Button } from '@mui/material'
 import TextField from '@mui/material/TextField';
-import { Button } from "@mui/material";
 import FolderIcon from '@mui/icons-material/Folder';
 import DownloadIcon from '@mui/icons-material/Download';
 
@@ -149,7 +148,14 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
 
   return (
     <ProblemSection defaultCollapsed={false}>
-      <ProblemSection.Header title={CARD.cardHeaderText}>
+      <ProblemSection.Header sx={{
+        border: '5px solid red', // testing
+        backgroundColor: 'yellow', // obvious
+        height: '150px', // large height
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }} title={CARD.cardHeaderText}>
         <SearchBarExtensible
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={problemName}
@@ -178,7 +184,9 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
 
       <ProblemSection.Body>
         <Stack direction="row" gap={1}>
-          {CARD.cardBodyText}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+            {CARD.cardBodyText}
+          </Box>
           {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
           <TextField
             error={!instanceParsed.test}
