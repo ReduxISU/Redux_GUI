@@ -6,18 +6,31 @@
 /**
  * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
  */
-export async function requestMappedSolutionTransitive(url, reductionPath, problemInstance, solution) {
+export async function requestMappedSolutionTransitive(
+  url,
+  reductionPath,
+  problemInstance,
+  solution
+) {
   let problemFrom = problemInstance;
   let mappedSolution = solution;
   for (const reduction of reductionPath.split("-")) {
     const reduced = await requestReducedInstance(url, reduction, problemFrom);
     if (!reduced) {
-      console.log(`${reductionPath} AT ${reduction} REDUCTION FOR SOLUTION MAPPING REQUEST FAILED`);
+      console.log(
+        `${reductionPath} AT ${reduction} REDUCTION FOR SOLUTION MAPPING REQUEST FAILED`
+      );
       break;
     }
     const problemTo = reduced.reductionTo.instance;
 
-    const solution = await requestMappedSolution(url, reduction, problemFrom, problemTo, mappedSolution);
+    const solution = await requestMappedSolution(
+      url,
+      reduction,
+      problemFrom,
+      problemTo,
+      mappedSolution
+    );
     if (!solution) {
       console.log("SOLUTION MAPPING REQUEST FAILED");
       break;
@@ -29,7 +42,13 @@ export async function requestMappedSolutionTransitive(url, reductionPath, proble
   return mappedSolution;
 }
 
-export async function requestMappedSolution(url, reduction, problemFrom, problemTo, solution) {
+export async function requestMappedSolution(
+  url,
+  reduction,
+  problemFrom,
+  problemTo,
+  solution
+) {
   let preparedFrom = problemFrom.replaceAll("&", "%26");
   let preparedTo = problemTo.replaceAll("&", "%26");
 
@@ -71,8 +90,14 @@ function isCertificateValid(problem, certificate) {
           return false;
         } else {
           // Replace True/true/t with T and False/false/f with F
-          singleClause[1] = singleClause[1].replace(new RegExp(/^false$|^False$|^f$/g), "F");
-          singleClause[1] = singleClause[1].replace(new RegExp(/^True$|^true$|^t$/g), "T");
+          singleClause[1] = singleClause[1].replace(
+            new RegExp(/^false$|^False$|^f$/g),
+            "F"
+          );
+          singleClause[1] = singleClause[1].replace(
+            new RegExp(/^True$|^true$|^t$/g),
+            "T"
+          );
           validUserInput = true; // valid input
         }
       });
@@ -85,10 +110,16 @@ function isCertificateValid(problem, certificate) {
  * @returns the verified `instance` results from the specified `verifier`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVerifiedInstance(url, problem, verifier, instance, certificate) {
+export async function requestVerifiedInstance(
+  url,
+  problem,
+  verifier,
+  instance,
+  certificate
+) {
   // Temporary solution until certificate validation is moved to the Redux API
   if (!isCertificateValid(problem, certificate)) {
-    return "Invalid Input"
+    return "Invalid Input";
   }
 
   var preparedInstance = instance.replaceAll("&", "%26");
@@ -106,25 +137,43 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
  * @returns the solved `instance` from the specified `solver`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver, instance) {
+export async function requestSolvedInstanceTemporarySat3CliqueSolver(
+  url,
+  solver,
+  instance
+) {
   // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
   // remove first if once this functionality is added for all problems, the else code block was the original
   // functionality
   if (solver == "CliqueBruteForce - via SipserReduceToCliqueStandard") {
-    const reduction = await requestReducedInstance(url, "SipserReduceToCliqueStandard", instance);
+    const reduction = await requestReducedInstance(
+      url,
+      "SipserReduceToCliqueStandard",
+      instance
+    );
     if (!reduction) {
       return undefined;
     }
 
-    const solution = await requestSolvedInstance(url, "CliqueBruteForce", reduction.reductionTo.instance);
+    const solution = await requestSolvedInstance(
+      url,
+      "CliqueBruteForce",
+      reduction.reductionTo.instance
+    );
     if (!solution) {
       return undefined;
     }
 
     const parsedInstanceSat = instance.replaceAll("&", "%26");
-    const parsedInstanceClique = reduction.reductionTo.instance.replaceAll("&", "%26");
+    const parsedInstanceClique = reduction.reductionTo.instance.replaceAll(
+      "&",
+      "%26"
+    );
     const tempUrl = `${url}SipserReduceToCliqueStandard/reverseMappedSolution?problemFrom=${parsedInstanceSat}&problemTo=${parsedInstanceClique}&problemToSolution=${solution}`;
-    const mappedSolution = await fetchJson(tempUrl, "TRANSITIVE SOLVED REQUEST FAILED");
+    const mappedSolution = await fetchJson(
+      tempUrl,
+      "TRANSITIVE SOLVED REQUEST FAILED"
+    );
 
     return mappedSolution;
   } else {
@@ -150,11 +199,17 @@ export async function requestSolvedInstance(url, solver, instance) {
  * @returns the reduced `instance` list of reductions, the reduction path.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReducedInstanceFromPath(url, reductionPath, instance) {
+export async function requestReducedInstanceFromPath(
+  url,
+  reductionPath,
+  instance
+) {
   for (const path of reductionPath.split("-")) {
     const reducedInst = await requestReducedInstance(url, path, instance);
     if (!reducedInst) {
-      console.log(`${reductionPath} AT ${path} REDUCED INSTANCE FROM PATH REQUEST FAILED`);
+      console.log(
+        `${reductionPath} AT ${path} REDUCED INSTANCE FROM PATH REQUEST FAILED`
+      );
       return instance;
     }
     instance = reducedInst.reductionTo.instance;
@@ -180,7 +235,10 @@ export async function requestReducedInstance(url, reduction, instance) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestInfo(url, apiCall) {
-  return await fetchJson(`${url}${apiCall}/info`, () => `${apiCall} INFO REQUEST FAILED`);
+  return await fetchJson(
+    `${url}${apiCall}/info`,
+    () => `${apiCall} INFO REQUEST FAILED`
+  );
 }
 
 /**
@@ -209,7 +267,12 @@ export async function requestSolvers(url, problem, problemType = "NPC") {
  * @returns an array of arrays of reductions implemented for reducing a problem to another problem.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductions(url, problemFrom, problemTo, problemType = "NPC") {
+export async function requestReductions(
+  url,
+  problemFrom,
+  problemTo,
+  problemType = "NPC"
+) {
   return await fetchJson(
     `${url}Navigation/NPC_NavGraph/reductionPath/?reducingFrom=${problemFrom}&reducingTo=${problemTo}&problemType=${problemType}`,
     () => `${problemFrom} TO ${problemTo} REDUCTIONS REQUEST FAILED`
@@ -220,7 +283,11 @@ export async function requestReductions(url, problemFrom, problemTo, problemType
  * @returns an array of problems that have implemented reductions from `problem`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductionOptions(url, problem, problemType = "NPC") {
+export async function requestReductionOptions(
+  url,
+  problem,
+  problemType = "NPC"
+) {
   return await fetchJson(
     `${url}Navigation/NPC_NavGraph/availableReductions/?chosenProblem=${problem}&problemType=${problemType}`,
     () => `${problem} REDUCTION OPTIONS REQUEST FAILED`
@@ -232,7 +299,10 @@ export async function requestReductionOptions(url, problem, problemType = "NPC")
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestProblems(url) {
-  return await fetchJson(`${url}navigation/NPC_ProblemsRefactor/`, () => `PROBLEMS REQUEST FAILED`);
+  return await fetchJson(
+    `${url}navigation/NPC_ProblemsRefactor/`,
+    () => `PROBLEMS REQUEST FAILED`
+  );
 }
 
 /**
@@ -253,7 +323,10 @@ export async function requestProblemGenericInstance(url, problem, instance) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestProblemGeneric(url, problem) {
-  return await fetchJson(`${url}${problem}Generic`, () => `${problem} GENERIC REQUEST FAILED`);
+  return await fetchJson(
+    `${url}${problem}Generic`,
+    () => `${problem} GENERIC REQUEST FAILED`
+  );
 }
 
 /**

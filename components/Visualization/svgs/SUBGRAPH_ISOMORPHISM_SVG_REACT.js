@@ -214,7 +214,6 @@ function ForceGraph({ w, h, charge, apiCall, problemInstance }) {
 
 export default function SubgraphIsomorphismSvgReact(props) {
     const [charge, setCharge] = useState(-150);
-    console.log("Props ", props)
     return (
         <Container>
 

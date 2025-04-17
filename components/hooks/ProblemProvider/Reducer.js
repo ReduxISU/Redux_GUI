@@ -167,8 +167,7 @@ function useChosenReductionType(
       reductionTypeOptions.includes(DEFAULT_VERTEXCOVER_CHOSEN_REDUCTION_TYPE)
     ) {
       setChosenReductionType(DEFAULT_VERTEXCOVER_CHOSEN_REDUCTION_TYPE);
-    }
-    else {
+    } else {
       setChosenReductionType(
         !reductionTypeOptions.length ? "" : reductionTypeOptions[0]
       );

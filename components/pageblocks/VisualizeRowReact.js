@@ -1,31 +1,43 @@
 /**
  * VisualizeRowReact.js
- * 
+ *
  * This component does the real grunt work of the VerifyRowReact component. It uses passed in props to style and provide default text for its objects,
  * uses many of the global state values and has a variety of listeners and API calls.
- * 
+ *
  * The actual visualization logic is handled by imported Visualization components.
- * 
+ *
  * Essentialy, this is the brains of the VisualizeRowReact.js component and deals with the GUI's Visualize "Row"
- * 
+ *
  * @author Alex Diviney, Daniel Igbokwe
  */
 
+import React from "react";
+import { useContext, useState, useEffect } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Stack, OverlayTrigger, Popover } from "react-bootstrap";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { Button, Switch } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
-import React from 'react'
-import { useContext, useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { Stack, OverlayTrigger, Popover } from 'react-bootstrap'
-import FormControlLabel from '@mui/material/FormControlLabel';
-import { Button, Switch } from '@mui/material'
-import RefreshIcon from '@mui/icons-material/Refresh';
+import {
+  requestProblemGenericInstance,
+  requestReducedInstance,
+} from "../redux";
+import VisualizationBox from "../widgets/VisualizationBox";
+import ProblemSection from "../widgets/ProblemSection";
 
-import { requestProblemGenericInstance, requestReducedInstance } from '../redux';
-import VisualizationBox from '../widgets/VisualizationBox';
-import ProblemSection from '../widgets/ProblemSection';
-
-const CARD = { cardBodyText:"DEFAULT BODY", problemJson: 'DEFAULT' ,  problemInstance:'DEFAULT', cardHeaderText: "Visualize",problemText:"DEFAULT" }
-const SWITCHES = { switch1: "Highlight solution", switch2: "Highlight gadgets", switch3: "Show reduction" }
+const CARD = {
+  cardBodyText: "DEFAULT BODY",
+  problemJson: "DEFAULT",
+  problemInstance: "DEFAULT",
+  cardHeaderText: "Visualize",
+  problemText: "DEFAULT",
+};
+const SWITCHES = {
+  switch1: "Highlight solution",
+  switch2: "Highlight gadgets",
+  switch3: "Show reduction",
+};
 
 export default function VisualizeRowReact({
   url,
@@ -40,70 +52,52 @@ export default function VisualizeRowReact({
 }) {
   var visualization;
 
-
-
-
   const defaultSat3VisualizationArr = [
-    [
-      "x1",
-      "!x2",
-      "x3"
-    ],
-    [
-      "!x1",
-      "x3",
-      "x1"
-    ],
-    [
-      "x2",
-      "!x3",
-      "x1"
-    ],
-  ]
+    ["x1", "!x2", "x3"],
+    ["!x1", "x3", "x1"],
+    ["x2", "!x3", "x1"],
+  ];
 
-  const defaultSat3SolutionArr = ["x1"]
-
+  const defaultSat3SolutionArr = ["x1"];
 
   var defaultCLIQUEVisualizationArr = [
     {
-      "name": "x1",
-      "cluster": "0"
+      name: "x1",
+      cluster: "0",
     },
     {
-      "name": "!x2",
-      "cluster": "0"
+      name: "!x2",
+      cluster: "0",
     },
     {
-      "name": "x3",
-      "cluster": "0"
+      name: "x3",
+      cluster: "0",
     },
     {
-      "name": "!x1",
-      "cluster": "1"
+      name: "!x1",
+      cluster: "1",
     },
     {
-      "name": "x3",
-      "cluster": "1"
+      name: "x3",
+      cluster: "1",
     },
     {
-      "name": "x1",
-      "cluster": "1"
+      name: "x1",
+      cluster: "1",
     },
     {
-      "name": "x2",
-      "cluster": "2"
+      name: "x2",
+      cluster: "2",
     },
     {
-      "name": "!x3",
-      "cluster": "2"
+      name: "!x3",
+      cluster: "2",
     },
     {
-      "name": "x1",
-      "cluster": "2"
+      name: "x1",
+      cluster: "2",
     },
-
   ];
-
 
   const [showSolution, setShowSolution] = useState(false);
   const [showGadgets, setShowGadgets] = useState(false);
@@ -112,89 +106,97 @@ export default function VisualizeRowReact({
   const [disableSolution, setDisableSolution] = useState(true);
   const [disableReduction, setDisableReduction] = useState(chosenReductionType);
 
-  const [problemVisualizationData, setProblemVisualizationData] = useState(defaultSat3VisualizationArr);
-  const [reducedVisualizationData, setReducedVisualizationData] = useState(defaultCLIQUEVisualizationArr);
+  const [problemVisualizationData, setProblemVisualizationData] = useState(
+    defaultSat3VisualizationArr
+  );
+  const [reducedVisualizationData, setReducedVisualizationData] = useState(
+    defaultCLIQUEVisualizationArr
+  );
   const [svgIsLoading, setSvgIsLoading] = useState(false);
 
-  let apiCompatibleInstance = problemInstance.replaceAll('&', "%26").replaceAll(' ', '');
-
-
-
+  let apiCompatibleInstance = problemInstance
+    .replaceAll("&", "%26")
+    .replaceAll(" ", "");
 
   useEffect(() => {
     if (svgIsLoading) {
       setSvgIsLoading(false);
     }
-  }, [svgIsLoading])
-
-
-
+  }, [svgIsLoading]);
 
   useEffect(() => {
-    (problemName !== '' && problemName !== null) ? setDisableSolution(false) : setDisableSolution(true);
-    (chosenReduceTo !== '' && chosenReduceTo !== null) ? setDisableReduction(false) : setDisableReduction(true);
-    (problemName === 'SAT3' && chosenReduceTo === 'CLIQUE') ? setShowReduction(true) : setShowReduction(false);
+    problemName !== "" && problemName !== null
+      ? setDisableSolution(false)
+      : setDisableSolution(true);
+    chosenReduceTo !== "" && chosenReduceTo !== null
+      ? setDisableReduction(false)
+      : setDisableReduction(true);
+    problemName === "SAT3" && chosenReduceTo === "CLIQUE"
+      ? setShowReduction(true)
+      : setShowReduction(false);
   }, [problemName, chosenReduceTo]);
 
   useEffect(() => {
-
-    if(!chosenReductionType){
+    if (!chosenReductionType) {
       setDisableReduction(true);
       setShowReduction(false);
+    } else {
+      setDisableReduction(false);
     }
-    else{setDisableReduction(false);}
-    
-  }, [chosenReductionType])
+  }, [chosenReductionType]);
 
   useEffect(() => {
     // (showReduction === true) ? setDisableGadget(false) : setDisableGadget(true);
-   
-  }, [showReduction])
+  }, [showReduction]);
 
   useEffect(() => {
     if (problemName === "SAT3") {
-      requestProblemGenericInstance(url, problemName, problemInstance).then(data => {
-        if (data) {
-          setProblemVisualizationData(data.clauses);
-        }
-      });
-      if (chosenReductionType) {
-        requestReducedInstance(url, chosenReductionType, problemInstance).then(data => {
+      requestProblemGenericInstance(url, problemName, problemInstance).then(
+        (data) => {
           if (data) {
-            setReducedVisualizationData(data.reductionTo.clusterNodes);
+            setProblemVisualizationData(data.clauses);
           }
-        });
+        }
+      );
+      if (chosenReductionType) {
+        requestReducedInstance(url, chosenReductionType, problemInstance).then(
+          (data) => {
+            if (data) {
+              setReducedVisualizationData(data.reductionTo.clusterNodes);
+            }
+          }
+        );
       }
     }
   }, [problemInstance]);
 
-
-  function handleSwitch1Change(e) { // solution switch
+  function handleSwitch1Change(e) {
+    // solution switch
     setShowSolution(e.target.checked);
     setShowGadgets(false);
   }
 
-  function handleSwitch2Change(e) { //gadget switch.
+  function handleSwitch2Change(e) {
+    //gadget switch.
     // setShowGadgets(true);
     // setShowGadgets(false);
     setShowGadgets(e.target.checked);
     setShowSolution(false);
   }
 
-  function handleSwitch3Change(e) { //Reduction Switch
+  function handleSwitch3Change(e) {
+    //Reduction Switch
     setShowReduction(e.target.checked);
-
 
     // if (!e.target.checked) {
     //   setDisableGadget(true);
     // } else {
     //   setDisableGadget(false);
     // }
-
   }
 
   function handleRefreshButton(e) {
-    setSvgIsLoading(true)
+    setSvgIsLoading(true);
     setShowSolution(false);
     setShowGadgets(false);
     setShowReduction(false);
@@ -204,7 +206,7 @@ export default function VisualizeRowReact({
     solverOn: showSolution,
     reductionOn: showReduction,
     gadgetsOn: showGadgets,
-  }
+  };
 
   return (
     <ProblemSection defaultCollapsed={false}>
@@ -282,7 +284,6 @@ export default function VisualizeRowReact({
           problemSolutionData={defaultSat3SolutionArr}
           visualizationState={logicProps}
           url={url}
-
           problemName={problemName}
           problemNameMap={problemNameMap}
           chosenReduceTo={chosenReduceTo}
