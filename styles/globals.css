@@ -22,12 +22,35 @@ a {
 .toggleButton{
   text-align: right;
 }
+
 .submitButton{
-  text-align:right;
-  
+  display: flex;
+  gap: 10px; 
+  justify-content: flex-end;
 }
+
+.fixed-button {
+  height: 42.25px;
+  align-self: flex-start;
+}
+
+.corner-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000; /* Ensure it appears above other elements */
+}
+
 .centerImage{
   text-align: center;
+}
+
+.hide-scrollbar textarea::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome, Safari, and Opera */
+}
+.hide-scrollbar textarea {
+  -ms-overflow-style: none;  /* Hide scrollbar for Internet Explorer and Edge */
+  scrollbar-width: none;  /* Hide scrollbar for Firefox */
 }
 
 

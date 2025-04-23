@@ -8,11 +8,14 @@
  * @author Alex Diviney
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Stack } from '@mui/material'
 import TextField from '@mui/material/TextField';
+import { Button } from "@mui/material";
+import FolderIcon from '@mui/icons-material/Folder';
+import DownloadIcon from '@mui/icons-material/Download';
 
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import { useProblemInfo } from '../hooks/ProblemProvider'
@@ -22,8 +25,9 @@ import SearchBarExtensible from '../widgets/SearchBarExtensible';
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select problem" }
 const ACCORDION_FORM_TWO = { placeHolder: "default instance" }
-var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem",problemInstance:"" }
+var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstance: "" }
 const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
+const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
@@ -32,19 +36,52 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   const problemInfo = useProblemInfo(url, problemName);
   const [problemLocalInstance, setProblemLocalInstance] = useState("")
   const defaultInstanceParsed = {
-                test: true,
-                input: "No Input, Default String",
-                regex: "There is no regex string for this problem, parsing is likely not enabled",
-                type: "No input, default string",
-                exampleStr: "" // No input, default string
-                
+    test: true,
+    input: "No Input, Default String",
+    regex: "There is no regex string for this problem, parsing is likely not enabled",
+    type: "No input, default string",
+    exampleStr: "" // No input, default string
+
   }
 
 
   const [instanceParsed, setInstanceParsed] = useState(defaultInstanceParsed);
   const [seconds, setSeconds] = useState(1);
   const [timerIsActive, setTimerActive] = useState(false);
+  const isFirstRender = useRef(true);
 
+  function openFileDialog() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.txt';
+
+    input.onchange = function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const content = e.target.result;
+          setProblemLocalInstance(content);
+          handleChangeInstance({ target: { value: content } }); // Trigger handleChangeInstance
+        };
+        reader.readAsText(file);
+      }
+    };
+
+    input.click();
+  }
+  async function handleDownload() {
+    const blob = new Blob([problemLocalInstance], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = "query";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   //Updates state on problemName changing.
   useEffect(() => {
@@ -76,18 +113,33 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
 
   //Updates the problem instance on problem name change to be the default instance of the new problem.
   useEffect(() => {
-    const problem = problemName ? problemInfo : {};
-    setProblemLocalInstance(problem.defaultInstance ?? "");
-    setProblemInstance(problem.defaultInstance ?? "");
-  }, [problemName, problemInfo])
+    const problem = problemInfo ? problemInfo : false;
+    if (!problem.problemName) return;
+
+    let problemVal = problem.defaultInstance ?? "";
+    const storedData = localStorage.getItem('problemData');
+
+    if (isFirstRender.current) {
+      // First render: read from localStorage
+      if (storedData) {
+        const allData = JSON.parse(storedData);
+        problemVal = allData.instance;
+      }
+      isFirstRender.current = false;
+    }
+
+    setProblemLocalInstance(problemVal);
+    setProblemInstance(problemVal);
+
+  }, [problemInfo])
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {
     try {
     }
-    catch (error) {console.log("Couldn't clean problem instance: ", error);}
+    catch (error) { console.log("Couldn't clean problem instance: ", error); }
     setProblemLocalInstance(event.target.value)
-    if (!instanceParsed.test){
+    if (!instanceParsed.test) {
       defaultInstanceParsed.exampleStr = "";
     }
     if (!timerIsActive) {
@@ -115,10 +167,10 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           toolTip={
             problemName
               ? {
-                  header: problemInfo.problemName ?? "",
-                  formalDef: problemInfo.formalDefinition ?? "",
-                  info: (problemInfo.problemDefinition ?? "") + (problemInfo.source ?? ""),
-                }
+                header: problemInfo.problemName ?? "",
+                formalDef: problemInfo.formalDefinition ?? "",
+                info: (problemInfo.problemDefinition ?? "") + (problemInfo.source ?? ""),
+              }
               : TOOLTIP
           }
         ></PopoverTooltipClick>
@@ -136,7 +188,30 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
             value={problemLocalInstance}
             onChange={handleChangeInstance}
             helperText={!instanceParsed.test ? "Problem failed? Try: " + instanceParsed.exampleStr : ""} // Only displays the "Incorrect format" stuff when the input is activly wrong
+            className="hide-scrollbar"
+            multiline
+            maxRows={5}
           ></TextField>
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
+            <Button
+              size="large"
+              color="white"
+              style={{ backgroundColor: THEME.colors.grey }}
+              onClick={openFileDialog}
+              className="fixed-button"
+            >
+              <FolderIcon />
+            </Button>
+            <Button
+              size="large"
+              color="white"
+              style={{ backgroundColor: THEME.colors.grey }}
+              onClick={handleDownload}
+              className="fixed-button"
+            >
+              <DownloadIcon />
+            </Button>
+          </div>
         </Stack>
       </ProblemSection.Body>
     </ProblemSection>

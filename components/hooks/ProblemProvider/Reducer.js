@@ -151,16 +151,29 @@ function useChosenReductionType(
   reductionTypeOptions
 ) {
   const [chosenReductionType, setChosenReductionType] = useState("");
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     setChosenReductionType("");
   }, [problemName, chosenReduceTo]);
 
   useEffect(() => {
-    if (
-      chosenReduceTo === "CLIQUE" &&
-      reductionTypeOptions.includes(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE)
-    ) {
+    if(reductionTypeOptions.length === 0) return;
+
+    const storedData = localStorage.getItem('problemData');
+
+    if (isFirstRender.current) {
+      // First render: read from localStorage
+      if (storedData) {
+        const allData = JSON.parse(storedData);
+        setChosenReductionType(allData.reductionType);
+        isFirstRender.current = false;
+        if(allData.reductionType !== "") return;
+      }
+      isFirstRender.current = false;
+    }
+
+    if (chosenReduceTo === "CLIQUE" && reductionTypeOptions.includes(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE)) {
       setChosenReductionType(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE);
     } else if (
       chosenReduceTo === "VERTEXCOVER" &&
@@ -179,16 +192,28 @@ function useChosenReductionType(
 
 function useChosenReduceTo(problemName, reduceToOptions) {
   const [chosenReduceTo, setChosenReduceTo] = useState("");
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     setChosenReduceTo("");
   }, [problemName]);
 
   useEffect(() => {
-    if (
-      problemName === "SAT3" &&
-      reduceToOptions.includes(DEFAULT_SAT3_CHOSEN_REDUCE_TO)
-    ) {
+    if(reduceToOptions.length === 0) return;
+    const storedData = localStorage.getItem('problemData');
+
+    if (isFirstRender.current) {
+      // First render: read from localStorage
+      if (storedData) {
+        const allData = JSON.parse(storedData);
+        setChosenReduceTo(allData.reduceTo);
+        isFirstRender.current = false;
+        if(allData.reduceTo !== "") return;
+      }
+      isFirstRender.current = false;
+    } 
+
+    if (problemName === "SAT3" && reduceToOptions.includes(DEFAULT_SAT3_CHOSEN_REDUCE_TO)) {
       setChosenReduceTo(DEFAULT_SAT3_CHOSEN_REDUCE_TO);
     } else if (
       problemName === "CLIQUE" &&

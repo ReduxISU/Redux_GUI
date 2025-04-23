@@ -114,9 +114,9 @@ export default function VisualizeRowReact({
   );
   const [svgIsLoading, setSvgIsLoading] = useState(false);
 
-  let apiCompatibleInstance = problemInstance
-    .replaceAll("&", "%26")
-    .replaceAll(" ", "");
+//   let apiCompatibleInstance = problemInstance
+//     .replaceAll("&", "%26")
+//     .replaceAll(" ", "");
 
   useEffect(() => {
     if (svgIsLoading) {
@@ -278,7 +278,7 @@ export default function VisualizeRowReact({
           // reduceToggled={showReduction}
           //We are using the logicProps(visualizationState to handle this)
           // solveToggled={showSolution}
-          apiInstance={apiCompatibleInstance}
+          problemInstance={problemInstance}
           problemVisualizationData={problemVisualizationData}
           reducedVisualizationData={reducedVisualizationData}
           problemSolutionData={defaultSat3SolutionArr}
