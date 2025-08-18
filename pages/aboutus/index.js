@@ -76,7 +76,7 @@ export default function AboutUsPage() {
                             
                             {/* Show first 4 contributors always */}
                             <ul>
-                                {contributors.slice(0, 4).map((name, index) => (
+                                {contributors.slice(0, 3).map((name, index) => (
                                     <li key={index}>{name}</li>
                                 ))}
                             </ul>
