@@ -74,7 +74,7 @@ export default function AboutUsPage() {
                             <p>This project was started by Dr. <a href="https://www2.cose.isu.edu/~bodipaul/index.php" target="_blank" rel="noopener noreferrer">Paul Bodily</a>, who is also the ISU Faculty Sponsor of the project.</p>
                             <p>The students who contributed to the creation of the application are:</p>
                             
-                            {/* Show first 4 contributors always */}
+                            {/* Show first 3 contributors always */}
                             <ul>
                                 {contributors.slice(0, 3).map((name, index) => (
                                     <li key={index}>{name}</li>
