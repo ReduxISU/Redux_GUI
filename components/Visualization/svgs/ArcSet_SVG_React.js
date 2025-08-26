@@ -37,7 +37,7 @@ const initDefinitions = (svg) => {
     .style('stroke','none');
 }
 
-function DirectedForceGraph({ w, h, charge, solve, problemInstance, solution, reductionType="" }) {
+function DirectedForceGraph({ w, h, charge, url, solve, problemName, problemInstance, solution, reductionType="" }) {
   const [animatedNodes, setAnimatedNodes] = useState([]);
   const [animatedLinks, setAnimatedLinks] = useState([]);
   const margin = {top: 200, right: 30, bottom: 30, left: 200},
