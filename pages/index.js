@@ -23,7 +23,7 @@ import { useProblemProvider } from '../components/hooks/ProblemProvider'
 import { useEffect, memo } from 'react';
 import { useUnload } from '../components/eventHandlers/handleUnload';
 import ShareButton from '../components/widgets/ShareButton';
-import { handleParameters } from '../components/eventHandlers/handleParameters';
+import { useHandleParameters } from '../components/eventHandlers/handleParameters';
 
 const ProblemRowMemo = memo(ProblemRowReact);
 const ReduceToRowMemo = memo(ReduceToRowReact);
@@ -69,7 +69,7 @@ function MainPageContent() {
     // }
   });
 
-  handleParameters();
+  useHandleParameters();
 
   const { problem, solver, verifier, reducer } = useProblemProvider(reduxBaseUrl);
 
@@ -80,7 +80,7 @@ function MainPageContent() {
       <ThemeProvider theme={theme}>
         <ResponsiveAppBar></ResponsiveAppBar>
 
-        <div className="container my-5 ">{ /** This is an artifact from the old bootstrap code, may be deprecated */}
+        <div className="container-fluid">{ /** This is an artifact from the old bootstrap code, may be deprecated */}
           <div className="d-flex flex-column">
 
             <div className="p-2 col-example">
@@ -96,7 +96,7 @@ function MainPageContent() {
             </div>
 
             <div className="p-2 col-example">
-              <VisualizeRowMemo url={reduxBaseUrl} {...problem} {...reducer} defaultSolverMap={solver.defaultSolverMap} />
+              <VisualizeRowMemo url={reduxBaseUrl} {...problem} {...reducer} chosenSolver={solver.chosenSolver} />
             </div>
 
             <div className="p-2 col-example">

@@ -11,12 +11,17 @@ import WeightedCutSvgReact from "./WeightedCut_SVG_REACT";
 import DirHamiltonianSvgReact from "./DirHamiltonian_SVG_React";
 import TSPSvgReact from "./TSP_SVG_React";
 import NodeSetSvgReact from "./NodeSet_SVG_React";
+import StandardGraphSvgReact from "./StandardGraph_SVG_React";
+import { requestSolverSteps } from "../../redux";
+
+import { requestVisualization, requestSolvedVisualization } from "../../redux";
 import DominatingSetSvgReact from "./Dominating_set";
 
 const Visualizations = new Map([
     ["SAT3" , (solve, url, problemInstance, solution) => {
         return(
             <SAT3_SVG_React 
+                problemName={"SAT3"}
                 solutionData={solution}
                 data={problemInstance}
                 problemInstance={problemInstance}
@@ -25,107 +30,148 @@ const Visualizations = new Map([
             ></SAT3_SVG_React>  
         )
     }],
-    ["CLIQUE", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("ClIQUE", solve, url, problemInstance, solution)
+    ["CLIQUE", (solve, url, problemInstance, solution, currentStep, allSteps)=>{
         return(
         <CliqueSvgReactV2 
-            apiCall={apiCall} 
+            problemName={"CLIQUE"}
+            problemSteps={allSteps}
+            currentStep={currentStep}
+            solve={solve}
+            url={url}
+            problemInstance={problemInstance}
+            solution={solution}
         ></CliqueSvgReactV2>
         )
     }],
     ["INDEPENDENTSET", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("INDEPENDENTSET", solve, url, problemInstance, solution)
         return(
         <CliqueSvgReactV2 
-            apiCall={apiCall} 
+            problemName={"INDEPENDENTSET"}
+            solve={solve}
+            url={url}
+            problemInstance={problemInstance}
+            solution={solution}
         ></CliqueSvgReactV2>
         )
     }],
     ["VERTEXCOVER", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("VERTEXCOVER", solve, url, problemInstance, solution)
         return(
             <VertexCoverSvgReact 
-                apiCall={apiCall}> 
-            </VertexCoverSvgReact>
+                problemName={"VERTEXCOVER"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
+            ></VertexCoverSvgReact>
         )
     }],
     ["ARCSET", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("ARCSET", solve, url, problemInstance, solution)
         return(
             <ArcSetSvgReact 
-                apiCall={apiCall} 
+                problemName={"ARCSET"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></ArcSetSvgReact>
         )
     }],
     ["CUT", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("CUT", solve, url, problemInstance, solution)
         return(
             <CutSvgReact 
-                apiCall={apiCall} 
+                problemName={"CUT"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></CutSvgReact>
         )
     }],
     ["CLIQUECOVER", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("CLIQUECOVER", solve, url, problemInstance, solution)
         return(
             <CliqueCoverSvgReact 
-                apiCall={apiCall} 
+                problemName={"CLIQUECOVER"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></CliqueCoverSvgReact>
         )
     }],
     ["GRAPHCOLORING", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("GRAPHCOLORING", solve, url, problemInstance, solution)
         return(
             <GraphColoringSvgReact 
-                apiCall={apiCall} 
+                problemName={"GRAPHCOLORING"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></GraphColoringSvgReact>
         )
     }],
     ["HAMILTONIAN", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("HAMILTONIAN", solve, url, problemInstance, solution)
         return(
             <HamiltonianSvgReact 
-                apiCall={apiCall} 
+                problemName={"HAMILTONIAN"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></HamiltonianSvgReact>
         )
     }],
     ["DIRHAMILTONIAN", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("DIRHAMILTONIAN", solve, url, problemInstance, solution)
         return(
             <DirHamiltonianSvgReact 
-                apiCall={apiCall} 
+                problemName={"DIRHAMILTONIAN"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></DirHamiltonianSvgReact>
         )
     }],
     ["STEINERTREE", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("STEINERTREE", solve, url, problemInstance, solution)
         return(
             <SteinerTreeSvgReact
-                apiCall={apiCall} 
+                problemName={"STEINERTREE"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></SteinerTreeSvgReact>
         )
     }],
     ["WEIGHTEDCUT", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("WEIGHTEDCUT", solve, url, problemInstance, solution)
         return(
             <WeightedCutSvgReact
-                apiCall={apiCall} 
+                problemName={"WEIGHTEDCUT"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></WeightedCutSvgReact>
         )
     }],
     ["TSP", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("TSP", solve, url, problemInstance, solution)
         return(
             <TSPSvgReact
-                apiCall={apiCall} 
+                problemName={"TSP"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></TSPSvgReact>
         )
     }],
     ["NODESET", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("NODESET", solve, url, problemInstance, solution)
         return(
             <NodeSetSvgReact
-                apiCall={apiCall} 
+                problemName={"NODESET"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></NodeSetSvgReact>
         )
     }],
@@ -139,12 +185,8 @@ const Visualizations = new Map([
     }],
 ])
 
-function createAPICall(problemName, solve, url, problemInstance, solution){
-    if(solve){
-        return url + problemName +"Generic/solvedVisualization?problemInstance="+ problemInstance+ "&solution=" + solution;
-    }
-    else{
-        return url + problemName +"Generic/visualize?problemInstance="+ problemInstance; 
-    }
+function getSteps(url, solver, problemInstance) {
+    return requestSolverSteps(url, solver, problemInstance);
 }
+
 export default Visualizations;

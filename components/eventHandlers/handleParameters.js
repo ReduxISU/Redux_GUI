@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
-export const handleParameters = () => {
+export const useHandleParameters = () => {
   const router = useRouter();
 
   useEffect(() => {
