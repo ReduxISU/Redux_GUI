@@ -14,7 +14,10 @@ const defaultSolvers = new Map([
     ["WEIGHTEDCUT","WeightedCutBruteForce"],
     ["DIRHAMILTONIAN","DirectedHamiltonianBruteForce"],
     ["TSP","TSPBruteForce"],
-    ["NODESET", "NodeSetBruteForce"]
+    ["NODESET", "NodeSetBruteForce"],
+    ["DOMINATINGSET", "DominatingSetSolver"]
 ])
 
-export default defaultSolvers;
+
+
+export default defaultSolvers
