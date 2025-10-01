@@ -75,7 +75,6 @@ a {
 }
 
 .accordion{
-  transform: scale(0.8);  /* Scales the accordion content down by 10% */
   transform-origin: top;  /* Ensure it scales from the top */
   border: 2px solid #ccc; /* Dark border */
 } 
