@@ -11,6 +11,7 @@ import WeightedCutSvgReact from "./WeightedCut_SVG_REACT";
 import DirHamiltonianSvgReact from "./DirHamiltonian_SVG_React";
 import TSPSvgReact from "./TSP_SVG_React";
 import NodeSetSvgReact from "./NodeSet_SVG_React";
+import DominatingSetSvgReact from "./Dominating_set";
 
 const Visualizations = new Map([
     ["SAT3" , (solve, url, problemInstance, solution) => {
@@ -126,6 +127,14 @@ const Visualizations = new Map([
             <NodeSetSvgReact
                 apiCall={apiCall} 
             ></NodeSetSvgReact>
+        )
+    }],
+    ["DOMINATINGSET", (solve, url, problemInstance, solution)=>{
+        let apiCall = createAPICall("DOMINATINGSET", solve, url, problemInstance, solution)
+        return(
+            <DominatingSetSvgReact
+                apiCall={apiCall} 
+            ></DominatingSetSvgReact>
         )
     }],
 ])
