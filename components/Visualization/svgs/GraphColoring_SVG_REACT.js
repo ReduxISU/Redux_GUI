@@ -37,7 +37,7 @@ function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, so
                 .selectAll("line")
                 .data(data.links)
                 .join("line")
-                .join("line")
+               
                     .style("stroke", "#aaa")
                     
 
