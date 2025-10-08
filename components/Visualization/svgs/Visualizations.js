@@ -176,11 +176,15 @@ const Visualizations = new Map([
         )
     }],
     ["DOMINATINGSET", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("DOMINATINGSET", solve, url, problemInstance, solution)
         return(
-            <DominatingSetSvgReact
-                apiCall={apiCall} 
+            <DominatingSetSvgReact 
+                problemName={"DOMINATINGSET"}
+                solve={solve}
+                url={url}
+                problemInstance={problemInstance}
+                solution={solution}
             ></DominatingSetSvgReact>
+
         )
     }],
 ])
