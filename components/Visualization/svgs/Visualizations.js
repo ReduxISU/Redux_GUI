@@ -15,7 +15,6 @@ import StandardGraphSvgReact from "./StandardGraph_SVG_React";
 import { requestSolverSteps } from "../../redux";
 
 import { requestVisualization, requestSolvedVisualization } from "../../redux";
-import DominatingSetSvgReact from "./Dominating_set";
 
 const Visualizations = new Map([
     ["SAT3" , (solve, url, problemInstance, solution) => {
@@ -173,14 +172,6 @@ const Visualizations = new Map([
                 problemInstance={problemInstance}
                 solution={solution}
             ></NodeSetSvgReact>
-        )
-    }],
-    ["DOMINATINGSET", (solve, url, problemInstance, solution)=>{
-        let apiCall = createAPICall("DOMINATINGSET", solve, url, problemInstance, solution)
-        return(
-            <DominatingSetSvgReact
-                apiCall={apiCall} 
-            ></DominatingSetSvgReact>
         )
     }],
 ])
