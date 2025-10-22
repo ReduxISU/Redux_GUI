@@ -33,9 +33,11 @@ export default function SearchBarExtensible({
           onSelect(value);
         }
       }}
-      options={options
-        .sort(optionsHighlight ? (a, b) => sortHighlights(a, b, optionsHighlight) : undefined)
-        .map((x) => optionsMap.get(x) ?? x)}
+      options={Array.isArray(options)
+        ? options
+          .sort(optionsHighlight ? (a, b) => sortHighlights(a, b, optionsHighlight) : undefined)
+          .map((x) => optionsMap.get(x) ?? x)
+        : []}
       disabled={disabled}
       selectOnFocus
       clearOnBlur
@@ -55,13 +57,13 @@ export default function SearchBarExtensible({
       renderOption={
         optionsHighlight
           ? (props, option) => (
-              <li
-                {...props}
-                style={optionsHighlight.includes(getKeyByValue(optionsMap, option)) ? null : { opacity: 0.5 }}
-              >
-                {option}
-              </li>
-            )
+            <li
+              {...props}
+              style={optionsHighlight.includes(getKeyByValue(optionsMap, option)) ? null : { opacity: 0.5 }}
+            >
+              {option}
+            </li>
+          )
           : null
       }
     />

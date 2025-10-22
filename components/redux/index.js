@@ -211,6 +211,17 @@ export async function requestVerifiers(url, problem, problemType = "NPC") {
 }
 
 /**
+ * @returns an array of verifiers implemented for the `problem`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestVisualizations(url, problem, problemType = "NPC") {
+  return await fetchJson(
+    `${url}Navigation/Problem_VisualizationsRefactor/?chosenProblem=${problem}&problemType=${problemType}`,
+    () => `${problem} VISUALIZATIONS REQUEST FAILED`
+  );
+}
+
+/**
  * @returns an array of solvers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */

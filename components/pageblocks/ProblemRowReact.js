@@ -11,9 +11,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Stack } from '@mui/material'
 import TextField from '@mui/material/TextField';
-import { Button } from "@mui/material";
+import { Button, Stack, Box } from "@mui/material";
 import FolderIcon from '@mui/icons-material/Folder';
 import DownloadIcon from '@mui/icons-material/Download';
 
@@ -178,7 +177,9 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
 
       <ProblemSection.Body>
         <Stack direction="row" gap={1}>
-          {CARD.cardBodyText}
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+            {CARD.cardBodyText}
+          </Box>
           {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
           <TextField
             error={!instanceParsed.test}

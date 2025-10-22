@@ -21,12 +21,20 @@ import { Button, Switch, Radio, RadioGroup, FormControl, IconButton, TextField }
 import { SkipPrevious, SkipNext, FastRewind, FastForward } from '@mui/icons-material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
+// widgets
+import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
+import SearchBarExtensible from '../widgets/SearchBarExtensible';
+
 import { requestProblemGenericInstance, requestReducedInstance, requestSolverSteps } from '../redux';
 import VisualizationBox from '../widgets/VisualizationBox';
 import ProblemSection from '../widgets/ProblemSection';
 
+import { useVisualizationInfo } from '../hooks/ProblemProvider';
+
 const CARD = { cardBodyText: "DEFAULT BODY", problemJson: 'DEFAULT', problemInstance: 'DEFAULT', cardHeaderText: "Visualize", problemText: "DEFAULT" }
 const SWITCHES = { switch1: "Highlight solution", switch2: "Highlight gadgets", switch3: "Show reduction" }
+const ACCORDION_FORM_ONE = { placeHolder: "Select visualization" }
+const TOOLTIP = { header: "Visualization Information", formalDef: "Choose a visualization to see information about it", info: "", credit: "" }
 
 export default function VisualizeRowReact({
   url,
@@ -38,9 +46,14 @@ export default function VisualizeRowReact({
   reductionNameMap,
   reducedInstance,
   chosenSolver,
+  chosenVisualization,
+  visualizationNameMap,
+  setChosenVisualization,
+  visualizationOptions,
+
 }) {
   var visualization;
-
+  const visualizationInfo = useVisualizationInfo(url, chosenVisualization);
 
 
 
@@ -246,133 +259,149 @@ export default function VisualizeRowReact({
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText}>
-        <div>
-          <Button
-            style={{ backgroundColor: "#43a047" }}
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={handleRefreshButton}
-          >
-            Refresh
-          </Button>
-        </div>
+        <SearchBarExtensible
+          placeholder={ACCORDION_FORM_ONE.placeHolder}
+          selected={chosenVisualization}
+          onSelect={setChosenVisualization}
+          options={Array.isArray(visualizationOptions) ? visualizationOptions : []}
+          optionsMap={visualizationNameMap}
+          disabled={false}
+          disabledMessage={"No visualization available. Please select a problem."}
+          extenderButtons={(input) => [
+            {
+              label: `Add new visualization "${input}"`,
+              href: `${url}ProblemTemplate/visualization?problemName=${input}&visualizationName=${input}`,
+            },
+          ]}
+        />
 
-        <OverlayTrigger
-        placement="bottom"
-        overlay={
-          isDisabled ? (
-            <Popover id="popover-basic">
-              <Popover.Body>{"Radio buttons and text box are disabled when gadgets or reduction is on."}</Popover.Body>
-            </Popover>
-          ) : <></>
-        }
-      >
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <IconButton onClick={() => handleRadioChange('start')} disabled={isDisabled}>
-            <FastRewind />
-          </IconButton>
-          <IconButton onClick={() => handleRadioChange('back')} disabled={isDisabled}>
-            <SkipPrevious />
-          </IconButton>
-          <TextField
-            type="number"
-            variant="filled"
-            value={currentStep}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === '') {
-                setCurrentStep(''); // Allow the text box to be empty
-              } else {
-                const numValue = Number(value);
-                if (numValue >= 0 && numValue <= allSteps.length + 1) {
-                  setCurrentStep(numValue);
-                }
-              }
-            }}
-            inputProps={{
-              min: 0,
-              max: allSteps.length + 1,
-              onInput: (e) => {
-                const value = e.target.value;
-                if (value < 0 || value > allSteps.length + 1) e.target.value = currentStep; // Reset to currentStep if out of range
-              }
-            }}
-            className="no-spinner"
-            style={{ width: '70px' }}
-            disabled={isDisabled}
-          />
-          <IconButton onClick={() => handleRadioChange('forward')} disabled={isDisabled}>
-            <SkipNext />
-          </IconButton>
-          <IconButton onClick={() => handleRadioChange('end')} disabled={isDisabled}>
-            <FastForward />
-          </IconButton>
-        </div>
-      </OverlayTrigger>
+        <PopoverTooltipClick
+          toolTip={problemName ? { header: "", formalDef: "", info: "" } : TOOLTIP}
+        />
+      </ProblemSection.Header>
 
-        <Stack
-          style={{ width: "100%", flexDirection: "row-reverse" }}
-          className="float-end"
-          direction="horizontal"
-          gap={3}
+
+
+      <ProblemSection.Body>
+        {/* Container for everything above the VisualizationBox */}
+        <div
+          style={{
+            border: "2px solid #ccc",    // Outline
+            borderRadius: "8px",
+            padding: "16px",
+            marginBottom: "20px",
+            display: "flex",
+            justifyContent: "space-between", // Keep left and right at edges
+            alignItems: "center",             // Vertical centering
+            backgroundColor: "#f9f9f9",
+            flexWrap: "wrap",                 // Wrap on small screens
+          }}
         >
-          {disableReduction ? (
+          {/* Left side — Refresh button + step controls */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Button
+              style={{ backgroundColor: "#43a047" }}
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              onClick={handleRefreshButton}
+            >
+              Refresh
+            </Button>
+
             <OverlayTrigger
               placement="bottom"
-              triggers={["hover"]}
               overlay={
-                <Popover id="popover-basic" className="tooltip">
-                  <Popover.Body>{"Please select a reduction"}</Popover.Body>
-                </Popover>
+                isDisabled ? (
+                  <Popover id="popover-basic">
+                    <Popover.Body>
+                      {"Radio buttons and text box are disabled when gadgets or reduction is on."}
+                    </Popover.Body>
+                  </Popover>
+                ) : (
+                  <></>
+                )
               }
             >
-              <FormControlLabel
-                disabled={disableReduction ? true : false}
-                checked={showReduction}
-                control={<Switch />}
-                label={SWITCHES.switch3}
-                onChange={handleSwitch3Change}
-              />
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <IconButton onClick={() => handleRadioChange("start")} disabled={isDisabled}>
+                  <FastRewind />
+                </IconButton>
+                <IconButton onClick={() => handleRadioChange("back")} disabled={isDisabled}>
+                  <SkipPrevious />
+                </IconButton>
+
+                <TextField
+                  type="number"
+                  variant="filled"
+                  value={currentStep}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") setCurrentStep("");
+                    else {
+                      const numValue = Number(value);
+                      if (numValue >= 0 && numValue <= allSteps.length + 1) setCurrentStep(numValue);
+                    }
+                  }}
+                  inputProps={{
+                    min: 0,
+                    max: allSteps.length + 1,
+                    onInput: (e) => {
+                      const value = e.target.value;
+                      if (value < 0 || value > allSteps.length + 1) e.target.value = currentStep;
+                    },
+                  }}
+                  style={{ width: "70px" }}
+                  disabled={isDisabled}
+                />
+
+                <IconButton onClick={() => handleRadioChange("forward")} disabled={isDisabled}>
+                  <SkipNext />
+                </IconButton>
+                <IconButton onClick={() => handleRadioChange("end")} disabled={isDisabled}>
+                  <FastForward />
+                </IconButton>
+              </div>
             </OverlayTrigger>
-          ) : (
+          </div>
+
+          {/* Right side — Switch controls */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <FormControlLabel
-              disabled={disableReduction ? true : false}
+              disabled={disableReduction}
               checked={showReduction}
               control={<Switch />}
               label={SWITCHES.switch3}
               onChange={handleSwitch3Change}
+              style={{ margin: 0 }}
             />
-          )}
-          <FormControlLabel
-            disabled={disableGadget ? true : false}
-            checked={showGadgets}
-            control={<Switch id={"highlightGadgets"} />}
-            label={SWITCHES.switch2}
-            onChange={handleSwitch2Change}
-          />
-          <FormControlLabel
-            disabled={disableSolution ? true : false}
-            checked={showSolution}
-            control={<Switch id={"showSolution"} />}
-            label={SWITCHES.switch1}
-            onChange={handleSwitch1Change}
-          />
-        </Stack>
-      </ProblemSection.Header>
+            <FormControlLabel
+              disabled={disableGadget}
+              checked={showGadgets}
+              control={<Switch id="highlightGadgets" />}
+              label={SWITCHES.switch2}
+              onChange={handleSwitch2Change}
+              style={{ margin: 0 }}
+            />
+            <FormControlLabel
+              disabled={disableSolution}
+              checked={showSolution}
+              control={<Switch id="showSolution" />}
+              label={SWITCHES.switch1}
+              onChange={handleSwitch1Change}
+              style={{ margin: 0 }}
+            />
+          </div>
+        </div>
 
-      <ProblemSection.Body>
+        {/* Visualization Box */}
         <VisualizationBox
           loading={svgIsLoading}
-          // reduceToggled={showReduction}
-          //We are using the logicProps(visualizationState to handle this)
-          // solveToggled={showSolution}
           problemInstance={problemInstance}
           problemVisualizationData={problemVisualizationData}
           reducedVisualizationData={reducedVisualizationData}
           problemSolutionData={defaultSat3SolutionArr}
           visualizationState={logicProps}
           url={url}
-
           problemName={problemName}
           problemNameMap={problemNameMap}
           chosenReduceTo={chosenReduceTo}
@@ -382,25 +411,9 @@ export default function VisualizeRowReact({
           chosenSolver={chosenSolver}
           currentStep={currentStep}
           allSteps={allSteps}
-        ></VisualizationBox>
-        {/* <VisualizationLogic
-               props={logicProps}>
-              </VisualizationLogic> */}
-
-        {/* <VisualizationLogic
-                problemName={problemName}
-                problemInstance={problemInstance}
-                reductionName={chosenReductionType}
-                loading={svgIsLoading}
-                problemSolutionData={problemSolutionData}
-                reducedVisualizationData={reducedVisualizationData}
-                problemVisualizationData={problemVisualizationData}
-                visualizationState={logicProps}
-            // solverOn={true}
-            // reductionOn={reduceToggled}
-            // gadgetsOn={false}
-            /> */}
+        />
       </ProblemSection.Body>
+
     </ProblemSection>
   );
 }

@@ -53,8 +53,17 @@ export default function ProblemSection({ children, defaultCollapsed = true }) {
 ProblemSection.Header = function Header({ children, title, titleWidth }) {
   return (
     <Card.Header>
-      <Stack direction="row" gap={2}>
-        <Box sx={{ width: titleWidth ?? "10%" }}>{title}</Box>
+      <Stack direction="row" gap={2} alignItems="center">
+        <Box
+          sx={{
+            width: titleWidth ?? "10%",
+            display: "flex",
+            justifyContent: "center", // horizontal center
+            alignItems: "center",     // vertical center
+          }}
+        >
+          {title}
+        </Box>
         {children}
         <ContextAwareToggle eventKey="0" colors={THEME.colors}>
           ▼
@@ -63,6 +72,7 @@ ProblemSection.Header = function Header({ children, title, titleWidth }) {
     </Card.Header>
   );
 };
+
 
 ProblemSection.Body = function Body({ children }) {
   return (
