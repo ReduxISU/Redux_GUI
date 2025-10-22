@@ -51,7 +51,7 @@ export default function AboutUsPage() {
                         <Card.Body style={cardBodyStyle}>
                             {"Welcome to Redux, a platform for NP-Complete problems. Input your challenges and gain access to reductions, solutions, verifiers, and visualizations. Join our community of problem solvers and unravel computational complexities using the application's library. The project was greatly inspired by Richard Karp's paper "}
                             <a href="https://doi.org/10.1007/978-1-4684-2001-2_9" target="_blank" rel="noopener noreferrer">
-                                "Reducibility Among Combinatorial Problems"
+                                &quotReducibility Among Combinatorial Problems&quot
                             </a> {"(Karp, 1972)."}
                         </Card.Body>
                     </Card>
