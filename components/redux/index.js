@@ -290,18 +290,17 @@ export async function requestVisualization(url, visualizationName, instance) {
  * @returns the solved graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestSolvedVisualization(url, problem, instance, solution) {
-  // TODO: convert to POST request for problem instance
-  var preparedSolution = solution.replaceAll("&", "%26");
-  var preparedInstance = instance.replaceAll("&", "%26");
+export async function requestSolvedVisualization(url, problem, instance, visualizationName) {
   if (problem == "SipserReduceToCliqueStandard") {
-    return await fetchJson(
-      `${url}${problem}/solvedVisualize?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+    return await fetchPostJson(
+      `${url}ProblemProvider/solvedVisualize?visualizationName=${visualizationName}`,
+      instance,
       () => `${problem} VISUALIZE REQUEST FAILED`
     );
   } else {
-    return await fetchJson(
-      `${url}${problem}Generic/solvedVisualize?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+    return await fetchPostJson(
+      `${url}ProblemProvider/solvedVisualize?visualizationName=${visualizationName}`,
+      instance,
       () => `${problem} VISUALIZE REQUEST FAILED`
     );
   }

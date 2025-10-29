@@ -38,7 +38,7 @@ function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, so
         `translate(${margin.left}, ${margin.top})`);
 
     
-    const apiCall = solve ? requestSolvedVisualization(url, visualizationName, problemInstance, solution) : requestVisualization(url, visualizationName, problemInstance);
+    const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, visualizationName) : requestVisualization(url, visualizationName, problemInstance);
 
     apiCall.then((data) => {
       // Initialize the links
