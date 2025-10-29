@@ -265,7 +265,7 @@ export default function VisualizeRowReact({
           onSelect={setChosenVisualization}
           options={Array.isArray(visualizationOptions) ? visualizationOptions : []}
           optionsMap={VisualizationNameMap}
-          disabled={false}
+          disabled={!problemName}
           disabledMessage={"No visualization available. Please select a problem."}
           extenderButtons={(input) => [
             {
@@ -276,7 +276,15 @@ export default function VisualizeRowReact({
         />
 
         <PopoverTooltipClick
-          toolTip={problemName ? { header: "", formalDef: "", info: "" } : TOOLTIP}
+          toolTip={
+            chosenVisualization
+              ? {
+                  header: visualizationInfo.verifierName ?? "",
+                  formalDef: visualizationInfo.verifierDefinition ?? "",
+                  info: visualizationInfo.source ?? "",
+                }
+              : TOOLTIP
+          }
         />
       </ProblemSection.Header>
 
