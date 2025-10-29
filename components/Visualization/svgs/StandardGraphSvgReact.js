@@ -2,7 +2,6 @@
 
 
 import * as d3 from "d3";
-import { text } from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getColorByKey } from '../constants/VisColorsArray';
 import {requestVisualization, requestSolvedVisualization} from "../../redux";
@@ -16,7 +15,7 @@ function getProblemSolutionData(url, solver, instance) {
   });
 }
 
-function ForceGraph({ w, h, charge, apiCall, problemInstance, solve, reduceFrom, reduceFromInstance, url, reduceFromData }) {
+function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, solution }) {
   const margin = { top: 200, right: 30, bottom: 30, left: 200 },
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
@@ -173,7 +172,7 @@ function ForceGraph({ w, h, charge, apiCall, problemInstance, solve, reduceFrom,
 
     }).catch(error => console.log("VISUALIZATION FAILED"));
 
-  }, [solve, apiCall])
+  }, [url, solve, problemInstance])
   return (
     <svg
       width={width}
@@ -197,18 +196,7 @@ export default function StandardGraphSvgReact(props) {
 
   return (
     <>
-      <ForceGraph
-        w={700}
-        h={700}
-        charge={charge}
-        apiCall={props.apiCall}
-        problemInstance={props.instance}
-        solve={props.solveSwitch}
-        reduceFrom={props.reduceFrom}
-        reduceFromInstance={props.reduceFromInstance}
-        reduceFromData={props.reduceFromData}
-        url={props.url}
-      />
+      <ForceGraph w={700} h={700} charge={charge} {...props} />
     </>
   );
 }
