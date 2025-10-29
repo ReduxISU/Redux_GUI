@@ -411,6 +411,7 @@ export default function VisualizeRowReact({
           chosenSolver={chosenSolver}
           currentStep={currentStep}
           allSteps={allSteps}
+          visualizationType={visualizationInfo.visualizationType}
         />
       </ProblemSection.Body>
 

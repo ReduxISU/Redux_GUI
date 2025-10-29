@@ -24,6 +24,7 @@ export default function VisualizationLogic({
   loading,
   currentStep,
   allSteps,
+  visualizationType,
 }) {
     const [solution, setSolution] = useState("");
     const [mappedSolution, setMappedSolution] = useState();
@@ -60,7 +61,7 @@ export default function VisualizationLogic({
     
     if(url && problemInstance){
         try{
-            visualization = Visualizations.get(problemName)(solve, url, problemInstance, solution, currentStep, allSteps)
+            visualization = Visualizations.get(visualizationType)(problemName, solve, url, problemInstance, solution, currentStep, allSteps)
         } catch{
             visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)}/>
         }

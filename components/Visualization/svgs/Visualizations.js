@@ -11,8 +11,7 @@ import WeightedCutSvgReact from "./WeightedCut_SVG_REACT";
 import DirHamiltonianSvgReact from "./DirHamiltonian_SVG_React";
 import TSPSvgReact from "./TSP_SVG_React";
 import NodeSetSvgReact from "./NodeSet_SVG_React";
-import StandardGraphSvgReact from "./StandardGraph_SVG_React";
-import { requestSolverSteps } from "../../redux";
+import StandardGraphSvgReact from "./StandardGraphSvgReact";
 
 import { requestVisualization, requestSolvedVisualization } from "../../redux";
 
@@ -42,17 +41,17 @@ const Visualizations = new Map([
         ></CliqueSvgReactV2>
         )
     }],
-    ["INDEPENDENTSET", (solve, url, problemInstance, solution)=>{
-        return(
-        <CliqueSvgReactV2 
-            problemName={"INDEPENDENTSET"}
-            solve={solve}
-            url={url}
-            problemInstance={problemInstance}
-            solution={solution}
-        ></CliqueSvgReactV2>
-        )
-    }],
+    // ["INDEPENDENTSET", (solve, url, problemInstance, solution)=>{
+    //     return(
+    //     <CliqueSvgReactV2 
+    //         problemName={"INDEPENDENTSET"}
+    //         solve={solve}
+    //         url={url}
+    //         problemInstance={problemInstance}
+    //         solution={solution}
+    //     ></CliqueSvgReactV2>
+    //     )
+    // }],
     ["VERTEXCOVER", (solve, url, problemInstance, solution)=>{
         return(
             <VertexCoverSvgReact 
@@ -174,10 +173,19 @@ const Visualizations = new Map([
             ></NodeSetSvgReact>
         )
     }],
+    ["Graph D3", (problemName, solve, url, problemInstance, solution, currentStep, allSteps)=>{
+        return(
+        <StandardGraphSvgReact 
+            problemName={problemName}
+            solve={solve}
+            url={url}
+            problemInstance={problemInstance}
+            solution={solution}
+            currentStep={currentStep}
+            problemSteps={allSteps}
+        ></StandardGraphSvgReact>
+        )
+    }],
 ])
-
-function getSteps(url, solver, problemInstance) {
-    return requestSolverSteps(url, solver, problemInstance);
-}
 
 export default Visualizations;

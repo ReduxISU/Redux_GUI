@@ -47,7 +47,7 @@ function ForceGraph({ w, h, charge, apiCall, problemInstance, solve, reduceFrom,
         .style("stroke", function (d) {
           if (getColorByKey(d.color)) {
             if (d.delay !== "") {
-              // Add fading effect for the link transitioning from grey to green
+              // Add fading effect for the link transitioning from grey to expected color
               d3.select(this)
                 .transition()
                 .delay(d.delay)
@@ -90,7 +90,7 @@ function ForceGraph({ w, h, charge, apiCall, problemInstance, solve, reduceFrom,
 
           if (getColorByKey(d.color)) {
             if (d.delay !== "") {
-              // Add fading effect for the node transitioning from grey to green
+              // Add fading effect for the node transitioning from grey to expected color
               d3.select(this)
                 .transition()
                 .delay(d.delay)
@@ -188,7 +188,7 @@ function ForceGraph({ w, h, charge, apiCall, problemInstance, solve, reduceFrom,
 }
 
 
-export default function SatndardGraphSvgReact(props) {
+export default function StandardGraphSvgReact(props) {
   const [charge, setCharge] = useState(-50);
 
   return (
