@@ -278,21 +278,12 @@ export async function requestProblemGenericInstance(url, problem, instance) {
  * @returns the graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualization(url, problem, instance) {
-  if (problem === "sipserReduceToVC") {
-    // HACK: handle special case for sipserReduceToVC and use POST request instead of GET
-    var preparedInstance = instance.replaceAll("&", "%26");
-    return await fetchJson(
-      `${url}${problem}Generic/visualize?problemInstance=${preparedInstance}`,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  } else {
+export async function requestVisualization(url, visualizationName, instance) {
     return await fetchPostJson(
-      `${url}ProblemProvider/visualize?problem=${problem}`,
+      `${url}ProblemProvider/visualize?visualizationName=${visualizationName}`,
       instance,
-      () => `${problem} VISUALIZE REQUEST FAILED`
+      () => `${visualizationName} VISUALIZE REQUEST FAILED`
     );
-  }
 }
 
 /**

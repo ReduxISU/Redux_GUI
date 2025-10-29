@@ -15,7 +15,7 @@ function getProblemSolutionData(url, solver, instance) {
   });
 }
 
-function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, solution }) {
+function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, solution, visualizationName }) {
   const margin = { top: 200, right: 30, bottom: 30, left: 200 },
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
@@ -38,7 +38,7 @@ function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, so
         `translate(${margin.left}, ${margin.top})`);
 
     
-    const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
+    const apiCall = solve ? requestSolvedVisualization(url, visualizationName, problemInstance, solution) : requestVisualization(url, visualizationName, problemInstance);
     const problemUrl = apiCall;
 
     d3.json(problemUrl).then(function (data) {

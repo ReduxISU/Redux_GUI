@@ -420,6 +420,7 @@ export default function VisualizeRowReact({
           currentStep={currentStep}
           allSteps={allSteps}
           visualizationType={visualizationInfo.visualizationType}
+          VisualizationName={visualizationInfo.visualizationName}
         />
       </ProblemSection.Body>
 

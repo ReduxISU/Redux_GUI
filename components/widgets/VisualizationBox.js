@@ -27,6 +27,7 @@ export default function VisualizationBox({
     currentStep,
     allSteps,
     visualizationType,
+    visualizationName,
   }) {
 
     return (
@@ -50,6 +51,7 @@ export default function VisualizationBox({
                 currentStep={currentStep}
                 allSteps={allSteps}
                 visualizationType={visualizationType}
+                visualizationName={visualizationName}
             />
         </>
     )
