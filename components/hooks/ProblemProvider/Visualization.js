@@ -103,7 +103,7 @@ function useVisualizationNameMap(url, problemNameMap) {
       for (const Visualization of Visualizations) {
         const info = await requestInfo(url, Visualization);
         if (info) {
-          map.set(Visualization, info.VisualizationName);
+          map.set(Visualization, info.visualizationName);
         }
       }
     }

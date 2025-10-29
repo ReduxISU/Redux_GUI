@@ -47,7 +47,7 @@ export default function VisualizeRowReact({
   reducedInstance,
   chosenSolver,
   chosenVisualization,
-  visualizationNameMap,
+  VisualizationNameMap,
   setChosenVisualization,
   visualizationOptions,
 
@@ -264,7 +264,7 @@ export default function VisualizeRowReact({
           selected={chosenVisualization}
           onSelect={setChosenVisualization}
           options={Array.isArray(visualizationOptions) ? visualizationOptions : []}
-          optionsMap={visualizationNameMap}
+          optionsMap={VisualizationNameMap}
           disabled={false}
           disabledMessage={"No visualization available. Please select a problem."}
           extenderButtons={(input) => [
