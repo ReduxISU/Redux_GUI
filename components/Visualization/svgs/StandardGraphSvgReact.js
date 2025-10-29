@@ -5,6 +5,7 @@ import * as d3 from "d3";
 import { text } from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getColorByKey } from '../constants/VisColorsArray';
+import {requestVisualization, requestSolvedVisualization} from "../../redux";
 
 function getProblemSolutionData(url, solver, instance) {
   var fullUrl = `${url}${solver}/solve?problemInstance=${instance}`;
@@ -37,7 +38,10 @@ function ForceGraph({ w, h, charge, apiCall, problemInstance, solve, reduceFrom,
       .attr("transform",
         `translate(${margin.left}, ${margin.top})`);
 
+    
+    const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
     const problemUrl = apiCall;
+
     d3.json(problemUrl).then(function (data) {
       // Initialize the links
       const link = svg
