@@ -39,9 +39,8 @@ function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, so
 
     
     const apiCall = solve ? requestSolvedVisualization(url, visualizationName, problemInstance, solution) : requestVisualization(url, visualizationName, problemInstance);
-    const problemUrl = apiCall;
 
-    d3.json(problemUrl).then(function (data) {
+    apiCall.then((data) => {
       // Initialize the links
       const link = svg
         .selectAll("line")

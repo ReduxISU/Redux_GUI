@@ -296,12 +296,12 @@ export async function requestSolvedVisualization(url, problem, instance, solutio
   var preparedInstance = instance.replaceAll("&", "%26");
   if (problem == "SipserReduceToCliqueStandard") {
     return await fetchJson(
-      `${url}${problem}/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+      `${url}${problem}/solvedVisualize?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
       () => `${problem} VISUALIZE REQUEST FAILED`
     );
   } else {
     return await fetchJson(
-      `${url}${problem}Generic/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+      `${url}${problem}Generic/solvedVisualize?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
       () => `${problem} VISUALIZE REQUEST FAILED`
     );
   }
