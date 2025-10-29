@@ -173,7 +173,7 @@ const Visualizations = new Map([
             ></NodeSetSvgReact>
         )
     }],
-    ["Graph D3", (problemName, solve, url, problemInstance, solution, currentStep, allSteps)=>{
+    ["Graph D3", (problemName, solve, url, problemInstance, solution)=>{
         return(
         <StandardGraphSvgReact 
             problemName={problemName}
@@ -181,8 +181,6 @@ const Visualizations = new Map([
             url={url}
             problemInstance={problemInstance}
             solution={solution}
-            currentStep={currentStep}
-            problemSteps={allSteps}
         ></StandardGraphSvgReact>
         )
     }],
