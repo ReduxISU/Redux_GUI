@@ -9,6 +9,11 @@ a {
   text-decoration: none;
 }
 
+.accordion{
+  transform-origin: top;  /* Ensure it scales from the top */
+  border: 2px solid #ccc; /* Dark border */
+}
+
 .TextBox {
   text-align: center;
   margin: 100px;

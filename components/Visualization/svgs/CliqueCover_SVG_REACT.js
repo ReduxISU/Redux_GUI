@@ -195,7 +195,7 @@ function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, so
             style={{
                 display: "inline-block",
                 position: "relative",
-                height: "100%",
+                
                 width: "100%",
                 marginRight: "0px",
                 marginLeft: "0px",
