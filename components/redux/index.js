@@ -148,7 +148,7 @@ export async function requestSolvedInstance(url, solver, instance) {
  */
 export async function requestSolverSteps(url, solver, instance) {
   return await fetchPostJson(
-    `${url}${solver}/steps`,
+    `${url}ProlemProvider/steps?solver=${solver}`,
     instance,
     () => `${solver} SOLVED INSTANCE REQUEST FAILED`
   );
