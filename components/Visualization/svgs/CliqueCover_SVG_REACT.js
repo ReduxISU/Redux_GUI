@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import { text } from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
 import VisColors from '../constants/VisColors';
-import {requestVisualization, requestSolvedVisualization} from "../../redux";
+import {requestVisualization} from "../../redux";
 
 
 function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, solution }) {
@@ -30,7 +30,7 @@ function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, so
             .append("g")
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-        const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
+        const apiCall = requestVisualization(url, problemName, problemInstance);
         apiCall.then(function (data) {
 
             // Initialize the links

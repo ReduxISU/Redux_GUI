@@ -4,7 +4,7 @@
 import * as d3 from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getColorByKey } from '../constants/VisColorsArray';
-import {requestVisualization, requestSolvedVisualization} from "../../redux";
+import { requestVisualization } from "../../redux";
 
 function getProblemSolutionData(url, solver, instance) {
   var fullUrl = `${url}${solver}/solve?problemInstance=${instance}`;
@@ -15,7 +15,22 @@ function getProblemSolutionData(url, solver, instance) {
   });
 }
 
-function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, solution, visualizationName }) {
+const initDefinitions = (svg) => {
+  svg.append("defs")
+    .append("marker")
+    .attr("id", "arrow")
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 28) // adjust to node radius + padding
+    .attr("refY", 0)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
+    .append("path")
+    .attr("d", "M0,-5L10,0L0,5")
+    .attr("fill", "#999"); // or getColorByKey("Edges")
+};
+
+function ForceGraph({w, h, charge, problemData, solve, url, problemInstance}) {
   const margin = { top: 200, right: 30, bottom: 30, left: 200 },
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
@@ -37,8 +52,10 @@ function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, so
       .attr("transform",
         `translate(${margin.left}, ${margin.top})`);
 
-    
-    const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, visualizationName) : requestVisualization(url, visualizationName, problemInstance);
+    initDefinitions(svg);
+
+
+    const apiCall = problemData;
 
     apiCall.then((data) => {
       // Initialize the links
@@ -46,6 +63,7 @@ function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, so
         .selectAll("line")
         .data(data.links)
         .join("line")
+        .attr("marker-end", d => d.directed ? "url(#arrow)" : null)
         .style("stroke", function (d) {
           if (getColorByKey(d.color)) {
             if (d.delay !== "") {
@@ -125,16 +143,21 @@ function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, so
         .attr('text-anchor', "middle")
         .text(function (d) { return d["name"]; });
 
+
+      const maxWeight = d3.max(data.links, d => d.weight);
+      const scale = d3.scaleLinear().domain([0, maxWeight]).range([30, 200]);
+
       // Let's list the force we wanna apply on the network
-      const simulation = d3.forceSimulation(data.nodes)                 // Force algorithm is applied to data.nodes
-        .force("link", d3.forceLink().distance(charge * -1.5)                               // This force provides links between nodes
-          .id(function (d) { return d.name; })                     // This provide  the id of a node
-          .links(data.links)                                    // and this the list of links
+      const simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink()
+          .distance(d => scale(d.weight))
+          .id(d => d.name)
+          .links(data.links)
         )
-        .force("charge", d3.forceManyBody().strength(charge * 8)) // This adds repulsion between nodes 
-        .force("x", d3.forceX()) //centers disconnected subgraphs
+        .force("charge", d3.forceManyBody().strength(charge * 8))
+        .force("x", d3.forceX())
         .force("y", d3.forceY())
-        .force("collide", d3.forceCollide().radius(d => d.r * 2).iterations(10)) //collision detection
+        .force("collide", d3.forceCollide().radius(d => d.r * 2).iterations(10))
         .on("tick", ticked);
 
 
@@ -180,7 +203,7 @@ function ForceGraph({ w, h, charge, problemName, solve, url, problemInstance, so
       style={{
         display: "inline-block",
         position: "relative",
-        
+
         width: "100%",
         marginRight: "0px",
         marginLeft: "0px",

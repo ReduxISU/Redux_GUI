@@ -2,7 +2,7 @@ import { Container } from "@mui/material";
 import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
 import VisColors from '../constants/VisColors';
-import {requestVisualization, requestSolvedVisualization} from "../../redux";
+import {requestVisualization} from "../../redux";
 
 function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, solution, steps, currentStep}) {
   const margin = { top: 200, right: 30, bottom: 30, left: 200 },
@@ -21,7 +21,7 @@ function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, so
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    const apiCall = (solve) => solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
+    const apiCall = (solve) => requestVisualization(url, problemName, problemInstance);
 
     // Ensure steps is resolved before using it
     Promise.resolve(steps).then(resolvedSteps => {

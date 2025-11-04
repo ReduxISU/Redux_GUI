@@ -278,32 +278,12 @@ export async function requestProblemGenericInstance(url, problem, instance) {
  * @returns the graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualization(url, visualizationName, instance) {
+export async function requestVisualization(url, visualization, instance, solver) {
     return await fetchPostJson(
-      `${url}ProblemProvider/visualize?visualizationName=${visualizationName}`,
+      `${url}ProblemProvider/visualize?visualization=${visualization}&solver=${solver}`,
       instance,
-      () => `${visualizationName} VISUALIZE REQUEST FAILED`
+      () => `${visualization} VISUALIZE REQUEST FAILED`
     );
-}
-
-/**
- * @returns the solved graph visualization of the problem instance.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolvedVisualization(url, problem, instance, visualizationName) {
-  if (problem == "SipserReduceToCliqueStandard") {
-    return await fetchPostJson(
-      `${url}ProblemProvider/solvedVisualize?visualizationName=${visualizationName}`,
-      instance,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  } else {
-    return await fetchPostJson(
-      `${url}ProblemProvider/solvedVisualize?visualizationName=${visualizationName}`,
-      instance,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  }
 }
 
 /**

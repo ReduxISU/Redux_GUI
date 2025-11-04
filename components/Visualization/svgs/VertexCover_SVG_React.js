@@ -6,7 +6,7 @@ import { text } from "d3";
 import { useEffect, useMemo, useRef, useState} from "react";
 import VisColors from '../constants/VisColors';
 import { showSolution } from "./Sat3ToCliqueInstance";
-import {requestVisualization, requestSolvedVisualization} from "../../redux";
+import {requestVisualization} from "../../redux";
 
 function getProblemSolutionData(url, solver, instance) {
   var fullUrl = `${url}${solver}/solve?problemInstance=${instance}`;
@@ -41,7 +41,7 @@ function ForceGraph({ w, h, charge, url, solve, problemName, problemInstance, so
     .attr("transform",
         `translate(${margin.left}, ${margin.top})`);
 
-  const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
+  const apiCall = requestVisualization(url, problemName, problemInstance);
   apiCall.then( function( data) {
     // Initialize the links
     const link = svg

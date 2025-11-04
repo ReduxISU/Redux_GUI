@@ -13,7 +13,7 @@ import TSPSvgReact from "./TSP_SVG_React";
 import NodeSetSvgReact from "./NodeSet_SVG_React";
 import StandardGraphSvgReact from "./StandardGraphSvgReact";
 
-import { requestVisualization, requestSolvedVisualization } from "../../redux";
+import { requestVisualization } from "../../redux";
 
 const Visualizations = new Map([
     ["SAT3" , (solve, url, problemInstance, solution) => {
@@ -173,15 +173,13 @@ const Visualizations = new Map([
             ></NodeSetSvgReact>
         )
     }],
-    ["Graph D3", (problemName, solve, url, problemInstance, solution, visualizationName)=>{
+    ["Graph D3", (problemData, solve, url, problemInstance)=>{
         return(
         <StandardGraphSvgReact 
-            problemName={problemName}
+            problemData={Data}
             solve={solve}
             url={url}
             problemInstance={problemInstance}
-            solution={solution}
-            visualizationName={visualizationName}
         ></StandardGraphSvgReact>
         )
     }],

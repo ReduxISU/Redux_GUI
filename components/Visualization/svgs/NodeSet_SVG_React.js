@@ -4,7 +4,7 @@
 import * as d3 from "d3";
 import { useEffect, useMemo, useRef, useState} from "react";
 import VisColors from '../constants/VisColors';
-import {requestVisualization, requestSolvedVisualization} from "../../redux";
+import {requestVisualization} from "../../redux";
 
 const initDefinitions = (svg) => {
   svg.append('defs')
@@ -64,7 +64,7 @@ function DirectedForceGraph({ w, h, charge, url, solve, problemName, problemInst
     
     initDefinitions(svg);
 
-  const apiCall = solve ? requestSolvedVisualization(url, problemName, problemInstance, solution) : requestVisualization(url, problemName, problemInstance);
+  const apiCall = requestVisualization(url, problemName, problemInstance);
   apiCall.then( function( data) {
     // Initialize the links
     const link = svg
