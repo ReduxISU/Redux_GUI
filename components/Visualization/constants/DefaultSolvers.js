@@ -11,7 +11,6 @@ const defaultSolvers = new Map([
     ["GRAPHCOLORING","GraphColoringBruteForce"],
     ["HAMILTONIAN","HamiltonianBruteForce"],
     ["STEINERTREE","SteinerTreeBruteForce"],
-    ["SUBGRAPHISOMORPHISM","SubgraphIsomorphismBruteForce"],
     ["WEIGHTEDCUT","WeightedCutBruteForce"],
     ["DIRHAMILTONIAN","DirectedHamiltonianBruteForce"],
     ["TSP","TSPBruteForce"],

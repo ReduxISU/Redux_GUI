@@ -12,7 +12,6 @@ import DirHamiltonianSvgReact from "./DirHamiltonian_SVG_React";
 import TSPSvgReact from "./TSP_SVG_React";
 import NodeSetSvgReact from "./NodeSet_SVG_React";
 import StandardGraphSvgReact from "./StandardGraph_SVG_React";
-import SubgraphIsomorphismSvgReact  from "./SUBGRAPH_ISOMORPHISM_SVG_REACT";
 import { requestSolverSteps } from "../../redux";
 
 import { requestVisualization, requestSolvedVisualization } from "../../redux";
@@ -140,17 +139,6 @@ const Visualizations = new Map([
                 problemInstance={problemInstance}
                 solution={solution}
             ></SteinerTreeSvgReact>
-        )
-    }],
-    ["SUBGRAPHISOMORPHISM", (solve, url, problemInstance, solution)=>{
-        return(
-            <SubgraphIsomorphismSvgReact
-                problemName={"SUBGRAPHISOMORPHISM"}
-                solve={solve}
-                url={url}
-                problemInstance={problemInstance}
-                solution={solution}
-            ></SubgraphIsomorphismSvgReact>
         )
     }],
     ["WEIGHTEDCUT", (solve, url, problemInstance, solution)=>{
