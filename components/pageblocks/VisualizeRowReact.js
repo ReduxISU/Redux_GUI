@@ -174,6 +174,25 @@ export default function VisualizeRowReact({
 
   const logicProps = { solverOn: showSolution, reductionOn: showReduction, gadgetsOn: showGadgets };
 
+  const tip =
+    chosenSolver
+      ? {
+          header: visualizationInfo.visualizationName ?? "",
+          formalDef: visualizationInfo.visualizationDefinition ?? "",
+          // Keep description clean
+          info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+          // Source on its own line 
+          source: visualizationInfo.source,
+          credit:
+            Array.isArray(visualizationInfo.contributors) && visualizationInfo.contributors.length
+              ? visualizationInfo.contributors.join(", ")
+              : "",
+          
+          componentLink: visualizationInfo.visualizationLink || "",
+          sourceLink: visualizationInfo.sourceLink || "",
+        }
+      : TOOLTIP;
+
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText}>
@@ -188,16 +207,7 @@ export default function VisualizeRowReact({
           extenderButtons={(input) => [{ label: `Add new visualization "${input}"`, href: `${url}ProblemTemplate/visualization?problemName=${input}&visualizationName=${input}` }]}
         />
 
-        <PopoverTooltipClick
-          toolTip={chosenVisualization
-            ? {
-              header: visualizationInfo.verifierName ?? "",
-              formalDef: visualizationInfo.verifierDefinition ?? "",
-              info: visualizationInfo.source ?? "",
-            }
-            : TOOLTIP
-          }
-        />
+        <PopoverTooltipClick toolTip={tip} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>

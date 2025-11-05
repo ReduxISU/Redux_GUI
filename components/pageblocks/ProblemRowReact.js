@@ -146,6 +146,30 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     }
   }
 
+  const tip =
+    problemName
+      ? {
+          header: problemInfo.problemName ?? "",
+          formalDef: problemInfo.formalDefinition ?? "",
+          // It makes description clean 
+          info: problemInfo.problemDefinition ?? "",
+          // Source shown on its own line here
+          source:
+            problemInfo.source ||
+            (Array.isArray(problemInfo.citations) ? problemInfo.citations.join("; ") : "") ||
+            "",
+          // Contributors
+          credit:
+            Array.isArray(problemInfo.contributors) && problemInfo.contributors.length
+              ? problemInfo.contributors.join(", ")
+              : "",
+          //  Popover builds Wikipedia URL
+          componentLink: problemInfo.problemLink || "",
+          sourceLink: problemInfo.sourceLink || "",
+          isMathDef: true, // only this file adds the flag
+        }
+      : TOOLTIP;
+
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText}>
@@ -162,17 +186,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
             },
           ]}
         />{" "}
-        <PopoverTooltipClick
-          toolTip={
-            problemName
-              ? {
-                header: problemInfo.problemName ?? "",
-                formalDef: problemInfo.formalDefinition ?? "",
-                info: (problemInfo.problemDefinition ?? "") + (problemInfo.source ?? ""),
-              }
-              : TOOLTIP
-          }
-        ></PopoverTooltipClick>
+         <PopoverTooltipClick toolTip={tip} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>

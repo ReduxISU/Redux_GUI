@@ -1,73 +1,89 @@
-/**
- * PopoverTooltipHover.js
- * 
- * This is a resuable "widget" that acts as tooltip.
- * 
- * Requires the prop attributes "header","formalDef", and "info" which will become more generic in the future.
- * 
- * @author Alex Diviney
- */
-
-
-import { OverlayTrigger, Tooltip, Popover, Button } from 'react-bootstrap';
-import { SvgIcon } from '@mui/material';
+import { OverlayTrigger, Popover, Button } from 'react-bootstrap';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { useEffect,useContext } from 'react';
-import { getThemeProps } from '@mui/system';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 function popOver(props) {
+  const t = props?.toolTip || {};
+
   return (
     <Popover id="popover-basic" className="tooltip">
-      <Popover.Header as="h3">
-        {props.toolTip.header}
-      </Popover.Header>
-      <Popover.Body>
-        {props.toolTip.formalDef && (
-          <>
-            {props.toolTip.formalDef}
-            <br></br>
-            <br></br>
-          </>
-        )}
-        {props.toolTip.info && (
-          <>
-            {props.toolTip.info}
-            <br></br>
-            <br></br>
-          </>
-        )}
-        {props.toolTip.source && (
-          <>
-            {props.toolTip.source}
-            <br></br>
-            <br></br>
-          </>
-        )}
-        {props.toolTip.credit && (
-          <>
-            {props.toolTip.credit}
-            <br></br>
-            <br></br>
-          </>
-        )}
+      {t.header && (
+        <Popover.Header as="h3" style={{ fontWeight: 700 }}>
+          {t.header}
+        </Popover.Header>
+      )}
+
+      <Popover.Body style={{ maxWidth: 480, lineHeight: 1.35 }}>
+        {t.formalDef && t.isMathDef ? (
+          <div
+            style={{
+              padding: "8px 10px",
+              borderRadius: 6,
+              background: "rgba(0,0,0,0.06)",
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+              whiteSpace: "pre-wrap",
+              marginBottom: 12
+            }}
+          >
+            {t.formalDef}
+          </div>
+        ) : t.formalDef ? (
+          <div style={{ marginBottom: 12 }}>{t.formalDef}</div>
+        ) : null}
+
+        {t.info ? (
+          <div style={{ marginBottom: 12, whiteSpace: "pre-wrap" }}>
+            <strong>Definition:</strong> {t.info}
+            {t.componentLink && (
+              <a
+                href={t.componentLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ marginLeft: 4 }}
+              >
+                <OpenInNewIcon fontSize="small" />
+              </a>
+            )}
+          </div>
+        ) : null}
+
+        {t.source ? (
+          <div style={{ marginBottom: 6 }}>
+            <strong>Source:</strong> {t.source}
+            {t.sourceLink && (
+              <a
+                href={t.sourceLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ marginLeft: 4 }}
+              >
+                <OpenInNewIcon fontSize="small" />
+              </a>
+            )}
+          </div>
+        ) : null}
+
+        {t.credit ? (
+          <div>
+            <strong>Contributed by:</strong> {t.credit}
+          </div>
+        ) : null}
       </Popover.Body>
     </Popover>
   );
-
 }
 
 function PopoverTooltipClick(props) {
-
-
   return (
-    <OverlayTrigger rootClose={true} trigger="click" placement="bottom" overlay={popOver(props)} >
-      <InfoOutlinedIcon>
-        <Button variant="success">
-        </Button>
-      </InfoOutlinedIcon>
+    <OverlayTrigger
+      rootClose={true}
+      trigger="click"
+      placement="bottom"
+      overlay={popOver(props)}
+    >
+      <InfoOutlinedIcon style={{ cursor: "pointer" }} />
     </OverlayTrigger>
-  )
+  );
 }
 
 export default PopoverTooltipClick;
-
