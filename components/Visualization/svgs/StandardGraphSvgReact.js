@@ -30,7 +30,7 @@ const initDefinitions = (svg) => {
     .attr("fill", "#999"); // or getColorByKey("Edges")
 };
 
-function ForceGraph({w, h, charge, problemData, solve, url, problemInstance}) {
+function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) {
   const margin = { top: 200, right: 30, bottom: 30, left: 200 },
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
@@ -55,146 +55,150 @@ function ForceGraph({w, h, charge, problemData, solve, url, problemInstance}) {
     initDefinitions(svg);
 
 
-    const apiCall = problemData;
+    const data = problemData;
+    if (!data) return;
 
-    apiCall.then((data) => {
-      // Initialize the links
-      const link = svg
-        .selectAll("line")
-        .data(data.links)
-        .join("line")
-        .attr("marker-end", d => d.directed ? "url(#arrow)" : null)
-        .style("stroke", function (d) {
-          if (getColorByKey(d.color)) {
-            if (d.delay !== "") {
-              // Add fading effect for the link transitioning from grey to expected color
-              d3.select(this)
-                .transition()
-                .delay(d.delay)
-                .duration(1000)
-                .style("stroke", getColorByKey(d.color))
-                .attr("stroke-width", 2);
-              return getColorByKey("Edges")
-            }
-            else return getColorByKey(d.color)
+
+    // Initialize the links
+    const link = svg
+      .selectAll("line")
+      .data(data.links)
+      .join("line")
+      .attr("marker-end", d => d.directed ? "url(#arrow)" : null)
+      .style("stroke", function (d) {
+        if (getColorByKey(d.color)) {
+          if (d.delay !== "") {
+            // Add fading effect for the link transitioning from grey to expected color
+            d3.select(this)
+              .transition()
+              .delay(d.delay)
+              .duration(1000)
+              .style("stroke", getColorByKey(d.color))
+              .attr("stroke-width", 2);
+            return getColorByKey("Edges")
           }
-          else {
-            return getColorByKey("Edges") // Non-Solution color: grey
-          }
+          else return getColorByKey(d.color)
+        }
+        else {
+          return getColorByKey("Edges") // Non-Solution color: grey
+        }
+      })
+      .style("stroke-width", function (d) {
+        if (getColorByKey(d.color)) {
+          return "2px"; // Increase thickness for solutions
+        } else {
+          return "1px"; // Default thickness for non-solutions
+        }
+      })
+      .style("stroke-dasharray", function (d) {
+        if (d.dashed !== "") {
+          return "5, 5"; // Dashed pattern for solutions: 5 pixels dash, 5 pixels gap
+        } else {
+          return "none"; // No dashed pattern for non-solutions
+        }
+      })
+
+
+    // Initialize the nodes
+    // Here is where the color editing is for the Reduction side of the graph.
+
+    const node = svg
+      .selectAll("circle")
+      .data(data.nodes)
+      .join("circle")
+      .attr("r", 20)
+      .attr("fill", function (d) {
+
+        if (getColorByKey(d.color)) {
+          if (d.delay !== "") {
+            // Add fading effect for the node transitioning from grey to expected color
+            d3.select(this)
+              .transition()
+              .delay(d.delay)
+              .duration(1000)
+              .attr("fill", getColorByKey(d.color))
+            return getColorByKey("Background")
+          } else
+            return getColorByKey(d.color);
+        }
+        else {
+          return getColorByKey("Background") // Non-Solution color: grey
+        }
+
+      })
+      .attr("stroke", function (d) {
+        if (getColorByKey(d.outline)) {
+          return getColorByKey(d.outline); // Outline color
+        } else {
+          return null;
+        }
+      })
+
+
+    const text = svg.selectAll("text") //Append Text on top of nodes.
+      .data(data.nodes)
+      .enter()
+      .append("text")
+      .attr("fill", "black")
+      .attr("font-size", "12px")
+      .attr('text-anchor', "middle")
+      .text(function (d) { return d["name"]; });
+
+
+    const maxWeight = d3.max(data.links, d => d.weight);
+    const minWeight = d3.min(data.links, d => d.weight);
+
+    const scale = (maxWeight === minWeight)
+      ? () => 1   // all weights same → map to minimum
+      : d3.scaleLinear().domain([minWeight, maxWeight]).range([1, 10]);
+
+    // Let's list the force we wanna apply on the network
+    const simulation = d3.forceSimulation(data.nodes)                 // Force algorithm is applied to data.nodes
+      .force("link", d3.forceLink()
+        .distance(d => scale(d.weight) * -1.5 * charge) // call scale for each link
+        .id(d => d.name)
+        .links(data.links)
+      )
+      .force("charge", d3.forceManyBody().strength(charge * 8)) // This adds repulsion between nodes 
+      .force("x", d3.forceX()) //centers disconnected subgraphs
+      .force("y", d3.forceY())
+      .force("collide", d3.forceCollide().radius(d => d.r * 2).iterations(10)) //collision detection
+      .on("tick", ticked);
+
+
+
+
+    // This function is run at each iteration of the force algorithm, updating the nodes position.
+    function ticked() {
+      link
+        .attr("x1", function (d) { return d.source.x; })
+        .attr("y1", function (d) { return d.source.y; })
+        .attr("x2", function (d) { return d.target.x; })
+        .attr("y2", function (d) { return d.target.y; });
+
+      node
+        .attr("cx", function (d) { return d.x; })
+        .attr("cy", function (d) { return d.y; })
+        .attr("searchId", function (d) { return d.name; });
+
+      text
+        .text(function (d) {
+          return d.name;
         })
-        .style("stroke-width", function (d) {
-          if (getColorByKey(d.color)) {
-            return "2px"; // Increase thickness for solutions
-          } else {
-            return "1px"; // Default thickness for non-solutions
-          }
+        .attr('x', function (d) {
+          return d.x;
         })
-        .style("stroke-dasharray", function (d) {
-          if (d.dashed !== "") {
-            return "5, 5"; // Dashed pattern for solutions: 5 pixels dash, 5 pixels gap
-          } else {
-            return "none"; // No dashed pattern for non-solutions
-          }
+        .attr('y', function (d) {
+          return d.y
+        })
+        .attr('dy', function (d) {
+          return 5
         })
 
-
-      // Initialize the nodes
-      // Here is where the color editing is for the Reduction side of the graph.
-
-      const node = svg
-        .selectAll("circle")
-        .data(data.nodes)
-        .join("circle")
-        .attr("r", 20)
-        .attr("fill", function (d) {
-
-          if (getColorByKey(d.color)) {
-            if (d.delay !== "") {
-              // Add fading effect for the node transitioning from grey to expected color
-              d3.select(this)
-                .transition()
-                .delay(d.delay)
-                .duration(1000)
-                .attr("fill", getColorByKey(d.color))
-              return getColorByKey("Background")
-            } else
-              return getColorByKey(d.color);
-          }
-          else {
-            return getColorByKey("Background") // Non-Solution color: grey
-          }
-
-        })
-        .attr("stroke", function (d) {
-          if (getColorByKey(d.outline)) {
-            return getColorByKey(d.outline); // Outline color
-          } else {
-            return null;
-          }
-        })
+    }
 
 
-      const text = svg.selectAll("text") //Append Text on top of nodes.
-        .data(data.nodes)
-        .enter()
-        .append("text")
-        .attr("fill", "black")
-        .attr("font-size", "12px")
-        .attr('text-anchor', "middle")
-        .text(function (d) { return d["name"]; });
-
-
-      const maxWeight = d3.max(data.links, d => d.weight);
-      const scale = d3.scaleLinear().domain([0, maxWeight]).range([30, 200]);
-
-      // Let's list the force we wanna apply on the network
-      const simulation = d3.forceSimulation(data.nodes)
-        .force("link", d3.forceLink()
-          .distance(d => scale(d.weight))
-          .id(d => d.name)
-          .links(data.links)
-        )
-        .force("charge", d3.forceManyBody().strength(charge * 8))
-        .force("x", d3.forceX())
-        .force("y", d3.forceY())
-        .force("collide", d3.forceCollide().radius(d => d.r * 2).iterations(10))
-        .on("tick", ticked);
-
-
-
-
-      // This function is run at each iteration of the force algorithm, updating the nodes position.
-      function ticked() {
-        link
-          .attr("x1", function (d) { return d.source.x; })
-          .attr("y1", function (d) { return d.source.y; })
-          .attr("x2", function (d) { return d.target.x; })
-          .attr("y2", function (d) { return d.target.y; });
-
-        node
-          .attr("cx", function (d) { return d.x; })
-          .attr("cy", function (d) { return d.y; })
-          .attr("searchId", function (d) { return d.name; });
-
-        text
-          .text(function (d) {
-            return d.name;
-          })
-          .attr('x', function (d) {
-            return d.x;
-          })
-          .attr('y', function (d) {
-            return d.y
-          })
-          .attr('dy', function (d) {
-            return 5
-          })
-
-      }
-
-    }).catch(error => console.log("VISUALIZATION FAILED"));
-
-  }, [url, solve, problemInstance])
+  }, [url, solve, problemInstance, problemData])
   return (
     <svg
       width={width}

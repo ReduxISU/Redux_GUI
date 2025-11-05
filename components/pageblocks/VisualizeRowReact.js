@@ -69,6 +69,7 @@ export default function VisualizeRowReact({
 
   const [problemVisualizationData, setProblemVisualizationData] = useState(defaultSat3VisualizationArr);
   const [reducedVisualizationData, setReducedVisualizationData] = useState(defaultCLIQUEVisualizationArr);
+  const [currentProblemData, setCurrentProblemData] = useState(null);
   const [problemData, setProblemData] = useState([]);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -131,8 +132,12 @@ export default function VisualizeRowReact({
 
   // Show solution when at last step
   useEffect(() => {
-    setShowSolution(currentStep === totalSteps && totalSteps > 0);
+    setShowSolution(currentStep === (totalSteps - 1) && totalSteps > 1);
   }, [currentStep, totalSteps]);
+
+  useEffect(() => {
+    setCurrentProblemData(problemData[currentStep] ?? null);
+  }, [problemData, currentStep]);
 
   // Switch handlers
   function handleSwitch1Change(e) {
@@ -150,7 +155,7 @@ export default function VisualizeRowReact({
     setCurrentStep(0);
   }
   function handleRefreshButton() {
-    setSvgIsLoading(true);
+    setSvgIsLoading(false);
     setShowSolution(false);
     setShowGadgets(false);
     setShowReduction(false);
@@ -168,7 +173,6 @@ export default function VisualizeRowReact({
   }
 
   const logicProps = { solverOn: showSolution, reductionOn: showReduction, gadgetsOn: showGadgets };
-  const currentProblemData = problemData[currentStep] ?? null;
 
   return (
     <ProblemSection defaultCollapsed={false}>

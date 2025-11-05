@@ -176,7 +176,7 @@ const Visualizations = new Map([
     ["Graph D3", (problemData, solve, url, problemInstance)=>{
         return(
         <StandardGraphSvgReact 
-            problemData={Data}
+            problemData={problemData}
             solve={solve}
             url={url}
             problemInstance={problemInstance}
