@@ -145,24 +145,22 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
       .text(function (d) { return d["name"]; });
 
 
-    const maxWeight = d3.max(data.links, d => d.weight);
-    const minWeight = d3.min(data.links, d => d.weight);
+    const weights = data.links.map(d => d.weight);
+    const minWeight = d3.min(weights);
+    const maxWeight = d3.max(weights);
 
-    const scale = (maxWeight === minWeight)
-      ? () => 1   // all weights same → map to minimum
-      : d3.scaleLinear().domain([minWeight, maxWeight]).range([1, 10]);
+    const scale = (minWeight === maxWeight)
+      ? () => 1   
+      : d3.scaleLinear().domain([minWeight, maxWeight]).range([1, 4]).clamp(true);
 
-    // Let's list the force we wanna apply on the network
-    const simulation = d3.forceSimulation(data.nodes)                 // Force algorithm is applied to data.nodes
-      .force("link", d3.forceLink()
-        .distance(d => scale(d.weight) * -1.5 * charge) // call scale for each link
+    const simulation = d3.forceSimulation(data.nodes)
+      .force("link", d3.forceLink(data.links)
         .id(d => d.name)
-        .links(data.links)
-      )
-      .force("charge", d3.forceManyBody().strength(charge * 8)) // This adds repulsion between nodes 
-      .force("x", d3.forceX()) //centers disconnected subgraphs
+        .distance(d => scale(d.weight) * Math.abs(charge) * 1.5))
+      .force("charge", d3.forceManyBody().strength(charge * 8))
+      .force("x", d3.forceX())
       .force("y", d3.forceY())
-      .force("collide", d3.forceCollide().radius(d => d.r * 2).iterations(10)) //collision detection
+      .force("collide", d3.forceCollide().radius(d => d.r * 2).iterations(10))
       .on("tick", ticked);
 
 
