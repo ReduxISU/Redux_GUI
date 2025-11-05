@@ -133,6 +133,7 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
           return null;
         }
       })
+      .attr("stroke-width", d => d.outline ? 2 : 0);
 
 
     const text = svg.selectAll("text") //Append Text on top of nodes.
