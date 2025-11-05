@@ -1,34 +1,8 @@
 //This is a react compatible graph visualization built in d3.
-
-
 import * as d3 from "d3";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getColorByKey } from '../constants/VisColorsArray';
 import { requestVisualization } from "../../redux";
-
-function getProblemSolutionData(url, solver, instance) {
-  var fullUrl = `${url}${solver}/solve?problemInstance=${instance}`;
-  return fetch(fullUrl).then(resp => {
-    if (resp.ok) {
-      return resp.json()
-    }
-  });
-}
-
-const initDefinitions = (svg) => {
-  svg.append("defs")
-    .append("marker")
-    .attr("id", "arrow")
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 28) // adjust to node radius + padding
-    .attr("refY", 0)
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
-    .attr("orient", "auto")
-    .append("path")
-    .attr("d", "M0,-5L10,0L0,5")
-    .attr("fill", "#999"); // or getColorByKey("Edges")
-};
 
 function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) {
   const margin = { top: 200, right: 30, bottom: 30, left: 200 },
@@ -52,19 +26,37 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
       .attr("transform",
         `translate(${margin.left}, ${margin.top})`);
 
-    initDefinitions(svg);
-
-
     const data = problemData;
     if (!data) return;
 
+    const linkColors = Array.from(new Set(data.links.map(d => d.color || "Edges")));
+
+    const defs = svg.append("defs");
+    data.links.forEach((d, i) => {
+      if (d.directed) {
+        const marker = defs.append("marker")
+          .attr("id", `arrow-${i}`) // unique per link
+          .attr("viewBox", "0 -5 10 10")
+          .attr("refX", 26)
+          .attr("refY", 0)
+          .attr("markerWidth", 6)
+          .attr("markerHeight", 6)
+          .attr("orient", "auto");
+
+        marker.append("path")
+          .attr("d", "M0,-5L10,0L0,5")
+          .attr("fill", getColorByKey("Edges")); // start neutral, animate to d.color
+
+        d.markerId = `arrow-${i}`;
+      }
+    });
 
     // Initialize the links
     const link = svg
       .selectAll("line")
       .data(data.links)
       .join("line")
-      .attr("marker-end", d => d.directed ? "url(#arrow)" : null)
+      .attr("marker-end", d => d.directed ? `url(#${d.markerId})` : null)
       .style("stroke", function (d) {
         if (getColorByKey(d.color)) {
           if (d.delay !== "") {
@@ -83,13 +75,7 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
           return getColorByKey("Edges") // Non-Solution color: grey
         }
       })
-      .style("stroke-width", function (d) {
-        if (getColorByKey(d.color)) {
-          return "2px"; // Increase thickness for solutions
-        } else {
-          return "1px"; // Default thickness for non-solutions
-        }
-      })
+      .style("stroke-width", "2px")
       .style("stroke-dasharray", function (d) {
         if (d.dashed !== "") {
           return "5, 5"; // Dashed pattern for solutions: 5 pixels dash, 5 pixels gap
@@ -98,6 +84,20 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
         }
       })
 
+    data.links.forEach(d => {
+      if (d.directed) {
+        const markerPath = d3.select(`#${d.markerId} path`);
+        if (d.delay !== "") {
+          markerPath
+            .transition()
+            .delay(d.delay)
+            .duration(1000)
+            .attr("fill", getColorByKey(d.color));
+        } else {
+          markerPath.attr("fill", getColorByKey(d.color) || getColorByKey("Edges"));
+        }
+      }
+    });
 
     // Initialize the nodes
     // Here is where the color editing is for the Reduction side of the graph.
@@ -151,7 +151,7 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
     const maxWeight = d3.max(weights);
 
     const scale = (minWeight === maxWeight)
-      ? () => 1   
+      ? () => 1
       : d3.scaleLinear().domain([minWeight, maxWeight]).range([1, 4]).clamp(true);
 
     const simulation = d3.forceSimulation(data.nodes)
