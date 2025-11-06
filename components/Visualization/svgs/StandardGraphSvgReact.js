@@ -29,8 +29,6 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
     const data = problemData;
     if (!data) return;
 
-    const linkColors = Array.from(new Set(data.links.map(d => d.color || "Edges")));
-
     const defs = svg.append("defs");
     data.links.forEach((d, i) => {
       if (d.directed) {

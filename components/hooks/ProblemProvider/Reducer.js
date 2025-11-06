@@ -25,6 +25,10 @@ export function useReducer(url, problemName, problemType, problemInstance) {
     state.chosenReduceTo,
     state.chosenReductionType
   );
+  [state.reductionVisualization, state.setReductionVisualization] = useReductionVisualization(
+    url,
+    state.chosenReduceTo
+  );
   return state;
 }
 
@@ -61,6 +65,25 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
 
   return [reducedInstance, setReducedInstance];
 }
+
+function useReductionVisualization(url, chosenReduceTo) {
+  const [reductionVisualization, setReductionVisualization] = useState("");
+
+  useEffect(() => {
+    if (!chosenReduceTo) {
+      setReductionVisualization("");
+      return;
+    }
+
+    (async () => {
+      const info = await requestReductionInfo(url, chosenReduceTo);
+      setReductionVisualization(info?.reductionVisualization ?? "");
+    })();
+  }, [url, chosenReduceTo]);
+
+  return [reductionVisualization, setReductionVisualization];
+}
+
 
 function useReduceToOptions(url, problemName, problemType) {
   const [reduceToOptions, setReduceToOptions] = useState([]);
@@ -111,7 +134,7 @@ function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOption
   }, [problemName, chosenReduceTo]);
 
   useEffect(() => {
-    if(reductionTypeOptions.length === 0) return;
+    if (reductionTypeOptions.length === 0) return;
 
     const storedData = localStorage.getItem('problemData');
 
@@ -121,7 +144,7 @@ function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOption
         const allData = JSON.parse(storedData);
         setChosenReductionType(allData.reductionType);
         isFirstRender.current = false;
-        if(allData.reductionType !== "") return;
+        if (allData.reductionType !== "") return;
       }
       isFirstRender.current = false;
     }
@@ -150,7 +173,7 @@ function useChosenReduceTo(problemName, reduceToOptions) {
   }, [problemName]);
 
   useEffect(() => {
-    if(reduceToOptions.length === 0) return;
+    if (reduceToOptions.length === 0) return;
     const storedData = localStorage.getItem('problemData');
 
     if (isFirstRender.current) {
@@ -159,10 +182,10 @@ function useChosenReduceTo(problemName, reduceToOptions) {
         const allData = JSON.parse(storedData);
         setChosenReduceTo(allData.reduceTo);
         isFirstRender.current = false;
-        if(allData.reduceTo !== "") return;
+        if (allData.reduceTo !== "") return;
       }
       isFirstRender.current = false;
-    } 
+    }
 
     if (problemName === "SAT3" && reduceToOptions.includes(DEFAULT_SAT3_CHOSEN_REDUCE_TO)) {
       setChosenReduceTo(DEFAULT_SAT3_CHOSEN_REDUCE_TO);
