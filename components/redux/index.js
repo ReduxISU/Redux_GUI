@@ -32,7 +32,7 @@ export async function requestMappedSolutionTransitive(url, reductionPath, proble
 export async function requestMappedSolution(url, reduction, problemFrom, problemTo, solution) {
   return await fetchPostJson(
     `${url}${reduction}/mapSolution`,
-    { problemFrom: problemFrom, problemTo: problemTo, problemFromSolution: solution },
+    {problemFrom: problemFrom, problemTo: problemTo, problemFromSolution: solution},
     () => `${reduction} MAPPED SOLUTION REQUEST FAILED`
   );
 }
@@ -91,7 +91,7 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
 
   return await fetchPostJson(
     `${url}ProblemProvider/verify?verifier=${verifier}`,
-    { problemInstance: instance, certificate: certificate },
+    {problemInstance: instance, certificate: certificate},
     () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`
   );
 }
@@ -120,7 +120,7 @@ export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver
 
     const mappedSolution = await fetchPostJson(
       `${url}SipserReduceToCliqueStandard/reverseMappedSolution`,
-      { problemFrom: instance, problemTo: reduction.reductionTo.instance, problemFromSolution: solution },
+      {problemFrom: instance, problemTo: reduction.reductionTo.instance, problemFromSolution: solution},
       () => "TRANSITIVE SOLVED REQUEST FAILED"
     );
 
@@ -222,27 +222,6 @@ export async function requestVisualizations(url, problem, problemType = "NPC") {
 }
 
 /**
- * @returns the solved graph visualization of the problem instance.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolvedVisualization(url, problem, instance, solution) {
-  // TODO: convert to POST request for problem instance
-  var preparedSolution = solution.replaceAll("&", "%26");
-  var preparedInstance = instance.replaceAll("&", "%26");
-  if (problem == "SipserReduceToCliqueStandard") {
-    return await fetchJson(
-      `${url}${problem}/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  } else {
-    return await fetchJson(
-      `${url}${problem}Generic/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  }
-}
-
-/**
  * @returns an array of solvers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */
@@ -300,11 +279,11 @@ export async function requestProblemGenericInstance(url, problem, instance) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestVisualization(url, visualization, instance, solver) {
-  return await fetchPostJson(
-    `${url}ProblemProvider/visualize?visualization=${visualization}&solver=${solver}`,
-    instance,
-    () => `${visualization} VISUALIZE REQUEST FAILED`
-  );
+    return await fetchPostJson(
+      `${url}ProblemProvider/visualize?visualization=${visualization}&solver=${solver}`,
+      instance,
+      () => `${visualization} VISUALIZE REQUEST FAILED`
+    );
 }
 
 /**

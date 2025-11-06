@@ -17,8 +17,6 @@ export default function VisualizationLogic({
   problemNameMap,
   problemInstance,
   reductionName,
-  reductionData,
-  reductionVisualization,
   chosenReductionType,
   reductionNameMap,
   reducedInstance,
@@ -72,12 +70,12 @@ export default function VisualizationLogic({
 
         if(visualizationState.reductionOn){
             try{
-                reducedVisualization = Visualizations.get(reductionVisualization)(reductionData, solve, url, problemInstance)
+                reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, reducedInstance, mappedSolution)
 
                 //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
                 // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
                 if(reductionName == "CLIQUE"){
-                    //reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
+                    reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
                 }
 
             } catch{

@@ -2,7 +2,7 @@ import React from 'react'
 import { getClique } from './Sat3ToCliqueReduction'
 import dynamic from "next/dynamic";
 import { useRef,useState,useEffect,useContext } from 'react';
-import { requestReducedInstance, requestSolvedVisualization } from '../../redux';
+import { requestReducedInstance } from '../../redux';
 
 /// SAT3_SVG_React.js
 /// This is a wrapper for the SAT3 visualization instance. It allows us to use the visualization as a react component, and also disables

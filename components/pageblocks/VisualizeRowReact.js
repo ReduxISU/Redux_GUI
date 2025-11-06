@@ -26,7 +26,6 @@ const TOOLTIP = { header: "Visualization Information", formalDef: "Choose a visu
 
 export default function VisualizeRowReact({
   url,
-  problemInfo,
   problemInstance,
   problemName,
   problemNameMap,
@@ -34,13 +33,11 @@ export default function VisualizeRowReact({
   chosenReductionType,
   reductionNameMap,
   reducedInstance,
-  reductionVisualization,
   chosenSolver,
   chosenVisualization,
   VisualizationNameMap,
   setChosenVisualization,
   visualizationOptions,
-  defaultVisualizationMap,
 }) {
 
   const visualizationInfo = useVisualizationInfo(url, chosenVisualization);
@@ -73,32 +70,12 @@ export default function VisualizeRowReact({
   const [problemVisualizationData, setProblemVisualizationData] = useState(defaultSat3VisualizationArr);
   const [reducedVisualizationData, setReducedVisualizationData] = useState(defaultCLIQUEVisualizationArr);
   const [currentProblemData, setCurrentProblemData] = useState(null);
-  const [currentReductionData, setCurrentReductionData] = useState(null);
   const [problemData, setProblemData] = useState([]);
-  const [problemReductionData, setProblemReductionData] = useState([]);
-
   const [svgIsLoading, setSvgIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
   const isDisabled = showGadgets || showReduction;
   const totalSteps = problemData.length;
-
-  // Fetch reduction visualization data asynchronously
-  useEffect(() => {
-    if (!chosenReduceTo || !reducedInstance || !showReduction) return;
-
-    const fetchVisualization = async () => {
-      try {
-        const data = await requestVisualization(url, reductionVisualization || problemInfo.defaultVisualization.visualizationType, reducedInstance, chosenSolver);
-        setProblemReductionData(data ?? []);
-      } catch (err) {
-        console.error("Failed to load visualization:", err);
-        setProblemReductionData([]);
-      }
-    };
-
-    fetchVisualization();
-  }, [showReduction]);
 
   // Fetch main visualization data asynchronously
   useEffect(() => {
@@ -110,13 +87,7 @@ export default function VisualizeRowReact({
     const fetchVisualization = async () => {
       try {
         const data = await requestVisualization(url, chosenVisualization, problemInstance, chosenSolver);
-        if (showReduction) {
-          const modifiedData = (data ?? []).length > 2
-            ? [data[0], data[data.length - 1]] // keep only first and last
-            : data ?? [];
-          setProblemData(modifiedData ?? []);
-        }
-        else setProblemData(data ?? []);
+        setProblemData(data ?? []);
       } catch (err) {
         console.error("Failed to load visualization:", err);
         setProblemData([]);
@@ -124,7 +95,7 @@ export default function VisualizeRowReact({
     };
 
     fetchVisualization();
-  }, [problemInstance, problemName, chosenSolver, chosenVisualization, showReduction]);
+  }, [problemInstance, problemName, chosenSolver, chosenVisualization]);
 
   // Fetch SAT3 / Reduction data asynchronously
   useEffect(() => {
@@ -166,8 +137,7 @@ export default function VisualizeRowReact({
 
   useEffect(() => {
     setCurrentProblemData(problemData[currentStep] ?? null);
-    if (showReduction) setCurrentReductionData(problemReductionData[currentStep] ?? null);
-  }, [problemData, currentStep, showReduction]);
+  }, [problemData, currentStep]);
 
   // Switch handlers
   function handleSwitch1Change(e) {
@@ -207,20 +177,20 @@ export default function VisualizeRowReact({
   const tip =
     chosenVisualization
       ? {
-        header: visualizationInfo.visualizationName ?? "",
-        formalDef: visualizationInfo.visualizationDefinition ?? "",
-        // Keep description clean
-        info: visualizationInfo.info ?? visualizationInfo.description ?? "",
-        // Source on its own line 
-        source: visualizationInfo.source,
-        credit:
-          Array.isArray(visualizationInfo.contributors) && visualizationInfo.contributors.length
-            ? visualizationInfo.contributors.join(", ")
-            : "",
-
-        componentLink: visualizationInfo.visualizationLink || "",
-        sourceLink: visualizationInfo.sourceLink || "",
-      }
+          header: visualizationInfo.visualizationName ?? "",
+          formalDef: visualizationInfo.visualizationDefinition ?? "",
+          // Keep description clean
+          info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+          // Source on its own line 
+          source: visualizationInfo.source,
+          credit:
+            Array.isArray(visualizationInfo.contributors) && visualizationInfo.contributors.length
+              ? visualizationInfo.contributors.join(", ")
+              : "",
+          
+          componentLink: visualizationInfo.visualizationLink || "",
+          sourceLink: visualizationInfo.sourceLink || "",
+        }
       : TOOLTIP;
 
   return (
@@ -292,8 +262,6 @@ export default function VisualizeRowReact({
           visualizationType={visualizationInfo.visualizationType}
           visualizationName={chosenVisualization}
           problemData={currentProblemData}
-          reductionData={currentReductionData}
-          reductionVisualization={reductionVisualization}
         />
       </ProblemSection.Body>
     </ProblemSection>
