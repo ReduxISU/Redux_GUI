@@ -175,7 +175,7 @@ export default function VisualizeRowReact({
   const logicProps = { solverOn: showSolution, reductionOn: showReduction, gadgetsOn: showGadgets };
 
   const tip =
-    chosenSolver
+    chosenVisualization
       ? {
           header: visualizationInfo.visualizationName ?? "",
           formalDef: visualizationInfo.visualizationDefinition ?? "",
