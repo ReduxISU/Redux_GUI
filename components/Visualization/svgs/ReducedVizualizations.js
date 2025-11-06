@@ -1,7 +1,16 @@
 import ArcSetSvgReact from "./ArcSet_SVG_React"
 import VertexCoverSvgReact from "./VertexCover_SVG_React"
 import CLIQUE_SVG_REACT from "./CLIQUE_SVG_REACT"
+import StandardGraphSvgReact from "./StandardGraphSvgReact"
 const ReducedVisualizations = new Map([
+    ["Graph D3",(solve, url, problemInstance) => {
+        <StandardGraphSvgReact 
+            problemData={problemData}
+            solve={solve}
+            url={url}
+            problemInstance={problemInstance}
+        ></StandardGraphSvgReact>
+    }],
     //Vertex Cover
     ["LawlerKarp",(solve, url, problemInstance, solution) => {
         return(
