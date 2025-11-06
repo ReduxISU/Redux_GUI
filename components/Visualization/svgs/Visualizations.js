@@ -16,7 +16,7 @@ import StandardGraphSvgReact from "./StandardGraphSvgReact";
 import { requestVisualization } from "../../redux";
 
 const Visualizations = new Map([
-    ["SAT3" , (solve, url, problemInstance, solution) => {
+    ["Boolean Satisfiability" , (solve, url, problemInstance, solution) => {
         return(
             <SAT3_SVG_React 
                 problemName={"SAT3"}
