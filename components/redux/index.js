@@ -222,6 +222,28 @@ export async function requestVisualizations(url, problem, problemType = "NPC") {
 }
 
 /**
+ * @returns the solved graph visualization of the problem instance.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestSolvedVisualization(url, problem, instance, solution) {
+  // TODO: convert to POST request for problem instance
+  var preparedSolution = solution.replaceAll("&", "%26");
+  var preparedInstance = instance.replaceAll("&", "%26");
+  if (problem == "SipserReduceToCliqueStandard") {
+    return await fetchJson(
+      `${url}${problem}/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  } else {
+    return await fetchJson(
+      `${url}${problem}Generic/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
+      () => `${problem} VISUALIZE REQUEST FAILED`
+    );
+  }
+}
+
+
+/**
  * @returns an array of solvers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */

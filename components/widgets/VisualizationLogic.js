@@ -61,9 +61,9 @@ export default function VisualizationLogic({
       }
     }, [solution])
     
-    if(url && problemInstance){
+    if(url && problemInstance && problemData && Object.keys(problemData).length > 0){
         try{
-            visualization = Visualizations.get(visualizationType)(problemData, solve, url, problemInstance)
+            visualization = Visualizations.get(visualizationType)(solve, url, problemInstance, solution, problemData)
         } catch{
             visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)}/>
         }
