@@ -96,7 +96,7 @@ function MainPageContent() {
             </div>
 
             <div className="p-2 col-example">
-              <VisualizeRowMemo url={reduxBaseUrl} {...problem} {...reducer} chosenSolver={solver.chosenSolver} {...visualization} />
+              <VisualizeRowMemo url={reduxBaseUrl} {...problem} {...reducer} chosenSolver={solver.chosenSolver} defaultSolverMap={solver.defaultSolverMap} {...visualization} />
             </div>
 
             <div className="p-2 col-example">

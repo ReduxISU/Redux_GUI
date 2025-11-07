@@ -25,6 +25,10 @@ export function useReducer(url, problemName, problemType, problemInstance) {
     state.chosenReduceTo,
     state.chosenReductionType
   );
+  [state.reductionVisualization, state.setReductionVisualization] = useReductionVisualization(
+    url,
+    state.chosenReduceTo
+  );
   return state;
 }
 
@@ -60,6 +64,24 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
   }, [chosenReductionType, problemInstance]);
 
   return [reducedInstance, setReducedInstance];
+}
+
+function useReductionVisualization(url, chosenReduceTo) {
+  const [reductionVisualization, setReductionVisualization] = useState("");
+
+  useEffect(() => {
+    if (!chosenReduceTo) {
+      setReductionVisualization("");
+      return;
+    }
+
+    (async () => {
+      const info = await requestReductionInfo(url, chosenReduceTo);
+      setReductionVisualization(info?.reductionVisualization ?? "");
+    })();
+  }, [url, chosenReduceTo]);
+
+  return [reductionVisualization, setReductionVisualization];
 }
 
 function useReduceToOptions(url, problemName, problemType) {

@@ -61,25 +61,27 @@ function useVisualizationOptions(url, problemName, problemType) {
 
 function useChosenVisualization(problemName, defaultVisualizationMap) {
   const [chosenVisualization, setChosenVisualization] = useState("");
-  const isFirstRender = useRef(true);
+  const hasLoadedFromStorage = useRef(false);
 
   useEffect(() => {
-    if(!problemName || defaultVisualizationMap.size === 0) return;
+    if (!problemName || defaultVisualizationMap.size === 0) return;
 
-    let VisualizationVar = !problemName ? "" : defaultVisualizationMap.get(problemName);
-    const storedData = localStorage.getItem('problemData');
-
-    if (isFirstRender.current) {
-      // First render: read from localStorage
+    // Only load localStorage once
+    if (!hasLoadedFromStorage.current) {
+      const storedData = localStorage.getItem('problemData');
       if (storedData) {
         const allData = JSON.parse(storedData);
-        VisualizationVar = allData.Visualization;
-        
+        setChosenVisualization(allData.Visualization || "");
+        hasLoadedFromStorage.current = true;
+        return; // skip setting default from map on first render if localStorage exists
       }
-      isFirstRender.current = false;
+      hasLoadedFromStorage.current = true;
     }
-    
-    setChosenVisualization(VisualizationVar);
+
+    // fallback to default from map
+    const defaultVisualization = defaultVisualizationMap.get(problemName) || "";
+    setChosenVisualization(defaultVisualization);
+
   }, [problemName, defaultVisualizationMap]);
 
   return [chosenVisualization, setChosenVisualization];
