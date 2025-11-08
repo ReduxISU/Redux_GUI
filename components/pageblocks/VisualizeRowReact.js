@@ -104,7 +104,7 @@ export default function VisualizeRowReact({
       try {
         const data = await requestVisualization(url, reductionVisualization || defaultVisualizationMap.get(chosenReduceTo), reducedInstance, defaultSolverMap.get(chosenReduceTo));
         console.log("++++++++++++++++++++++++++++++++++++++");
-        console.log("chosenReductionVisualization:", reductionVisualization || defaultVisualizationMap.get(chosenReduceTo));
+        console.log("chosenReductionType:", reductionVisualization || defaultVisualizationMap.get(chosenReduceTo));
         console.log("defaultVisualizationMap.get(chosenReduceTo):", defaultVisualizationMap.get(chosenReduceTo));
         console.log("reducedInstance:", reducedInstance);
         console.log("defaultSolverMap.get(chosenReduceTo):", defaultSolverMap.get(chosenReduceTo));
@@ -187,7 +187,9 @@ export default function VisualizeRowReact({
   useEffect(() => {
     setDisableSolution(!problemName);
     setDisableReduction(!chosenReduceTo);
-    setShowReduction(problemName === "SAT3" && chosenReduceTo === "CLIQUE");
+    setShowGadgets(false);
+    // Temporarily disabled, needs fixing!
+    //setShowReduction(problemName === "SAT3" && chosenReduceTo === "CLIQUE");
   }, [problemName, chosenReduceTo]);
 
   useEffect(() => {
@@ -325,6 +327,7 @@ export default function VisualizeRowReact({
           visualizationName={chosenVisualization}
           problemData={currentProblemData}
           reductionData={currentReductionData}
+          showSolutionToggle={showSolution}
           reductionVisualization={"Graph D3"}
         />
       </ProblemSection.Body>
