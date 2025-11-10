@@ -6,13 +6,10 @@ import { useEffect, useState } from 'react';
 import { Container } from '@mui/material';
 import { No_Viz_Svg, No_Reduction_Viz_Svg } from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
-import ReducedVisualizations from '../Visualization/svgs/ReducedVizualizations';
-import defaultSolvers from '../Visualization/constants/DefaultSolvers';
-import { requestMappedSolution, requestMappedSolutionTransitive, requestSolvedInstanceTemporarySat3CliqueSolver } from '../redux';
+import { requestGagetMap } from '../redux';
 
 export default function VisualizationLogic({
   url,
-  chosenSolver,
   problemName,
   problemNameMap,
   problemInstance,
@@ -23,15 +20,12 @@ export default function VisualizationLogic({
   visualizationState,
   loading,
   visualizationType,
-  problemVisualizationData,
-  reducedVisualizationData,
-  problemSolutionData,
   problemData,
   reductionData,
   reductionVisualization,
+  chosenReduceTo,
 }) {
-  const [solution, setSolution] = useState("");
-  const [mappedSolution, setMappedSolution] = useState();
+  const [gadgetMap, setGadgetMap] = useState([]);
   let visualization;
   let reducedVisualization;
 
@@ -40,55 +34,22 @@ export default function VisualizationLogic({
   const handleBar = (sizes) => { }
 
   useEffect(() => {
-    if (url && problemInstance) {
-      requestSolvedInstanceTemporarySat3CliqueSolver(url, /*defaultSolvers.get(problemName) || */chosenSolver, problemInstance).then(
-        (data) => {
-          setSolution(data ?? "");
-        }
-      );
+    if (visualizationState.reductionOn && reductionVisualization) {
+        requestGagetMap(url, chosenReductionType, problemInstance)
+            .then(setGadgetMap);
     }
-  }, [problemInstance, problemName, chosenReductionType, reducedInstance, chosenSolver]);
-
-  useEffect(() => {
-    if (url && problemInstance && chosenReductionType && solution) {
-      if (chosenReductionType.includes("-")) {
-        requestMappedSolutionTransitive(url, chosenReductionType, problemInstance, solution).then((data) => {
-          setMappedSolution(data ?? "");
-        });
-      } else if (reducedInstance) {
-        requestMappedSolution(url, chosenReductionType, problemInstance, reducedInstance, solution).then((data) => {
-          setMappedSolution(data ?? "");
-        });
-      }
-    }
-  }, [solution])
+  }, [visualizationState.reductionOn, reductionVisualization, chosenReductionType, problemInstance]);
 
   if (url && problemInstance && problemData && Object.keys(problemData).length > 0) {
     try {
-    console.log("++++++++++++++++++++++++++++++++++++++")
-      console.log("visualizationType:", visualizationType);
-      console.log("problemInstance:", problemInstance);
-      console.log("problemData:", problemData);
-      console.log("solution:", solution);
-      console.log("solve:", solve);
-      console.log("++++++++++++++++++++++++++++++++++++++")
-
-
-      visualization = Visualizations.get(visualizationType)(solve, url, problemInstance, solution, problemData)
+      visualization = Visualizations.get(visualizationType)(solve, url, problemData, gadgetMap)
     } catch {
       visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />
     }
 
     if (visualizationState.reductionOn) {
       try {
-        // console.log("++++++++++++++++++++++++++++++++++++++")
-        // console.log("chosenReductionType:", reductionVisualization);
-        // console.log("reducedInstance:", reducedInstance);
-        // console.log("reductionData:", reductionData);
-        // console.log("solution:", solution);
-        // console.log("solve:", solve);
-        // console.log("++++++++++++++++++++++++++++++++++++++")
-        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, reducedInstance, solution, reductionData)
+        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, reductionData, gadgetMap)
 
         //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
         // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue

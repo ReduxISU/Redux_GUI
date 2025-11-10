@@ -1,5 +1,5 @@
 import { useGenericInfo } from "../ProblemProvider";
-import { requestReductionOptions, requestReductionInfo, requestReductions, requestReducedInstanceFromPath } from "../../redux";
+import { requestReductionOptions, requestReductionInfo, requestReductions, requestReducedInstanceFromPath, requestInfo } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
 // For initial startup defaults
@@ -76,8 +76,8 @@ function useReductionVisualization(url, chosenReduceTo) {
     }
 
     (async () => {
-      const info = await requestReductionInfo(url, chosenReduceTo);
-      setReductionVisualization(info?.reductionVisualization ?? "");
+      const info = await requestInfo(url, chosenReduceTo);
+      setReductionVisualization(info?.defaultVisualization.visualizationType ?? "");
     })();
   }, [url, chosenReduceTo]);
 

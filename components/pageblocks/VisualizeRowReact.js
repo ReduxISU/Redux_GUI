@@ -321,7 +321,7 @@ export default function VisualizeRowReact({
           problemData={currentProblemData}
           reductionData={currentReductionData}
           showSolutionToggle={showSolution}
-          reductionVisualization={"Graph D3"}
+          reductionVisualization={reductionVisualization}
         />
       </ProblemSection.Body>
     </ProblemSection>

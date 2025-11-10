@@ -1,67 +1,27 @@
 import React from 'react'
 import * as d3 from 'd3'
-import VisColors from '../constants/VisColors';
+import { getColorByKey } from '../constants/VisColorsArray';
 import dynamic from "next/dynamic";
 import { useRef, useState, useEffect, useContext } from 'react';
 
-import { requestProblemGenericInstance } from '../../redux';
-/// SAT3_SVG_React.js
-/// This is a wrapper for the SAT3 visualization instance. It allows us to use the visualization as a react component, and also disables
+/// StandardSetSvgReact.js
+/// This is a wrapper for the boolean visualization instance. It allows us to use the visualization as a react component, and also disables
 /// server side rendering due to compilation issues with rendering a d3 svg before the entire page is rendered. 
 
 function StandardSetSvgReact(props) {
     const ref = useRef(null);
-    const problemInstance = props.problemInstance;
-    const [solutionData, setSolutionData] = useState([]);
-    const [data, setData] = useState('hello');
     useEffect(() => {
+
         try {
             if (props.problemData) {
-                getSets(ref.current, props.problemData);
+                getSets(ref.current, props.problemData, props.gadgetMap);
             }
 
-
-            if (props.showSolution) {
-                // let solutionData = getProblemSolution(props.url, "Sat3BacktrackingSolver", problemInstance.replaceAll('&', "%26"));
-                let apiCompatibleInstance = problemInstance.replaceAll('&', "%26");
-                let stringArr = props.solutionData.replace('(', '').replace(')', ''); //turns (x1:True) int x1:True
-                stringArr = stringArr.split(','); //turns x1:True,x2:True into [x1:True,x2:True]
-                let finalArr = [];
-                for (const str of stringArr) {
-                    let temp = str.split(':');
-                    if (temp[1] === "False") {
-                        finalArr.push("NOT" + temp[0]);
-                    }
-                    else {
-                        finalArr.push(temp[0]); //turns x1:true into x1
-                    }
-                }
-                setSolutionData(finalArr);
-            }
-
-            else if (!props.showSolution) { //ALEX NOTE: Code in here causes a rerender of sat3 that gets rid of the solution.
-                setSolutionData([]);
-                fullClear();
-
-
-            }
         }
         catch (error) { console.log("VISUALIZATION FAILED") };
 
-    }, [problemInstance, props.showSolution])
+    }, [props.problemData, props.gadgetMap])
 
-    try {
-        if (props.showSolution) {
-            showSolution(solutionData); //Data fed to this triggers a instance render with solution
-        }
-    }
-    catch (error) { console.log("VISUALIZATION FAILED") }
-
-    // useEffect(() => { //This updated the cerificate text with a solution value when a user hits the solution button in SolvedRow
-    //  if(!props.showSolution){
-    //   setSolutionData([])
-    //  }
-    // }, [props.showSolution])
 
     return (
         <svg ref={ref}
@@ -74,7 +34,7 @@ function StandardSetSvgReact(props) {
     )
 }
 
-function getSets(ref, data) {
+function getSets(ref, data, gadgetMap) {
     const margin = { top: 200, right: 30, bottom: 30, left: 200 },
         width = 700 - margin.left - margin.right,
         height = 700 - margin.top - margin.bottom;
@@ -95,7 +55,7 @@ function getSets(ref, data) {
     const clauses = data.clauses;
 
     for (let i = 0; i < clauses.length; i++) {
-        let c = new clause(clauses[i].id, svg, x, y, clauses[i].literals, 15);
+        let c = new clause(clauses[i].id, svg, x, y, clauses[i].literals, 15, gadgetMap);
         c.show();
         x += c.width + 8;
         if (i < clauses.length - 1) {
@@ -116,49 +76,96 @@ function getSets(ref, data) {
     }
 
     d3.selectAll(".true")
-        .attr("fill", VisColors.ElementHighlight)
-        .attr("stroke", VisColors.ElementHighlight);
+        .attr("fill", getColorByKey("ElementHighlight"))
+        .attr("stroke", getColorByKey("ElementHighlight"));
 
     d3.select(ref).selectChildren()._groups[0]?.slice(1).map((child) => d3.select(child).remove())
 }
 
+function showCluster(clusterClass, gadgetMap) {
+    if (!d3.select("#highlightGadgets").property("checked")) return;
 
-function showSolution(solution) {
-    for (let i = 0; i < solution.length; i++) {
-        d3.selectAll("." + solution[i] + ".gadget") 
-            .attr("fill", VisColors.Solution)
-            .attr("stroke", VisColors.Solution);
+    d3.selectAll("." + clusterClass)
+        .attr("fill", getColorByKey("ClauseHighlight"))
+        .attr("stroke", getColorByKey("ClauseHighlight"));
+
+
+    const cleanElement = clusterClass.replace(/^class/, "");
+
+    // Optionally highlight linked elements via gadgetMap
+    if (Array.isArray(gadgetMap)) {
+        gadgetMap.forEach(item => {
+            if ((item.reductionFromIds.includes(cleanElement) || item.reductionToIds.includes(cleanElement)) && item.color === "ClauseHighlight") {
+                [...item.reductionFromIds, ...item.reductionToIds].forEach(id => {
+                    d3.selectAll("#id" + id.replace("!", "NOT"))
+                        .attr("fill", getColorByKey("ClauseHighlight"))
+                        .attr("stroke", getColorByKey("ClauseHighlight"));
+                });
+            }
+        });
     }
 }
-function showCluster(cluster) {
-    if (d3.select("#highlightGadgets").property("checked")) {
-        d3.selectAll("." + cluster)
-            .attr("fill", VisColors.ClauseHighlight)
-            .attr("stroke", VisColors.ClauseHighlight);
-    }
-}
-function showElement(element) {
+function showElement(element, gadgetMap) {
     if (d3.select("#highlightGadgets").property("checked")) {
         d3.selectAll("#" + element)
-            .attr("fill", VisColors.ElementHighlight)
-            .attr("stroke", VisColors.ElementHighlight);
+            .attr("fill", getColorByKey("ElementHighlight"))
+            .attr("stroke", getColorByKey("ElementHighlight"))
+
+        if (!gadgetMap) return;
+
+        const cleanElement = element.replace(/^id/, "");
+
+        gadgetMap.forEach(item => {
+            // Check if the element is in reductionFromIds or reductionToIds
+            if ((item.reductionFromIds.includes(cleanElement) || item.reductionToIds.includes(cleanElement)) && item.color === "ElementHighlight") {
+
+                // Highlight all IDs in reductionFromIds
+                item.reductionFromIds.forEach(id => {
+                    d3.selectAll("#id" + id.replace("!", "NOT"))
+                        .attr("fill", getColorByKey("ElementHighlight"))
+                        .attr("stroke", getColorByKey("ElementHighlight"));
+                });
+
+                // Highlight all IDs in reductionToIds
+                item.reductionToIds.forEach(id => {
+                    d3.selectAll("#id" + id.replace("!", "NOT"))
+                        .attr("fill", getColorByKey("ElementHighlight"))
+                        .attr("stroke", getColorByKey("ElementHighlight"));
+                });
+            }
+        });
     }
 }
-function clear() {
-    if (d3.select("#highlightGadgets").property("checked")) {
-        d3.selectAll(".gadget")
-            .attr("fill", VisColors.Background)
-            .attr("stroke", VisColors.Background);
+function clear(gadgetMap) {
+    // Reset all elements highlighted directly
+    d3.selectAll("[id^='id']").attr("fill", getColorByKey("Background"))
+        .attr("stroke", getColorByKey("Background"));
+
+    // Reset all gadgets
+    d3.selectAll(".gadget").attr("fill", getColorByKey("Background"))
+        .attr("stroke", getColorByKey("Background"));
+
+    // Reset linked elements from gadgetMap
+    if (Array.isArray(gadgetMap)) {
+        gadgetMap.forEach(item => {
+            if (item.color === "ElementHighlight") {
+                item.reductionFromIds.forEach(id => {
+                    d3.selectAll("#id" + id.replace("!", "NOT"))
+                        .attr("fill", getColorByKey("Background"))
+                        .attr("stroke", getColorByKey("Background"));
+                });
+                item.reductionToIds.forEach(id => {
+                    d3.selectAll("#id" + id.replace("!", "NOT"))
+                        .attr("fill", getColorByKey("Background"))
+                        .attr("stroke", getColorByKey("Background"));
+                });
+            }
+        });
     }
-}
-function fullClear() {
-    d3.selectAll(".gadget")
-        .attr("fill", VisColors.Background)
-        .attr("stroke", VisColors.Background);
 }
 
 class literal {
-    constructor(id, className, name, svg, x, y, size = 25) {
+    constructor(id, className, name, svg, x, y, size = 25, gadgetMap, color) {
         this.id = "id" + id;
         this.className = className;
         this.name = name;
@@ -166,25 +173,25 @@ class literal {
         this.x = x;
         this.y = y;
         this.size = size;
+        this.gadgetMap = gadgetMap;
+        this.color = color;
     }
     show(c = this.className, e = this.id) {
         this.svg.append("rect")
             .attr("x", this.x)
             .attr("y", this.y - this.size / 2)
-            .attr("fill", VisColors.Background)
+            .attr("fill", getColorByKey(this.color.trim()))
             .attr("height", this.size)
             .attr("width", this.size * this.name.length - 7)//subtracting 7 since the stroke length is 7.
             .attr("id", this.id)
             .attr("class", this.className + " gadget " + this.name.replace("!", "NOT"))
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", "7px")
-            .on("mouseover", function () {
-                showCluster(c)
-                showElement(e);
+            .on("mouseover", () => {
+                showCluster(c, this.gadgetMap)
+                showElement(e, this.gadgetMap);
             })
-            .on("mouseout", function () {
-                clear();
-            })
+            .on("mouseout", () => clear());
         this.svg.append("text")
             .attr("class", this.name)
             .attr("x", this.x)
@@ -194,27 +201,27 @@ class literal {
             .attr("font-size", this.size + "px")
             .attr("font-family", "'Courier New', Courier, monospace")
             .text(this.name)
-            .on("mouseover", function () {
-                showCluster(c);
-                showElement(e);
+            .on("mouseover", () => {
+                showCluster(c, this.gadgetMap);
+                showElement(e, this.gadgetMap);
             })
-            .on("mouseout", function () {
-                clear();
-            })
-
+            .on("mouseout", () => clear())
+            .style("pointer-events", "none");
+            
     }
 }
 
 class clause {
-    constructor(className, svg, x, y, literals, size = 20) {
+    constructor(className, svg, x, y, literals, size = 20, gadgetMap) {
         this.className = "class" + className;
         this.svg = svg;
         this.x = x;
         this.y = y;
         this.size = size;
         this.literalsIDs = [];
-        this.literals = literals
+        this.literals = literals;
         this.width = 0;
+        this.gadgetMap = gadgetMap;
     }
     show(c = this.className) {
         // starting offset
@@ -227,7 +234,8 @@ class clause {
             .attr("text-anchor", "left")
             .attr("dominant-baseline", "middle")
             .attr("font-size", this.size + "px")
-            .text("(");
+            .text("(")
+            .style("pointer-events", "none"); 
 
         // draw each literal and OR symbol
         for (let i = 0; i < this.literals.length; i++) {
@@ -238,7 +246,9 @@ class clause {
                 this.svg,
                 offsetX,
                 this.y,
-                this.size
+                this.size,
+                this.gadgetMap,
+                this.literals[i].color,
             );
             lit.show();
 
@@ -258,7 +268,8 @@ class clause {
                     .attr("dominant-baseline", "middle")
                     .attr("font-size", this.size + "px")
                     .attr("font-family", "'Courier New', Courier, monospace")
-                    .text("\u2228");
+                    .text("\u2228")
+                    .style("pointer-events", "none"); 
 
                 // move offsetX past the OR symbol plus some spacing
                 offsetX += this.size + gap;
@@ -277,7 +288,8 @@ class clause {
             .attr("dominant-baseline", "middle")
             .attr("font-size", this.size + "px")
             .attr("font-family", "'Courier New', Courier, monospace")
-            .text(")");
+            .text(")")
+            .style("pointer-events", "none"); 
 
         // compute width for background rect
         this.width = offsetX - this.x + this.size / 2;
@@ -285,15 +297,15 @@ class clause {
         this.svg.append("rect")
             .attr("x", this.x)
             .attr("y", this.y - this.size)
-            .attr("fill", VisColors.Background)
-            .attr("stroke", VisColors.Background)
+            .attr("fill", getColorByKey("Background"))
+            .attr("stroke", getColorByKey("Background"))
             .attr("height", this.size * 2)
             .attr("width", this.width)
             .attr("class", this.className + " gadget")
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", "7px")
             .lower() // send behind text
-            .on("mouseover", () => showCluster(c))
+            .on("mouseover", () => showCluster(c, this.gadgetMap))
             .on("mouseout", clear);
     }
 }
