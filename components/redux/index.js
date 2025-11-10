@@ -309,6 +309,18 @@ export async function requestVisualization(url, visualization, instance, solver)
 }
 
 /**
+ * @returns the graph visualization of the reduced problem instance.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestReductionVisualization(url, reduction, instance, solver) {
+    return await fetchPostJson(
+      `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solver=${solver}`,
+      instance,
+      () => `${reduction} VISUALIZE REQUEST FAILED`
+    );
+}
+
+/**
  * @param failMsg The message that is logged on failure. Message is lazily evaluated.
  * @returns the JSON format of the fetch request.
  * @returns `undefined` on failure and logs the error.

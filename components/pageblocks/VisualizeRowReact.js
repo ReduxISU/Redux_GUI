@@ -14,7 +14,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
 
-import { requestProblemGenericInstance, requestReducedInstance, requestVisualization, requestInfo } from '../redux';
+import { requestProblemGenericInstance, requestReducedInstance, requestVisualization, requestReductionVisualization } from '../redux';
 import VisualizationLogic from '../widgets/VisualizationLogic';
 import ProblemSection from '../widgets/ProblemSection';
 import { useVisualizationInfo } from '../hooks/ProblemProvider';
@@ -102,7 +102,7 @@ export default function VisualizeRowReact({
 
     const fetchVisualization = async () => {
       try {
-        const data = await requestVisualization(url, reductionVisualization || defaultVisualizationMap.get(chosenReduceTo), reducedInstance, defaultSolverMap.get(chosenReduceTo));
+        const data = await requestReductionVisualization(url, chosenReductionType, reducedInstance, chosenSolver);
         console.log("++++++++++++++++++++++++++++++++++++++");
         console.log("chosenReductionType:", reductionVisualization || defaultVisualizationMap.get(chosenReduceTo));
         console.log("defaultVisualizationMap.get(chosenReduceTo):", defaultVisualizationMap.get(chosenReduceTo));

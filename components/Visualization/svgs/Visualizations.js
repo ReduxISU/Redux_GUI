@@ -12,20 +12,22 @@ import DirHamiltonianSvgReact from "./DirHamiltonian_SVG_React";
 import TSPSvgReact from "./TSP_SVG_React";
 import NodeSetSvgReact from "./NodeSet_SVG_React";
 import StandardGraphSvgReact from "./StandardGraphSvgReact";
+import StandardSetSvgReact from "./StandardSetSvgReact";
 
 import { requestVisualization } from "../../redux";
 
 const Visualizations = new Map([
-    ["Boolean Satisfiability" , (solve, url, problemInstance, solution) => {
+    ["Boolean Satisfiability" , (solve, url, problemInstance, solution, problemData) => {
         return(
-            <SAT3_SVG_React 
+            <StandardSetSvgReact 
                 problemName={"SAT3"}
                 solutionData={solution}
                 data={problemInstance}
                 problemInstance={problemInstance}
                 showSolution={solve}
                 url={url}
-            ></SAT3_SVG_React>  
+                problemData={problemData}
+            ></StandardSetSvgReact>  
         )
     }],
     ["CLIQUE", (solve, url, problemInstance, solution, currentStep, allSteps)=>{
