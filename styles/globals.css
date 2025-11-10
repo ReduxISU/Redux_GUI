@@ -145,3 +145,10 @@ a {
   top: 10px;
   left: 0;
 }
+
+svg {
+  user-select: none; /* Standard */
+  -webkit-user-select: none; /* Safari/Chrome */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+}

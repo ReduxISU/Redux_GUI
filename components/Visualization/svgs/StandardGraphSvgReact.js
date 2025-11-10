@@ -105,6 +105,7 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
       .data(data.nodes)
       .join("circle")
       .attr("r", 20)
+      .attr("class", d => d.id.replace("!", "NOT"))
       .attr("fill", function (d) {
 
         if (getColorByKey(d.color)) {
@@ -131,8 +132,19 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
           return null;
         }
       })
-      .attr("stroke-width", d => d.outline ? 2 : 0);
-
+      .attr("stroke-width", d => d.outline ? 2 : 0)
+      .on("mouseover", function (event, d) {
+        if (d3.select("#highlightGadgets").property("checked")) {
+          d3.selectAll(`.${d.id.replace("!", "NOT")}`).attr('fill', getColorByKey("ElementHighlight"))
+          d3.selectAll(`.${d.id.replace("!", "NOT")}`).attr('stroke', getColorByKey("ElementHighlight"))
+        }
+      })
+      .on("mouseout", function (event, d) {
+        if (d3.select("#highlightGadgets").property("checked")) {
+          d3.selectAll(`.${d.id.replace("!", "NOT")}`).attr('fill', getColorByKey("Background"))
+          d3.selectAll(`.${d.id.replace("!", "NOT")}`).attr('stroke', getColorByKey("Background"))
+        }
+      });
 
     const text = svg.selectAll("text") //Append Text on top of nodes.
       .data(data.nodes)
@@ -142,6 +154,8 @@ function ForceGraph({ w, h, charge, problemData, solve, url, problemInstance }) 
       .attr("font-size", "12px")
       .attr('text-anchor', "middle")
       .text(function (d) { return d["name"]; });
+
+    text.style("pointer-events", "none");
 
 
     const weights = data.links.map(d => d.weight);

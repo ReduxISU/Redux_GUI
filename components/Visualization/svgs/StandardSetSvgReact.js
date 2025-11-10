@@ -125,7 +125,7 @@ function getSets(ref, data) {
 
 function showSolution(solution) {
     for (let i = 0; i < solution.length; i++) {
-        d3.selectAll("." + solution[i]) 
+        d3.selectAll("." + solution[i] + ".gadget") 
             .attr("fill", VisColors.Solution)
             .attr("stroke", VisColors.Solution);
     }
