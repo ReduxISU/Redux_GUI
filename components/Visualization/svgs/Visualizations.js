@@ -1,15 +1,15 @@
 import StandardGraphSvgReact from "./StandardGraphSvgReact";
-import StandardSetSvgReact from "./StandardSetSvgReact";
+import StandardSATSvgReact from "./StandardSATSvgReact";
 
 const Visualizations = new Map([
     ["Boolean Satisfiability" , (solve, url, problemData, gadgetMap) => {
         return(
-            <StandardSetSvgReact 
+            <StandardSATSvgReact 
                 problemData={problemData}
                 solve={solve}
                 url={url}
                 gadgetMap={gadgetMap}
-            ></StandardSetSvgReact>  
+            ></StandardSATSvgReact>  
         )
     }],
     ["Graph D3", (solve, url, problemData, gadgetMap)=>{

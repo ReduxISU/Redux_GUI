@@ -34,7 +34,7 @@ export default function VisualizationLogic({
   const handleBar = (sizes) => { }
 
   useEffect(() => {
-    if (visualizationState.reductionOn && reductionVisualization) {
+    if (visualizationState.reductionOn && reductionVisualization !== "") {
         requestGagetMap(url, chosenReductionType, problemInstance)
             .then(setGadgetMap);
     }

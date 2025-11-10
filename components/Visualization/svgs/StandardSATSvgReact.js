@@ -4,11 +4,11 @@ import { getColorByKey } from '../constants/VisColorsArray';
 import dynamic from "next/dynamic";
 import { useRef, useState, useEffect, useContext } from 'react';
 
-/// StandardSetSvgReact.js
+/// StandardSATSvgReact.js
 /// This is a wrapper for the boolean visualization instance. It allows us to use the visualization as a react component, and also disables
 /// server side rendering due to compilation issues with rendering a d3 svg before the entire page is rendered. 
 
-function StandardSetSvgReact(props) {
+function StandardSATSvgReact(props) {
     const ref = useRef(null);
     useEffect(() => {
 
@@ -311,6 +311,6 @@ class clause {
 }
 
 
-export default dynamic(() => Promise.resolve(StandardSetSvgReact), {
+export default dynamic(() => Promise.resolve(StandardSATSvgReact), {
     ssr: false
 })
