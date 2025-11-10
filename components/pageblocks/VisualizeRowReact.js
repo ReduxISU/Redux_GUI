@@ -98,18 +98,11 @@ export default function VisualizeRowReact({
 
 
   useEffect(() => {
-    if (!chosenReduceTo || !reducedInstance || !showReduction) return;
+    if (!chosenReduceTo || !problemInstance || !showReduction || problemInstance === "") return;
 
     const fetchVisualization = async () => {
       try {
-        const data = await requestReductionVisualization(url, chosenReductionType, reducedInstance, chosenSolver);
-        console.log("++++++++++++++++++++++++++++++++++++++");
-        console.log("chosenReductionType:", reductionVisualization || defaultVisualizationMap.get(chosenReduceTo));
-        console.log("defaultVisualizationMap.get(chosenReduceTo):", defaultVisualizationMap.get(chosenReduceTo));
-        console.log("reducedInstance:", reducedInstance);
-        console.log("defaultSolverMap.get(chosenReduceTo):", defaultSolverMap.get(chosenReduceTo));
-        console.log("++++++++++++++++++++++++++++++++++++++");
-        console.log("reduction data:", data);
+        const data = await requestReductionVisualization(url, chosenReductionType, problemInstance, chosenSolver);
         setProblemReductionData(data ?? []);
       } catch (err) {
         console.error("Failed to load visualization:", err);
@@ -118,7 +111,7 @@ export default function VisualizeRowReact({
     };
 
     fetchVisualization();
-  }, [showReduction, problemName, reducedInstance]);
+  }, [showReduction, problemName, problemInstance]);
 
   // Fetch main visualization data asynchronously after instanceReady
   useEffect(() => {
