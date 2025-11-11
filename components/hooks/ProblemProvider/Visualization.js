@@ -7,7 +7,7 @@ export function useVisualization(url, problemName, problemType, problemNameMap, 
   [state.defaultVisualizationMap] = useDefaultVisualizationMap(url, problemInfoMap);
   [state.VisualizationOptions] = useVisualizationOptions(url, problemName, problemType);
   [state.chosenVisualization, state.setChosenVisualization] = useChosenVisualization(problemName, state.defaultVisualizationMap);
-  [state.VisualizationNameMap] = useVisualizationNameMap(url, problemNameMap);
+  [state.visualizationNameMap] = useVisualizationNameMap(url, problemNameMap);
   return state;
 }
 
