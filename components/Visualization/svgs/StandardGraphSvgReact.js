@@ -192,7 +192,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
         .text(d => d.name);
     }
 
-  }, [problemData, charge]);
+  }, [problemData, charge, gadgetMap]);
 
   return (
     <svg

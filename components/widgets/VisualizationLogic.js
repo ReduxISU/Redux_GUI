@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Container } from '@mui/material';
 import { No_Viz_Svg, No_Reduction_Viz_Svg } from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
-import { requestGagetMap } from '../redux';
+import { requestGadgetMap, processReductions } from '../redux';
 
 export default function VisualizationLogic({
   url,
@@ -33,12 +33,17 @@ export default function VisualizationLogic({
 
   const handleBar = (sizes) => { }
 
+  const [loadingMap, setLoadingMap] = useState(false);
+
   useEffect(() => {
     if (visualizationState.reductionOn && reductionVisualization !== "") {
-        requestGagetMap(url, chosenReductionType, problemInstance)
-            .then(setGadgetMap);
+      setLoadingMap(true);
+      processReductions(url, chosenReductionType, problemInstance)
+        .then(setGadgetMap)
+        .finally(() => setLoadingMap(false));
     }
   }, [visualizationState.reductionOn, reductionVisualization, chosenReductionType, problemInstance]);
+
 
   if (url && problemInstance && problemData && Object.keys(problemData).length > 0) {
     try {

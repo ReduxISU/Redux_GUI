@@ -91,13 +91,64 @@ function isCertificateValid(problem, certificate) {
  * @returns the gadget map of ids based on an `instance` from the specified `reduction`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestGagetMap(url, reduction, instance) {
+export async function requestGadgetMap(url, reduction, instance) {
   return await fetchPostJson(
     `${url}ProblemProvider/gadgets?reduction=${reduction}`,
     instance,
     () => `${reduction} MAP GADGETS REQUEST FAILED`
   );
 }
+
+export async function processReductions(url, reductionPath, instance) {
+  const reductions = reductionPath.split("-").map(r => r.trim());
+
+  let currentInstance = instance;
+  let currentMap = null;
+
+  for (const reduction of reductions) {
+    const nextMap = await requestGadgetMap(url, reduction, currentInstance);
+    const nextInstance = await requestReducedInstanceFromPath(url, reduction, currentInstance);
+
+    // compose A→B and B→C into A→C
+    if (currentMap) {
+      currentMap = composeMappings(currentMap, nextMap);
+    } else {
+      currentMap = nextMap;
+    }
+
+    currentInstance = nextInstance;
+  }
+
+  return currentMap;
+}
+
+/**
+ * Compose two gadget maps: map1: A→B and map2: B→C → result: A→C.
+ */
+function composeMappings(map1, map2) {
+  const composed = [];
+
+  for (const entry1 of map1) {
+    const linkedTo = new Set();
+
+    for (const b of entry1.reductionToIds) {
+      for (const entry2 of map2) {
+        if (entry2.reductionFromIds.includes(b)) {
+          entry2.reductionToIds.forEach(c => linkedTo.add(c));
+        }
+      }
+    }
+
+    composed.push({
+      color: entry1.color,
+      reductionFromIds: entry1.reductionFromIds,
+      reductionToIds: Array.from(linkedTo),
+    });
+  }
+
+  return composed;
+}
+
 
 /**
  * @returns information regarding the problem/solver/verifier.
