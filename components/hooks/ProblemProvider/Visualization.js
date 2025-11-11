@@ -68,7 +68,7 @@ function useChosenVisualization(problemName, defaultVisualizationMap) {
 
     // Only load localStorage once
     if (!hasLoadedFromStorage.current) {
-      const storedData = localStorage.getItem('problemData');
+      const storedData = null;
       if (storedData) {
         const allData = JSON.parse(storedData);
         setChosenVisualization(allData.Visualization || "");

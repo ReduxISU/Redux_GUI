@@ -135,7 +135,7 @@ function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOption
   useEffect(() => {
     if(reductionTypeOptions.length === 0) return;
 
-    const storedData = localStorage.getItem('problemData');
+    const storedData = null;
 
     if (isFirstRender.current) {
       // First render: read from localStorage
@@ -173,7 +173,7 @@ function useChosenReduceTo(problemName, reduceToOptions) {
 
   useEffect(() => {
     if(reduceToOptions.length === 0) return;
-    const storedData = localStorage.getItem('problemData');
+    const storedData = null;
 
     if (isFirstRender.current) {
       // First render: read from localStorage

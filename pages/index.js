@@ -69,11 +69,11 @@ function MainPageContent() {
     // }
   });
 
-  useHandleParameters();
+  //useHandleParameters();
 
   const { problem, solver, verifier, reducer, visualization } = useProblemProvider(reduxBaseUrl);
 
-  useUnload(problem, solver, verifier, reducer);
+  //useUnload(problem, solver, verifier, reducer);
 
   return (
     <>

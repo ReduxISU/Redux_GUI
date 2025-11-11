@@ -55,7 +55,7 @@ function useProblemName(problemNameMap) {
   const [problemName, setProblemName] = useState("");
 
   useEffect(() => {
-    const storedData = localStorage.getItem('problemData');
+    const storedData = null;
     
     if(storedData) {
       const allData = JSON.parse(storedData);

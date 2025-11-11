@@ -116,7 +116,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     if (!problem.problemName) return;
 
     let problemVal = problem.defaultInstance ?? "";
-    const storedData = localStorage.getItem('problemData');
+    const storedData = null;
 
     if (isFirstRender.current) {
       // First render: read from localStorage

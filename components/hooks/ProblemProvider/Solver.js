@@ -112,7 +112,7 @@ function useChosenSolver(problemName, defaultSolverMap) {
     if (!problemName || defaultSolverMap.size === 0) return;
 
     let solverVar = !problemName ? "" : defaultSolverMap.get(problemName);
-    const storedData = localStorage.getItem('problemData');
+    const storedData = null;
 
     if (isFirstRender.current) {
       // First render: read from localStorage
