@@ -40,7 +40,7 @@ export default function VisualizeRowReact({
   chosenVisualization,
   VisualizationNameMap,
   setChosenVisualization,
-  visualizationOptions,
+  VisualizationOptions,
   defaultVisualizationMap,
 }) {
 
@@ -258,7 +258,7 @@ export default function VisualizeRowReact({
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={chosenVisualization}
           onSelect={setChosenVisualization}
-          options={Array.isArray(visualizationOptions) ? visualizationOptions : []}
+          options={Array.isArray(VisualizationOptions) ? VisualizationOptions : []}
           optionsMap={VisualizationNameMap}
           disabled={!problemName}
           disabledMessage="No visualization available. Please select a problem."
