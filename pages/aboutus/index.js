@@ -7,7 +7,6 @@ import Image from "next/image";
 import { useState } from "react";
 
 export default function AboutUsPage() {
-
     const theme = createTheme({
         palette: {
             mode: "light",
@@ -35,7 +34,7 @@ export default function AboutUsPage() {
         "Michael Crapse",
         "Ian Gonzalez",
         "Sabal Subedi"
-        //Add new contributer
+        // Add new contributor here
     ];
 
     return (
@@ -49,10 +48,15 @@ export default function AboutUsPage() {
                     <Card>
                         <Card.Header><b>ABOUT US</b></Card.Header>
                         <Card.Body style={cardBodyStyle}>
-                            {"Welcome to Redux, a platform for NP-Complete problems. Input your challenges and gain access to reductions, solutions, verifiers, and visualizations. Join our community of problem solvers and unravel computational complexities using the application's library. The project was greatly inspired by Richard Karp's paper "}
-                            <a href="https://doi.org/10.1007/978-1-4684-2001-2_9" target="_blank" rel="noopener noreferrer">
-                                "Reducibility Among Combinatorial Problems"
-                            </a> {"(Karp, 1972)."}
+                            {`Welcome to Redux, a platform for NP-Complete problems. Input your challenges and gain access to reductions, solutions, verifiers, and visualizations. Join our community of problem solvers and unravel computational complexities using the application's library. The project was greatly inspired by Richard Karp's paper `}
+                            <a 
+                                href="https://doi.org/10.1007/978-1-4684-2001-2_9" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                            >
+                                &quot;Reducibility Among Combinatorial Problems&quot;
+                            </a>
+                            {` (Karp, 1972).`}
                         </Card.Body>
                     </Card>
 
@@ -71,9 +75,11 @@ export default function AboutUsPage() {
                             </Button>
                         </Card.Header>
                         <Card.Body style={cardBodyStyle}>
-                            <p>This project was started by Dr. <a href="https://www2.cose.isu.edu/~bodipaul/index.php" target="_blank" rel="noopener noreferrer">Paul Bodily</a>, who is also the ISU Faculty Sponsor of the project.</p>
+                            <p>
+                                This project was started by Dr. <a href="https://www2.cose.isu.edu/~bodipaul/index.php" target="_blank" rel="noopener noreferrer">Paul Bodily</a>, who is also the ISU Faculty Sponsor of the project.
+                            </p>
                             <p>The students who contributed to the creation of the application are:</p>
-                            
+
                             {/* Show first 3 contributors always */}
                             <ul>
                                 {contributors.slice(0, 3).map((name, index) => (
@@ -84,7 +90,7 @@ export default function AboutUsPage() {
                             {/* Collapsible rest of the contributors */}
                             <Collapse in={showAll}>
                                 <ul>
-                                    {contributors.slice(4).map((name, index) => (
+                                    {contributors.slice(3).map((name, index) => (
                                         <li key={index}>{name}</li>
                                     ))}
                                 </ul>
@@ -98,11 +104,11 @@ export default function AboutUsPage() {
                     <Card>
                         <Card.Header><b>Learn More</b></Card.Header>
                         <Card.Body style={cardBodyStyle}>
-                            {"Additional documentation can be found at the following links:"}
+                            {`Additional documentation can be found at the following links:`}
                             <ul>
                                 <li><a href="https://github.com/marckade/Redux_GUI" target="_blank" rel="noopener noreferrer">Github</a></li>
                                 <li><a href="https://en.wikipedia.org/wiki/NP-completeness" target="_blank" rel="noopener noreferrer">Wikipedia: What is NP-Complete?</a></li>
-                                <li><a href="https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf" target="_blank" rel="noopener noreferrer">Karp's 21 NP-Complete Problems</a></li>
+                                <li><a href="https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf" target="_blank" rel="noopener noreferrer">Karp&apos;s 21 NP-Complete Problems</a></li>
                                 <li><a href="https://docs.google.com/document/d/18IKOGImh5O7Z2elgc4WzhiYUV-VwdjNb7WJFEHIFL-E/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Redux GUI Documentation</a></li>
                             </ul>
                         </Card.Body>
