@@ -51,7 +51,7 @@ export default function AboutUsPage() {
                         <Card.Body style={cardBodyStyle}>
                             {"Welcome to Redux, a platform for NP-Complete problems. Input your challenges and gain access to reductions, solutions, verifiers, and visualizations. Join our community of problem solvers and unravel computational complexities using the application's library. The project was greatly inspired by Richard Karp's paper "}
                             <a href="https://doi.org/10.1007/978-1-4684-2001-2_9" target="_blank" rel="noopener noreferrer">
-                                "Reducibility Among Combinatorial Problems"
+                                &quot;Reducibility Among Combinatorial Problems&quot;
                             </a> {"(Karp, 1972)."}
                         </Card.Body>
                     </Card>
@@ -102,7 +102,7 @@ export default function AboutUsPage() {
                             <ul>
                                 <li><a href="https://github.com/marckade/Redux_GUI" target="_blank" rel="noopener noreferrer">Github</a></li>
                                 <li><a href="https://en.wikipedia.org/wiki/NP-completeness" target="_blank" rel="noopener noreferrer">Wikipedia: What is NP-Complete?</a></li>
-                                <li><a href="https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf" target="_blank" rel="noopener noreferrer">Karp's 21 NP-Complete Problems</a></li>
+                                <li><a href="https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf" target="_blank" rel="noopener noreferrer">Karp&apos;s 21 NP-Complete Problems</a></li>
                                 <li><a href="https://docs.google.com/document/d/18IKOGImh5O7Z2elgc4WzhiYUV-VwdjNb7WJFEHIFL-E/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Redux GUI Documentation</a></li>
                             </ul>
                         </Card.Body>
