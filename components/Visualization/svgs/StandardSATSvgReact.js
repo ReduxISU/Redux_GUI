@@ -26,7 +26,7 @@ function StandardSATSvgReact(props) {
     return (
         <svg ref={ref}
             style={{
-                height: "700px",
+                height: "470px",
                 width: "100%",
                 marginRight: "0px",
                 marginLeft: "0px",
@@ -55,7 +55,7 @@ function getSets(ref, data, gadgetMap) {
     const clauses = data.clauses;
 
     for (let i = 0; i < clauses.length; i++) {
-        let c = new clause(clauses[i].id, svg, x, y, clauses[i].literals, 15, gadgetMap);
+        let c = new clause(clauses[i].id, svg, x, y, clauses[i].literals, 13, gadgetMap);
         c.show();
         x += c.width + 8;
         if (i < clauses.length - 1) {
