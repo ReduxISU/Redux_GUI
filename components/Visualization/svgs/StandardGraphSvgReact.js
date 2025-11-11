@@ -12,11 +12,11 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
   // Highlight all gadgets related to a node
   function highlightGadget(nodeId, gadgetMap) {
-    if(!gadgetMap) return;
+    if(!gadgetMap || gadgetMap.length === 0) return;
     gadgetMap.forEach(item => {
       if ((item.reductionFromIds.includes(nodeId) || item.reductionToIds.includes(nodeId)) && item.color === "ElementHighlight") {
         [...item.reductionFromIds, ...item.reductionToIds].forEach(id => {
-          d3.select("#id" + id.replace("!", "NOT"))
+          d3.selectAll("#id" + id.replace("!", "NOT"))
             .attr("fill", getColorByKey("ElementHighlight"))
             .attr("stroke", getColorByKey("ElementHighlight"));
         });
@@ -26,11 +26,11 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
   // Reset all gadget highlights
   function clearHighlights(gadgetMap) {
-    if(!gadgetMap) return;
+    if(!gadgetMap || gadgetMap.length === 0) return;
     // Reset all gadgets in gadgetMap
     gadgetMap.forEach(item => {
       [...item.reductionFromIds, ...item.reductionToIds].forEach(id => {
-        d3.select("#id" + id.replace("!", "NOT"))
+        d3.selectAll("#id" + id.replace("!", "NOT"))
           .attr("fill", getColorByKey("Background"))
           .attr("stroke", getColorByKey("Background"));
       });
@@ -39,11 +39,11 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
   // Highlight all gadgets related to a node
   function highlightCluster(nodeId, gadgetMap) {
-    if(!gadgetMap) return;
+    if(!gadgetMap || gadgetMap.length === 0) return;
     gadgetMap.forEach(item => {
       if ((item.reductionFromIds.includes(nodeId) || item.reductionToIds.includes(nodeId))) {
         [...item.reductionFromIds, ...item.reductionToIds].forEach(id => {
-          d3.select("#id" + id.replace("!", "NOT"))
+          d3.selectAll("#id" + id.replace("!", "NOT"))
             .attr("fill", getColorByKey("ClauseHighlight"))
             .attr("stroke", getColorByKey("ClauseHighlight"));
           d3.selectAll(".class" + id.replace("!", "NOT"))
@@ -56,14 +56,14 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
   // Reset all cluster highlights
   function clearClusters(gadgetMap) {
-    if(!gadgetMap) return;
+    if(!gadgetMap || gadgetMap.length === 0) return;
     // Reset all clusters in gadgetMap
     gadgetMap.forEach(item => {
       [...item.reductionFromIds, ...item.reductionToIds].forEach(id => {
-        d3.select("#id" + id.replace("!", "NOT"))
+        d3.selectAll("#id" + id.replace("!", "NOT"))
           .attr("fill", getColorByKey("Background"))
           .attr("stroke", getColorByKey("Background"));
-        d3.select(".class" + id.replace("!", "NOT"))
+        d3.selectAll(".class" + id.replace("!", "NOT"))
           .attr("fill", getColorByKey("Background"))
           .attr("stroke", getColorByKey("Background"));
       });

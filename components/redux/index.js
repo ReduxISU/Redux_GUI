@@ -167,6 +167,23 @@ export async function requestReductionVisualization(url, reduction, instance, so
   );
 }
 
+export async function processReductionVisualizations(url, reductionPath, instance, solver) {
+  const reductions = reductionPath.split("-").map(r => r.trim());
+
+  let currentInstance = instance;
+  let solution = requestSolvedInstance(url, solver, currentInstance)
+  let finalVisualization = null;
+
+  for (const reduction of reductions) {
+    finalVisualization = await requestReductionVisualization(url, reduction, currentInstance, solution);
+    const info = await requestInfo(url, reduction, instance);
+    currentInstance = info.reductionTo.defaultInstance;
+    solution = requestMappedSolution(url, solution, currentInstance);
+  }
+
+  return finalVisualization;
+}
+
 /**
  * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
  */

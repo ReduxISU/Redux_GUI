@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Container } from '@mui/material';
 import { No_Viz_Svg, No_Reduction_Viz_Svg } from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
-import { requestGagetMap } from '../redux';
+import { processReductions } from '../redux';
 
 export default function VisualizationLogic({
   url,
@@ -35,7 +35,7 @@ export default function VisualizationLogic({
 
   useEffect(() => {
     if (visualizationState.reductionOn && reductionVisualization !== "") {
-        requestGagetMap(url, chosenReductionType, problemInstance)
+        processReductions(url, chosenReductionType, problemInstance)
             .then(setGadgetMap);
     }
   }, [visualizationState.reductionOn, reductionVisualization, chosenReductionType, problemInstance]);
