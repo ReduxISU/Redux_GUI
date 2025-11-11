@@ -14,13 +14,13 @@ function StandardSATSvgReact(props) {
 
         try {
             if (props.problemData) {
-                getSets(ref.current, props.problemData, props.gadgetMap);
+                getSets(ref.current, props.problemData, props.gadgetMap, props.gadgetsOn);
             }
 
         }
         catch (error) { console.log("VISUALIZATION FAILED") };
 
-    }, [props.problemData, props.gadgetMap])
+    }, [props.problemData, props.gadgetMap, props.gadgetsOn])
 
 
     return (
@@ -34,7 +34,7 @@ function StandardSATSvgReact(props) {
     )
 }
 
-function getSets(ref, data, gadgetMap) {
+function getSets(ref, data, gadgetMap, gadgetsOn) {
     const margin = { top: 200, right: 30, bottom: 30, left: 200 },
         width = 700 - margin.left - margin.right,
         height = 700 - margin.top - margin.bottom;
@@ -55,7 +55,7 @@ function getSets(ref, data, gadgetMap) {
     const clauses = data.clauses;
 
     for (let i = 0; i < clauses.length; i++) {
-        let c = new clause(clauses[i].id, svg, x, y, clauses[i].literals, 13, gadgetMap);
+        let c = new clause(clauses[i].id, svg, x, y, clauses[i].literals, 13, gadgetMap, gadgetsOn);
         c.show();
         x += c.width + 8;
         if (i < clauses.length - 1) {
@@ -165,7 +165,7 @@ function clear(gadgetMap) {
 }
 
 class literal {
-    constructor(id, className, name, svg, x, y, size = 25, gadgetMap, color) {
+    constructor(id, className, name, svg, x, y, size = 25, gadgetMap, color, gadgetsOn) {
         this.id = "id" + id;
         this.className = className;
         this.name = name;
@@ -175,6 +175,7 @@ class literal {
         this.size = size;
         this.gadgetMap = gadgetMap;
         this.color = color;
+        this.gadgetsOn = gadgetsOn;
     }
     show(c = this.className, e = this.id) {
         this.svg.append("rect")
@@ -188,10 +189,16 @@ class literal {
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", "7px")
             .on("mouseover", () => {
-                showCluster(c, this.gadgetMap)
-                showElement(e, this.gadgetMap);
+                if (this.gadgetsOn) {
+                    showCluster(c, this.gadgetMap);
+                    showElement(e, this.gadgetMap);
+                }
             })
-            .on("mouseout", () => clear());
+            .on("mouseout", () => {
+                if (this.gadgetsOn) {
+                    clear();
+                }
+            });
         this.svg.append("text")
             .attr("class", this.name)
             .attr("x", this.x)
@@ -202,17 +209,23 @@ class literal {
             .attr("font-family", "'Courier New', Courier, monospace")
             .text(this.name)
             .on("mouseover", () => {
-                showCluster(c, this.gadgetMap);
-                showElement(e, this.gadgetMap);
+                if (this.gadgetsOn) {
+                    showCluster(c, this.gadgetMap);
+                    showElement(e, this.gadgetMap);
+                }
             })
-            .on("mouseout", () => clear())
+            .on("mouseout", () => {
+                if (this.gadgetsOn) {
+                    clear();
+                }
+            })
             .style("pointer-events", "none");
-            
+
     }
 }
 
 class clause {
-    constructor(className, svg, x, y, literals, size = 20, gadgetMap) {
+    constructor(className, svg, x, y, literals, size = 20, gadgetMap, gadgetsOn) {
         this.className = "class" + className;
         this.svg = svg;
         this.x = x;
@@ -222,6 +235,7 @@ class clause {
         this.literals = literals;
         this.width = 0;
         this.gadgetMap = gadgetMap;
+        this.gadgetsOn = gadgetsOn;
     }
     show(c = this.className) {
         // starting offset
@@ -235,7 +249,7 @@ class clause {
             .attr("dominant-baseline", "middle")
             .attr("font-size", this.size + "px")
             .text("(")
-            .style("pointer-events", "none"); 
+            .style("pointer-events", "none");
 
         // draw each literal and OR symbol
         for (let i = 0; i < this.literals.length; i++) {
@@ -249,6 +263,7 @@ class clause {
                 this.size,
                 this.gadgetMap,
                 this.literals[i].color,
+                this.gadgetsOn,
             );
             lit.show();
 
@@ -269,7 +284,7 @@ class clause {
                     .attr("font-size", this.size + "px")
                     .attr("font-family", "'Courier New', Courier, monospace")
                     .text("\u2228")
-                    .style("pointer-events", "none"); 
+                    .style("pointer-events", "none");
 
                 // move offsetX past the OR symbol plus some spacing
                 offsetX += this.size + gap;
@@ -289,7 +304,7 @@ class clause {
             .attr("font-size", this.size + "px")
             .attr("font-family", "'Courier New', Courier, monospace")
             .text(")")
-            .style("pointer-events", "none"); 
+            .style("pointer-events", "none");
 
         // compute width for background rect
         this.width = offsetX - this.x + this.size / 2;
@@ -305,8 +320,12 @@ class clause {
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", "7px")
             .lower() // send behind text
-            .on("mouseover", () => showCluster(c, this.gadgetMap))
-            .on("mouseout", clear);
+            .on("mouseover", () => {
+                if(this.gadgetsOn) showCluster(c, this.gadgetMap) }
+            )
+            .on("mouseout", () => {
+                if(this.gadgetsOn) clear() }
+            );
     }
 }
 
