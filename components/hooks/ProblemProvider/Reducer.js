@@ -1,5 +1,5 @@
 import { useGenericInfo } from "../ProblemProvider";
-import { requestReductionOptions, requestReductionInfo, requestReductions, requestReducedInstanceFromPath } from "../../redux";
+import { requestReductionOptions, requestReductionInfo, requestReductions, requestReducedInstanceFromPath, requestInfo } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
 // For initial startup defaults
@@ -24,6 +24,10 @@ export function useReducer(url, problemName, problemType, problemInstance) {
     problemInstance,
     state.chosenReduceTo,
     state.chosenReductionType
+  );
+  [state.reductionVisualization, state.setReductionVisualization] = useReductionVisualization(
+    url,
+    state.chosenReduceTo
   );
   return state;
 }
@@ -60,6 +64,24 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
   }, [chosenReductionType, problemInstance]);
 
   return [reducedInstance, setReducedInstance];
+}
+
+function useReductionVisualization(url, chosenReduceTo) {
+  const [reductionVisualization, setReductionVisualization] = useState("");
+
+  useEffect(() => {
+    if (!chosenReduceTo) {
+      setReductionVisualization("");
+      return;
+    }
+
+    (async () => {
+      const info = await requestInfo(url, chosenReduceTo);
+      setReductionVisualization(info?.defaultVisualization.visualizationType ?? "");
+    })();
+  }, [url, chosenReduceTo]);
+
+  return [reductionVisualization, setReductionVisualization];
 }
 
 function useReduceToOptions(url, problemName, problemType) {

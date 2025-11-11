@@ -95,8 +95,8 @@ export default function VisualizationLogic(props) {
                 setSolution(data) 
             }).catch((error) => console.log("SOLUTION REQUEST FAILED"))
         }
-        // SAT3 -> CLIQUE
-        if(reductionName === "CLIQUE"){
+        // SAT3 -> CLIQUE 
+        if(reductionName === "CLIQUE" && false){
             if(props.url && props.problemInstance && props.reducedInstance && solution){
                 requestMappedSolution(props.url, "SipserReduceToCliqueStandard", props.problemInstance, props.reducedInstance, solution).then(data => {
                     setMappedSolution(data);

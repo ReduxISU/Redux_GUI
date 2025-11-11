@@ -13,7 +13,8 @@ const VisColorsArray = [
     { key: "Wine", value: "#882255" },
     { key: "Teal", value: "#44AA99" },
     { key: "Olive", value: "#999933" },
-    { key: "Purple", value: "#AA4499" }
+    { key: "Purple", value: "#AA4499" },
+    { key: "Red", value: "#FF0000" },
 ];
 
 const getColorByKey = (key) => {

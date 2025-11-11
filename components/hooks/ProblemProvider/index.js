@@ -2,6 +2,7 @@ export * from "./Problem";
 export * from "./Reducer";
 export * from "./Solver";
 export * from "./Verifier";
+export * from "./Visualization";
 
 import React, { useEffect, useState } from "react";
 import { requestInfo } from "../../redux";
@@ -10,6 +11,7 @@ import { useProblem } from "./Problem";
 import { useVerifier } from "./Verifier";
 import { useSolver } from "./Solver";
 import { useReducer } from "./Reducer";
+import { useVisualization} from "./Visualization";
 
 export function useProblemProvider(url) {
   const problem = useProblem(url);
@@ -19,6 +21,7 @@ export function useProblemProvider(url) {
     reducer: useReducer(url, problemName, problemType, problemInstance),
     solver: useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance),
     verifier: useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap),
+    visualization: useVisualization(url, problemName, problemType, problemNameMap, problemInfoMap),
   };
 }
 

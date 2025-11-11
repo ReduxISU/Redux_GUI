@@ -11,7 +11,7 @@ export const useUnload = (problem, solver, verifier, reducer) => {
                 reductionType: reducer.chosenReductionType ?? "",
                 verifier: verifier.chosenVerifier ?? "",
             };
-            localStorage.setItem('problemData', JSON.stringify(data));
+            // localStorage.setItem('problemData', JSON.stringify(data));
         };
 
         window.addEventListener('beforeunload', handleBeforeUnload);

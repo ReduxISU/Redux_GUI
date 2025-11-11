@@ -73,7 +73,7 @@ export default function ReduceToRowReact({
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText} titleWidth={"22%"}>
-      <SearchBarExtensible
+        <SearchBarExtensible
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={chosenReduceTo}
           onSelect={setChosenReduceTo}
@@ -93,10 +93,21 @@ export default function ReduceToRowReact({
           toolTip={
             chosenReduceTo
               ? {
-                  header: reduceToInfo.problemName ?? "",
-                  formalDef: reduceToInfo.formalDefinition ?? "",
-                  info: (reduceToInfo.problemDefinition ?? "") + (reduceToInfo.source ?? ""),
-                }
+                header: reduceToInfo.problemName ?? "",
+                formalDef: reduceToInfo.formalDefinition ?? "",
+                // description only 
+                info: reduceToInfo.problemDefinition ?? "",
+                // show source 
+                source: reduceToInfo.source, 
+                credit:
+                  Array.isArray(reduceToInfo.contributors) &&
+                    reduceToInfo.contributors.length
+                    ? reduceToInfo.contributors.join(", ")
+                    : "",
+                // hyperlink
+                componentLink: reduceToInfo.problemLink || "",
+                sourceLink: reduceToInfo.sourceLink || "",
+              }
               : TOOLTIP1
           }
         ></PopoverTooltipClick>
@@ -127,15 +138,26 @@ export default function ReduceToRowReact({
           toolTip={
             chosenReductionType
               ? {
-                  header: reducerInfo.reductionName ?? "",
-                  formalDef: reducerInfo.reductionDefinition ?? "",
-                  info: reducerInfo.source ?? "",
-                }
+                header: reducerInfo.reductionName ?? "",
+                formalDef: reducerInfo.reductionDefinition ?? "",
+                // plain description for the reduction
+                info: reducerInfo.info ?? reducerInfo.description ?? "",
+                // separate Source line
+                source: reducerInfo.source,
+                // contributors if present
+                credit:
+                  Array.isArray(reducerInfo.contributors) &&
+                    reducerInfo.contributors.length
+                    ? reducerInfo.contributors.join(", ")
+                    : "",
+                componentLink: reducerInfo.problemLink || "",
+                sourceLink: reducerInfo.sourceLink || "",
+              }
               : TOOLTIP2
           }
         ></PopoverTooltipClick>
       </ProblemSection.Header>
-      
+
       <ProblemSection.Body>
         {reducedInstance ? (
           <ReduceInfo
@@ -146,7 +168,7 @@ export default function ReduceToRowReact({
         ) : null}
 
         <div className="submitButton">
-        <Button
+          <Button
             size="large"
             color="white"
             style={{ backgroundColor: THEME.colors.grey }}
@@ -243,32 +265,32 @@ function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
 If any of them match it return both a "pretty" version of the instance in a array [0] defines the type(Boolean, graph etc.).
 In the case of a graph nodes and edges are returned in [1] and [2] respectively.
 SAT or boolean form is only the "pretty" form in [1] and [2] is an empty string.*/
-function checkProblemType(stringInstance, chosenReduceTo){
+function checkProblemType(stringInstance, chosenReduceTo) {
   const spacedInstance = stringInstance.replace(/,/g, ', ');
   const kValue = stringInstance.match('(\\d+)(?!.*\\d)'); // Gets the K value from the string.
 
   // Regex for undirected graph
   const prettyUndirectedNodes = spacedInstance.match('((?<=\\(\\({)[ -~]+)(?=}, {{)');
   const prettyUndirectedEdges = getEdges(spacedInstance);
-  if (prettyUndirectedNodes != null){
+  if (prettyUndirectedNodes != null) {
     return ["GRAPH", prettyUndirectedNodes[0], prettyUndirectedEdges[0], kValue[0]];
   }
 
   // Regex for directed graph. Consequently the edge regex is the same for both directed and undirected. Shouldn't be a problem, but good to note.
   const prettyDirectedNodes = spacedInstance.match('((?<=\\(\\({)[ -~]+)(?=}, {\\()');
   const prettyDirectedEdges = getEdges(spacedInstance);
-  if(prettyDirectedNodes != null && (chosenReduceTo == "ARCSET" || chosenReduceTo == "TSP")){
+  if (prettyDirectedNodes != null && (chosenReduceTo == "ARCSET" || chosenReduceTo == "TSP")) {
     return ["GRAPH", prettyDirectedNodes[0], prettyDirectedEdges[0], kValue[0]];
   }
 
   // Regex for Boolean problems.Getting rid of all the characters we don't need and spliting to get all the literals.
   const literalArray = stringInstance.replaceAll("(", "")
-                                      .replaceAll(")", "|") // Replace with a | for splitting
-                                      .replaceAll("&", "")
-                                      .split("|");
-  const uniqueLiterals = new Set (literalArray); // Getting rid of duplicate literals
+    .replaceAll(")", "|") // Replace with a | for splitting
+    .replaceAll("&", "")
+    .split("|");
+  const uniqueLiterals = new Set(literalArray); // Getting rid of duplicate literals
   var literalString = ""
-  uniqueLiterals.forEach((literal)=>{
+  uniqueLiterals.forEach((literal) => {
     literalString += literal + ", "
   })
   literalString = literalString.match('(?:.)+(?=, , )'); // Getting rid of trailing commas.
@@ -276,7 +298,7 @@ function checkProblemType(stringInstance, chosenReduceTo){
   const clauses = stringInstance.replaceAll("|", " | ").replaceAll("&", ", ")
 
   // Literals and clauses.
-  if(clauses != "" && literalString != "" && (chosenReduceTo == "SAT" || chosenReduceTo == "3SAT")){
+  if (clauses != "" && literalString != "" && (chosenReduceTo == "SAT" || chosenReduceTo == "3SAT")) {
     return ["BOOLEAN", literalString, clauses];
   }
 
@@ -285,6 +307,6 @@ function checkProblemType(stringInstance, chosenReduceTo){
 }
 
 // Parses the edges from the graph
-function getEdges(stringInstance){
+function getEdges(stringInstance) {
   return stringInstance.match('((?<=}, {)[ -~]+)(?=}\\), )');
 }
