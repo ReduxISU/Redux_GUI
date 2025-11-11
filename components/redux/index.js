@@ -181,9 +181,9 @@ export async function requestReducedInstanceFromPath(url, reductionPath, instanc
  */
 export async function requestReducedInstance(url, reduction, instance) {
   return await fetchPostJson(
-    `${url}${reduction}/reduce`,
+    `${url}ProblemProvider/reduce?reduction=${reduction}`,
     instance,
-    () => `${reduction} REDUCED INSTANCE REQUEST FAILED`
+    () => `${reduction}  REDUCED INSTANCE REQUEST FAILED`
   );
 }
 
