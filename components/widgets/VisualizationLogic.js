@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Container } from '@mui/material';
 import { No_Viz_Svg, No_Reduction_Viz_Svg } from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
-import { processReductions } from '../redux';
+import { requestGagetMap } from '../redux';
 
 export default function VisualizationLogic({
   url,
@@ -24,7 +24,6 @@ export default function VisualizationLogic({
   reductionData,
   reductionVisualization,
   chosenReduceTo,
-  showGadgets,
 }) {
   const [gadgetMap, setGadgetMap] = useState([]);
   let visualization;
@@ -36,21 +35,21 @@ export default function VisualizationLogic({
 
   useEffect(() => {
     if (visualizationState.reductionOn && reductionVisualization !== "") {
-        processReductions(url, chosenReductionType, problemInstance)
+        requestGagetMap(url, chosenReductionType, problemInstance)
             .then(setGadgetMap);
     }
   }, [visualizationState.reductionOn, reductionVisualization, chosenReductionType, problemInstance]);
 
   if (url && problemInstance && problemData && Object.keys(problemData).length > 0) {
     try {
-      visualization = Visualizations.get(visualizationType)(solve, url, problemData, gadgetMap, showGadgets)
+      visualization = Visualizations.get(visualizationType)(solve, url, problemData, gadgetMap)
     } catch {
       visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />
     }
 
     if (visualizationState.reductionOn) {
       try {
-        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, reductionData, gadgetMap, showGadgets)
+        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, reductionData, gadgetMap)
 
         //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
         // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue

@@ -38,9 +38,9 @@ export default function VisualizeRowReact({
   chosenSolver,
   defaultSolverMap,
   chosenVisualization,
-  visualizationNameMap,
+  VisualizationNameMap,
   setChosenVisualization,
-  VisualizationOptions,
+  visualizationOptions,
   defaultVisualizationMap,
 }) {
 
@@ -258,8 +258,8 @@ export default function VisualizeRowReact({
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={chosenVisualization}
           onSelect={setChosenVisualization}
-          options={VisualizationOptions}
-          optionsMap={visualizationNameMap}
+          options={Array.isArray(visualizationOptions) ? visualizationOptions : []}
+          optionsMap={VisualizationNameMap}
           disabled={!problemName}
           disabledMessage="No visualization available. Please select a problem."
           extenderButtons={(input) => [{ label: `Add new visualization "${input}"`, href: `${url}ProblemTemplate/visualization?problemName=${input}&visualizationName=${input}` }]}
@@ -320,7 +320,7 @@ export default function VisualizeRowReact({
           visualizationName={chosenVisualization}
           problemData={currentProblemData}
           reductionData={currentReductionData}
-          showGadgets={showGadgets}
+          showSolutionToggle={showSolution}
           reductionVisualization={reductionVisualization}
         />
       </ProblemSection.Body>
