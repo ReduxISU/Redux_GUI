@@ -107,41 +107,47 @@ function fullClear(){
         .attr("stroke", VisColors.Background);
 }
 
-class literal{
-    constructor(id, className, name, svg, x, y, size = 25){
-        this.id = "_"+id.replace("!","NOT")
+class literal {
+    constructor(id, className, name, svg, x, y, size = 25) {
+        // Safely handle missing/undefined id and name
+        const safeId = (id ?? "").toString();       // if id is null/undefined, use empty string
+        const safeName = (name ?? "").toString();   // same for name
+
+        this.id = "_" + safeId.replace("!", "NOT");
         this.className = className;
-        this.name = name;
+        this.name = safeName;
         this.svg = svg;
         this.x = x;
         this.y = y;
         this.size = size;
     }
-    show(c = this.className, e = this.id){
+
+    show(c = this.className, e = this.id) {
         this.svg.append("rect")
             .attr("x", this.x)
-            .attr("y", this.y-this.size/2)
+            .attr("y", this.y - this.size / 2)
             .attr("fill", VisColors.Background)
             .attr("height", this.size)
-            .attr("width", this.size*this.name.length-7)//subtracting 7 since the stroke length is 7.
+            .attr("width", this.size * this.name.length - 7) // subtracting 7 since the stroke length is 7.
             .attr("id", this.id)
-            .attr("class", "c_"+this.className+" gadget"+" "+this.name.replace("!","NOT"))
-            .attr("stroke-linejoin","round")
+            .attr("class", "c_" + this.className + " gadget" + " " + this.name.replace("!", "NOT"))
+            .attr("stroke-linejoin", "round")
             .attr("stroke-width", "7px")
             .on("mouseover", function () {
-                showCluster(c)
+                showCluster(c);
                 showElement(e);
             })
             .on("mouseout", function () {
                 clear();
-            })
+            });
+
         this.svg.append("text")
             .attr("class", this.className)
             .attr("x", this.x)
             .attr("y", this.y)
             .attr("text-anchor", "left")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", this.size+"px")
+            .attr("font-size", this.size + "px")
             .attr("font-family", "'Courier New', Courier, monospace")
             .text(this.name)
             .on("mouseover", function () {
@@ -150,10 +156,10 @@ class literal{
             })
             .on("mouseout", function () {
                 clear();
-            })
-
+            });
     }
 }
+
 
 class clause{
     constructor(data,className,svg,x,y,literals,size = 20,solution=[["x1"]]){
