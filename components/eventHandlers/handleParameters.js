@@ -19,7 +19,7 @@ export const useHandleParameters = () => {
     });
 
     if (Object.keys(data).length > 0) {
-      localStorage.setItem('problemData', JSON.stringify(data));
+      // localStorage.setItem('problemData', JSON.stringify(data));
     }
 
     // Remove parameters from the URL

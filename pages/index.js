@@ -69,11 +69,11 @@ function MainPageContent() {
     // }
   });
 
-  useHandleParameters();
+  //useHandleParameters();
 
-  const { problem, solver, verifier, reducer } = useProblemProvider(reduxBaseUrl);
+  const { problem, solver, verifier, reducer, visualization } = useProblemProvider(reduxBaseUrl);
 
-  useUnload(problem, solver, verifier, reducer);
+  //useUnload(problem, solver, verifier, reducer);
 
   return (
     <>
@@ -96,14 +96,14 @@ function MainPageContent() {
             </div>
 
             <div className="p-2 col-example">
-              <VisualizeRowMemo url={reduxBaseUrl} {...problem} {...reducer} chosenSolver={solver.chosenSolver} />
+              <VisualizeRowMemo url={reduxBaseUrl} {...problem} {...reducer} chosenSolver={solver.chosenSolver} defaultSolverMap={solver.defaultSolverMap} {...visualization} />
             </div>
 
             <div className="p-2 col-example">
               <SolveRowMemo url={reduxBaseUrl} {...problem} {...solver} chosenReduceTo={reducer.chosenReduceTo} />
             </div>
-            <div className="p-2 col-example">
 
+            <div className="p-2 col-example">
               <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />
             </div>
 

@@ -11,9 +11,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Stack } from '@mui/material'
 import TextField from '@mui/material/TextField';
-import { Button } from "@mui/material";
+import { Button, Stack, Box } from "@mui/material";
 import FolderIcon from '@mui/icons-material/Folder';
 import DownloadIcon from '@mui/icons-material/Download';
 
@@ -117,7 +116,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     if (!problem.problemName) return;
 
     let problemVal = problem.defaultInstance ?? "";
-    const storedData = localStorage.getItem('problemData');
+    const storedData = null;
 
     if (isFirstRender.current) {
       // First render: read from localStorage
@@ -147,6 +146,30 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     }
   }
 
+  const tip =
+    problemName
+      ? {
+          header: problemInfo.problemName ?? "",
+          formalDef: problemInfo.formalDefinition ?? "",
+          // It makes description clean 
+          info: problemInfo.problemDefinition ?? "",
+          // Source shown on its own line here
+          source:
+            problemInfo.source ||
+            (Array.isArray(problemInfo.citations) ? problemInfo.citations.join("; ") : "") ||
+            "",
+          // Contributors
+          credit:
+            Array.isArray(problemInfo.contributors) && problemInfo.contributors.length
+              ? problemInfo.contributors.join(", ")
+              : "",
+          //  Popover builds Wikipedia URL
+          componentLink: problemInfo.problemLink || "",
+          sourceLink: problemInfo.sourceLink || "",
+          isMathDef: true, // only this file adds the flag
+        }
+      : TOOLTIP;
+
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText}>
@@ -163,22 +186,14 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
             },
           ]}
         />{" "}
-        <PopoverTooltipClick
-          toolTip={
-            problemName
-              ? {
-                header: problemInfo.problemName ?? "",
-                formalDef: problemInfo.formalDefinition ?? "",
-                info: (problemInfo.problemDefinition ?? "") + (problemInfo.source ?? ""),
-              }
-              : TOOLTIP
-          }
-        ></PopoverTooltipClick>
+         <PopoverTooltipClick toolTip={tip} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>
         <Stack direction="row" gap={1}>
-          {CARD.cardBodyText}
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+            {CARD.cardBodyText}
+          </Box>
           {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
           <TextField
             error={!instanceParsed.test}

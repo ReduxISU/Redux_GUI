@@ -4,15 +4,12 @@
 import Split from 'react-split'
 import { useEffect, useState } from 'react';
 import { Container } from '@mui/material';
-import {No_Viz_Svg, No_Reduction_Viz_Svg} from '../Visualization/svgs/No_Viz_SVG';
+import { No_Viz_Svg, No_Reduction_Viz_Svg } from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
-import ReducedVisualizations from '../Visualization/svgs/ReducedVizualizations';
-import defaultSolvers from '../Visualization/constants/DefaultSolvers';
-import { requestMappedSolution, requestMappedSolutionTransitive, requestSolvedInstanceTemporarySat3CliqueSolver } from '../redux';
+import { requestGadgetMap, processReductions } from '../redux';
 
 export default function VisualizationLogic({
   url,
-  chosenSolver,
   problemName,
   problemNameMap,
   problemInstance,
@@ -22,102 +19,92 @@ export default function VisualizationLogic({
   reducedInstance,
   visualizationState,
   loading,
-  currentStep,
-  allSteps,
+  visualizationType,
+  problemData,
+  reductionData,
+  reductionVisualization,
+  chosenReduceTo,
 }) {
-    const [solution, setSolution] = useState("");
-    const [mappedSolution, setMappedSolution] = useState();
-    let visualization;
-    let reducedVisualization;
+  const [gadgetMap, setGadgetMap] = useState([]);
+  let visualization;
+  let reducedVisualization;
 
-    const solve = visualizationState.solverOn
+  const solve = visualizationState.solverOn
 
-    const handleBar = (sizes) => {}
+  const handleBar = (sizes) => { }
 
-    useEffect(() => {
-      if (url && problemInstance) {
-        requestSolvedInstanceTemporarySat3CliqueSolver(url, /*defaultSolvers.get(problemName) || */chosenSolver, problemInstance).then(
-          (data) => {
-            setSolution(data ?? "");
-          }
-        );
+  const [loadingMap, setLoadingMap] = useState(false);
+
+  useEffect(() => {
+    if (visualizationState.reductionOn && reductionVisualization !== "") {
+      setLoadingMap(true);
+      processReductions(url, chosenReductionType, problemInstance)
+        .then(setGadgetMap)
+        .finally(() => setLoadingMap(false));
+    }
+  }, [visualizationState.reductionOn, reductionVisualization, chosenReductionType, problemInstance]);
+
+
+  if (url && problemInstance && problemData && Object.keys(problemData).length > 0) {
+    try {
+      visualization = Visualizations.get(visualizationType)(solve, url, problemData, gadgetMap, visualizationState.gadgetsOn)
+    } catch {
+      visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />
+    }
+
+    if (visualizationState.reductionOn) {
+      try {
+        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, reductionData, gadgetMap, visualizationState.gadgetsOn)
+
+        //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
+        // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
+        if (reductionName == "CLIQUE") {
+          //reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
+        }
+
+      } catch {
+        reducedVisualization = <No_Reduction_Viz_Svg reducedVisualization={reductionNameMap.get(chosenReductionType)} />
       }
-    }, [problemInstance, problemName, chosenReductionType, reducedInstance, chosenSolver]);
-
-    useEffect(() => {
-      if (url && problemInstance && chosenReductionType && solution) {
-        if (chosenReductionType.includes("-")) {
-          requestMappedSolutionTransitive(url, chosenReductionType, problemInstance, solution).then((data) => {
-            setMappedSolution(data ?? "");
-          });
-        } else if (reducedInstance) {
-          requestMappedSolution(url, chosenReductionType, problemInstance, reducedInstance, solution).then((data) => {
-            setMappedSolution(data ?? "");
-          });
-        }
-      }
-    }, [solution])
-    
-    if(url && problemInstance){
-        try{
-            visualization = Visualizations.get(problemName)(solve, url, problemInstance, solution, currentStep, allSteps)
-        } catch{
-            visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)}/>
-        }
-
-        if(visualizationState.reductionOn){
-            try{
-                reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, reducedInstance, mappedSolution)
-
-                //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
-                // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
-                if(reductionName == "CLIQUE"){
-                    reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
-                }
-
-            } catch{
-                reducedVisualization = <No_Reduction_Viz_Svg reducedVisualization={reductionNameMap.get(chosenReductionType)}/>
-            }
-        }
     }
+  }
 
 
-    if (!visualizationState.reductionOn && !loading) {
-        return (
-            <>
-                <Container>
-                    {visualization}
-                </Container>
-            </>
-        )
-    }
-    else if (visualizationState.reductionOn && !loading) {
-
-        return (
-            <>
-                <Split
-                    className="wrap"
-                    direction="horizontal"
-                    style={{ height: 'inherit' }}
-                    onDragStart={handleBar}
-                >
-                    <Container>
-                        {/* {"Container1"} */}
-                        {visualization}
-                    </Container>
-
-                    <Container>
-                        {/* {"Container2"} */}
-                        {reducedVisualization}
-                    </Container>
-                </Split>
-
-            </>
-        )
-    }
+  if (!visualizationState.reductionOn && !loading) {
+    return (
+      <>
+        <Container>
+          {visualization}
+        </Container>
+      </>
+    )
+  }
+  else if (visualizationState.reductionOn && !loading) {
 
     return (
-        <>
-        </>
+      <>
+        <Split
+          className="wrap"
+          direction="horizontal"
+          style={{ height: 'inherit' }}
+          onDragStart={handleBar}
+        >
+          <Container>
+            {/* {"Container1"} */}
+            {visualization}
+          </Container>
+
+          <Container>
+            {/* {"Container2"} */}
+            {reducedVisualization}
+          </Container>
+        </Split>
+
+      </>
     )
+  }
+
+  return (
+    <>
+    </>
+  )
 }

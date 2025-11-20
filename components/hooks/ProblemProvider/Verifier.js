@@ -67,7 +67,7 @@ function useChosenVerifier(problemName, defaultVerifierMap) {
     if(!problemName || defaultVerifierMap.size === 0) return;
 
     let verifierVar = !problemName ? "" : defaultVerifierMap.get(problemName);
-    const storedData = localStorage.getItem('problemData');
+    const storedData = null;
 
     if (isFirstRender.current) {
       // First render: read from localStorage

@@ -24,7 +24,7 @@ const ACCORDION_FORM_ONE = { placeHolder: "Select verifier" }
 const BUTTON = { buttonText: "Verify" }
 const CARD = { cardBodyText: "Enter a certificate:", cardHeaderText: "Verify" }
 const TOOLTIP = { header: "Problem Verifier", formalDef: "Choose a verifier to see information about it", info: "" }
-const THEME = {colors:{grey:"#424242",orange:"#d4441c"}}
+const THEME = { colors: { grey: "#424242", orange: "#d4441c" } }
 
 export default function VerifyRowReact({
   url,
@@ -80,10 +80,21 @@ export default function VerifyRowReact({
           toolTip={
             chosenVerifier
               ? {
-                  header: verifierInfo.verifierName ?? "",
-                  formalDef: verifierInfo.verifierDefinition ?? "",
-                  info: verifierInfo.source ?? "",
-                }
+                header: verifierInfo.verifierName ?? "",
+                formalDef: verifierInfo.verifierDefinition ?? "",
+                // plain description only
+                info: verifierInfo.info ?? verifierInfo.description ?? "",
+                // show source 
+                source: verifierInfo.source,
+                // show contributors 
+                credit:
+                  Array.isArray(verifierInfo.contributors) && verifierInfo.contributors.length
+                    ? verifierInfo.contributors.join(", ")
+                    : "",
+                // hyperlink target 
+                componentLink: verifierInfo.verifierLink || "",
+                sourceLink: verifierInfo.sourceLink || "",
+              }
               : TOOLTIP
           }
         ></PopoverTooltipClick>

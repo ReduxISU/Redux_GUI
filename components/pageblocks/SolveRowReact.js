@@ -66,6 +66,25 @@ export default function SolveRowReact({
     document.body.removeChild(link);
   }
 
+  const tip =
+    chosenSolver
+      ? {
+        header: solverInfo.solverName ?? "",
+        formalDef: solverInfo.solverDefinition ?? "",
+        // Keep description clean
+        info: solverInfo.info ?? solverInfo.description ?? "",
+        // Source on its own line 
+        source: solverInfo.source,
+        credit:
+          Array.isArray(solverInfo.contributors) && solverInfo.contributors.length
+            ? solverInfo.contributors.join(", ")
+            : "",
+
+        componentLink: solverInfo.solverLink || "",
+        sourceLink: solverInfo.sourceLink || "",
+      }
+      : TOOLTIP;
+
   return (
     <ProblemSection>
       <ProblemSection.Header title={CARD.cardHeaderText}>
@@ -85,23 +104,13 @@ export default function SolveRowReact({
             return !chosenReduceTo ? [extender(problemName)] : [extender(problemName), extender(chosenReduceTo)];
           }}
         />{" "}
-        <PopoverTooltipClick
-          toolTip={
-            chosenSolver
-              ? {
-                  header: solverInfo.solverName ?? "",
-                  formalDef: solverInfo.solverDefinition ?? "",
-                  info: solverInfo.source ?? "",
-                }
-              : TOOLTIP
-          }
-        ></PopoverTooltipClick>
+        <PopoverTooltipClick toolTip={tip} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>
         {CARD.cardBodyText + " " + solvedInstance}
         <div className="submitButton">
-        <Button
+          <Button
             size="large"
             color="white"
             style={{ backgroundColor: THEME.colors.grey }}
