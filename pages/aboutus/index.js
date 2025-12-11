@@ -33,7 +33,10 @@ export default function AboutUsPage() {
         "Russell Phillips",
         "Michael Crapse",
         "Ian Gonzalez",
-        "Sabal Subedi"
+        "Sabal Subedi",
+        "George Lake",
+        "Grant Gardner",
+        "Jason Wright"
         // Add new contributor here
     ];
 
@@ -106,7 +109,7 @@ export default function AboutUsPage() {
                         <Card.Body style={cardBodyStyle}>
                             {`Additional documentation can be found at the following links:`}
                             <ul>
-                                <li><a href="https://github.com/marckade/Redux_GUI" target="_blank" rel="noopener noreferrer">Github</a></li>
+                                <li><a href="https://github.com/ReduxISU/Redux_GUI" target="_blank" rel="noopener noreferrer">Github</a></li>
                                 <li><a href="https://en.wikipedia.org/wiki/NP-completeness" target="_blank" rel="noopener noreferrer">Wikipedia: What is NP-Complete?</a></li>
                                 <li><a href="https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf" target="_blank" rel="noopener noreferrer">Karp&apos;s 21 NP-Complete Problems</a></li>
                                 <li><a href="https://docs.google.com/document/d/18IKOGImh5O7Z2elgc4WzhiYUV-VwdjNb7WJFEHIFL-E/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Redux GUI Documentation</a></li>
