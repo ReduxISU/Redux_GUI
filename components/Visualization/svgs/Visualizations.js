@@ -3,7 +3,7 @@ import StandardSATSvgReact from "./StandardSATSvgReact";
 import StandardCircuitSvgReact from "./StandardCircuitSvgReact";
 
 const Visualizations = new Map([
-    ["Boolean Satisfiability" , (solve, url, problemData, gadgetMap, gadgetsOn) => {
+    ["Boolean Satisfiability" , (solve, url, problemData, gadgetMap, gadgetsOn, extra) => {
         return(
             <StandardSATSvgReact 
                 problemData={problemData}
@@ -14,7 +14,7 @@ const Visualizations = new Map([
             ></StandardSATSvgReact>  
         )
     }],
-    ["Graph D3", (solve, url, problemData, gadgetMap, gadgetsOn)=>{
+    ["Graph D3", (solve, url, problemData, gadgetMap, gadgetsOn, extra)=>{
         return(
         <StandardGraphSvgReact 
             problemData={problemData}
@@ -25,7 +25,7 @@ const Visualizations = new Map([
         ></StandardGraphSvgReact>
         )
     }],
-    ["Quantum Circuit D3", (solve, url, problemData, gadgetMap, gadgetsOn)=>{
+    ["Quantum Circuit D3", (solve, url, problemData, gadgetMap, gadgetsOn, extra)=>{
         return(
         <StandardCircuitSvgReact
             problemData={problemData}
@@ -33,11 +33,11 @@ const Visualizations = new Map([
             url={url}
             gadgetMap={gadgetMap}
             gadgetsOn={gadgetsOn}
+            useSolutionCircuit={extra?.showSolutionCircuit}
         ></StandardCircuitSvgReact>
         )
     }],
     // TODO: Quantum Circuit Qs (Courtney)
-
 ])
 
 export default Visualizations;
