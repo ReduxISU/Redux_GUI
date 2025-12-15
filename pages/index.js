@@ -7,7 +7,7 @@
  */
 
 import React from "react"; //React is implicitly imported
-import QuantumCircuitVisualizer from "../components/Quantum/QuantumCircuitVisualizer.jsx";
+import QuantumCircuitVisualizer from "../components/Quantum/QuantumCircuitVisualizer.js";
 import ProblemRowReact from "../components/pageblocks/ProblemRowReact";
 import ReduceToRowReact from "../components/pageblocks/ReduceToRowReact";
 import VisualizeRowReact from "../components/pageblocks/VisualizeRowReact";
