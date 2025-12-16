@@ -1,28 +1,54 @@
 /**
  * VisualizeRowReact.js
- * 
- * Handles visualization row UI, step controls, switches, and async loading of visualization data.
+ *
+ * Handles visualization row UI, step controls, switches,
+ * and async loading of visualization data.
  */
 
-import React, { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { OverlayTrigger, Popover } from 'react-bootstrap';
-import { Button, Switch, FormControlLabel, IconButton, TextField } from '@mui/material';
-import { SkipPrevious, SkipNext, FastRewind, FastForward } from '@mui/icons-material';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import React, { useState, useEffect } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { OverlayTrigger, Popover } from "react-bootstrap";
+import {
+  Button,
+  Switch,
+  FormControlLabel,
+  IconButton,
+  TextField,
+} from "@mui/material";
+import {
+  SkipPrevious,
+  SkipNext,
+  FastRewind,
+  FastForward,
+} from "@mui/icons-material";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import Link from "next/link"; // <-- IMPORTANT for Quantum button
 
-import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
-import SearchBarExtensible from '../widgets/SearchBarExtensible';
+import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
+import SearchBarExtensible from "../widgets/SearchBarExtensible";
 
-import { requestProblemGenericInstance, requestReducedInstance, requestVisualization, requestReductionVisualization } from '../redux';
-import VisualizationLogic from '../widgets/VisualizationLogic';
-import ProblemSection from '../widgets/ProblemSection';
-import { useVisualizationInfo } from '../hooks/ProblemProvider';
+import {
+  requestProblemGenericInstance,
+  requestReducedInstance,
+  requestVisualization,
+  requestReductionVisualization,
+} from "../redux";
+
+import VisualizationLogic from "../widgets/VisualizationLogic";
+import ProblemSection from "../widgets/ProblemSection";
+import { useVisualizationInfo } from "../hooks/ProblemProvider";
 
 const CARD = { cardBodyText: "DEFAULT BODY", cardHeaderText: "Visualize" };
-const SWITCHES = { switch1: "Highlight solution", switch2: "Highlight gadgets", switch3: "Show reduction" };
+const SWITCHES = {
+  switch1: "Highlight solution",
+  switch2: "Highlight gadgets",
+  switch3: "Show reduction",
+};
 const ACCORDION_FORM_ONE = { placeHolder: "Select visualization" };
-const TOOLTIP = { header: "Visualization Information", formalDef: "Choose a visualization to see information about it" };
+const TOOLTIP = {
+  header: "Visualization Information",
+  formalDef: "Choose a visualization to see info about it",
+};
 
 export default function VisualizeRowReact({
   url,
@@ -43,15 +69,16 @@ export default function VisualizeRowReact({
   VisualizationOptions,
   defaultVisualizationMap,
 }) {
-
   const visualizationInfo = useVisualizationInfo(url, chosenVisualization);
 
   const defaultSat3VisualizationArr = [
     ["x1", "!x2", "x3"],
     ["!x1", "x3", "x1"],
-    ["x2", "!x3", "x1"]
+    ["x2", "!x3", "x1"],
   ];
+
   const defaultSat3SolutionArr = ["x1"];
+
   const defaultCLIQUEVisualizationArr = [
     { name: "x1", cluster: "0" },
     { name: "!x2", cluster: "0" },
@@ -73,8 +100,12 @@ export default function VisualizeRowReact({
   const [disableReduction, setDisableReduction] = useState(!chosenReductionType);
   const [hasSolutionCircuit, setHasSolutionCircuit] = useState(false);
 
-  const [problemVisualizationData, setProblemVisualizationData] = useState(defaultSat3VisualizationArr);
-  const [reducedVisualizationData, setReducedVisualizationData] = useState(defaultCLIQUEVisualizationArr);
+  const [problemVisualizationData, setProblemVisualizationData] = useState(
+    defaultSat3VisualizationArr
+  );
+  const [reducedVisualizationData, setReducedVisualizationData] = useState(
+    defaultCLIQUEVisualizationArr
+  );
   const [currentProblemData, setCurrentProblemData] = useState(null);
   const [currentReductionData, setCurrentReductionData] = useState(null);
   const [problemData, setProblemData] = useState([]);
@@ -88,10 +119,9 @@ export default function VisualizeRowReact({
   const totalSteps = problemData.length;
   const disableSolutionCircuit = !hasSolutionCircuit;
 
-  // Track when problem instance is ready
+  // Track when instance is ready
   useEffect(() => {
-    if (problemInstance && problemName) setInstanceReady(true);
-    else setInstanceReady(false);
+    setInstanceReady(!!(problemInstance && problemName));
   }, [problemInstance, problemName]);
 
   useEffect(() => {
@@ -101,38 +131,43 @@ export default function VisualizeRowReact({
     setHasSolutionCircuit(false);
   }, [problemName, problemInstance, chosenVisualization]);
 
-
+  // Fetch reduction visualization
   useEffect(() => {
-    if (!chosenReduceTo || !problemInstance || !showReduction || problemInstance === "") return;
+    if (!chosenReduceTo || !problemInstance || !showReduction) return;
 
-    const fetchVisualization = async () => {
+    const fetch = async () => {
       try {
-        const data = await requestReductionVisualization(url, chosenReductionType, problemInstance, chosenSolver);
+        const data = await requestReductionVisualization(
+          url,
+          chosenReductionType,
+          problemInstance,
+          chosenSolver
+        );
         setProblemReductionData(data ?? []);
       } catch (err) {
-        console.error("Failed to load visualization:", err);
-        setProblemReductionData([]);
+        console.error("Failed to load reduction visualization:", err);
       }
     };
 
-    fetchVisualization();
+    fetch();
   }, [showReduction, problemName, problemInstance]);
 
-  // Fetch main visualization data asynchronously after instanceReady
+  // Fetch main visualization data
   useEffect(() => {
     if (!instanceReady || !chosenVisualization) return;
 
-    let isCurrent = true; // prevents race conditions
-    setProblemData([]);
-    setProblemReductionData([]);
-    setCurrentProblemData(null);
-    setCurrentReductionData(null);
-    setCurrentStep(0);
+    let alive = true;
 
-    const fetchVisualization = async () => {
+    const fetch = async () => {
       try {
-        const data = await requestVisualization(url, chosenVisualization, problemInstance, chosenSolver);
-        if (!isCurrent) return;
+        const data = await requestVisualization(
+          url,
+          chosenVisualization,
+          problemInstance,
+          chosenSolver
+        );
+
+        if (!alive) return;
 
         let processedData = [];
 
@@ -147,9 +182,8 @@ export default function VisualizeRowReact({
           processedData = [data];
         }
 
-        // If showReduction is true, only keep first and last elements
-        if (showReduction && processedData.length > 1) {
-          processedData = [processedData[0], processedData[processedData.length - 1]];
+        if (showReduction && list.length > 1) {
+          list = [list[0], list[list.length - 1]];
         }
 
 
@@ -174,40 +208,53 @@ export default function VisualizeRowReact({
       }
     };
 
-    fetchVisualization();
+    fetch();
 
-    return () => { isCurrent = false }; // cancel outdated fetches
-  }, [instanceReady, chosenVisualization, problemInstance, problemName, chosenSolver]);
+    return () => {
+      alive = false;
+    };
+  }, [
+    instanceReady,
+    chosenVisualization,
+    problemInstance,
+    chosenSolver,
+    showReduction,
+  ]);
 
-
-  // Fetch SAT3 / Reduction data asynchronously
+  // Fetch SAT3
   useEffect(() => {
     if (problemName !== "SAT3") return;
 
-    const fetchProblemData = async () => {
+    const fetchSAT3 = async () => {
       try {
-        const problemClauses = await requestProblemGenericInstance(url, problemName, problemInstance);
-        if (problemClauses) setProblemVisualizationData(problemClauses.clauses);
+        const clauses = await requestProblemGenericInstance(
+          url,
+          problemName,
+          problemInstance
+        );
+        if (clauses) setProblemVisualizationData(clauses.clauses);
 
         if (chosenReductionType) {
-          const reduced = await requestReducedInstance(url, chosenReductionType, problemInstance);
-          if (reduced) setReducedVisualizationData(reduced.reductionTo.clusterNodes);
+          const reduced = await requestReducedInstance(
+            url,
+            chosenReductionType,
+            problemInstance
+          );
+          if (reduced)
+            setReducedVisualizationData(reduced.reductionTo.clusterNodes);
         }
       } catch (err) {
-        console.error("Failed to fetch SAT3/reduction data:", err);
+        console.error("SAT3 fetch failed:", err);
       }
     };
 
-    fetchProblemData();
+    fetchSAT3();
   }, [problemInstance, problemName, chosenReductionType]);
 
-  // Switch enable/disable logic
   useEffect(() => {
     setDisableSolution(!problemName);
     setDisableReduction(!chosenReduceTo);
     setShowGadgets(false);
-    // Temporarily disabled, needs fixing!
-    //setShowReduction(problemName === "SAT3" && chosenReduceTo === "CLIQUE");
   }, [problemName, chosenReduceTo]);
 
   useEffect(() => {
@@ -215,27 +262,28 @@ export default function VisualizeRowReact({
     if (!chosenReductionType) setShowReduction(false);
   }, [chosenReductionType]);
 
-  // Show solution when at last step
   useEffect(() => {
-    setShowSolution(currentStep === (totalSteps - 1) && totalSteps > 1);
+    setShowSolution(currentStep === totalSteps - 1 && totalSteps > 1);
   }, [currentStep, totalSteps]);
 
   useEffect(() => {
     setCurrentProblemData(problemData[currentStep] ?? null);
-    if(showReduction && reducedInstance && "Graph D3") setCurrentReductionData(problemReductionData[currentStep] ?? null);
+    setCurrentReductionData(problemReductionData[currentStep] ?? null);
   }, [problemData, currentStep, problemReductionData]);
 
-  // Switch handlers
+  // Switch Handlers
   function handleSwitch1Change(e) {
     setShowSolution(e.target.checked);
     setShowGadgets(false);
-    setCurrentStep(e.target.checked && totalSteps > 0 ? totalSteps - 1 : 0);
+    setCurrentStep(e.target.checked ? totalSteps - 1 : 0);
   }
+
   function handleSwitch2Change(e) {
     setShowGadgets(e.target.checked);
     setShowSolution(false);
     setCurrentStep(0);
   }
+
   function handleSwitch3Change(e) {
     setShowReduction(e.target.checked);
     setCurrentStep(0);
@@ -252,33 +300,35 @@ export default function VisualizeRowReact({
     setCurrentStep(0);
   }
 
-  function handleRadioChange(value) {
-    switch (value) {
-      case 'start': setCurrentStep(0); break;
-      case 'back': setCurrentStep(prev => Math.max(prev - 1, 0)); break;
-      case 'forward': setCurrentStep(prev => Math.min(prev + 1, totalSteps - 1)); break;
-      case 'end': setCurrentStep(totalSteps - 1); break;
-      default: break;
-    }
+  function handleRadioChange(type) {
+    if (type === "start") setCurrentStep(0);
+    else if (type === "back") setCurrentStep((p) => Math.max(0, p - 1));
+    else if (type === "forward")
+      setCurrentStep((p) => Math.min(totalSteps - 1, p + 1));
+    else if (type === "end") setCurrentStep(totalSteps - 1);
   }
 
-  const logicProps = { solverOn: showSolution, reductionOn: showReduction, gadgetsOn: showGadgets };
+  const logicProps = {
+    solverOn: showSolution,
+    reductionOn: showReduction,
+    gadgetsOn: showGadgets,
+  };
 
-  const tip =
-    chosenVisualization
-      ? {
+  const tip = chosenVisualization
+    ? {
         header: visualizationInfo.visualizationName ?? "",
         formalDef: visualizationInfo.visualizationDefinition ?? "",
         info: visualizationInfo.info ?? visualizationInfo.description ?? "",
         source: visualizationInfo.source,
         credit:
-          Array.isArray(visualizationInfo.contributors) && visualizationInfo.contributors.length
+          Array.isArray(visualizationInfo.contributors) &&
+          visualizationInfo.contributors.length
             ? visualizationInfo.contributors.join(", ")
             : "",
         componentLink: visualizationInfo.visualizationLink || "",
         sourceLink: visualizationInfo.sourceLink || "",
       }
-      : TOOLTIP;
+    : TOOLTIP;
 
   return (
     <ProblemSection defaultCollapsed={false}>
@@ -287,50 +337,146 @@ export default function VisualizeRowReact({
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={chosenVisualization}
           onSelect={setChosenVisualization}
-          options={Array.isArray(VisualizationOptions) ? VisualizationOptions : []}
+          options={VisualizationOptions || []}
           optionsMap={VisualizationNameMap}
           disabled={!problemName}
           disabledMessage="No visualization available. Please select a problem."
-          extenderButtons={(input) => [{ label: `Add new visualization "${input}"`, href: `${url}ProblemTemplate/visualization?problemName=${input}&visualizationName=${input}` }]}
         />
+
         <PopoverTooltipClick toolTip={tip} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>
         {/* Controls */}
-        <div style={{ border: "2px solid #ccc", borderRadius: "8px", padding: "16px", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", backgroundColor: "#f9f9f9" }}>
+        <div
+          style={{
+            border: "2px solid #ccc",
+            borderRadius: "8px",
+            padding: "16px",
+            marginBottom: "20px",
+            display: "flex",
+            justifyContent: "space-between",
+            backgroundColor: "#f9f9f9",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Refresh + Step navigation */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Button style={{ backgroundColor: "#43a047" }} variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefreshButton}>Refresh</Button>
-            <OverlayTrigger placement="bottom" overlay={isDisabled ? <Popover id="popover-basic"><Popover.Body>Radio buttons and text box are disabled when gadgets or reduction is on.</Popover.Body></Popover> : <></>}>
-              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <IconButton onClick={() => handleRadioChange("start")} disabled={isDisabled}><FastRewind /></IconButton>
-                <IconButton onClick={() => handleRadioChange("back")} disabled={isDisabled}><SkipPrevious /></IconButton>
+            <Button
+              style={{ backgroundColor: "#43a047" }}
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              onClick={handleRefreshButton}
+            >
+              Refresh
+            </Button>
+
+            <OverlayTrigger
+              placement="bottom"
+              overlay={
+                isDisabled ? (
+                  <Popover>
+                    <Popover.Body>
+                      Navigation disabled during reduction or gadget mode.
+                    </Popover.Body>
+                  </Popover>
+                ) : (
+                  <></>
+                )
+              }
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "4px" }}
+              >
+                <IconButton
+                  disabled={isDisabled}
+                  onClick={() => handleRadioChange("start")}
+                >
+                  <FastRewind />
+                </IconButton>
+                <IconButton
+                  disabled={isDisabled}
+                  onClick={() => handleRadioChange("back")}
+                >
+                  <SkipPrevious />
+                </IconButton>
+
                 <TextField
                   type="number"
                   variant="filled"
                   value={currentStep}
                   onChange={(e) => {
-                    const numValue = Number(e.target.value);
-                    if (!isNaN(numValue) && numValue >= 0 && numValue < totalSteps) setCurrentStep(numValue);
+                    const n = Number(e.target.value);
+                    if (!isNaN(n) && n >= 0 && n < totalSteps)
+                      setCurrentStep(n);
                   }}
-                  inputProps={{ min: 0, max: totalSteps }}
                   style={{ width: "70px" }}
                   disabled={isDisabled}
                 />
-                <IconButton onClick={() => handleRadioChange("forward")} disabled={isDisabled}><SkipNext /></IconButton>
-                <IconButton onClick={() => handleRadioChange("end")} disabled={isDisabled}><FastForward /></IconButton>
+
+                <IconButton
+                  disabled={isDisabled}
+                  onClick={() => handleRadioChange("forward")}
+                >
+                  <SkipNext />
+                </IconButton>
+                <IconButton
+                  disabled={isDisabled}
+                  onClick={() => handleRadioChange("end")}
+                >
+                  <FastForward />
+                </IconButton>
               </div>
             </OverlayTrigger>
           </div>
 
+          {/* Switches */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <FormControlLabel disabled={disableReduction} checked={showReduction} control={<Switch />} label={SWITCHES.switch3} onChange={handleSwitch3Change} />
-            <FormControlLabel disabled={disableGadget} checked={showGadgets} control={<Switch id="highlightGadgets" />} label={SWITCHES.switch2} onChange={handleSwitch2Change} />
+            <FormControlLabel
+              disabled={disableReduction}
+              checked={showReduction}
+              control={<Switch />}
+              label={SWITCHES.switch3}
+              onChange={handleSwitch3Change}
+            />
+            <FormControlLabel
+              disabled={disableGadget}
+              checked={showGadgets}
+              control={<Switch />}
+              label={SWITCHES.switch2}
+              onChange={handleSwitch2Change}
+            />
             <FormControlLabel disabled={disableSolutionCircuit} checked={showSolutionCircuit} control={<Switch id="showSolutionCircuit" />} label="Show solution circuit" onChange={handleSolutionCircuitChange} />
-            <FormControlLabel disabled={disableSolution} checked={showSolution} control={<Switch id="showSolution" />} label={SWITCHES.switch1} onChange={handleSwitch1Change} />
+            <FormControlLabel
+              disabled={disableSolution}
+              checked={showSolution}
+              control={<Switch />}
+              label={SWITCHES.switch1}
+              onChange={handleSwitch1Change}
+            />
           </div>
         </div>
 
+        {/* --- QUANTUM VISUALIZER BUTTON --- */}
+        <div style={{ marginBottom: "20px", textAlign: "right" }}>
+          <Link href="/visualizer" passHref legacyBehavior>
+            <button
+              style={{
+                backgroundColor: "#0d6efd",
+                color: "white",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                border: "none",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              QUANTUM VISUALIZER
+            </button>
+          </Link>
+        </div>
+
+        {/* Main visualization */}
         <VisualizationLogic
           loading={svgIsLoading}
           problemInstance={problemInstance}
