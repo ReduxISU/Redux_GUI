@@ -2,16 +2,81 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
 import { openqasmToQText } from "./openqasmToQText";
 
-const QuantumCircuitVis = ({ problemData }) => {
+const QuantumCircuitVis = ({
+  problemData,
+  useSolutionCircuit = false,
+  // Unused today but kept for signature parity with other visualizations
+  solve,
+  url,
+  gadgetMap,
+  gadgetsOn,
+}) => {
   const [qReady, setQReady] = useState(false);
   const containerRef = useRef(null);
 
-  // 1) Get the OpenQASM string from problemData
-  const openQasm =
-    problemData?.openQasm ||
-    problemData?.solution?.openQasm ||
-    problemData?.qasm ||
-    "";
+  // 1) Get the OpenQASM string from problemData; prefer solution circuit when requested
+  function extractOpenQasm(raw, useSolution) {
+    let data = raw;
+
+    // If we were passed an array of frames, pick the first one that has QASM
+    if (Array.isArray(data)) {
+      const candidate = data.find(
+        (f) =>
+          (useSolution && (f?.solution?.openQasm || f?.solution?.qasm)) ||
+          f?.openQasm ||
+          f?.qasm ||
+          f?.openqasm
+      );
+      if (candidate) data = candidate;
+    }
+
+    // If it's a JSON string, try to parse it
+    if (typeof data === "string") {
+      const trimmed = data.trim();
+      if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+        try {
+          data = JSON.parse(trimmed);
+        } catch {
+          // treat raw string as the qasm itself
+          return trimmed;
+        }
+      } else {
+        return trimmed;
+      }
+    }
+
+    // If there's a string payload, try to parse it as JSON; otherwise, treat it as QASM text
+    if (data && typeof data === "object" && typeof data.payload === "string") {
+      const payloadStr = data.payload.trim();
+      if (payloadStr.startsWith("{") || payloadStr.startsWith("[")) {
+        try {
+          data = JSON.parse(payloadStr);
+        } catch {
+          // keep existing data; fall back to fields below
+        }
+      } else {
+        // payload is raw QASM text
+        return payloadStr;
+      }
+    }
+
+    // At this point, data is either an object or undefined
+    const fromSolution = data?.solution?.openQasm || data?.solution?.qasm;
+    const fromMain =
+      data?.openQasm ||
+      data?.qasm ||
+      data?.openqasm ||
+      data?.circuitQasm ||
+      data?.qasmText;
+
+    if (useSolution && fromSolution) return fromSolution;
+    if (fromMain) return fromMain;
+    if (fromSolution) return fromSolution;
+    return "";
+  }
+  const openQasm = extractOpenQasm(problemData, useSolutionCircuit);
+  console.log("QJS problemData", problemData);
+  console.log("QJS openQasm", openQasm);
 
   // 2) Convert QASM → Q.js text
   const qText = useMemo(() => {
@@ -29,6 +94,10 @@ const QuantumCircuitVis = ({ problemData }) => {
     if (!qReady) return;
     if (typeof window === "undefined") return;
     if (!containerRef.current) return;
+    if (!openQasm || !qText || qText.startsWith("// No OpenQASM")) {
+      containerRef.current.textContent = "No OpenQASM found in problemData";
+      return;
+    }
 
     // clear whatever was there before
     containerRef.current.innerHTML = "";
@@ -46,7 +115,7 @@ const QuantumCircuitVis = ({ problemData }) => {
       console.log("qText for Q.js:\n", normalized);
       console.log("window.Q =", window.Q);
 
-      // 👉 Use Q’s “text as circuit” API:
+      // Use Q’s “text as circuit” API:
       // In the docs they write Q` ...text... `.
       // When we have a plain string, the function form Q(text) does the same parse.
       const circuit = window.Q(normalized);
@@ -158,4 +227,3 @@ const QuantumCircuitVis = ({ problemData }) => {
 };
 
 export default QuantumCircuitVis;
-

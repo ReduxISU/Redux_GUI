@@ -152,6 +152,7 @@ export default function VisualizeRowReact({
           processedData = [processedData[0], processedData[processedData.length - 1]];
         }
 
+
         const hasSolution = processedData.some(
           (frame) => frame && Array.isArray(frame.solutionCircuit) && frame.solutionCircuit.length > 0
         );
