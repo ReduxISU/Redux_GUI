@@ -89,6 +89,15 @@ const QuantumCircuitVis = ({
     }
   }, [openQasm]);
 
+  // If Q.js is already on the page (e.g., returning to this view), mark ready immediately
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.Q || globalThis.Q) {
+      if (!window.Q && globalThis.Q) window.Q = globalThis.Q;
+      setQReady(true);
+    }
+  }, []);
+
   // 3) When Q.js is ready and we have qText, render the circuit
   useEffect(() => {
     if (!qReady) return;
@@ -147,6 +156,10 @@ const QuantumCircuitVis = ({
       <Script
         src="/q.js"
         strategy="afterInteractive"
+        onReady={() => {
+          if (!window.Q && globalThis.Q) window.Q = globalThis.Q;
+          setQReady(true);
+        }}
         onLoad={() => {
             console.log("Q.js script loaded. window.Q =", window.Q);
 
