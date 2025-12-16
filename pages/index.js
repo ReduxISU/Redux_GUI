@@ -7,7 +7,7 @@
  */
 
 import React from "react"; //React is implicitly imported
-import QuantumCircuitVisualizer from "../components/Quantum/QuantumCircuitVisualizer.js";
+// import QuantumCircuitVisualizer from "../components/Quantum/QuantumCircuitVisualizer.js";
 import ProblemRowReact from "../components/pageblocks/ProblemRowReact";
 import ReduceToRowReact from "../components/pageblocks/ReduceToRowReact";
 import VisualizeRowReact from "../components/pageblocks/VisualizeRowReact";
@@ -32,6 +32,7 @@ import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
 
+const SHOW_QUANTUM_VIS = false; //Flag to show a quantum circuit visualizer (sandbox feature)
 const ProblemRowMemo = memo(ProblemRowReact);
 const ReduceToRowMemo = memo(ReduceToRowReact);
 const VisualizeRowMemo = memo(VisualizeRowReact);
@@ -157,18 +158,19 @@ function MainPageContent() {
 export default function MainPage() {
   return (
     <>
-      <QuantumCircuitVisualizer
-        circuit={{
-          qubits: 2,
-          gates: [
-            { type: "h", qubit: 0, t: 0 },
-            { type: "x", qubit: 1, t: 1 },
-            { type: "cnot", control: 0, target: 1, t: 2 },
-          ],
-        }}
-      />
-      <MainPageContent></MainPageContent>{" "}
-      {/** Renders the actual contents of the page */}
+      {SHOW_QUANTUM_VIS && (
+        <QuantumCircuitVisualizer
+          circuit={{
+            qubits: 2,
+            gates: [
+              { type: "h", qubit: 0, t: 0 },
+              { type: "x", qubit: 1, t: 1 },
+              { type: "cnot", control: 0, target: 1, t: 2 },
+            ],
+          }}
+        />
+      )}
+      <MainPageContent />
     </>
   );
 }

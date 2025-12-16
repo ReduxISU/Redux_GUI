@@ -2,7 +2,10 @@
 import React from "react";
 import QuantumCircuitVisualizer from "../components/Quantum/QuantumCircuitVisualizer";
 
+const SHOW_QUANTUM_VIS = false;
+
 export default function VisualizerPage() {
+  if (!SHOW_QUANTUM_VIS) return null;
   return (
     <div style={{ padding: "20px" }}>
       <QuantumCircuitVisualizer

@@ -457,7 +457,7 @@ export default function VisualizeRowReact({
           </div>
         </div>
 
-        {/* --- QUANTUM VISUALIZER BUTTON --- */}
+        {/* --- QUANTUM VISUALIZER BUTTON ---
         <div style={{ marginBottom: "20px", textAlign: "right" }}>
           <Link href="/visualizer" passHref legacyBehavior>
             <button
@@ -474,7 +474,7 @@ export default function VisualizeRowReact({
               QUANTUM VISUALIZER
             </button>
           </Link>
-        </div>
+        </div> */}
 
         {/* Main visualization */}
         <VisualizationLogic
