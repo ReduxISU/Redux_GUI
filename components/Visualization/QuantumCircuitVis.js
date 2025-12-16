@@ -74,11 +74,71 @@ const QuantumCircuitVis = ({
     if (fromSolution) return fromSolution;
     return "";
   }
+
   const openQasm = extractOpenQasm(problemData, useSolutionCircuit);
   console.log("QJS problemData", problemData);
   console.log("QJS openQasm", openQasm);
 
-  // 2) Convert QASM → Q.js text
+  // Pull a human-readable solution string from the incoming data
+  const solutionText = useMemo(() => {
+    const serialize = (val) => {
+      if (val === undefined || val === null) return "";
+      if (typeof val === "string") return val.trim();
+      if (typeof val === "number" || typeof val === "boolean") return String(val);
+      return JSON.stringify(val);
+    };
+
+    const getField = (obj) => {
+      if (!obj || typeof obj !== "object") return "";
+      return (
+        obj.solution ??
+        obj.solutionText ??
+        obj.solution_string ??
+        obj.answer ??
+        obj.result ??
+        ""
+      );
+    };
+
+    let data = problemData;
+
+    // If array of frames, prefer the first that carries a solution-like field
+    if (Array.isArray(data)) {
+      const found = data.find((frame) => getField(frame));
+      if (found) return serialize(getField(found));
+      data = data[0];
+    }
+
+    // If raw JSON string, try to parse it
+    if (typeof data === "string") {
+      const trimmed = data.trim();
+      if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+        try {
+          data = JSON.parse(trimmed);
+        } catch {
+          return "";
+        }
+      }
+    }
+
+    // If payload holds JSON, parse and fall through
+    if (data && typeof data === "object" && typeof data.payload === "string") {
+      const payloadStr = data.payload.trim();
+      if (payloadStr.startsWith("{") || payloadStr.startsWith("[")) {
+        try {
+          data = JSON.parse(payloadStr);
+        } catch {
+          // ignore parse error, fall back to payload string below
+        }
+      } else if (payloadStr) {
+        return serialize(payloadStr);
+      }
+    }
+
+    return serialize(getField(data));
+  }, [problemData]);
+
+  // 2) Convert QASM to Q.js text
   const qText = useMemo(() => {
     if (!openQasm) return "// No OpenQASM found in problemData";
     try {
@@ -124,9 +184,7 @@ const QuantumCircuitVis = ({
       console.log("qText for Q.js:\n", normalized);
       console.log("window.Q =", window.Q);
 
-      // Use Q’s “text as circuit” API:
-      // In the docs they write Q` ...text... `.
-      // When we have a plain string, the function form Q(text) does the same parse.
+      // Use Q's text-as-circuit API
       const circuit = window.Q(normalized);
 
       console.log("Q.js circuit object:", circuit);
@@ -138,9 +196,10 @@ const QuantumCircuitVis = ({
       } else {
         console.warn("circuit.toDom is not a function; showing text instead");
         const pre = document.createElement("pre");
-        pre.textContent = circuit && circuit.toText
-          ? circuit.toText()
-          : "Circuit created but no toDom() available.";
+        pre.textContent =
+          circuit && circuit.toText
+            ? circuit.toText()
+            : "Circuit created but no toDom() available.";
         containerRef.current.appendChild(pre);
       }
     } catch (err) {
@@ -148,7 +207,7 @@ const QuantumCircuitVis = ({
       containerRef.current.textContent =
         "Error rendering circuit: " + err.message;
     }
-  }, [qReady, qText]);
+  }, [qReady, qText, openQasm]);
 
   return (
     <div style={{ padding: "1rem", maxWidth: 900 }}>
@@ -161,43 +220,41 @@ const QuantumCircuitVis = ({
           setQReady(true);
         }}
         onLoad={() => {
-            console.log("Q.js script loaded. window.Q =", window.Q);
+          console.log("Q.js script loaded. window.Q =", window.Q);
 
-            if (!window.Q && globalThis.Q) {
+          if (!window.Q && globalThis.Q) {
             window.Q = globalThis.Q;
             console.log("Patched window.Q from globalThis.Q");
-            }
+          }
 
-            if (!window.Q) {
+          if (!window.Q) {
             console.error("Q.js failed to attach Q() to window.");
             setQReady(true);
             return;
-            }
+          }
 
-            // --- Define a custom 4-qubit “Q” gate for visualization ---
-            const Qjs = window.Q;
+          // Define a custom 4-qubit "Q" gate for visualization
+          const Qjs = window.Q;
 
-            // Only create it once
-            if (!Qjs.Gate.findBySymbol("Q")) {
+          // Only create it once
+          if (!Qjs.Gate.findBySymbol("Q")) {
             const fourQubitDim = 16; // 2^4
             const identity4Q = Qjs.Matrix.createIdentity(fourQubitDim);
 
             const groverQGate = new Qjs.Gate({
-                symbol: "Q",
-                name: "Grover iteration",
-                nameCss: "grover-iteration", // CSS class name
-                matrix: identity4Q          // behaves like identity, just for display
+              symbol: "Q",
+              name: "Grover iteration",
+              nameCss: "grover-iteration",
+              matrix: identity4Q, // behaves like identity, just for display
             });
 
             Qjs.Gate.createConstant("GROVER_Q", groverQGate);
             console.log("Custom Q gate registered with Q.js");
-            }
+          }
 
-            setQReady(true);
+          setQReady(true);
         }}
-        />
-
-
+      />
 
       <h3>Quantum Circuit (Q.js format)</h3>
       <p style={{ marginBottom: "0.5rem" }}>
@@ -225,7 +282,7 @@ const QuantumCircuitVis = ({
       />
 
       <h4>Embedded Quantum Circuit</h4>
-      {!qReady && <p>Loading Q.js circuit library…</p>}
+      {!qReady && <p>Loading Q.js circuit library...</p>}
       <div
         ref={containerRef}
         style={{
@@ -235,6 +292,9 @@ const QuantumCircuitVis = ({
           overflowX: "auto",
         }}
       />
+      <p style={{ marginTop: "0.75rem" }}>
+        Solution: {solutionText || "Not provided"}
+      </p>
     </div>
   );
 };
