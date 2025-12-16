@@ -503,12 +503,15 @@ export default function StandardCircuitSvgReact({
   const solution = parsedData?.metadata?.solution;
   const solutionBits = parsedData?.metadata?.solutionBits;
   const iterations = parsedData?.metadata?.iterations;
+  const shouldShowSolution = solve || useSolutionCircuit;
 
   const additionalMetadata = parsedData?.metadata
     ? Object.entries(parsedData.metadata).filter(
-      ([key]) => !["oracleType", "solution", "solutionBits", "iterations"].includes(key)
+      ([key]) => !["oracleType", "solution", "solutionBits", "iterations", "secretString"].includes(key)
     )
     : [];
+  const hasSolutionMetadata = shouldShowSolution && (solution || solutionBits || additionalMetadata.length > 0);
+  const showMetadataPanel = oracle || typeof iterations !== "undefined" || hasSolutionMetadata;
 
   return (
     <>
@@ -527,7 +530,7 @@ export default function StandardCircuitSvgReact({
       >
         <div ref={ref} />
       </div>
-        {(oracle || solution || solutionBits || iterations || additionalMetadata.length > 0) && (
+        {showMetadataPanel && (
           <div
             style={{
               marginTop: 12,
@@ -543,14 +546,14 @@ export default function StandardCircuitSvgReact({
                 Oracle (ground truth): <span style={{ fontWeight: "normal" }}>{oracle}</span>
               </div>
             )}
-            {solution && (
+            {shouldShowSolution && solution && (
               <div style={{ fontWeight: "bold", marginBottom: 4 }}>
                 Solution (measured result): <span style={{ fontWeight: "normal" }}>{solution}</span>
               </div>
             )}
-            {solutionBits && <div>Solution bits: {solutionBits}</div>}
+            {shouldShowSolution && solutionBits && <div>Solution bits: {solutionBits}</div>}
             {typeof iterations !== "undefined" && <div>Iterations: {iterations}</div>}
-            {additionalMetadata.map(([k, v]) => (
+            {shouldShowSolution && additionalMetadata.map(([k, v]) => (
               <div key={k}>
                 {k}: {String(v)}
               </div>
