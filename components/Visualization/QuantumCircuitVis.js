@@ -193,6 +193,16 @@ const QuantumCircuitVis = ({
         const dom = circuit.toDom();
         console.log("Q.js circuit DOM:", dom);
         containerRef.current.appendChild(dom);
+
+        // Keep the visual static: hide toolbar/lock button and disable interaction
+        dom.classList.add("Q-circuit-locked");
+        const toolbar = dom.querySelector(".Q-circuit-toolbar");
+        if (toolbar) toolbar.remove();
+        const board = dom.querySelector(".Q-circuit-board");
+        if (board) {
+          board.style.pointerEvents = "none";
+          board.style.userSelect = "none";
+        }
       } else {
         console.warn("circuit.toDom is not a function; showing text instead");
         const pre = document.createElement("pre");
