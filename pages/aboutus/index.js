@@ -35,7 +35,11 @@ export default function AboutUsPage() {
     "Pratham Khanal",
     "George Lake",
     "Grant Gardner",
-    "Jason Wright"
+    "Jason Wright",
+    "Alex Svancara", 
+    "Eric Hill", 
+    "Max Grünwoldt", 
+    "Paul Gilbreath"
   ];
 
   const publications = [
