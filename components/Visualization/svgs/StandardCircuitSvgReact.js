@@ -3,8 +3,9 @@ import * as d3 from "d3";
 import { getColorByKey } from "../constants/VisColorsArray";
 
 const CIRCUIT_WIDTH = 700;
-const CIRCUIT_HEIGHT = 320;
-const CIRCUIT_MARGIN = { top: 40, right: 30, bottom: 40, left: 70 };
+const CIRCUIT_HEIGHT = 260;
+// More top margin so the title and any overlays have breathing room above the first qubit wire.
+const CIRCUIT_MARGIN = { top: 80, right: 30, bottom: 40, left: 70 };
 const GATE_WIDTH = 44;
 const GATE_HEIGHT = 26;
 
@@ -65,16 +66,20 @@ export default function StandardCircuitSvgReact({
     const timestepsRaw = gates.map((g, idx) => g.time ?? idx);
     const timesteps = (timestepsRaw.length ? Array.from(new Set(timestepsRaw)) : [0, 1]).sort((a, b) => a - b);
 
-    const qubitSpacing = 60;
+    const qubitSpacing = 64;
     const classicalSpacing = 18;
+    const qubitToClassicalGap = classical.length ? 44 : 0;
 
     const xExtent = margin.left + margin.right + Math.max(timesteps.length - 1, 1) * 80 + GATE_WIDTH * 2;
     const width = Math.max(CIRCUIT_WIDTH, xExtent);
 
     const qubitBand = Math.max(qubits.length - 1, 0) * qubitSpacing;
-    const classicalStart = margin.top + qubitBand + 60;
+    const classicalStart = margin.top + qubitBand + qubitToClassicalGap;
     const classicalHeight = classical.length ? (classical.length - 1) * classicalSpacing : 0;
-    const height = Math.max(CIRCUIT_HEIGHT, classicalStart + classicalHeight + margin.bottom + 50);
+    const height = Math.max(
+      CIRCUIT_HEIGHT,
+      classicalStart + classicalHeight + margin.bottom + (classical.length ? 30 : 10)
+    );
 
     const xScale = d3
       .scalePoint()
@@ -86,7 +91,7 @@ export default function StandardCircuitSvgReact({
       .scalePoint()
       .domain(qubits.map((_, i) => i))
       .range([margin.top, margin.top + qubitBand])
-      .padding(0.5);
+      .padding(0);
 
     const classicalYBase = classicalStart;
 
@@ -184,12 +189,17 @@ export default function StandardCircuitSvgReact({
 
       const overlayGroup = svg.append("g").attr("class", "circuit-overlay");
 
+      const overlayTopPad = GATE_HEIGHT + 14;
+      const overlayBottomPad = GATE_HEIGHT;
+      const overlayTop = Math.max(0, Math.min(yMin, yMax) - overlayTopPad);
+      const overlayBottom = Math.max(yMin, yMax) + overlayBottomPad;
+
       overlayGroup
         .append("rect")
         .attr("x", bandLeft)
-        .attr("y", Math.min(yMin, yMax) - GATE_HEIGHT)
+        .attr("y", overlayTop)
         .attr("width", bandRight - bandLeft)
-        .attr("height", Math.abs(yMax - yMin) + GATE_HEIGHT * 2)
+        .attr("height", overlayBottom - overlayTop)
         .attr("rx", 10)
         .attr("ry", 10)
         .attr("fill", getColorByKey("Purple") || "#AA4499")
@@ -201,7 +211,7 @@ export default function StandardCircuitSvgReact({
       overlayGroup
         .append("text")
         .attr("x", (bandLeft + bandRight) / 2)
-        .attr("y", Math.min(yMin, yMax) - GATE_HEIGHT + 14)
+        .attr("y", overlayTop + 14)
         .attr("text-anchor", "middle")
         .attr("font-size", 12)
         .attr("font-weight", 700)
@@ -518,7 +528,7 @@ export default function StandardCircuitSvgReact({
       <div
         style={{
           width: "100%",
-          maxHeight: 480,
+          maxHeight: 420,
           overflowX: "auto",
           overflowY: "auto",
           marginRight: 0,
@@ -533,21 +543,22 @@ export default function StandardCircuitSvgReact({
         {showMetadataPanel && (
           <div
             style={{
-              marginTop: 12,
-              padding: "8px 12px",
-              fontSize: 14,
+              marginTop: 8,
+              padding: "12px 16px",
+              fontSize: 16,
+              lineHeight: 1.4,
               borderLeft: `4px solid ${getColorByKey("Edges")}`,
               background: getColorByKey("Background"),
               maxWidth: "100%",
             }}
           >
             {oracle && (
-              <div style={{ fontWeight: "bold", marginBottom: 4 }}>
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>
                 Oracle (ground truth): <span style={{ fontWeight: "normal" }}>{oracle}</span>
               </div>
             )}
             {shouldShowSolution && solution && (
-              <div style={{ fontWeight: "bold", marginBottom: 4 }}>
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>
                 Solution (measured result): <span style={{ fontWeight: "normal" }}>{solution}</span>
               </div>
             )}
