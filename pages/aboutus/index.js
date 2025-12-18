@@ -35,7 +35,10 @@ export default function AboutUsPage() {
     "Pratham Khanal",
     "George Lake",
     "Grant Gardner",
-    "Jason Wright"
+    "Jason Wright",
+    "Andreas Kramer",
+    "Courtney Bodily",
+    "Rakesh Itani"
   ];
 
   const publications = [

@@ -61,31 +61,40 @@ function useVisualizationOptions(url, problemName, problemType) {
 
 function useChosenVisualization(problemName, defaultVisualizationMap) {
   const [chosenVisualization, setChosenVisualization] = useState("");
-  const hasLoadedFromStorage = useRef(false);
+  const [byProblem, setByProblem] = useState({}); // { [problemName]: vis }
+  const userSelected = useRef(false);
+  const lastProblem = useRef(null);
+
+  const setChosenVisualizationSafe = (value) => {
+    userSelected.current = true;
+    setByProblem((prev) => ({ ...prev, [problemName]: value }));
+    setChosenVisualization(value);
+  };
 
   useEffect(() => {
-    if (!problemName || defaultVisualizationMap.size === 0) return;
+    if (!problemName) return;
 
-    // Only load localStorage once
-    if (!hasLoadedFromStorage.current) {
-      const storedData = null;
-      if (storedData) {
-        const allData = JSON.parse(storedData);
-        setChosenVisualization(allData.Visualization || "");
-        hasLoadedFromStorage.current = true;
-        return; // skip setting default from map on first render if localStorage exists
-      }
-      hasLoadedFromStorage.current = true;
+    // On problem change: load stored or default
+    if (problemName !== lastProblem.current) {
+      lastProblem.current = problemName;
+      userSelected.current = false;
+      const stored = byProblem[problemName];
+      const def = defaultVisualizationMap.get(problemName) || "";
+      const next = stored ?? def;
+      setChosenVisualization(next);
+      return;
     }
 
-    // fallback to default from map
-    const defaultVisualization = defaultVisualizationMap.get(problemName) || "";
-    setChosenVisualization(defaultVisualization);
+    // After defaults load for the same problem: only if nothing chosen/stored
+    if (!userSelected.current && !byProblem[problemName] && !chosenVisualization) {
+      const def = defaultVisualizationMap.get(problemName) || "";
+      setChosenVisualization(def);
+    }
+  }, [problemName, defaultVisualizationMap, chosenVisualization, byProblem]);
 
-  }, [problemName, defaultVisualizationMap]);
-
-  return [chosenVisualization, setChosenVisualization];
+  return [chosenVisualization, setChosenVisualizationSafe];
 }
+
 
 function useVisualizationNameMap(url, problemNameMap) {
   const [VisualizationNameMap, setVisualizationNameMap] = useState(new Map());
