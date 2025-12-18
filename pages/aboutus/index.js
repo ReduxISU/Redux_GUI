@@ -40,6 +40,9 @@ export default function AboutUsPage() {
     "Eric Hill", 
     "Max Grünwoldt", 
     "Paul Gilbreath"
+    "Andreas Kramer",
+    "Courtney Bodily",
+    "Rakesh Itani"
   ];
 
   const publications = [

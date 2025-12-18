@@ -1,0 +1,30 @@
+.quantumContainer {
+  position: relative;
+  padding: 20px;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  background: #fafafa;
+  margin-bottom: 40px;
+}
+
+.exportRow {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.controls {
+  margin-top: 25px;
+}
+
+.modifyPanel {
+  margin-top: 25px;
+  border-top: 1px solid #ccc;
+  padding-top: 15px;
+}
+
+.modifyRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
