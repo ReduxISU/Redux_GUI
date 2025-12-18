@@ -36,6 +36,10 @@ export default function AboutUsPage() {
     "George Lake",
     "Grant Gardner",
     "Jason Wright",
+    "Alex Svancara", 
+    "Eric Hill", 
+    "Max Grünwoldt", 
+    "Paul Gilbreath"
     "Andreas Kramer",
     "Courtney Bodily",
     "Rakesh Itani"
