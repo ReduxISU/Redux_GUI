@@ -177,6 +177,8 @@ export default function AboutUsPage() {
                                 <li><a href="https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf" target="_blank" rel="noopener noreferrer">Karp&apos;s 21 NP-Complete Problems</a></li>
                                 <li><a href="https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md" target="_blank" rel="noopener noreferrer">Redux GUI Documentation</a></li>
                                 <li><a href="https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md" target="_blank" rel="noopener noreferrer">Redux Backend Documentation</a></li>
+                                <li><a href="https://api.redux.portneuf.cose.isu.edu/swagger/index.html" target="_blank" rel="noopener noreferrer">API Swagger Documentation</a></li>
+
                             </ul>
                         </Card.Body>
                     </Card>
