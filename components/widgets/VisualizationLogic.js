@@ -24,7 +24,6 @@ export default function VisualizationLogic({
   reductionData,
   reductionVisualization,
   chosenReduceTo,
-  showSolutionCircuit = false,
 }) {
   const [gadgetMap, setGadgetMap] = useState([]);
   let visualization;
@@ -48,14 +47,14 @@ export default function VisualizationLogic({
 
   if (url && problemInstance && problemData && Object.keys(problemData).length > 0) {
     try {
-      visualization = Visualizations.get(visualizationType)(solve, url, problemData, gadgetMap, visualizationState.gadgetsOn, { showSolutionCircuit })
+      visualization = Visualizations.get(visualizationType)(solve, url, problemData, gadgetMap, visualizationState.gadgetsOn)
     } catch {
       visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />
     }
 
     if (visualizationState.reductionOn) {
       try {
-        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, reductionData, gadgetMap, visualizationState.gadgetsOn, { showSolutionCircuit })
+        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, reductionData, gadgetMap, visualizationState.gadgetsOn)
 
         //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
         // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue

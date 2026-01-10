@@ -4,7 +4,7 @@ import StandardCircuitSvgReact from "./StandardCircuitSvgReact";
 import QuantumCircuitVis from "../QuantumCircuitVis";
 
 const Visualizations = new Map([
-    ["Boolean Satisfiability" , (solve, url, problemData, gadgetMap, gadgetsOn, extra) => {
+    ["Boolean Satisfiability" , (solve, url, problemData, gadgetMap, gadgetsOn) => {
         return(
             <StandardSATSvgReact 
                 problemData={problemData}
@@ -15,7 +15,7 @@ const Visualizations = new Map([
             ></StandardSATSvgReact>  
         )
     }],
-    ["Graph D3", (solve, url, problemData, gadgetMap, gadgetsOn, extra)=>{
+    ["Graph D3", (solve, url, problemData, gadgetMap, gadgetsOn)=>{
         return(
         <StandardGraphSvgReact 
             problemData={problemData}
@@ -26,7 +26,7 @@ const Visualizations = new Map([
         ></StandardGraphSvgReact>
         )
     }],
-    ["Quantum Circuit D3", (solve, url, problemData, gadgetMap, gadgetsOn, extra)=>{
+    ["Quantum Circuit D3", (solve, url, problemData, gadgetMap, gadgetsOn)=>{
         return(
         <StandardCircuitSvgReact
             problemData={problemData}
@@ -34,11 +34,10 @@ const Visualizations = new Map([
             url={url}
             gadgetMap={gadgetMap}
             gadgetsOn={gadgetsOn}
-            useSolutionCircuit={extra?.showSolutionCircuit}
         ></StandardCircuitSvgReact>
         )
     }],
-    ["Quantum Circuit Q.js", (solve, url, problemData, gadgetMap, gadgetsOn, extra) => {
+    ["Quantum Circuit Q.js", (solve, url, problemData, gadgetMap, gadgetsOn) => {
         return (
             <QuantumCircuitVis
                 problemData={problemData}
@@ -46,7 +45,6 @@ const Visualizations = new Map([
                 url={url}
                 gadgetMap={gadgetMap}
                 gadgetsOn={gadgetsOn}
-                useSolutionCircuit={extra?.showSolutionCircuit}
             />
         );
     }],

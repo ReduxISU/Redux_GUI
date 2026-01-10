@@ -94,11 +94,9 @@ export default function VisualizeRowReact({
   const [showSolution, setShowSolution] = useState(false);
   const [showGadgets, setShowGadgets] = useState(false);
   const [showReduction, setShowReduction] = useState(false);
-  const [showSolutionCircuit, setShowSolutionCircuit] = useState(false);
   const [disableGadget, setDisableGadget] = useState(false);
   const [disableSolution, setDisableSolution] = useState(true);
   const [disableReduction, setDisableReduction] = useState(!chosenReductionType);
-  const [hasSolutionCircuit, setHasSolutionCircuit] = useState(false);
 
   const [problemVisualizationData, setProblemVisualizationData] = useState(
     defaultSat3VisualizationArr
@@ -117,7 +115,6 @@ export default function VisualizeRowReact({
 
   const isDisabled = showGadgets || showReduction;
   const totalSteps = problemData.length;
-  const disableSolutionCircuit = !hasSolutionCircuit;
 
   // Track when instance is ready
   useEffect(() => {
@@ -127,8 +124,6 @@ export default function VisualizeRowReact({
   useEffect(() => {
     setProblemData([]);
     setCurrentProblemData(null);
-    setShowSolutionCircuit(false);
-    setHasSolutionCircuit(false);
   }, [problemName, problemInstance, chosenVisualization]);
 
   // Fetch reduction visualization
@@ -169,42 +164,20 @@ export default function VisualizeRowReact({
 
         if (!alive) return;
 
-        let processedData = [];
+        let processedData = data ? [...data] : [];
 
-        if (Array.isArray(data)) {
-          processedData = [...data];
-        } else if (data?.steps && Array.isArray(data.steps)) {
-          processedData = data.steps.map((frame) => ({
-            ...frame,
-            metadata: { ...(data.metadata || {}), ...(frame?.metadata || {}) },
-          }));
-        } else if (data) {
-          processedData = [data];
+        // In reduction mode, only show the first and last frames to highlight the delta
+        if (showReduction && processedData.length > 1) {
+          processedData = [
+            processedData[0],
+            processedData[processedData.length - 1],
+          ];
         }
-
-        if (showReduction && list.length > 1) {
-          list = [list[0], list[list.length - 1]];
-        }
-
-
-        const hasSolution = processedData.some(
-          (frame) => frame && Array.isArray(frame.solutionCircuit) && frame.solutionCircuit.length > 0
-        );
 
         setProblemData(processedData);
         setCurrentProblemData(processedData?.[0] ?? null);
-        setHasSolutionCircuit(hasSolution);
-        setShowSolutionCircuit((prev) => hasSolution ? prev : false);
       } catch (err) {
         console.error(err);
-        if (isCurrent) {
-          setProblemData([]);
-          setProblemReductionData([]);
-          setCurrentProblemData(null);
-          setCurrentReductionData(null);
-          setHasSolutionCircuit(false);
-          setShowSolutionCircuit(false);
-        }
       }
     };
 
@@ -288,15 +261,11 @@ export default function VisualizeRowReact({
     setShowReduction(e.target.checked);
     setCurrentStep(0);
   }
-  function handleSolutionCircuitChange(e) {
-    setShowSolutionCircuit(e.target.checked && hasSolutionCircuit);
-  }
   function handleRefreshButton() {
     setSvgIsLoading(false);
     setShowSolution(false);
     setShowGadgets(false);
     setShowReduction(false);
-    setShowSolutionCircuit(false);
     setCurrentStep(0);
   }
 
@@ -446,7 +415,6 @@ export default function VisualizeRowReact({
               label={SWITCHES.switch2}
               onChange={handleSwitch2Change}
             />
-            <FormControlLabel disabled={disableSolutionCircuit} checked={showSolutionCircuit} control={<Switch id="showSolutionCircuit" />} label="Show solution circuit" onChange={handleSolutionCircuitChange} />
             <FormControlLabel
               disabled={disableSolution}
               checked={showSolution}
@@ -498,7 +466,6 @@ export default function VisualizeRowReact({
           reductionData={currentReductionData}
           showSolutionToggle={showSolution}
           reductionVisualization={reductionVisualization}
-          showSolutionCircuit={showSolutionCircuit}
         />
       </ProblemSection.Body>
     </ProblemSection>

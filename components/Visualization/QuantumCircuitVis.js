@@ -200,7 +200,7 @@ const QuantumCircuitVis = ({
         if (toolbar) toolbar.remove();
         const board = dom.querySelector(".Q-circuit-board");
         if (board) {
-          board.style.pointerEvents = "none";
+          board.style.pointerEvents = "auto";
           board.style.userSelect = "none";
         }
       } else {
