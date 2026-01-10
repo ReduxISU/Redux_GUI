@@ -39,7 +39,7 @@ export default function AboutUsPage() {
     "Alex Svancara", 
     "Eric Hill", 
     "Max Grünwoldt", 
-    "Paul Gilbreath"
+    "Paul Gilbreath",
     "Andreas Kramer",
     "Courtney Bodily",
     "Rakesh Itani"
