@@ -401,27 +401,9 @@ export default function VisualizeRowReact({
 
           {/* Switches */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <FormControlLabel
-              disabled={disableReduction}
-              checked={showReduction}
-              control={<Switch />}
-              label={SWITCHES.switch3}
-              onChange={handleSwitch3Change}
-            />
-            <FormControlLabel
-              disabled={disableGadget}
-              checked={showGadgets}
-              control={<Switch />}
-              label={SWITCHES.switch2}
-              onChange={handleSwitch2Change}
-            />
-            <FormControlLabel
-              disabled={disableSolution}
-              checked={showSolution}
-              control={<Switch />}
-              label={SWITCHES.switch1}
-              onChange={handleSwitch1Change}
-            />
+            <FormControlLabel disabled={disableReduction} checked={showReduction} control={<Switch />} label={SWITCHES.switch3} onChange={handleSwitch3Change} />
+            <FormControlLabel disabled={disableGadget} checked={showGadgets} control={<Switch id="highlightGadgets" />} label={SWITCHES.switch2} onChange={handleSwitch2Change} />
+            <FormControlLabel disabled={disableSolution} checked={showSolution} control={<Switch id="showSolution" />} label={SWITCHES.switch1} onChange={handleSwitch1Change} />
           </div>
         </div>
 
