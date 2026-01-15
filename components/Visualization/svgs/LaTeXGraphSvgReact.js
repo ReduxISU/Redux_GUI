@@ -224,11 +224,10 @@ function LaTeXGraphSvgReact({ problemData }) {
   return (
     <div
       style={{
-        display: "flex",
-        justifyContent: "center",   // horizontal centering
-        alignItems: "center",       // vertical centering
-        minHeight: "400px",         // or any height you want
-        width: "100%",              // full width
+        display: "inline-block",
+        alignItems: "center",      
+        minHeight: "400px",         
+        width: "100%",              
       }}
     >
       {!loading && (
