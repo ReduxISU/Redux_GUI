@@ -2,6 +2,7 @@ import StandardGraphSvgReact from "./StandardGraphSvgReact";
 import StandardSATSvgReact from "./StandardSATSvgReact";
 import StandardCircuitSvgReact from "./StandardCircuitSvgReact";
 import QuantumCircuitVis from "../QuantumCircuitVis";
+import LaTeXGraphSvgReact from "./LaTeXGraphSvgReact";
 
 const Visualizations = new Map([
     ["Boolean Satisfiability" , (solve, url, problemData, gadgetMap, gadgetsOn) => {
@@ -24,6 +25,17 @@ const Visualizations = new Map([
             gadgetMap={gadgetMap}
             gadgetsOn={gadgetsOn}
         ></StandardGraphSvgReact>
+        )
+    }],
+    ["Graph LaTeX", (solve, url, problemData, gadgetMap, gadgetsOn)=>{
+        return(
+        <LaTeXGraphSvgReact 
+            problemData={problemData}
+            solve={solve}
+            url={url}
+            gadgetMap={gadgetMap}
+            gadgetsOn={gadgetsOn}
+        ></LaTeXGraphSvgReact>
         )
     }],
     ["Quantum Circuit D3", (solve, url, problemData, gadgetMap, gadgetsOn)=>{
