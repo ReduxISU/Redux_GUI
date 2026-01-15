@@ -259,7 +259,6 @@ export default function VisualizeRowReact({
 
   function handleSwitch3Change(e) {
     setShowReduction(e.target.checked);
-    setCurrentStep(0);
   }
   function handleRefreshButton() {
     setSvgIsLoading(false);
@@ -406,25 +405,6 @@ export default function VisualizeRowReact({
             <FormControlLabel disabled={disableSolution} checked={showSolution} control={<Switch id="showSolution" />} label={SWITCHES.switch1} onChange={handleSwitch1Change} />
           </div>
         </div>
-
-        {/* --- QUANTUM VISUALIZER BUTTON ---
-        <div style={{ marginBottom: "20px", textAlign: "right" }}>
-          <Link href="/visualizer" passHref legacyBehavior>
-            <button
-              style={{
-                backgroundColor: "#0d6efd",
-                color: "white",
-                padding: "10px 14px",
-                borderRadius: "8px",
-                border: "none",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              QUANTUM VISUALIZER
-            </button>
-          </Link>
-        </div> */}
 
         {/* Main visualization */}
         <VisualizationLogic
