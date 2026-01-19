@@ -118,7 +118,8 @@ export async function processReductions(url, reductionPath, instance) {
 
     currentInstance = nextInstance;
   }
-
+  currentMap = makeIdsUnique(currentMap);
+  console.log(currentMap);
   return currentMap;
 }
 
@@ -147,6 +148,43 @@ function composeMappings(map1, map2) {
   }
 
   return composed;
+}
+
+/**
+ * Give unique IDs to elements between the two instances to remove collision
+ */
+function makeIdsUnique(gadgets) {
+  const fromIdMap = new Map(); 
+  const toIdMap = new Map();   
+
+  let nextFromId = 0;
+  let nextToId = 0;
+
+  // First pass: map reductionFromIds
+  gadgets.forEach(gadget => {
+    gadget.reductionFromIds.forEach(oldId => {
+      if (!fromIdMap.has(oldId)) {
+        fromIdMap.set(oldId, nextFromId++);
+      }
+    });
+  });
+
+  // Second pass: map reductionToIds, starting after last from-ID to avoid collisions
+  nextToId = nextFromId;
+  gadgets.forEach(gadget => {
+    gadget.reductionToIds.forEach(oldId => {
+      if (!toIdMap.has(oldId)) {
+        toIdMap.set(oldId, nextToId++);
+      }
+    });
+  });
+
+  // Third pass: create new array with mapped IDs
+  return gadgets.map(gadget => ({
+    ...gadget,
+    reductionFromIds: gadget.reductionFromIds.map(id => fromIdMap.get(id)),
+    reductionToIds: gadget.reductionToIds.map(id => toIdMap.get(id))
+  }));
 }
 
 
