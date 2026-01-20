@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Container } from '@mui/material';
 import { No_Viz_Svg, No_Reduction_Viz_Svg } from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
-import { requestGadgetMap, processReductions } from '../redux';
+import { remapIdsDeep, makeIdsUnique, processReductions } from '../redux';
 
 export default function VisualizationLogic({
   url,
@@ -34,27 +34,41 @@ export default function VisualizationLogic({
   const handleBar = (sizes) => { }
 
   const [loadingMap, setLoadingMap] = useState(false);
+  const [mappedProblemData, setMappedProblemData] = useState(false);
+  const [mappedReductionData, setMappedReductionData] = useState(false);
+
 
   useEffect(() => {
     if (visualizationState.reductionOn && reductionVisualization !== "") {
       setLoadingMap(true);
       processReductions(url, chosenReductionType, problemInstance)
-        .then(setGadgetMap)
+        .then(rawGadgetMap => {
+          const { gadgets, fromIdMap, toIdMap } = makeIdsUnique(rawGadgetMap);
+
+          setGadgetMap(gadgets);
+          setMappedProblemData(remapIdsDeep(problemData, fromIdMap));
+          setMappedReductionData(remapIdsDeep(reductionData, toIdMap));
+
+          console.log("GADGET MAP:", gadgets);
+          console.log("MAPPED PROBLEM DATA:", remapIdsDeep(problemData, fromIdMap));
+          console.log("MAPPED REDUCTION DATA:", remapIdsDeep(reductionData, toIdMap));
+        })
         .finally(() => setLoadingMap(false));
+
     }
   }, [visualizationState.reductionOn, reductionVisualization, chosenReductionType, problemInstance]);
 
 
   if (url && problemInstance && problemData && Object.keys(problemData).length > 0) {
     try {
-      visualization = Visualizations.get(visualizationType)(solve, url, problemData, gadgetMap, visualizationState.gadgetsOn)
+      visualization = Visualizations.get(visualizationType)(solve, url, mappedProblemData, gadgetMap, visualizationState.gadgetsOn)
     } catch {
       visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />
     }
 
     if (visualizationState.reductionOn) {
       try {
-        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, reductionData, gadgetMap, visualizationState.gadgetsOn)
+        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, mappedReductionData, gadgetMap, visualizationState.gadgetsOn)
 
         //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
         // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue

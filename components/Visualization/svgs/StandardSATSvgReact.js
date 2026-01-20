@@ -89,7 +89,6 @@ function showCluster(clusterClass, gadgetMap) {
         .attr("fill", getColorByKey("ClauseHighlight"))
         .attr("stroke", getColorByKey("ClauseHighlight"));
 
-
     const cleanElement = clusterClass.replace(/^class/, "");
 
     // Optionally highlight linked elements via gadgetMap
@@ -98,6 +97,9 @@ function showCluster(clusterClass, gadgetMap) {
             if ((item.reductionFromIds.includes(cleanElement) || item.reductionToIds.includes(cleanElement)) && item.color === "ClauseHighlight") {
                 [...item.reductionFromIds, ...item.reductionToIds].forEach(id => {
                     d3.selectAll("#id" + id.replace("!", "NOT"))
+                        .attr("fill", getColorByKey("ClauseHighlight"))
+                        .attr("stroke", getColorByKey("ClauseHighlight"));
+                    d3.selectAll(".class" + id.replace("!", "NOT"))
                         .attr("fill", getColorByKey("ClauseHighlight"))
                         .attr("stroke", getColorByKey("ClauseHighlight"));
                 });

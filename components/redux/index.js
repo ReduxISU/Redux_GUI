@@ -118,8 +118,6 @@ export async function processReductions(url, reductionPath, instance) {
 
     currentInstance = nextInstance;
   }
-  currentMap = makeIdsUnique(currentMap);
-
   return currentMap;
 }
 
@@ -153,9 +151,9 @@ function composeMappings(map1, map2) {
 /**
  * Give unique IDs to elements between the two instances to remove collision
  */
-function makeIdsUnique(gadgets) {
-  const fromIdMap = new Map(); 
-  const toIdMap = new Map();   
+export function makeIdsUnique(gadgets) {
+  const fromIdMap = new Map();
+  const toIdMap = new Map();
 
   let nextFromId = 0;
   let nextToId = 0;
@@ -169,7 +167,7 @@ function makeIdsUnique(gadgets) {
     });
   });
 
-  // Second pass: map reductionToIds, starting after last from-ID to avoid collisions
+  // Second pass: map reductionToIds
   nextToId = nextFromId;
   gadgets.forEach(gadget => {
     gadget.reductionToIds.forEach(oldId => {
@@ -179,14 +177,44 @@ function makeIdsUnique(gadgets) {
     });
   });
 
-  // Third pass: create new array with mapped IDs
-  return gadgets.map(gadget => ({
+  // Third pass: create new gadgets array
+  const updatedGadgets = gadgets.map(gadget => ({
     ...gadget,
     reductionFromIds: gadget.reductionFromIds.map(id => fromIdMap.get(id)),
     reductionToIds: gadget.reductionToIds.map(id => toIdMap.get(id))
   }));
+
+  return {
+    gadgets: updatedGadgets,
+    fromIdMap,
+    toIdMap
+  };
 }
 
+/**
+ * @returns newly mapped data for visualizations based on the provided `idMap`.
+ */
+export function remapIdsDeep(value, idMap) {
+  if (Array.isArray(value)) {
+    return value.map(v => remapIdsDeep(v, idMap));
+  }
+
+  if (value !== null && typeof value === "object") {
+    const result = {};
+
+    for (const [key, val] of Object.entries(value)) {
+      if (key === "id" && idMap.has(val)) {
+        result[key] = idMap.get(val);
+      } else {
+        result[key] = remapIdsDeep(val, idMap);
+      }
+    }
+
+    return result;
+  }
+
+  return value;
+}
 
 /**
  * @returns information regarding the problem/solver/verifier.
