@@ -119,7 +119,7 @@ export async function processReductions(url, reductionPath, instance) {
     currentInstance = nextInstance;
   }
   currentMap = makeIdsUnique(currentMap);
-  console.log(currentMap);
+
   return currentMap;
 }
 
