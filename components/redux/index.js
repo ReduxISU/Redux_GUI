@@ -180,8 +180,8 @@ export function makeIdsUnique(gadgets) {
   // Third pass: create new gadgets array
   const updatedGadgets = gadgets.map(gadget => ({
     ...gadget,
-    reductionFromIds: gadget.reductionFromIds.map(id => fromIdMap.get(id)),
-    reductionToIds: gadget.reductionToIds.map(id => toIdMap.get(id))
+    reductionFromIds: gadget.reductionFromIds.map(id => String(fromIdMap.get(id))),
+    reductionToIds: gadget.reductionToIds.map(id => String(toIdMap.get(id)))
   }));
 
   return {
@@ -204,7 +204,7 @@ export function remapIdsDeep(value, idMap) {
 
     for (const [key, val] of Object.entries(value)) {
       if (key === "id" && idMap.has(val)) {
-        result[key] = idMap.get(val);
+        result[key] = String(idMap.get(val));
       } else {
         result[key] = remapIdsDeep(val, idMap);
       }
