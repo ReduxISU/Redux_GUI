@@ -34,91 +34,103 @@ export default function VisualizationLogic({
   const handleBar = (sizes) => { }
 
   const [loadingMap, setLoadingMap] = useState(false);
-  const [mappedProblemData, setMappedProblemData] = useState(false);
-  const [mappedReductionData, setMappedReductionData] = useState(false);
-
+  const [mappedProblemData, setMappedProblemData] = useState(null);
+  const [mappedReductionData, setMappedReductionData] = useState(null);
 
   useEffect(() => {
-    if (visualizationState.reductionOn && reductionVisualization !== "") {
+    if (problemInstance && problemData) {
       setLoadingMap(true);
-      processReductions(url, chosenReductionType, problemInstance)
+      processReductions(url, chosenReductionType, problemInstance) 
         .then(rawGadgetMap => {
-          const { gadgets, fromIdMap, toIdMap } = makeIdsUnique(rawGadgetMap);
-
+          const { gadgets, fromIdMap } = makeIdsUnique(rawGadgetMap);
           setGadgetMap(gadgets);
-          setMappedProblemData(remapIdsDeep(problemData, fromIdMap));
-          setMappedReductionData(remapIdsDeep(reductionData, toIdMap));
-
-          console.log("GADGET MAP:", gadgets);
-          console.log("MAPPED PROBLEM DATA:", remapIdsDeep(problemData, fromIdMap));
-          console.log("MAPPED REDUCTION DATA:", remapIdsDeep(reductionData, toIdMap));
+          setMappedProblemData(remapIdsDeep(problemData, fromIdMap) || problemData);
         })
         .finally(() => setLoadingMap(false));
-
     }
-  }, [visualizationState.reductionOn, reductionVisualization, chosenReductionType, problemInstance]);
+  }, [problemInstance, problemData]);
+
+useEffect(() => {
+  if (visualizationState.reductionOn && reductionVisualization && url && problemInstance) {
+    setLoadingMap(true);
+    processReductions(url, chosenReductionType, problemInstance)
+      .then(rawGadgetMap => {
+        const { gadgets, toIdMap } = makeIdsUnique(rawGadgetMap);
+        setGadgetMap(gadgets);
+        setMappedReductionData(remapIdsDeep(reductionData, toIdMap) || reductionData);
+      })
+      .finally(() => setLoadingMap(false));
+  }
+}, [
+  visualizationState.reductionOn,
+  reductionVisualization,
+  chosenReductionType,
+  problemInstance,
+  reductionData,
+  url
+]);
 
 
-  if (url && problemInstance && problemData && Object.keys(problemData).length > 0) {
+if (url && problemInstance && mappedProblemData && Object.keys(mappedProblemData).length > 0) {
+  try {
+    visualization = Visualizations.get(visualizationType)(solve, url, mappedProblemData, gadgetMap, visualizationState.gadgetsOn)
+  } catch {
+    visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />
+  }
+
+  if (visualizationState.reductionOn) {
     try {
-      visualization = Visualizations.get(visualizationType)(solve, url, mappedProblemData, gadgetMap, visualizationState.gadgetsOn)
-    } catch {
-      visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />
-    }
+      reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, mappedReductionData, gadgetMap, visualizationState.gadgetsOn)
 
-    if (visualizationState.reductionOn) {
-      try {
-        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, mappedReductionData, gadgetMap, visualizationState.gadgetsOn)
-
-        //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
-        // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
-        if (reductionName == "CLIQUE") {
-          //reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
-        }
-
-      } catch {
-        reducedVisualization = <No_Reduction_Viz_Svg reducedVisualization={reductionNameMap.get(chosenReductionType)} />
+      //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
+      // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
+      if (reductionName == "CLIQUE") {
+        //reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
       }
+
+    } catch {
+      reducedVisualization = <No_Reduction_Viz_Svg reducedVisualization={reductionNameMap.get(chosenReductionType)} />
     }
   }
+}
 
 
-  if (!visualizationState.reductionOn && !loading) {
-    return (
-      <>
-        <Container>
-          {visualization}
-        </Container>
-      </>
-    )
-  }
-  else if (visualizationState.reductionOn && !loading) {
-
-    return (
-      <>
-        <Split
-          className="wrap"
-          direction="horizontal"
-          style={{ height: 'inherit' }}
-          onDragStart={handleBar}
-        >
-          <Container>
-            {/* {"Container1"} */}
-            {visualization}
-          </Container>
-
-          <Container>
-            {/* {"Container2"} */}
-            {reducedVisualization}
-          </Container>
-        </Split>
-
-      </>
-    )
-  }
+if (!visualizationState.reductionOn && !loading) {
+  return (
+    <>
+      <Container>
+        {visualization}
+      </Container>
+    </>
+  )
+}
+else if (visualizationState.reductionOn && !loading) {
 
   return (
     <>
+      <Split
+        className="wrap"
+        direction="horizontal"
+        style={{ height: 'inherit' }}
+        onDragStart={handleBar}
+      >
+        <Container>
+          {/* {"Container1"} */}
+          {visualization}
+        </Container>
+
+        <Container>
+          {/* {"Container2"} */}
+          {reducedVisualization}
+        </Container>
+      </Split>
+
     </>
   )
+}
+
+return (
+  <>
+  </>
+)
 }
