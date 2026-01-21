@@ -48,7 +48,7 @@ export default function VisualizationLogic({
         })
         .finally(() => setLoadingMap(false));
     }
-  }, [problemInstance, problemData]);
+  }, [problemData]);
 
 useEffect(() => {
   if (visualizationState.reductionOn && reductionVisualization && url && problemInstance) {
@@ -73,6 +73,7 @@ useEffect(() => {
 
 if (url && problemInstance && mappedProblemData && Object.keys(mappedProblemData).length > 0) {
   try {
+      console.log(mappedProblemData)
     visualization = Visualizations.get(visualizationType)(solve, url, mappedProblemData, gadgetMap, visualizationState.gadgetsOn)
   } catch {
     visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />

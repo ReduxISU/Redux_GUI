@@ -14,7 +14,6 @@ function StandardSATSvgReact(props) {
 
         try {
             if (props.problemData) {
-                console.log(props.problemData)
                 getSets(ref.current, props.problemData, props.gadgetMap, props.gadgetsOn);
             }
 
