@@ -118,7 +118,6 @@ export async function processReductions(url, reductionPath, instance) {
 
     currentInstance = nextInstance;
   }
-
   return currentMap;
 }
 
@@ -149,6 +148,79 @@ function composeMappings(map1, map2) {
   return composed;
 }
 
+/**
+ * Give unique IDs to elements between the two instances to remove collision
+ */
+export function makeIdsUnique(gadgets) {
+  if (!gadgets || !Array.isArray(gadgets)) {
+    return { gadgets: [], fromIdMap: new Map(), toIdMap: new Map() };
+  }
+
+  const fromIdMap = new Map();
+  const toIdMap = new Map();
+
+  let nextFromId = 0;
+  let nextToId = 0;
+
+  // First pass: map reductionFromIds safely
+  gadgets.forEach(gadget => {
+    (gadget.reductionFromIds || []).forEach(oldId => {
+      const key = String(oldId);
+      if (!fromIdMap.has(key)) {
+        fromIdMap.set(key, String(nextFromId++));
+      }
+    });
+  });
+
+  // Second pass: map reductionToIds safely
+  nextToId = nextFromId;
+  gadgets.forEach(gadget => {
+    (gadget.reductionToIds || []).forEach(oldId => {
+      const key = String(oldId);
+      if (!toIdMap.has(key)) {
+        toIdMap.set(key, String(nextToId++));
+      }
+    });
+  });
+
+  // Third pass: create new gadgets array safely
+  const updatedGadgets = gadgets.map(gadget => ({
+    ...gadget,
+    reductionFromIds: (gadget.reductionFromIds || []).map(id => fromIdMap.get(String(id)) || String(id)),
+    reductionToIds: (gadget.reductionToIds || []).map(id => toIdMap.get(String(id)) || String(id)),
+  }));
+
+  return { gadgets: updatedGadgets, fromIdMap, toIdMap };
+}
+
+
+/**
+ * Remap IDs in gadgets, clauses, or literals based on the provided idMap.
+ * Only touches properties that exist: id, reductionFromIds, reductionToIds.
+ */
+export function remapIdsDeep(obj, idMap) {
+  if (!obj || typeof obj !== "object") return obj;
+
+  // Copy object
+  const result = Array.isArray(obj) ? [] : {};
+
+  for (const [key, val] of Object.entries(obj)) {
+    if (key === "id" && idMap.has(String(val))) {
+      result[key] = String(idMap.get(String(val)));
+    } else if ((key === "reductionFromIds" || key === "reductionToIds") && Array.isArray(val)) {
+      result[key] = val.map(v => String(idMap.get(String(v)) ?? v));
+    } else if (Array.isArray(val)) {
+      // only recurse for arrays
+      result[key] = val.map(v => remapIdsDeep(v, idMap));
+    } else if (val && typeof val === "object") {
+      result[key] = remapIdsDeep(val, idMap);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  return result;
+}
 
 /**
  * @returns information regarding the problem/solver/verifier.
