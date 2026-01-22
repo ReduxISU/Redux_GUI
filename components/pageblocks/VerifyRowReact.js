@@ -72,7 +72,7 @@ export default function VerifyRowReact({
           extenderButtons={(input) => [
             {
               label: `Add new verifier "${input}"`,
-              href: `${url}ProblemTemplate/verifier?problemName=${input}&verifierName=${input}`,
+              href: `${url}ProblemTemplate/verifier?problemName=${problemName}&verifierName=${input}`,
             },
           ]}
         />{" "}

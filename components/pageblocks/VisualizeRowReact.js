@@ -309,6 +309,12 @@ export default function VisualizeRowReact({
           optionsMap={VisualizationNameMap}
           disabled={!problemName}
           disabledMessage="No visualization available. Please select a problem."
+          extenderButtons={(input) => [
+            {
+              label: `Add new visualization "${input}"`,
+              href: `${url}ProblemTemplate/visualization?problemName=${problemName}&visualizationName=${input}`,
+            },
+          ]}
         />
 
         <PopoverTooltipClick toolTip={tip} />
