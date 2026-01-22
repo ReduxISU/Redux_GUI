@@ -1,9 +1,11 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import { createTheme, ThemeProvider, Container, Box } from "@mui/material";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { createTheme, ThemeProvider, Container, Box, Button, Collapse } from "@mui/material";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card } from "react-bootstrap";
 import isulogo from "../../components/images/ISULogo.png";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function AboutUsPage() {
   const theme = createTheme({
@@ -15,6 +17,31 @@ export default function AboutUsPage() {
   });
 
   const cardBodyStyle = { padding: "20px" };
+  const [contributorData, setContributorData] = useState({});
+
+  // Fetch contributor metadata from backend
+  useEffect(() => {
+    const fetchAllContributorData = async () => {
+      const dataMap = {};
+      
+      for (const name of contributors) {
+        try {
+          const encodedName = encodeURIComponent(name);
+          const response = await fetch(`https://api.redux.portneuf.cose.isu.edu/Navigation/ContributorProfile/${encodedName}`);
+          if (response.ok) {
+            const data = await response.json();
+            dataMap[name] = data;
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch data for ${name}:`, error);
+        }
+      }
+      
+      setContributorData(dataMap);
+    };
+    
+    fetchAllContributorData();
+  }, []);
 
   const contributors = [
     "Kaden Marchetti",
@@ -159,9 +186,22 @@ export default function AboutUsPage() {
                 lineHeight: "1.6",
               }}
             >
-              {contributors.map((name, index) => (
-                <div key={index}>• {name}</div>
-              ))}
+              {contributors.map((name, index) => {
+                const data = contributorData[name];
+                const nameSlug = name.replace(/\s+/g, '-').toLowerCase();
+                
+                return (
+                  <div key={index}>
+                    • <Link href={`/contributor/${nameSlug}`} legacyBehavior>
+                      <a 
+                        style={{ color: "#f47920", textDecoration: "underline", cursor: "pointer" }}
+                      >
+                        {name}
+                      </a>
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
           </Card.Body>
         </Card>
