@@ -155,7 +155,7 @@ function LaTeXGraphSvgReact({ problemData }) {
 
         const loopWeight =
           link.weighted === true
-            ? ` node[fill=white, inner sep=0pt] {${escapeLatexText(link.weight)}}`
+            ? ` node {${escapeLatexText(link.weight)}}`
             : "";
 
         if (src === tgt) {
