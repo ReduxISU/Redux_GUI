@@ -150,6 +150,11 @@ function LaTeXGraphSvgReact({ problemData }) {
 
         const weight =
           link.weighted === true
+            ? ` node[midway, fill=white, inner sep=2pt] {${escapeLatexText(link.weight)}}`
+            : "";
+
+        const loopWeight =
+          link.weighted === true
             ? ` node {${escapeLatexText(link.weight)}}`
             : "";
 
@@ -179,7 +184,7 @@ function LaTeXGraphSvgReact({ problemData }) {
 
           edgeDefs +=
             `    \\path[draw=${color},very thick,>={Stealth[black]}] ` +
-            `(${src}) edge[${arrow},loop ${side}${style ? "," + style : ""}]${weight} (${src});\n`;
+            `(${src}) edge[${arrow},loop ${side}${style ? "," + style : ""}]${loopWeight} (${src});\n`;
           return;
         }
 
@@ -225,9 +230,9 @@ function LaTeXGraphSvgReact({ problemData }) {
     <div
       style={{
         display: "inline-block",
-        alignItems: "center",      
-        minHeight: "400px",         
-        width: "100%",              
+        alignItems: "center",
+        minHeight: "400px",
+        width: "100%",
       }}
     >
       {!loading && (
