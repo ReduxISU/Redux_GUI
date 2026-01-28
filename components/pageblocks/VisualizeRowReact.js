@@ -136,7 +136,6 @@ export default function VisualizeRowReact({
           url,
           chosenReductionType,
           problemInstance,
-          chosenSolver
         );
         setProblemReductionData(data ?? []);
       } catch (err) {
@@ -159,7 +158,6 @@ export default function VisualizeRowReact({
           url,
           chosenVisualization,
           problemInstance,
-          chosenSolver
         );
 
         if (!alive) return;
@@ -190,7 +188,6 @@ export default function VisualizeRowReact({
     instanceReady,
     chosenVisualization,
     problemInstance,
-    chosenSolver,
     showReduction,
   ]);
 
