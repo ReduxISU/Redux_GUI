@@ -58,6 +58,12 @@ let globalY = 100; // start Y
 
 function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, maxWidth) {
     for (let i = 0; i < sets.length; i++) {
+         // Wrap line if needed
+        if (x >= maxWidth - 50) {
+            x = 20;
+            globalY += 50;
+        }
+        
         const s = new CustomSet(
             sets[i].id,
             svg,
@@ -86,12 +92,6 @@ function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, maxWidth) {
                 .style("pointer-events", "none");
 
             x += commaGap + 10; // move x past comma for next set
-        }
-
-        // Wrap line if needed
-        if (x >= maxWidth - 50) {
-            x = 20;
-            globalY += 50;
         }
     }
     return x;
@@ -176,7 +176,7 @@ class element {
         this.svg.append("rect")
             .attr("x", this.x)
             .attr("y", this.y - this.size / 2)
-            .attr("fill", getColorByKey(this.color.trim()))
+            .attr("fill", getColorByKey(this.color.trim()) || getColorByKey("Background"))
             .attr("height", this.size)
             .attr("width", this.size * this.name.length - 7)
             .attr("id", this.id)
@@ -249,7 +249,7 @@ class CustomSet {
                     this.y,
                     this.size,
                     this.gadgetMap,
-                    "Background",
+                    el.color,
                     this.gadgetsOn
                 );
 
@@ -260,7 +260,7 @@ class CustomSet {
                 const gap = 8;
                 this.svg.append("text")
                     .attr("x", offsetX + gap)
-                    .attr("y", this.y)
+                    .attr("y", globalY)
                     .attr("text-anchor", "left")
                     .attr("dominant-baseline", "middle")
                     .attr("font-size", this.size + "px")
