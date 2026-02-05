@@ -32,6 +32,7 @@ import {
   requestReducedInstance,
   requestVisualization,
   requestReductionVisualization,
+  requestSolvedInstance,
 } from "../redux";
 
 import VisualizationLogic from "../widgets/VisualizationLogic";
@@ -126,16 +127,41 @@ export default function VisualizeRowReact({
     setCurrentProblemData(null);
   }, [problemName, problemInstance, chosenVisualization]);
 
+  // fetch solution when instance or solver changes, since it's needed for some visualizations and reductions
+  const [solution, setSolution] = useState(undefined);
+
+  useEffect(() => {
+    if (!problemInstance || !chosenSolver) return;
+
+    const fetchSolvedInstance = async () => {
+      try {
+        const solved = await requestSolvedInstance(url, chosenSolver, problemInstance);
+        setSolution(solved);
+      } catch (err) {
+        console.error("Failed to solve instance:", err);
+      }
+    };
+
+    fetchSolvedInstance();
+  }, [problemInstance, chosenSolver]);
+
   // Fetch reduction visualization
   useEffect(() => {
-    if (!chosenReduceTo || !problemInstance || !showReduction) return;
+    if (
+      !chosenReduceTo ||
+      !problemInstance ||
+      !showReduction ||
+      !solution
+    )
+      return;
 
     const fetch = async () => {
       try {
         const data = await requestReductionVisualization(
           url,
           chosenReductionType,
-          problemInstance,
+          solution,
+          problemInstance
         );
         setProblemReductionData(data ?? []);
       } catch (err) {
@@ -144,7 +170,8 @@ export default function VisualizeRowReact({
     };
 
     fetch();
-  }, [showReduction, problemName, problemInstance]);
+  }, [showReduction, chosenReduceTo, problemInstance, solution]);
+
 
   // Fetch main visualization data
   useEffect(() => {
@@ -281,18 +308,18 @@ export default function VisualizeRowReact({
 
   const tip = chosenVisualization
     ? {
-        header: visualizationInfo.visualizationName ?? "",
-        formalDef: visualizationInfo.visualizationDefinition ?? "",
-        info: visualizationInfo.info ?? visualizationInfo.description ?? "",
-        source: visualizationInfo.source,
-        credit:
-          Array.isArray(visualizationInfo.contributors) &&
+      header: visualizationInfo.visualizationName ?? "",
+      formalDef: visualizationInfo.visualizationDefinition ?? "",
+      info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+      source: visualizationInfo.source,
+      credit:
+        Array.isArray(visualizationInfo.contributors) &&
           visualizationInfo.contributors.length
-            ? visualizationInfo.contributors.join(", ")
-            : "",
-        componentLink: visualizationInfo.visualizationLink || "",
-        sourceLink: visualizationInfo.sourceLink || "",
-      }
+          ? visualizationInfo.contributors.join(", ")
+          : "",
+      componentLink: visualizationInfo.visualizationLink || "",
+      sourceLink: visualizationInfo.sourceLink || "",
+    }
     : TOOLTIP;
 
   return (

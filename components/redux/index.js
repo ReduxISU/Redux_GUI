@@ -282,9 +282,9 @@ export async function requestReductionOptions(url, problem, problemType = "NPC")
  * @returns the graph visualization of the reduced problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductionVisualization(url, reduction, instance) {
+export async function requestReductionVisualization(url, reduction, solution, instance) {
   return await fetchPostJson(
-    `${url}ProblemProvider/visualizeReduction?reduction=${reduction}`,
+    `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solution=${solution}`,
     instance,
     () => `${reduction} VISUALIZE REQUEST FAILED`
   );
