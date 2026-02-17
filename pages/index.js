@@ -7,7 +7,6 @@
  */
 
 import React from "react"; //React is implicitly imported
-// import QuantumCircuitVisualizer from "../components/Quantum/QuantumCircuitVisualizer.js";
 import ProblemRowReact from "../components/pageblocks/ProblemRowReact";
 import ReduceToRowReact from "../components/pageblocks/ReduceToRowReact";
 import VisualizeRowReact from "../components/pageblocks/VisualizeRowReact";
@@ -158,19 +157,7 @@ function MainPageContent() {
 export default function MainPage() {
   return (
     <>
-      {SHOW_QUANTUM_VIS && (
-        <QuantumCircuitVisualizer
-          circuit={{
-            qubits: 2,
-            gates: [
-              { type: "h", qubit: 0, t: 0 },
-              { type: "x", qubit: 1, t: 1 },
-              { type: "cnot", control: 0, target: 1, t: 2 },
-            ],
-          }}
-        />
-      )}
-      <MainPageContent />
+      <MainPageContent></MainPageContent> 
     </>
   );
 }

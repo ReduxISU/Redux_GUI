@@ -33,8 +33,8 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
   // Reset all gadget highlights
   function clearHighlights(nodeId, gadgetMap) {
     d3.selectAll("#id" + nodeId.replace("!", "NOT"))
-          .attr("fill", getColorByKey("Background"))
-          .attr("stroke", getColorByKey("Background"));
+      .attr("fill", getColorByKey("Background"))
+      .attr("stroke", getColorByKey("Background"));
 
     if (!gadgetMap || gadgetMap.length === 0) return;
     // Reset all gadgets in gadgetMap
@@ -90,6 +90,13 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
   useEffect(() => {
     if (!problemData) return;
 
+    // Normalize links and nodes to always exist
+    const data = {
+      ...problemData,
+      links: problemData.links || [],
+      nodes: problemData.nodes || [],
+    };
+
     d3.select(ref.current).selectChildren().remove();
 
     const svg = d3.select(ref.current)
@@ -101,8 +108,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
     const defs = svg.append("defs");
 
-    // Setup markers for directed edges
-    problemData.links.forEach((d, i) => {
+    problemData.links?.forEach((d, i) => {
       if (d.directed) {
         const marker = defs.append("marker")
           .attr("id", `arrow-${i}`)
@@ -123,14 +129,14 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
     // Draw links
     const link = svg.selectAll("line")
-      .data(problemData.links)
+      .data(data.links)
       .join("line")
       .attr("marker-end", d => d.directed ? `url(#${d.markerId})` : null)
       .style("stroke", d => getColorByKey(d.color || "Edges"))
       .style("stroke-width", "2px")
       .style("stroke-dasharray", d => d.dashed ? "5,5" : "none");
 
-    problemData.links.forEach(d => {
+    problemData.links?.forEach(d => {
       if (d.directed) {
         const markerPath = d3.select(`#${d.markerId} path`);
         markerPath.attr("fill", getColorByKey(d.color || "Edges"));
@@ -139,7 +145,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
     // Draw nodes
     const node = svg.selectAll("circle")
-      .data(problemData.nodes)
+      .data(data.nodes)
       .join("circle")
       .attr("r", 20)
       .attr("id", d => "id" + d.id.replace("!", "NOT"))
@@ -162,7 +168,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
     // Draw labels
     const text = svg.selectAll("text")
-      .data(problemData.nodes)
+      .data(data.nodes)
       .enter()
       .append("text")
       .attr("fill", "black")
@@ -172,7 +178,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
       .style("pointer-events", "none"); // disables pointer events for labels
 
     // Scale for link distances based on weight
-    const weights = problemData.links.map(d => d.weight);
+    const weights = data.links.map(d => d.weight);
     const minWeight = d3.min(weights);
     const maxWeight = d3.max(weights);
     const scale = (minWeight === maxWeight)
