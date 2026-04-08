@@ -12,7 +12,7 @@ ${tikzBody}
 
     try {
         const svg = await tex2svg(tikzDocument, {
-            showConsole: false,
+            showConsole: true,
             tikzLibraries: ["automata", "positioning", "arrows.meta"],
         });
         res.status(200).json({ success: true, svg });
