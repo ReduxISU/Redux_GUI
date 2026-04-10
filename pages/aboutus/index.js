@@ -42,7 +42,10 @@ export default function AboutUsPage() {
     "Paul Gilbreath",
     "Andreas Kramer",
     "Courtney Bodily",
-    "Rakesh Itani"
+    "Rakesh Itani",
+    "Michael Trosper",
+    "Corbin Hay",
+    "Diya Pandey"
   ];
 
   const publications = [
