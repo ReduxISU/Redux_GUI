@@ -42,7 +42,8 @@ export default function AboutUsPage() {
     "Paul Gilbreath",
     "Andreas Kramer",
     "Courtney Bodily",
-    "Rakesh Itani"
+    "Rakesh Itani",
+    "David Lindeman",
   ];
 
   const publications = [
