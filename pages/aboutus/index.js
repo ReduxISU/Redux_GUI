@@ -45,7 +45,8 @@ export default function AboutUsPage() {
     "Rakesh Itani",
     "Michael Trosper",
     "Corbin Hay",
-    "Diya Pandey"
+    "Diya Pandey",
+    "David Lindeman"
   ];
 
   const publications = [
