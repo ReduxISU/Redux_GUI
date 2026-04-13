@@ -333,7 +333,7 @@ export default function AboutUsPage() {
                 Welcome to <Box component="span" sx={{ color: "#fff", fontWeight: 500 }}>Redux</Box>, a
                 platform for NP-Complete problems. Input your challenges and gain access to
                 reductions, solutions, verifiers, and visualizations. Join our community of
-                problem solvers and unravel computational complexities using the application's
+                problem solvers and unravel computational complexities using the application
                 library. The project was greatly inspired by Richard Karp&apos;s paper{" "}
                 <Link
                   href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
