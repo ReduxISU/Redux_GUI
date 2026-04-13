@@ -533,12 +533,12 @@ export default function AboutUsPage() {
     underline="none"
     sx={{
       display: "inline-flex",
-      opacity: 60,
+      opacity: 1,
     }}
   >
     <Box
       component="img"
-      src={isulogo.src}
+      src={isulogo}
       alt="Idaho State University Computer Science"
       sx={{
         height: 72,
