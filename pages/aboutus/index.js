@@ -137,7 +137,7 @@ const learnMoreHyperlink = [
     url: "https://en.wikipedia.org/wiki/NP-completeness",
   },
   {
-    label: "Karp's 21 NP-Complete Problems",
+    label: "Karp&apos;s 21 NP-Complete Problems",
     url: "https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf",
   },
   {
