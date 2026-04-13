@@ -15,7 +15,6 @@ import {
   CssBaseline,
 } from "@mui/material";
 import isulogo from "../../components/images/ISULogo.png"; //Used for ISU logo at the bottom
-import Image from "next/image";
 
 
 
