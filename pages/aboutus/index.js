@@ -128,34 +128,6 @@ const contributorProfiles = {
 
 
 
-
-//Other links sections at the bottom
-const learnMoreHyperlink = [
-  { label: "Github", url: "https://github.com/ReduxISU/" },
-  {
-    label: "Wikipedia: What is NP-Complete?",
-    url: "https://en.wikipedia.org/wiki/NP-completeness",
-  },
-  {
-    label: "Karp&apos;s 21 NP-Complete Problems",
-    url: "https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf",
-  },
-  {
-    label: "Redux GUI Documentation",
-    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
-  },
-  {
-    label: "Redux Backend Documentation",
-    url: "https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md",
-  },
-  {
-    label: "API Swagger Documentation",
-    url: "https://api.redux.portneuf.cose.isu.edu/swagger/index.html",
-  },
-];
-
-
-
 //It controls all the sections of About, Publications and Contributors
 const theSectionCard = {
   background: "rgba(255,255,255,0.05)",
@@ -479,40 +451,6 @@ export default function AboutUsPage() {
     ))}
   </Grid>
 </Box>
-
-            <Box
-              sx={{
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: "12px",
-                border: "1px solid rgba(255,255,255,0.10)",
-                p: 3,
-                mb: 4,
-              }}
-            >
-              <TitleSection>LEARN MORE</TitleSection>
-              <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 2 }}>
-                Additional documentation can be found at the following links:
-              </Typography>
-
-              <Box sx={{ display: "grid", gap: 1.2 }}>
-                {learnMoreHyperlink.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="none"
-                    sx={{
-                      color: "#c084fc",
-                      fontSize: "0.8rem",
-                      "&:hover": { color: "#e9d5ff" },
-                    }}
-                  >
-                    • {item.label}
-                  </Link>
-                ))}
-              </Box>
-            </Box>
           </Box>
         </Container>
 
