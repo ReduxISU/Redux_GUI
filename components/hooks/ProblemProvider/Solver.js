@@ -1,14 +1,14 @@
 import { useGenericInfo } from "../ProblemProvider";
-import { requestInfo, requestSolvers } from "../../redux";
+import { requestAllSolvers, requestAllInfo } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
 export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance) {
   const state = {};
   /// Maps each problem name to its default solver name.
-  [state.defaultSolverMap] = useDefaultSolverMap(url, problemInfoMap);
+  [state.defaultSolverMap] = useDefaultSolverMap(url, problemInfoMap, problemType);
   [state.solverOptions] = useSolverOptions(url, problemName, problemType);
   [state.chosenSolver, state.setChosenSolver] = useChosenSolver(problemName, state.defaultSolverMap);
-  [state.solverNameMap] = useSolverNameMap(url, problemNameMap);
+  [state.solverNameMap] = useSolverNameMap(url, problemNameMap, problemType);
   [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(problemInstance, state.chosenSolver);
   return state;
 }
@@ -33,74 +33,76 @@ function useSolvedInstance(problemInstance, chosenSolver) {
   return [solvedInstance, setSolvedInstance];
 }
 
-function useSolverNameMap(url, problemNameMap) {
+function useSolverNameMap(url, problemNameMap, problemType) {
   const [solverNameMap, setSolverNameMap] = useState(new Map());
 
   useEffect(() => {
     const problems = Array.from(problemNameMap.keys());
-    requestSolverNameMap(url, problems).then((solverMap) => {
-      setSolverNameMap(solverMap);
-    });
-  }, [problemNameMap]);
-
-  //The following the functions are used to set the solver names
-  async function requestSolverNameMap(url, problems) {
+    (async () => {
+    const allSolvers = (await requestAllSolvers(url, problemType)) ?? {};
+    const allInfo = (await requestAllInfo(url, problemType)) ?? {};
     let map = new Map();
+
     for (const problem of problems) {
-      const solvers = (await requestSolvers(url, problem)) ?? [];
+      const solvers = allSolvers[problem] ?? [];
       for (const s of solvers) {
-        let solver = s.split(" ")[0];
-        const info = await requestInfo(url, solver);
-        if (info) {
-          map.set(s, info.solverName);
-        }
+        const solver = s.split(" ")[0];
+        const info = allInfo[solver];
+        map.set(s, info?.solverName || s);
       }
     }
-    return map;
-  }
+    setSolverNameMap(map);
+  })();
+}, [url, problemNameMap, problemType]);
+
 
   return [solverNameMap, setSolverNameMap];
 }
 
-function useDefaultSolverMap(url, problemInfoMap) {
+function useDefaultSolverMap(url, problemInfoMap, problemType) {
   const [defaultSolverMap, setDefaultSolverMap] = useState(new Map());
 
-  useEffect(() => {
-    const problems = [...problemInfoMap.keys()];
-    const defaultSolverNames = [...problemInfoMap.values()].map((info) => info.defaultSolver.solverName);
-    requestDefaultSolverFileMap(url, problems, defaultSolverNames).then((defaultSolverFileNames) => {
-      setDefaultSolverMap(defaultSolverFileNames);
-    });
-  }, [problemInfoMap]);
+useEffect(() => {
+  const problems = [...problemInfoMap.keys()];
+  const defaultSolverNames = [...problemInfoMap.values()]
+    .map((info) => info?.defaultSolver?.solverName)
+    .filter(Boolean);
 
-  //The requestDefaultSolverFileMap sets the solver names by the file name
-  async function requestDefaultSolverFileMap(url, problems, defaultSolverNames) {
+  (async () => {
+    const allSolvers = (await requestAllSolvers(url, problemType)) ?? {};
+    const allInfo = (await requestAllInfo(url, problemType)) ?? {};
     let map = new Map();
     for (const problem of problems) {
-      const solvers = (await requestSolvers(url, problem)) ?? [];
+      const solvers = allSolvers[problem] ?? [];
       for (const s of solvers) {
-        let solver = s.split(" ")[0];
-        const info = await requestInfo(url, solver);
+        const solver = s.split(" ")[0];
+        const info = allInfo[solver];
         if (info && defaultSolverNames.includes(info.solverName)) {
           map.set(problem, s);
         }
       }
     }
-    return map;
-  }
+    setDefaultSolverMap(map);
+  })();
+}, [url, problemInfoMap, problemType]);
+
 
   return [defaultSolverMap, setDefaultSolverMap];
 }
 
 function useSolverOptions(url, problemName, problemType) {
   const [solverOptions, setSolverOptions] = useState([]);
-
+  
   useEffect(() => {
     (async () => {
-      setSolverOptions(problemName && problemType ? (await requestSolvers(url, problemName, problemType)) ?? [] : []);
+      if (!problemName || !problemType) {
+        setSolverOptions([]);
+        return;
+      }
+      const allSolvers = (await requestAllSolvers(url, problemType)) ?? {};
+      setSolverOptions(allSolvers[problemName] ?? []);
     })();
-  }, [problemName, problemType]);
-
+  }, [url, problemName, problemType]);
   return [solverOptions, setSolverOptions];
 }
 
