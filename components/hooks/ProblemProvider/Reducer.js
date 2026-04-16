@@ -1,5 +1,5 @@
 import { useGenericInfo } from "../ProblemProvider";
-import { requestReductionOptions, requestReductionInfo, requestReductions, requestReducedInstanceFromPath, requestInfo } from "../../redux";
+import { requestReductionOptions, requestReductionInfo, requestReductions, requestReducedInstanceFromPath, requestAllInfo } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
 // For initial startup defaults
@@ -26,9 +26,10 @@ export function useReducer(url, problemName, problemType, problemInstance) {
     state.chosenReductionType
   );
   [state.reductionVisualization, state.setReductionVisualization] = useReductionVisualization(
-    url,
-    state.chosenReduceTo
-  );
+  url,
+  state.chosenReduceTo,
+  problemType
+);
   return state;
 }
 
@@ -66,7 +67,7 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
   return [reducedInstance, setReducedInstance];
 }
 
-function useReductionVisualization(url, chosenReduceTo) {
+function useReductionVisualization(url, chosenReduceTo, problemType) {
   const [reductionVisualization, setReductionVisualization] = useState("");
 
   useEffect(() => {
@@ -76,10 +77,11 @@ function useReductionVisualization(url, chosenReduceTo) {
     }
 
     (async () => {
-      const info = await requestInfo(url, chosenReduceTo);
-      setReductionVisualization(info?.defaultVisualization.visualizationType ?? "");
+      const allInfo = (await requestAllInfo(url, problemType)) ?? {};
+      const info = allInfo[chosenReduceTo];
+      setReductionVisualization(info?.defaultVisualization?.visualizationType ?? "");
     })();
-  }, [url, chosenReduceTo]);
+  }, [url, chosenReduceTo, problemType]);
 
   return [reductionVisualization, setReductionVisualization];
 }
