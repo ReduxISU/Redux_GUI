@@ -1,197 +1,554 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import { createTheme, ThemeProvider, Container, Box } from "@mui/material";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Card } from "react-bootstrap";
-import isulogo from "../../components/images/ISULogo.png";
-import Image from "next/image";
 
+
+//UI Components
+import {
+  createTheme,
+  ThemeProvider,
+  Container,
+  Box,
+  Typography,
+  Link,
+  Grid,
+  Avatar,
+  Tooltip,
+  CssBaseline,
+} from "@mui/material";
+import isulogo from "../../components/images/ISULogo.png"; //Used for ISU logo at the bottom
+
+
+
+
+//Global Styling
+const theme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: { main: "#8b5cf6" },
+    secondary: { main: "#a855f7" },
+    background: {
+      default: "#07070b",
+      paper: "rgba(255,255,255,0.04)",
+    },
+    text: {
+      primary: "#ffffff",
+      secondary: "#b4b4c7",
+    },
+  },
+  typography: {
+    fontFamily:
+      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+});
+
+
+//List of research papers
+const publications = [
+  {
+    authors: "R. Phillips and P. M. Bodily",
+    title:
+      "Spade: A library for programmatic parsing and verification of discrete data structures",
+    venue:
+      "2025 Intermountain Engineering, Technology and Computing (IETC), pp. 1–5, IEEE, 2025",
+    pdfUrl:
+      "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11039449",
+  },
+  {
+    authors:
+      "K. Marchetti, A. Sevaljevic, A. Diviney, R. Phillips, C. Eardley, R. Khadka, D. Igbokwe, and P. M. Bodily",
+    title:
+      "Redux: An interactive, dynamic knowledge base for teaching NP-completeness",
+    venue:
+      "Proceedings of the 29th annual ACM conference on Innovation and Technology in Computer Science Education (ITiCSE), 2024",
+    pdfUrl: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2206",
+  },
+  {
+    authors: "A. Sevaljevic and P. M. Bodily",
+    title:
+      "Comparative empirical analysis of dancing links implementations to solve the exact cover problem",
+    venue:
+      "Proceedings of the 4th Intermountain Engineering, Technology, and Computing Conference (i-ETC), pp. 255–258, IEEE, 2024",
+    pdfUrl: "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10564396",
+  },
+  {
+    authors: "K. Marchetti and P. Bodily",
+    title: "Visualizing the 3SAT to CLIQUE Reduction Process",
+    venue:
+      "2022 Intermountain Engineering, Technology and Computing (IETC), Orem, UT, USA, 2022, pp. 1-5",
+    pdfUrl:
+      "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9796851",
+  },
+  {
+    authors: "K. Marchetti and P. Bodily",
+    title:
+      "KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems",
+    venue:
+      "2022 Intermountain Engineering, Technology and Computing (IETC), Orem, UT, USA, 2022, pp. 1-4",
+    pdfUrl: "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796945",
+  },
+];
+
+
+
+
+//The only contributors whose github profiles are found along with its avatar and link
+const contributorProfiles = {
+  "Pratham Khanal": {
+    image: "https://github.com/pkprathamkhanal.png",
+    github: "https://github.com/pkprathamkhanal",
+  },
+  "Sansar Kharal": {
+    image: "https://github.com/kharsans.png",
+    github: "https://github.com/kharsans",
+  },
+  "Himanshu Jha": {
+    image: "https://github.com/himanshujha05.png",
+    github: "https://github.com/himanshujha05",
+  },
+  "Andrija Sevaljevic": {
+    image: "https://github.com/Andrija-Sevaljevic.png",
+    github: "https://github.com/Andrija-Sevaljevic",
+  },
+  "Jason Wright": {
+    image: "https://github.com/wrigjl.png",
+    github: "https://github.com/wrigjl",
+  },
+  "Daniel Igbokwe": {
+    image: "https://github.com/igbodani.png",
+    github: "https://github.com/igbodani",
+  },
+  "Sabal Subedi": {
+    image: "https://github.com/sabal_subedi.png",
+    github: "https://github.com/sabal_subedi",
+  },
+  "Alex Svancara": {
+    image: "https://github.com/svanalex.png",
+    github: "https://github.com/svanalex",
+  },
+};
+
+
+
+
+//Other links sections at the bottom
+const learnMoreHyperlink = [
+  { label: "Github", url: "https://github.com/ReduxISU/" },
+  {
+    label: "Wikipedia: What is NP-Complete?",
+    url: "https://en.wikipedia.org/wiki/NP-completeness",
+  },
+  {
+    label: "Karp&apos;s 21 NP-Complete Problems",
+    url: "https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf",
+  },
+  {
+    label: "Redux GUI Documentation",
+    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
+  },
+  {
+    label: "Redux Backend Documentation",
+    url: "https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md",
+  },
+  {
+    label: "API Swagger Documentation",
+    url: "https://api.redux.portneuf.cose.isu.edu/swagger/index.html",
+  },
+];
+
+
+
+//It controls all the sections of About, Publications and Contributors
+const theSectionCard = {
+  background: "rgba(255,255,255,0.05)",
+  backdropFilter: "blur(10px)",
+  borderRadius: "16px",
+  border: "1px solid rgba(255,255,255,0.10)",
+  padding: { xs: 3, md: 4 },
+  transition: "all 0.3s ease",
+  "&:hover": {
+    borderColor: "rgba(168,85,247,0.4)",
+    boxShadow: "0 0 25px rgba(168,85,247,0.15)",
+  },
+};
+
+
+
+
+//For the reusable title sections 
+function TitleSection({ children }) {
+  return (
+    <Typography
+      sx={{
+        color: "#ffffff", //color of the font, plain whiwte in general
+        fontSize: "0.85rem", //font size
+        fontWeight: 600,
+        letterSpacing: "0.22em",
+        mb: 2,
+      }}
+    >
+      {children}
+    </Typography>
+  );
+}
+
+
+function ItemContributor({ name }) {
+  const profile = contributorProfiles[name];
+  if (!profile) {
+    return (
+      <Typography
+        sx={{
+          color: "#e5e7eb",
+          fontSize: "0.8rem",
+          lineHeight: 0.89,
+        }}
+      >
+        {name}
+      </Typography>
+    );
+  }
+  return (
+    <Tooltip
+      arrow
+      placement="right"
+      slotProps={{
+        popper: {
+          modifiers: [
+            {
+              name: "offset",
+              options: {
+                offset: [0, 6],
+              },
+            },
+          ],
+        },
+      }}
+      title={
+        <Box sx={{ p: 1, minWidth: 190 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
+            <Avatar
+              src={profile.image}
+              alt={name}
+              sx={{ width: 50, height: 50 }}
+            />
+            <Box>
+              <Typography
+                sx={{
+                  color: "#ffffff",
+                  fontWeight: 600,
+                  fontSize: "0.92rem",
+                }}
+              >
+                {name}
+              </Typography>
+              <Typography
+                sx={{
+                  color: "#cbd5e1",
+                  fontSize: "0.78rem",
+                }}
+              >
+                Contributor
+              </Typography>
+            </Box>
+          </Box>
+
+          <Link
+            href={profile.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            sx={{
+              color: "#e9d5ff",
+              fontSize: "0.9rem",
+              fontWeight: 500,
+              display: "inline-block",
+              mt: 0.25,
+              "&:hover": {
+                color: "#c084fc",
+              },
+            }}
+          >
+            View GitHub Profile
+          </Link>
+        </Box>
+      }
+      componentsProps={{
+        tooltip: {
+          sx: {
+            bgcolor: "#111118",
+            border: "1px solid rgba(168,85,247,0.35)",
+            borderRadius: "12px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            padding: "10px 12px",
+          },
+        },
+      }}
+    >
+      <Box
+        component="span"
+        sx={{
+          color: "#e5e7eb",
+          fontSize: "0.9rem",
+          lineHeight: 1.35,
+          cursor: "pointer",
+          width: "100%",
+          "&:hover": {
+            color: "#d8b4fe",
+          },
+        }}
+      >
+        {name}
+      </Box>
+    </Tooltip>
+  );
+}
+
+
+//Default function
 export default function AboutUsPage() {
-  const theme = createTheme({
-    palette: {
-      mode: "light",
-      primary: { main: "#424242" },
-      secondary: { main: "#f47920" },
-    },
-  });
-
-  const cardBodyStyle = { padding: "20px" };
-
-  const contributors = [
-    "Kaden Marchetti",
-    "Caleb Eardley",
-    "Daniel Igbokwe",
-    "Alex Diviney",
-    "Janita Aamir",
-    "Andrija Sevaljevic",
-    "Garret Stouffer",
-    "Porter Glines",
-    "Show Pratoomratana",
-    "Russell Phillips",
-    "Michael Crapse",
-    "Ian Gonzalez",
-    "Sabal Subedi",
-    "Himanshu Jha",
-    "Sansar Kharal",
-    "Pratham Khanal",
-    "George Lake",
-    "Grant Gardner",
-    "Jason Wright",
-    "Alex Svancara", 
-    "Eric Hill", 
-    "Max Grünwoldt", 
-    "Paul Gilbreath",
-    "Andreas Kramer",
-    "Courtney Bodily",
-    "Rakesh Itani"
-  ];
-
-  const publications = [
-    {
-      title:
-        "R. Phillips and P. M. Bodily, “Spade: A library for programmatic parsing and verification of discrete data structures,” in 2025 Intermountain Engineering, Technology and Computing (IETC), pp. 1–5, IEEE, 2025.",
-      link: "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11039449",
-    },
-    {
-      title:
-        "K. Marchetti, A. Sevaljevic, A. Diviney, R. Phillips, C. Eardley, R. Khadka, D. Igbokwe, and P. M. Bodily, “Redux: An interactive, dynamic knowledge base for teaching NP-completeness,” in Proceedings of the 29th annual ACM conference on Innovation and Technology in Computer Science Education (ITiCSE), 2024.",
-      link: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2206",
-    },
-    {
-      title:
-        "A. Sevaljevic and P. M. Bodily, “Comparative empirical analysis of dancing links implementations to solve the exact cover problem,” in Proceedings of the 4th Intermountain Engineering, Technology, and Computing Conference (i-ETC), pp. 255–258, IEEE, 2024.",
-      link: "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10564396",
-    },
-    {
-      title:
-        'K. Marchetti and P. Bodily, "Visualizing the 3SAT to CLIQUE Reduction Process," 2022 Intermountain Engineering, Technology and Computing (IETC), Orem, UT, USA, 2022, pp. 1-5, doi: 10.1109/IETC54973.2022.9796851.',
-      link: "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9796851",
-    },
-    {
-      title:
-        'K. Marchetti and P. Bodily, "KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems," 2022 Intermountain Engineering, Technology and Computing (IETC), Orem, UT, USA, 2022, pp. 1-4, doi: 10.1109/IETC54973.2022.9796945.',
-      link: "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796945",
-    },
-  ];
-
   return (
     <ThemeProvider theme={theme}>
-      <ResponsiveAppBar />
-      <Container>
-        <br />
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background:
+            "radial-gradient(circle at top, rgba(139,92,246,0.16), transparent 32%), linear-gradient(180deg, #09090f 0%, #07070b 100%)",
+        }}
+      >
+        <ResponsiveAppBar />
 
-        {/* ABOUT US Card */}
-        <Card>
-          <Card.Header>
-            <b>About Us</b>
-          </Card.Header>
-          <Card.Body style={cardBodyStyle}>
-            {"Welcome to Redux, a platform for NP-Complete problems. Input your challenges and gain access to reductions, solutions, verifiers, and visualizations. Join our community of problem solvers and unravel computational complexities using the application's library. The project was greatly inspired by Richard Karp's paper "}
-            <a
-              href="https://doi.org/10.1007/978-1-4684-2001-2_9"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              &quot;Reducibility Among Combinatorial Problems&quot;
-            </a>{" "}
-            {"(Karp, 1972)."}
-          </Card.Body>
-        </Card>
 
-        <br />
-
-        {/* PUBLICATIONS Card */}
-        <Card>
-          <Card.Header>
-            <b>Publications</b>
-          </Card.Header>
-          <Card.Body style={cardBodyStyle}>
-            <p>
-              Below are research publications associated with the Redux project
-              and its contributors:
-            </p>
-            <ul>
-              {publications.map((pub, index) => (
-                <li key={index} style={{ marginBottom: "10px" }}>
-                  {pub.title}{" "}
-                  <a
-                    href={pub.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    [PDF]
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </Card.Body>
-        </Card>
-
-        <br />
-
-        {/* CONTRIBUTORS Card */}
-        <Card>
-          <Card.Header>
-            <b>Contributors</b>
-          </Card.Header>
-          <Card.Body style={cardBodyStyle}>
-            <p>
-              This project was started by Dr.{" "}
-              <a
-                href="https://www2.cose.isu.edu/~bodipaul/index.php"
-                target="_blank"
-                rel="noopener noreferrer"
+        <Container maxWidth="lg" sx={{ pt: 2 }}>
+          <Box sx={{ maxWidth: "900px", mx: "auto" }}>
+            <Box id="about" sx={{ ...theSectionCard, mb: 1.5 }}>
+              <TitleSection>ABOUT US</TitleSection>
+              <Typography
+                sx={{
+                  color: "#d1d5db",
+                  fontSize: "0.87rem",
+                  lineHeight: 1.9,
+                  textAlign: "justify"
+                }}
               >
-                Paul Bodily
-              </a>
-              , who is also the ISU Faculty Sponsor of the project.
-            </p>
-            <p>
-              The students who contributed to the creation of the application
-              are:
-            </p>
+                Welcome to <Box component="span" sx={{ color: "#fff", fontWeight: 500 }}>Redux</Box>, a
+                platform for NP-Complete problems. Input your challenges and gain access to
+                reductions, solutions, verifiers, and visualizations. Join our community of
+                problem solvers and unravel computational complexities using the application
+                library. The project was greatly inspired by Richard Karp&apos;s paper{" "}
+                <Link
+                  href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  underline="hover"
+                  sx={{ color: "#c084fc" }}
+                >
+                  &quot;Reducibility Among Combinatorial Problems&quot;
+                </Link>{" "}
+                (Karp, 1972).
+              </Typography>
+            </Box>
 
-            {/* Column-ordered 3-column layout */}
-            <div
-              style={{
-                columnCount: 3,
-                columnGap: "40px",
-                paddingLeft: "20px",
-                lineHeight: "1.6",
+            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+              <TitleSection>PUBLICATIONS</TitleSection>
+              <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 3 }}>
+                Below are research publications associated with the Redux project and its contributors.
+              </Typography>
+
+              <Box sx={{ display: "grid", gap: .5 }}>
+                {publications.map((pub, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      color: "#d1d5db",
+                      fontSize: "0.8rem",
+                      lineHeight: 1.8,
+                      borderRadius: "12px",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      background: "rgba(255,255,255,0.02)",
+                      p: 2,
+                      "&:hover": {
+                        borderColor: "rgba(168,85,247,0.3)",
+                        background: "rgba(255,255,255,0.04)",
+                      },
+                    }}
+                  >
+                    <Box component="span" sx={{ color: "#9ca3af" }}>{pub.authors}, </Box>
+                    <Box component="span" sx={{ color: "#fff" }}>&quot;{pub.title},&quot; </Box>
+                    <Box component="span" sx={{ color: "#6b7280", fontStyle: "italic" }}>
+                      {pub.venue}.
+                    </Box>{" "}
+                    <Link
+                      href={pub.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{ color: "#c084fc" }}
+                    >
+                      [PDF]
+                    </Link>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+            <Box sx={{ ...theSectionCard, mb: 1 }}>
+  <TitleSection>CONTRIBUTORS</TitleSection>
+
+  <Typography
+    sx={{
+      color: "#d1d5db",
+      fontSize: "0.87rem",
+      lineHeight: 1.8,
+      mb: 2,
+    }}
+  >
+    This project was started by{" "}
+    <Link
+      href="https://www2.cose.isu.edu/~bodipaul/index.php"
+      target="_blank"
+      rel="noopener noreferrer"
+      underline="hover"
+      sx={{ color: "#a78bfa" }}
+    >
+      Dr. Paul Bodily
+    </Link>
+    , who is also the ISU Faculty Sponsor of the project.
+  </Typography>
+
+  <Typography
+    sx={{
+      color: "#9ca3af",
+      fontSize: "0.87rem",
+      mb: 2,
+    }}
+  >
+    Project contributors
+  </Typography>
+
+  <Grid container spacing={1.5}>
+    {[
+      "Kaden Marchetti",
+      "Caleb Eardley",
+      "Daniel Igbokwe",
+      "Alex Diviney",
+      "Janita Aamir",
+      "Andrija Sevaljevic",
+      "Garret Stouffer",
+      "Alex Svancara",
+      "Eric Hill",
+      "Porter Glines",
+      "Show Pratoomratana",
+      "Russell Phillips",
+      "Michael Crapse",
+      "Ian Gonzalez",
+      "Sabal Subedi",
+      "Himanshu Jha",
+      "Max Grünwoldt",
+      "Paul Gilbreath",
+      "Sansar Kharal",
+      "Pratham Khanal",
+      "George Lake",
+      "Grant Gardner",
+      "Jason Wright",
+      "Andreas Kramer",
+      "Courtney Bodily",
+      "Rakesh Itani",
+      "David Lindeman",
+    ].map((name) => (
+      <Grid item xs={12} sm={6} md={4} key={name}>
+        <Box
+          sx={{
+            border: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(255,255,255,0.02)",
+            borderRadius: "10px",
+            px: 1.4,
+            py: 0.6,
+            minHeight: "30px",
+            display: "flex",
+            alignItems: "center",
+            transition: "all 0.2s ease",
+            "&:hover": {
+              borderColor: "rgba(168,85,247,0.28)",
+              background: "rgba(255,255,255,0.04)",
+            },
+          }}
+        >
+          <ItemContributor name={name} />
+        </Box>
+      </Grid>
+    ))}
+  </Grid>
+</Box>
+
+            <Box
+              sx={{
+                background: "rgba(255,255,255,0.05)",
+                borderRadius: "12px",
+                border: "1px solid rgba(255,255,255,0.10)",
+                p: 3,
+                mb: 4,
               }}
             >
-              {contributors.map((name, index) => (
-                <div key={index}>• {name}</div>
-              ))}
-            </div>
-          </Card.Body>
-        </Card>
+              <TitleSection>LEARN MORE</TitleSection>
+              <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 2 }}>
+                Additional documentation can be found at the following links:
+              </Typography>
 
-                    {/* LEARN MORE Card */}
-                    <Card>
-                        <Card.Header><b>Learn More</b></Card.Header>
-                        <Card.Body style={cardBodyStyle}>
-                            {`Additional documentation can be found at the following links:`}
-                            <ul>
-                                <li><a href="https://github.com/ReduxISU/" target="_blank" rel="noopener noreferrer">Github</a></li>
-                                <li><a href="https://en.wikipedia.org/wiki/NP-completeness" target="_blank" rel="noopener noreferrer">Wikipedia: What is NP-Complete?</a></li>
-                                <li><a href="https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf" target="_blank" rel="noopener noreferrer">Karp&apos;s 21 NP-Complete Problems</a></li>
-                                <li><a href="https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md" target="_blank" rel="noopener noreferrer">Redux GUI Documentation</a></li>
-                                <li><a href="https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md" target="_blank" rel="noopener noreferrer">Redux Backend Documentation</a></li>
-                                <li><a href="https://api.redux.portneuf.cose.isu.edu/swagger/index.html" target="_blank" rel="noopener noreferrer">API Swagger Documentation</a></li>
+              <Box sx={{ display: "grid", gap: 1.2 }}>
+                {learnMoreHyperlink.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="none"
+                    sx={{
+                      color: "#c084fc",
+                      fontSize: "0.8rem",
+                      "&:hover": { color: "#e9d5ff" },
+                    }}
+                  >
+                    • {item.label}
+                  </Link>
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        </Container>
 
-                            </ul>
-                        </Card.Body>
-                    </Card>
-                </Container>
-      {/* ISU Logo */}
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="10vh">
-        <a
-          href="https://www.isu.edu/cs/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image src={isulogo} alt="ISU Logo" height={125} width={500} />
-        </a>
+        <Box
+  sx={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    pt: 2,
+    pb: 3,
+  }}
+>
+  <Link
+    href="https://www.isu.edu/cs/"
+    target="_blank"
+    rel="noopener noreferrer"
+    underline="none"
+    sx={{
+      display: "inline-flex",
+      opacity: 60,
+    }}
+  >
+    <Box
+      component="img"
+      src={isulogo.src}
+      alt="Idaho State University Computer Science"
+      sx={{
+        height: 72,
+        width: "auto",
+        display: "block",
+        opacity: 1,
+        filter: "none",
+      }}
+    />
+  </Link>
+</Box>
       </Box>
     </ThemeProvider>
   );

@@ -346,7 +346,7 @@ export async function requestMappedSolution(url, reduction, problemFrom, problem
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestProblems(url) {
-  return await fetchJson(`${url}navigation/NPC_ProblemsRefactor/`, () => `PROBLEMS REQUEST FAILED`);
+  return await fetchJson(`${url}navigation/ALL_ProblemsRefactor/`, () => `PROBLEMS REQUEST FAILED`);
 }
 
 /**
