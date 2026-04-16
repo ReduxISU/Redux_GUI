@@ -1,4 +1,4 @@
-import { requestProblems, requestInfo } from "../../redux";
+import { requestAllProblems, requestAllInfo } from "../../redux";
 import React, { useEffect, useState } from "react";
 
 // For initial startup defaults
@@ -6,48 +6,44 @@ const DEFAULT_PROBLEM_NAME = "SAT3";
 
 export function useProblem(url) {
   const state = {};
-  [state.problemInfoMap] = useProblemInfoMap(url);
-  [state.problemNameMap] = useProblemNameMap(state.problemInfoMap);
   [state.problemType, state.setProblemType] = useState("NPC");
+  [state.problemInfoMap] = useProblemInfoMap(url, state.problemType);
+  [state.problemNameMap] = useProblemNameMap(state.problemInfoMap);
   [state.problemName, state.setProblemName] = useProblemName(state.problemNameMap);
-  [state.problemInstance, state.setProblemInstance] = useState("{{1,2,3},{1,2},GENERIC}"); // Careful about changing this value, the application boot up sequence is dependent on having a default value.
+  [state.problemInstance, state.setProblemInstance] = useState("{{1,2,3},{1,2},GENERIC}");
   return state;
 }
 
-export function useProblemInfo(url, problemName) {
+export function useProblemInfo(url, problemName, problemType = "NPC") {
   const [problemInfo, setProblemInfo] = useState({});
 
   useEffect(() => {
     if(!problemName) return;
     (async () => {
-      setProblemInfo(problemName ? (await requestInfo(url, problemName)) ?? {} : {});
+      const allInfo = (await requestAllInfo(url, problemType)) ?? {};
+      setProblemInfo(allInfo[problemName] ?? {});
     })();
-  }, [problemName]);
+  }, [url, problemName, problemType]);
 
   return problemInfo; // There should be no reason to set the problem information
 }
 
-function useProblemInfoMap(url) {
+function useProblemInfoMap(url, problemType) {
   const [problemInfoMap, setProblemInfoMap] = useState(new Map());
-
   useEffect(() => {
     (async () => {
-      const problems = (await requestProblems(url)) ?? [];
-      setProblemInfoMap(await requestProblemInfoMap(url, problems));
-    })();
-  }, []);
-
-  async function requestProblemInfoMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      const info = await requestInfo(url, problem);
-      if (info) {
-        map.set(problem, info);
+      const problems = (await requestAllProblems(url, problemType)) ?? [];
+      const allInfo = (await requestAllInfo(url, problemType)) ?? {};
+      let map = new Map();
+      for (const problem of problems) {
+        const info = allInfo[problem];
+        if (info) {
+          map.set(problem, info);
+        }
       }
-    }
-    return map;
-  }
-
+      setProblemInfoMap(map);
+    })();
+  }, [url, problemType]);
   return [problemInfoMap, setProblemInfoMap];
 }
 
@@ -73,7 +69,7 @@ function useProblemNameMap(problemInfoMap) {
   const [problemNameMap, setProblemNameMap] = useState(new Map());
 
   useEffect(() => {
-    setProblemNameMap(new Map([...problemInfoMap].map(([name, info]) => [name, info.problemName])));
+    setProblemNameMap(new Map([...problemInfoMap].map(([name, info]) => [name, info?.problemName || name])));
   }, [problemInfoMap]);
 
   return [problemNameMap, setProblemNameMap];
