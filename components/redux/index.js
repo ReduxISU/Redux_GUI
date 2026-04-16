@@ -26,15 +26,19 @@ async function fetchJson(url, failMsg) {
  * @returns the JSON format of the fetch request.
  * @returns `undefined` on failure and logs the error.
  */
+//Batch endpoints are POSTs with no body. 
 async function fetchPostJson(url, body, failMsg) {
   try {
-    const resp = await fetch(url, {
+    const options = {
       method: "POST",
-      body: JSON.stringify(body),
       headers: {
-        'Content-Type': 'application/json; charset=UTF-8'
-      }
-    });
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+    };
+    if (body !== undefined && body !== null) {
+      options.body = JSON.stringify(body);
+    }
+    const resp = await fetch(url, options);
     if (resp.ok) {
       return await resp.json();
     }
@@ -44,6 +48,8 @@ async function fetchPostJson(url, body, failMsg) {
   }
   return undefined;
 }
+
+
 
 /**
  * This function is a temporary solution for validating user input until it is ported to the Redux API.
@@ -92,6 +98,7 @@ function isCertificateValid(problem, certificate) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestGadgetMap(url, reduction, instance) {
+  if (!reduction) return;
   return await fetchPostJson(
     `${url}ProblemProvider/gadgets?reduction=${reduction}`,
     instance,
@@ -226,17 +233,33 @@ export function remapIdsDeep(obj, idMap) {
  * @returns information regarding the problem/solver/verifier.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestInfo(url, apiCall) {
-  return await fetchJson(`${url}ProblemProvider/info?interface=${apiCall}`, () => `${apiCall} INFO REQUEST FAILED`);
-}
 
+const infoCache = new Map();
+const brokenInfoInterfaces = new Set(["DijkstraPriorityQueue"]);
+export async function requestInfo(url, apiCall) {
+  if (!apiCall) return;
+  if (brokenInfoInterfaces.has(apiCall)) return;
+  if (infoCache.has(apiCall)) {
+    return await infoCache.get(apiCall);
+  }
+  const promise = fetchJson(
+    `${url}ProblemProvider/info?interface=${apiCall}`,
+    () => `${apiCall} INFO REQUEST FAILED`
+  );
+  infoCache.set(apiCall, promise);
+  const result = await promise;
+  if (!result) {
+    infoCache.delete(apiCall);
+  }
+  return result;
+}
 /**
  * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
  * @returns the reduced `instance` list of reductions, the reduction path.
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestReducedInstanceFromPath(url, reductionPath, instance) {
-  for (const path of reductionPath.split("-")) {
+  for (const path of reductionPath.split("-").filter(p => p)) {
     const reducedInst = await requestReducedInstance(url, path, instance);
     if (!reducedInst) {
       console.log(`${reductionPath} AT ${path} REDUCED INSTANCE FROM PATH REQUEST FAILED`);
@@ -252,6 +275,7 @@ export async function requestReducedInstanceFromPath(url, reductionPath, instanc
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestReducedInstance(url, reduction, instance) {
+  if (!reduction) return;
   return await fetchPostJson(
     `${url}ProblemProvider/reduce?reduction=${reduction}`,
     instance,
@@ -299,7 +323,8 @@ export async function processReductionVisualizations(url, reductionPath, instanc
 
   for (const reduction of reductions) {
     finalVisualization = await requestReductionVisualization(url, reduction, currentInstance, solution);
-    const info = await requestInfo(url, reduction, instance);
+    const allInfo = await requestAllInfo(url);
+    const info = allInfo[reduction];
     currentInstance = info.reductionTo.defaultInstance;
     solution = requestMappedSolution(url, solution, currentInstance);
   }
@@ -348,7 +373,6 @@ export async function requestMappedSolution(url, reduction, problemFrom, problem
 export async function requestProblems(url) {
   return await fetchJson(`${url}navigation/ALL_ProblemsRefactor/`, () => `PROBLEMS REQUEST FAILED`);
 }
-
 /**
  * @returns the generic instance of the `problem` with the given `instance`.
  * @returns `undefined` on failure and logs the error.
@@ -360,8 +384,6 @@ export async function requestProblemGenericInstance(url, problem, instance) {
     () => `${problem} PROBLEM GENERIC INSTANCE REQUEST FAILED`
   );
 }
-
-
 /**
  * @returns an array of arrays of reductions implemented for reducing a problem to another problem.
  * @returns `undefined` on failure and logs the error.
@@ -372,7 +394,6 @@ export async function requestReductions(url, problemFrom, problemTo, problemType
     () => `${problemFrom} TO ${problemTo} REDUCTIONS REQUEST FAILED`
   );
 }
-
 /**
  * @returns the solved `instance` from the specified `solver`.
  * @returns `undefined` on failure and logs the error.
@@ -384,7 +405,6 @@ export async function requestSolvedInstance(url, solver, instance) {
     () => `${solver} SOLVED INSTANCE REQUEST FAILED`
   );
 }
-
 /**
  * Temporary solution to allow solving 3 SAT with a Clique solver.
  * All calls to this function should eventually be replace with `requestSolvedInstance`.
@@ -401,24 +421,20 @@ export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver
     if (!reduction) {
       return undefined;
     }
-
     const solution = await requestSolvedInstance(url, "CliqueBruteForce", reduction.reductionTo.instance);
     if (!solution) {
       return undefined;
     }
-
     const mappedSolution = await fetchPostJson(
       `${url}SipserReduceToCliqueStandard/reverseMappedSolution`,
       { problemFrom: instance, problemTo: reduction.reductionTo.instance, problemFromSolution: solution },
       () => "TRANSITIVE SOLVED REQUEST FAILED"
     );
-
     return mappedSolution;
   } else {
     return await requestSolvedInstance(url, solver, instance);
   }
 }
-
 /**
  * @returns the solved graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
@@ -439,19 +455,17 @@ export async function requestSolvedVisualization(url, problem, instance, solutio
     );
   }
 }
-
 /**
  * @returns the `steps` from the specified `solver`.
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestSolverSteps(url, solver, instance) {
   return await fetchPostJson(
-    `${url}ProlemProvider/steps?solver=${solver}`,
+    `${url}ProblemProvider/steps?solver=${solver}`,
     instance,
     () => `${solver} SOLVED INSTANCE REQUEST FAILED`
   );
 }
-
 /**
  * @returns an array of solvers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
@@ -462,7 +476,6 @@ export async function requestSolvers(url, problem, problemType = "NPC") {
     () => `${problem} SOLVERS REQUEST FAILED`
   );
 }
-
 /**
  * @returns an array of verifiers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
@@ -473,7 +486,6 @@ export async function requestVerifiers(url, problem, problemType = "NPC") {
     () => `${problem} VERIFIERS REQUEST FAILED`
   );
 }
-
 /**
  * @returns the verified `instance` results from the specified `verifier`.
  * @returns `undefined` on failure and logs the error.
@@ -483,14 +495,12 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
   if (!isCertificateValid(problem, certificate)) {
     return "Invalid Input"
   }
-
   return await fetchPostJson(
     `${url}ProblemProvider/verify?verifier=${verifier}`,
     { problemInstance: instance, certificate: certificate },
     () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`
   );
 }
-
 /**
  * @returns the graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
@@ -502,7 +512,6 @@ export async function requestVisualization(url, visualization, instance, solver)
     () => `${visualization} VISUALIZE REQUEST FAILED`
   );
 }
-
 /**
  * @returns an array of visualizations implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
@@ -512,4 +521,71 @@ export async function requestVisualizations(url, problem, problemType = "NPC") {
     `${url}Navigation/Problem_VisualizationsRefactor/?chosenProblem=${problem}&problemType=${problemType}`,
     () => `${problem} VISUALIZATIONS REQUEST FAILED`
   );
+}
+/**
+ * @returns an object mapping problem names for the given `problemType`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestAllProblems(url, problemType = "NPC") {
+  return await fetchPostJson(
+    `${url}Navigation/Batch/allProblems?problemType=${problemType}`,
+    undefined,
+    () => `ALL PROBLEMS REQUEST FAILED`
+  );
+}
+/**
+ * @returns an object mapping each problem to its available solvers.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestAllSolvers(url, problemType = "NPC") {
+  return await fetchPostJson(
+    `${url}Navigation/Batch/allSolvers?problemType=${problemType}`,
+    undefined,
+    () => `ALL SOLVERS REQUEST FAILED`
+  );
+}
+/**
+ * @returns an object mapping each problem to its available verifiers.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestAllVerifiers(url, problemType = "NPC") {
+  return await fetchPostJson(
+    `${url}Navigation/Batch/allVerifiers?problemType=${problemType}`,
+    undefined,
+    () => `ALL VERIFIERS REQUEST FAILED`
+  );
+}
+/**
+ * @returns an object mapping each problem to its available visualizations.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestAllVisualizations(url, problemType = "NPC") {
+  return await fetchPostJson(
+    `${url}Navigation/Batch/allVisualizations?problemType=${problemType}`,
+    undefined,
+    () => `ALL VISUALIZATIONS REQUEST FAILED`
+  );
+}
+const allInfoCache = new Map();
+/**
+ * @returns an object containing metadata (`info`) for all interfaces (problems, solvers, verifiers, visualizations).
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error.
+ */
+export async function requestAllInfo(url, problemType = "NPC") {
+  const cacheKey = `${url}|${problemType}`;
+  if (allInfoCache.has(cacheKey)) {
+    return await allInfoCache.get(cacheKey);
+  }
+  const promise = fetchPostJson(
+    `${url}Navigation/Batch/allInfo?problemType=${problemType}`,
+    undefined,
+    () => `ALL INFO REQUEST FAILED`
+  );
+  allInfoCache.set(cacheKey, promise);
+  const result = await promise;
+  if (!result) {
+    allInfoCache.delete(cacheKey);
+  }
+  return result;
 }
