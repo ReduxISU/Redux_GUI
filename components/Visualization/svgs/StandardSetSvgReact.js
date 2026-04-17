@@ -74,7 +74,8 @@ function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, maxWidth) {
             gadgetMap,
             gadgetsOn,
             sets[i].isOrdered,
-            sets[i].isValue || false
+            sets[i].isValue || false,
+            sets[i].color
         );
 
         x = s.show(); // x after the set including its rectangle
@@ -205,7 +206,7 @@ class element {
 }
 
 class CustomSet {
-    constructor(className, svg, x, y, elements, size = 20, gadgetMap, gadgetsOn, isOrdered = false, isValue) {
+    constructor(className, svg, x, y, elements, size = 20, gadgetMap, gadgetsOn, isOrdered = false, isValue, color) {
         this.className = "class" + asciiToHex(className);
         this.svg = svg;
         this.x = x;
@@ -217,6 +218,7 @@ class CustomSet {
         this.gadgetsOn = gadgetsOn;
         this.isOrdered = isOrdered;
         this.isValue = isValue;
+        this.color = color;
     }
 
     show(c = this.className) {
@@ -287,8 +289,8 @@ class CustomSet {
             this.svg.append("rect")
                 .attr("x", this.x)
                 .attr("y", this.y - this.size)
-                .attr("fill", getColorByKey("Background"))
-                .attr("stroke", getColorByKey("Background"))
+                .attr("fill", getColorByKey(this.color?.trim() || "Background"))
+                .attr("stroke", getColorByKey(this.color?.trim() || "Background"))
                 .attr("height", this.size * 2)
                 .attr("width", this.width)
                 .attr("class", this.className + " gadget")
