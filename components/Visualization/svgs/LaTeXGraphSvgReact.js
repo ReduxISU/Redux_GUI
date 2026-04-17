@@ -51,7 +51,6 @@ function LaTeXGraphSvgReact({ problemData }) {
 
       const rand = seededRandom(12345);
 
-      // --- Layout calculation ---
       const nodes = problemData.nodes.map((n) => ({
         ...n,
         x: rand() * 10,
@@ -102,7 +101,6 @@ function LaTeXGraphSvgReact({ problemData }) {
         }
       }
 
-      // --- Build TikZ code  ---
       let nodeDefs =
         "\\begin{scope}[every node/.style={circle,draw,line width=1.2pt}]\n";
 
@@ -111,9 +109,8 @@ function LaTeXGraphSvgReact({ problemData }) {
         const outline = safeColor(node.outline, "black");
         const label = escapeLatexText(node.name);
 
-        // If node.color is "solution", use white fill and double circle
-        const isSolution = node.color === "solution";
-        const fill = isSolution ? "white" : safeColor(node.color, "white");
+        const isSolution = node.accept_state === "true";
+        const fill = safeColor(node.color, "white");
         const extraStyles = isSolution ? "double" : "";
 
         nodeDefs +=
@@ -122,29 +119,33 @@ function LaTeXGraphSvgReact({ problemData }) {
           `{${label}};\n`;
       });
 
-
       nodeDefs += "\\end{scope}\n\n";
 
       let edgeDefs = "\\begin{scope}[>={stealth[black]}]\n";
+
+      // FIX 1: Use a canonical (sorted) key so A->B and B->A are treated as the
+      // same pair for bend detection, preventing overlapping parallel edges.
       const usedEdges = Object.create(null);
 
-      edgeDefs += `    \\node[draw=none] (start) at (-1,0) {};\n`;
-
-      nodes.forEach((node) => {
-        if (node.additional === "initial") {
-          const id = safeNodeId(node.id);
-          edgeDefs +=
-            `    \\path[draw=black,very thick] ` +
-            `([xshift=-2em]${id}.west) edge[->] (${id}.west);\n`;
-        }
-      });
+      // FIX 4: Only emit the invisible start node when at least one initial node exists.
+      const hasInitial = nodes.some((n) => n.initial === "true");
+      if (hasInitial) {
+        edgeDefs += `    \\node[draw=none] (start) at (-1,0) {};\n`;
+        nodes.forEach((node) => {
+          if (node.initial === "true") {
+            const id = safeNodeId(node.id);
+            edgeDefs +=
+              `    \\path[draw=black,very thick] ` +
+              `([xshift=-2em]${id}.west) edge[->] (${id}.west);\n`;
+          }
+        });
+      }
 
       links.forEach((link) => {
         const src = safeNodeId(link.source);
         const tgt = safeNodeId(link.target);
         const color = safeColor(link.color, "black");
 
-        // arrow: "->" for directed, "-" for undirected
         const arrow = link.directed === true ? "->" : "-";
         const style = link.dashed === true ? "dashed" : "";
 
@@ -160,16 +161,18 @@ function LaTeXGraphSvgReact({ problemData }) {
 
         if (src === tgt) {
           const node = nodes.find((n) => n.id === src);
-          const nearbyEdges = links.filter(l => l.source === src || l.target === src && l.source !== src);
+          // FIX 2: Added parentheses to fix operator precedence bug.
+          const nearbyEdges = links.filter(
+            (l) => l.source === src || (l.target === src && l.source !== src)
+          );
 
-          // Compute which side has least nodes/edges
           let counts = { right: 0, left: 0, above: 0, below: 0 };
 
-          nearbyEdges.forEach(e => {
+          nearbyEdges.forEach((e) => {
             const otherId = e.source === src ? e.target : e.source;
-            const otherNode = nodes.find(n => n.id === otherId);
+            const otherNode = nodes.find((n) => n.id === otherId);
 
-            if (otherNode.additional === "initial") {
+            if (otherNode.initial === "true") {
               if (otherNode.x > node.x) counts.right++;
             } else {
               if (otherNode.x > node.x) counts.right++;
@@ -180,7 +183,7 @@ function LaTeXGraphSvgReact({ problemData }) {
             else counts.below++;
           });
 
-          const side = Object.entries(counts).sort((a, b) => a[1] - b[1])[0][0]; // least crowded side
+          const side = Object.entries(counts).sort((a, b) => a[1] - b[1])[0][0];
 
           edgeDefs +=
             `    \\path[draw=${color},very thick,>={Stealth[black]}] ` +
@@ -188,12 +191,14 @@ function LaTeXGraphSvgReact({ problemData }) {
           return;
         }
 
-
-        const key = `${src}->${tgt}`;
-        usedEdges[key] = (usedEdges[key] || 0) + 1;
+        // FIX 1: Canonical key — sort so (A,B) and (B,A) share a counter.
+        const canonicalKey = [src, tgt].sort().join("--");
+        usedEdges[canonicalKey] = (usedEdges[canonicalKey] || 0) + 1;
 
         const bend =
-          usedEdges[key] > 1 ? `bend right=${20 * usedEdges[key]}` : "";
+          usedEdges[canonicalKey] > 1
+            ? `bend right=${20 * usedEdges[canonicalKey]}`
+            : "";
 
         const options = [arrow, bend, style].filter(Boolean).join(",");
 
@@ -204,11 +209,9 @@ function LaTeXGraphSvgReact({ problemData }) {
 
       edgeDefs += "\\end{scope}\n";
 
-
       const tikz =
         `\\begin{tikzpicture}\n${nodeDefs}${edgeDefs}\\end{tikzpicture}`;
 
-      // --- 3. Render ---
       try {
         const response = await fetch("/api/render-tikz", {
           method: "POST",
@@ -235,12 +238,33 @@ function LaTeXGraphSvgReact({ problemData }) {
         width: "100%",
       }}
     >
-      {!loading && (
+      {/* FIX 5: Show a spinner while loading instead of a blank space. */}
+      {loading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "400px",
+          }}
+        >
+          <div
+            style={{
+              width: "40px",
+              height: "40px",
+              border: "4px solid #e0e0e0",
+              borderTop: "4px solid #555",
+              borderRadius: "50%",
+              animation: "spin 0.8s linear infinite",
+            }}
+          />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      ) : (
         <div dangerouslySetInnerHTML={{ __html: svgHtml }} />
       )}
     </div>
   );
-
 }
 
 export default LaTeXGraphSvgReact;
