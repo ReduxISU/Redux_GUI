@@ -52,7 +52,7 @@ async function fetchPostJson(url, body, failMsg) {
 function isCertificateValid(problem, certificate) {
   var cleanInput = certificate.replace(new RegExp(/[( )]/g), ""); // Strips spaces and ()
   cleanInput = cleanInput.replaceAll(":", "=");
-  var regexFormat = /[^,=:!{}\w]/; // Checks for special characters not including ,=:!{}
+  var regexFormat = /[^-.,=:!{}\w]/; // Checks for special characters not including -.,=:!{}
   if (regexFormat.test(cleanInput) == true) {
     // Invalid characters found, warn user.
     return false;
