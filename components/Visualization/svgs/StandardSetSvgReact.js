@@ -9,6 +9,7 @@ function StandardSetSvgReact(props) {
     useEffect(() => {
         try {
             if (props.problemData) {
+                globalY = 100;
                 getSets(ref.current, props.problemData, props.gadgetMap, props.gadgetsOn);
             }
         } catch (error) { console.log("VISUALIZATION FAILED", error) };
@@ -39,9 +40,8 @@ function getSets(ref, data, gadgetMap, gadgetsOn) {
         .attr("class", "all");
 
     let x = 20;
-    let y = 100;
 
-    recursiveSets(data.data.list, svg, gadgetMap, gadgetsOn, x, y, width);
+    recursiveSets(data.data.list, svg, gadgetMap, gadgetsOn, x, width);
 
     d3.selectAll(".true")
         .attr("fill", getColorByKey("ElementHighlight"))
@@ -54,21 +54,29 @@ function asciiToHex(str) {
     return Array.from(str).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
 }
 
-function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, y, maxWidth) {
+let globalY = 100; // start Y
+
+function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, maxWidth) {
     for (let i = 0; i < sets.length; i++) {
+         // Wrap line if needed
+        if (x >= maxWidth - 50) {
+            x = 20;
+            globalY += 50;
+        }
+        
         const s = new CustomSet(
             sets[i].id,
             svg,
             x,
-            y,
-            sets[i].list || [],
+            globalY,
+            sets[i].list || [sets[i]],
             13,
             gadgetMap,
             gadgetsOn,
-            sets[i].isOrdered
+            sets[i].isOrdered,
+            sets[i].isValue || false
         );
 
-        const startX = x;
         x = s.show(); // x after the set including its rectangle
 
         // Only add comma between sets
@@ -76,7 +84,7 @@ function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, y, maxWidth) {
             const commaGap = 8;
             svg.append("text")
                 .attr("x", x + commaGap)
-                .attr("y", y)
+                .attr("y", globalY)
                 .attr("text-anchor", "left")
                 .attr("dominant-baseline", "middle")
                 .attr("font-size", "15px")
@@ -84,12 +92,6 @@ function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, y, maxWidth) {
                 .style("pointer-events", "none");
 
             x += commaGap + 10; // move x past comma for next set
-        }
-
-        // Wrap line if needed
-        if (x >= maxWidth - 50) {
-            x = 20;
-            y += 50;
         }
     }
     return x;
@@ -174,7 +176,7 @@ class element {
         this.svg.append("rect")
             .attr("x", this.x)
             .attr("y", this.y - this.size / 2)
-            .attr("fill", getColorByKey(this.color.trim()))
+            .attr("fill", getColorByKey(this.color.trim()) || getColorByKey("Background"))
             .attr("height", this.size)
             .attr("width", this.size * this.name.length - 7)
             .attr("id", this.id)
@@ -203,7 +205,7 @@ class element {
 }
 
 class CustomSet {
-    constructor(className, svg, x, y, elements, size = 20, gadgetMap, gadgetsOn, isOrdered = false) {
+    constructor(className, svg, x, y, elements, size = 20, gadgetMap, gadgetsOn, isOrdered = false, isValue) {
         this.className = "class" + asciiToHex(className);
         this.svg = svg;
         this.x = x;
@@ -214,6 +216,7 @@ class CustomSet {
         this.gadgetMap = gadgetMap;
         this.gadgetsOn = gadgetsOn;
         this.isOrdered = isOrdered;
+        this.isValue = isValue;
     }
 
     show(c = this.className) {
@@ -225,7 +228,7 @@ class CustomSet {
             .attr("text-anchor", "left")
             .attr("dominant-baseline", "middle")
             .attr("font-size", this.size + "px")
-            .text(this.isOrdered ? "(" : "{")
+            .text(!this.isValue ? (this.isOrdered ? "(" : "{") : "")
             .style("pointer-events", "none");
 
         let hasNestedSets = false;
@@ -233,7 +236,7 @@ class CustomSet {
         this.elements.forEach((el, i) => {
             if (!el.isValue && el.list) {
                 hasNestedSets = true;
-                offsetX = recursiveSets([el], this.svg, this.gadgetMap, this.gadgetsOn, offsetX, this.y, 700);
+                offsetX = recursiveSets([el], this.svg, this.gadgetMap, this.gadgetsOn, offsetX, 700);
                 if (i < this.elements.length - 1) offsetX += 8;
             }
             else {
@@ -246,7 +249,7 @@ class CustomSet {
                     this.y,
                     this.size,
                     this.gadgetMap,
-                    "Background",
+                    el.color,
                     this.gadgetsOn
                 );
 
@@ -257,7 +260,7 @@ class CustomSet {
                 const gap = 8;
                 this.svg.append("text")
                     .attr("x", offsetX + gap)
-                    .attr("y", this.y)
+                    .attr("y", globalY)
                     .attr("text-anchor", "left")
                     .attr("dominant-baseline", "middle")
                     .attr("font-size", this.size + "px")
@@ -271,11 +274,11 @@ class CustomSet {
 
         this.svg.append("text")
             .attr("x", offsetX)
-            .attr("y", this.y)
+            .attr("y", globalY)
             .attr("text-anchor", "left")
             .attr("dominant-baseline", "middle")
             .attr("font-size", this.size + "px")
-            .text(this.isOrdered ? ")" : "}")
+            .text(!this.isValue ? (this.isOrdered ? ")" : "}") : "")
             .style("pointer-events", "none");
 
         this.width = offsetX - this.x + this.size / 2;
