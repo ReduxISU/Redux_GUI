@@ -16,6 +16,32 @@ import {
 } from "@mui/material";
 import isulogo from "../../components/images/ISULogo.png"; //Used for ISU logo at the bottom
 
+// New Data Array awards for Awards Sections
+const awards = [
+  {
+    text: "Best Graduate Poster Presentation in Education, Learning & Training (Andrija Sevaljevic), 2026 ISU Research and Creative Works Symposium",
+    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
+  },
+  {
+    text: "Best Graduate Oral Presentation in Education, Learning & Training (Andrija Sevaljevic), 2026 ISU Research and Creative Works Symposium",
+    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
+  },
+  {
+    text: "Best Student Paper Award, K. Marchetti and P. M. Bodily, “KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems,” in Proceedings of the 2nd Intermountain Engineering, Technology, and Computing Conference (i-ETC), 2022",
+    url: "https://myemail.constantcontact.com/ISU-STEM-Connections.html?soid=1138359982044&aid=J1PvVbF7PHo#:~:text=At%20the%20Intermountain%20Conference%20on,forward%20to%20continuing%20my%20research.%E2%80%9D",
+  },
+];
+
+
+//New data array funding for Fundings section
+const funding = [
+  "Bodily, P.M. (PI), Trosper, M. (Student), “Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” NSF (I-CREWS), $6,500, 2026",
+  "Bodily, P.M. (PI), Khadka, R. (Co-PI), “Crowd-Sourcing and Visualization of Advanced Computational Theory,” CAES, $15,000, 2024",
+  "Bodily, P.M. (PI), Khadka, R. (Co-PI), “Application of advanced computational theory to real-world combinatorial problems,” CAES, $22,570, 2022",
+  "Bodily, P.M. (PI), “Interactive visualization tools for teaching computer science theory,” ISU Office of Research, $4,954, 2022",
+  "Career Path Internship, Idaho State University, 2022 – Present",
+];
+
 
 
 
@@ -363,6 +389,99 @@ export default function AboutUsPage() {
               </Box>
             </Box>
 
+
+//For awards, it starts here
+<Box sx={{ ...theSectionCard, mb: 1.5 }}>
+  <TitleSection>AWARDS</TitleSection>
+
+  <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 2 }}>
+    The following awards have been received by contributors to the Redux project.
+  </Typography>
+
+  <Box sx={{ display: "grid", gap: 1.5 }}>
+    {awards.map((award, index) => (
+      <Box
+        key={index}
+        sx={{
+          background: "linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "12px",
+          px: 1.4,
+          py: 1.2,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+          transition: "all 0.2s ease",
+          "&:hover": {
+                        borderColor: "rgba(168,85,247,0.3)",
+                        background: "rgba(255,255,255,0.04)",
+          },
+        }}
+      >
+        <Typography
+          sx={{
+            color: "#e5e7eb",
+            fontSize: "0.82rem",
+            lineHeight: 1.6,
+          }}
+        >
+          {award.text}{" "}
+          <Link
+            href={award.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="none"
+            sx={{
+              color: "#c084fc",
+              fontSize: "0.8rem",
+              ml: 0.5,
+              "&:hover": {
+                color: "#e9d5ff",
+              },
+            }}
+          >
+            [LINK HERE]
+          </Link>
+        </Typography>
+      </Box>
+    ))}
+  </Box>
+</Box>
+
+
+  //For funding, it starts here
+        <Box sx={{ ...theSectionCard, mb: 4 }}>
+  <TitleSection>FUNDING</TitleSection>
+
+  <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 0.9 }}>
+    The Redux project has been supported through the following funding sources.
+  </Typography>
+
+  <Box sx={{ display: "grid", gap: 0.8 }}>
+    {funding.map((item, index) => (
+      <Box
+        key={index}
+        sx={{
+          background: "linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "12px",
+          px: 1.4,
+          py: 1.2,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+          transition: "all 0.2s ease",
+          "&:hover": {
+                        borderColor: "rgba(168,85,247,0.3)",
+                        background: "rgba(255,255,255,0.04)",
+        },
+        }}
+      >
+        <Typography sx={{ color: "#e5e7eb", fontSize: "0.85rem" }}>
+          {item}
+        </Typography>
+      </Box>
+    ))}
+  </Box>
+</Box>
+
+      
             <Box sx={{ ...theSectionCard, mb: 1 }}>
   <TitleSection>CONTRIBUTORS</TitleSection>
 
