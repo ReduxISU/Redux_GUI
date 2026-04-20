@@ -390,7 +390,7 @@ export default function AboutUsPage() {
             </Box>
 
 
-//For awards, it starts here
+{/* For awards, it starts here */}
 <Box sx={{ ...theSectionCard, mb: 1.5 }}>
   <TitleSection>AWARDS</TitleSection>
 
@@ -446,8 +446,7 @@ export default function AboutUsPage() {
   </Box>
 </Box>
 
-
-  //For funding, it starts here
+{/* For funding, it starts here */}
         <Box sx={{ ...theSectionCard, mb: 4 }}>
   <TitleSection>FUNDING</TitleSection>
 
