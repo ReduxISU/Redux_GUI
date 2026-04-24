@@ -150,6 +150,14 @@ const contributorProfiles = {
     image: "https://github.com/svanalex.png",
     github: "https://github.com/svanalex",
   },
+    "Michael Crapse": {
+    image: "https://github.com/mdcrapse.png",
+    github: "https://github.com/mdcrapse",
+  },
+      "Eric Hill": {
+    image: "https://github.com/starman2995.png",
+    github: "https://github.com/starman2995",
+  },
 };
 
 
