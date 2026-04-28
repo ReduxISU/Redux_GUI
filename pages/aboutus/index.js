@@ -215,7 +215,7 @@ function ItemContributor({ name }) {
     return (
       <Typography
         sx={{
-          color: "#e5e7eb",
+          color: "#374151",
           fontSize: "0.8rem",
           lineHeight: 0.89,
         }}
@@ -564,7 +564,8 @@ export default function AboutUsPage() {
       "Courtney Bodily",
       "Rakesh Itani",
       "David Lindeman",
-    ].map((name) => (
+    ].sort((a, b) => a.localeCompare(b))
+        .map((name) => (
       <Grid item xs={12} sm={6} md={4} key={name}>
         <Box
           sx={{
