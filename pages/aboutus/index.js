@@ -163,7 +163,7 @@ const contributorProfiles = {
 
 //It controls all the sections of About, Publications and Contributors
 //About Us section card styling
-const sectionCard = {
+const theSectionCard = {
   background: "#FFFFFF",
   borderRadius: "16px",
   border: "1px solid #E5E7EB",
