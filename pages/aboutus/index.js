@@ -304,7 +304,7 @@ function ItemContributor({ name }) {
       <Box
         component="span"
         sx={{
-          color: "#e5e7eb",
+          color: "#374151",
           fontSize: "0.9rem",
           lineHeight: 1.35,
           cursor: "pointer",
@@ -438,7 +438,7 @@ export default function AboutUsPage() {
       >
         <Typography
           sx={{
-            color: "#e5e7eb",
+            color: "#374151",
             fontSize: "0.82rem",
             lineHeight: 1.6,
           }}
@@ -492,7 +492,7 @@ export default function AboutUsPage() {
         },
         }}
       >
-        <Typography sx={{ color: "#e5e7eb", fontSize: "0.85rem" }}>
+        <Typography sx={{ color: "#374151", fontSize: "0.85rem" }}>
           {item}
         </Typography>
       </Box>
