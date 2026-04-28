@@ -44,20 +44,19 @@ const funding = [
 
 
 
-
-//Global Styling
+//Changing this to light theme.
 const theme = createTheme({
   palette: {
-    mode: "dark",
+    mode: "light",
     primary: { main: "#8b5cf6" },
     secondary: { main: "#a855f7" },
     background: {
-      default: "#07070b",
-      paper: "rgba(255,255,255,0.04)",
+      default: "#F9FAFB",
+      paper: "#FFFFFF",
     },
     text: {
-      primary: "#ffffff",
-      secondary: "#b4b4c7",
+      primary: "#111827",
+      secondary: "#4B5563",
     },
   },
   typography: {
