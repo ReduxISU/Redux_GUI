@@ -342,13 +342,13 @@ export default function AboutUsPage() {
               <TitleSection>ABOUT US</TitleSection>
               <Typography
                 sx={{
-                  color: "#d1d5db",
+                  color: "#374151",
                   fontSize: "0.87rem",
                   lineHeight: 1.9,
                   textAlign: "justify"
                 }}
               >
-                Welcome to <Box component="span" sx={{ color: "#fff", fontWeight: 500 }}>Redux</Box>, a
+                Welcome to <Box component="span" sx={{ color: "#111827", fontWeight: 700 }}>Redux</Box>, a
                 platform for NP-Complete problems. Input your challenges and gain access to
                 reductions, solutions, verifiers, and visualizations. Join our community of
                 problem solvers and unravel computational complexities using the application
@@ -358,7 +358,7 @@ export default function AboutUsPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="hover"
-                  sx={{ color: "#c084fc" }}
+                  sx={{ color: "#F47C20", fontWeight: 600 }}
                 >
                   &quot;Reducibility Among Combinatorial Problems&quot;
                 </Link>{" "}
