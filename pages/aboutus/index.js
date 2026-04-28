@@ -330,7 +330,7 @@ export default function AboutUsPage() {
         sx={{
           minHeight: "100vh",
           background:
-            "radial-gradient(circle at top, rgba(139,92,246,0.16), transparent 32%), linear-gradient(180deg, #09090f 0%, #07070b 100%)",
+            "radial-gradient(circle at top, rgba(139,92,246,0.08), transparent 38%), #F9FAFB",
         }}
       >
         <ResponsiveAppBar />
