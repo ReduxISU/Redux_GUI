@@ -368,7 +368,7 @@ export default function AboutUsPage() {
 
             <Box sx={{ ...theSectionCard, mb: 1.5 }}>
               <TitleSection>PUBLICATIONS</TitleSection>
-              <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 3 }}>
+              <Typography sx={{ color: "#374151", fontSize: "0.87rem", mb: 3 }}>
                 Below are research publications associated with the Redux project and its contributors.
               </Typography>
 
@@ -377,7 +377,7 @@ export default function AboutUsPage() {
                   <Box
                     key={index}
                     sx={{
-                      color: "#d1d5db",
+                      color: "#374151",
                       fontSize: "0.8rem",
                       lineHeight: 1.8,
                       borderRadius: "12px",
@@ -414,7 +414,7 @@ export default function AboutUsPage() {
 <Box sx={{ ...theSectionCard, mb: 1.5 }}>
   <TitleSection>AWARDS</TitleSection>
 
-  <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 2 }}>
+  <Typography sx={{ color: "#374151", fontSize: "0.87rem", mb: 2 }}>
     The following awards have been received by contributors to the Redux project.
   </Typography>
 
@@ -470,7 +470,7 @@ export default function AboutUsPage() {
         <Box sx={{ ...theSectionCard, mb: 4 }}>
   <TitleSection>FUNDING</TitleSection>
 
-  <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 0.9 }}>
+  <Typography sx={{ color: "#374151", fontSize: "0.87rem", mb: 0.9 }}>
     The Redux project has been supported through the following funding sources.
   </Typography>
 
@@ -506,7 +506,7 @@ export default function AboutUsPage() {
 
   <Typography
     sx={{
-      color: "#d1d5db",
+      color: "#374151",
       fontSize: "0.87rem",
       lineHeight: 1.8,
       mb: 2,
