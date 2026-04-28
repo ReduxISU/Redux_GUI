@@ -196,9 +196,9 @@ function TitleSection({ children }) {
   return (
     <Typography
       sx={{
-        color: "#ffffff", //color of the font, plain whiwte in general
+        color: "#111827", 
         fontSize: "0.85rem", //font size
-        fontWeight: 600,
+        fontWeight: 700,
         letterSpacing: "0.22em",
         mb: 2,
       }}
