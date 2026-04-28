@@ -336,7 +336,7 @@ export default function AboutUsPage() {
         <ResponsiveAppBar />
 
 
-        <Container maxWidth="lg" sx={{ pt: 2, pb: 5 }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 5 }}>
           <Box sx={{ maxWidth: "980px", mx: "auto" }}>
             <Box id="about" sx={{ ...theSectionCard, mb: 1.5 }}>
               <TitleSection>ABOUT US</TitleSection>
