@@ -162,16 +162,29 @@ const contributorProfiles = {
 
 
 //It controls all the sections of About, Publications and Contributors
-const theSectionCard = {
-  background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(10px)",
+//About Us section card styling
+const sectionCard = {
+  background: "#FFFFFF",
   borderRadius: "16px",
-  border: "1px solid rgba(255,255,255,0.10)",
+  border: "1px solid #E5E7EB",
   padding: { xs: 3, md: 4 },
-  transition: "all 0.3s ease",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
+  transition: "all 0.25s ease",
   "&:hover": {
-    borderColor: "rgba(168,85,247,0.4)",
-    boxShadow: "0 0 25px rgba(168,85,247,0.15)",
+    borderColor: "#8b5cf6",
+    boxShadow: "0 12px 30px rgba(0,0,0,0.07)",
+  },
+};
+const innerCard = {
+  background: "#F9FAFB",
+  border: "1px solid #E5E7EB",
+  borderRadius: "12px",
+  px: 1.6,
+  py: 1.3,
+  transition: "all 0.2s ease",
+  "&:hover": {
+    borderColor: "#8b5cf6",
+    background: "#FFFFFF",
   },
 };
 
