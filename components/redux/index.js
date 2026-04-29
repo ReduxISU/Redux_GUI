@@ -58,7 +58,7 @@ async function fetchPostJson(url, body, failMsg) {
 function isCertificateValid(problem, certificate) {
   var cleanInput = certificate.replace(new RegExp(/[( )]/g), ""); // Strips spaces and ()
   cleanInput = cleanInput.replaceAll(":", "=");
-  var regexFormat = /[^,=:!{}\w]/; // Checks for special characters not including ,=:!{}
+  var regexFormat = /[^-.,=:!{}\w;]/; // Checks for special characters not including -.,=:!{}
   if (regexFormat.test(cleanInput) == true) {
     // Invalid characters found, warn user.
     return false;
@@ -306,15 +306,15 @@ export async function requestReductionOptions(url, problem, problemType = "NPC")
  * @returns the graph visualization of the reduced problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductionVisualization(url, reduction, instance, solver) {
+export async function requestReductionVisualization(url, reduction, solution, instance) {
   return await fetchPostJson(
-    `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solver=${solver}`,
+    `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solution=${solution}`,
     instance,
     () => `${reduction} VISUALIZE REQUEST FAILED`
   );
 }
 
-export async function processReductionVisualizations(url, reductionPath, instance, solver) {
+export async function processReductionVisualizations(url, reductionPath, instance) {
   const reductions = reductionPath.split("-").map(r => r.trim());
 
   let currentInstance = instance;
@@ -505,9 +505,9 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
  * @returns the graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualization(url, visualization, instance, solver) {
+export async function requestVisualization(url, visualization, instance) {
   return await fetchPostJson(
-    `${url}ProblemProvider/visualize?visualization=${visualization}&solver=${solver}`,
+    `${url}ProblemProvider/visualize?visualization=${visualization}`,
     instance,
     () => `${visualization} VISUALIZE REQUEST FAILED`
   );
