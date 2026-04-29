@@ -178,9 +178,9 @@ const theSectionCard = {
 const innerCard = {
   background: "#F9FAFB",
   border: "1px solid #E5E7EB",
-  borderRadius: "12px",
-  px: 1.6,
-  py: 1.3,
+  borderRadius: "10px",
+  px: 1.1,
+  py: 0.9,
   transition: "all 0.2s ease",
   "&:hover": {
     borderColor: "#8b5cf6",
@@ -310,7 +310,7 @@ function ItemContributor({ name }) {
           cursor: "pointer",
           width: "100%",
           "&:hover": {
-            color: "#d8b4fe",
+            color: "#8b5cf6",
           },
         }}
       >
@@ -372,27 +372,14 @@ export default function AboutUsPage() {
                 Below are research publications associated with the Redux project and its contributors.
               </Typography>
 
-              <Box sx={{ display: "grid", gap: .5 }}>
-                {publications.map((pub, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      color: "#374151",
-                      fontSize: "0.8rem",
-                      lineHeight: 1.8,
-                      borderRadius: "12px",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      background: "rgba(255,255,255,0.02)",
-                      p: 2,
-                      "&:hover": {
-                        borderColor: "rgba(168,85,247,0.3)",
-                        background: "rgba(255,255,255,0.04)",
-                      },
-                    }}
-                  >
-                    <Box component="span" sx={{ color: "#9ca3af" }}>{pub.authors}, </Box>
-                    <Box component="span" sx={{ color: "#fff" }}>&quot;{pub.title},&quot; </Box>
-                    <Box component="span" sx={{ color: "#6b7280", fontStyle: "italic" }}>
+              <Box sx={{ display: "grid", gap: 0.8 }}>
+                  {publications.map((pub, index) => (
+                    <Box key={index} sx={innerCard}>
+
+                  
+                    <Box component="span" sx={{ color: "#6b7280", fontSize: "0.82rem" }}>{pub.authors}, </Box>
+                    <Box component="span" sx={{ color: "#111827", fontWeight: 600, fontSize: "0.82rem" }}>&quot;{pub.title},&quot; </Box>
+                    <Box component="span" sx={{ color: "#6b7280", fontStyle: "italic", fontSize: "0.82rem" }}>
                       {pub.venue}.
                     </Box>{" "}
                     <Link
@@ -400,7 +387,7 @@ export default function AboutUsPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       underline="hover"
-                      sx={{ color: "#c084fc" }}
+                      sx={{ color: "#F47C20", fontWeight: 600, fontSize: "0.8rem" }}
                     >
                       [PDF]
                     </Link>
@@ -418,24 +405,10 @@ export default function AboutUsPage() {
     The following awards have been received by contributors to the Redux project.
   </Typography>
 
-  <Box sx={{ display: "grid", gap: 1.5 }}>
-    {awards.map((award, index) => (
-      <Box
-        key={index}
-        sx={{
-          background: "linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: "12px",
-          px: 1.4,
-          py: 1.2,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
-          transition: "all 0.2s ease",
-          "&:hover": {
-                        borderColor: "rgba(168,85,247,0.3)",
-                        background: "rgba(255,255,255,0.04)",
-          },
-        }}
-      >
+  <Box sx={{ display: "grid", gap: 1.2 }}>
+  {awards.map((award, index) => (
+    <Box key={index} sx={innerCard}>
+      
         <Typography
           sx={{
             color: "#374151",
@@ -450,7 +423,8 @@ export default function AboutUsPage() {
             rel="noopener noreferrer"
             underline="none"
             sx={{
-              color: "#c084fc",
+              color: "#F47C20",
+              fontWeight: 600,
               fontSize: "0.8rem",
               ml: 0.5,
               "&:hover": {
@@ -476,22 +450,7 @@ export default function AboutUsPage() {
 
   <Box sx={{ display: "grid", gap: 0.8 }}>
     {funding.map((item, index) => (
-      <Box
-        key={index}
-        sx={{
-          background: "linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: "12px",
-          px: 1.4,
-          py: 1.2,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
-          transition: "all 0.2s ease",
-          "&:hover": {
-                        borderColor: "rgba(168,85,247,0.3)",
-                        background: "rgba(255,255,255,0.04)",
-        },
-        }}
-      >
+      <Box key={index} sx={innerCard}>
         <Typography sx={{ color: "#374151", fontSize: "0.85rem" }}>
           {item}
         </Typography>
@@ -508,7 +467,7 @@ export default function AboutUsPage() {
     sx={{
       color: "#374151",
       fontSize: "0.87rem",
-      lineHeight: 1.8,
+      lineHeight: 1.6,
       mb: 2,
     }}
   >
@@ -518,7 +477,7 @@ export default function AboutUsPage() {
       target="_blank"
       rel="noopener noreferrer"
       underline="hover"
-      sx={{ color: "#a78bfa" }}
+      sx={{ color: "#F47C20", fontWeight: 600 }}
     >
       Dr. Paul Bodily
     </Link>
@@ -569,20 +528,20 @@ export default function AboutUsPage() {
       <Grid item xs={12} sm={6} md={4} key={name}>
         <Box
           sx={{
-            border: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(255,255,255,0.02)",
-            borderRadius: "10px",
-            px: 1.4,
-            py: 0.6,
-            minHeight: "30px",
-            display: "flex",
-            alignItems: "center",
-            transition: "all 0.2s ease",
-            "&:hover": {
-              borderColor: "rgba(168,85,247,0.28)",
-              background: "rgba(255,255,255,0.04)",
-            },
-          }}
+                            border: "1px solid #E5E7EB",
+                            background: "#F9FAFB",
+                            borderRadius: "10px",
+                            px: 1.4,
+                            py: 0.8,
+                            minHeight: "34px",
+                            display: "flex",
+                            alignItems: "center",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              borderColor: "#8b5cf6",
+                              background: "#FFFFFF",
+  },
+}}
         >
           <ItemContributor name={name} />
         </Box>
@@ -609,7 +568,6 @@ export default function AboutUsPage() {
     underline="none"
     sx={{
       display: "inline-flex",
-      opacity: 60,
     }}
   >
     <Box
