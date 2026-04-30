@@ -127,30 +127,65 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
       }
     });
 
-    // Draw links
+    // Helper: parse the delay attribute (string from backend) into a positive
+    // number of milliseconds. Returns 0 for missing / non-numeric / non-positive
+    // values, which means "render at final color immediately, no animation."
+    const getDelayMs = d => {
+      const n = parseInt(d?.delay, 10);
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    };
+    const FADE_DURATION_MS = 500;
+
+    // Draw links. If a link has a positive delay, start it at the default edge
+    // color and transition to its final color after the delay. This produces a
+    // staggered animation for visualizations like Topological Sort that color
+    // edges in waves by topological rank.
     const link = svg.selectAll("line")
       .data(data.links)
       .join("line")
       .attr("marker-end", d => d.directed ? `url(#${d.markerId})` : null)
-      .style("stroke", d => getColorByKey(d.color || "Edges"))
+      .style("stroke", d => getDelayMs(d) > 0
+        ? getColorByKey("Edges")
+        : getColorByKey(d.color || "Edges"))
       .style("stroke-width", "2px")
       .style("stroke-dasharray", d => d.dashed ? "5,5" : "none");
 
+    link.filter(d => getDelayMs(d) > 0 && d.color)
+      .transition()
+      .delay(d => getDelayMs(d))
+      .duration(FADE_DURATION_MS)
+      .style("stroke", d => getColorByKey(d.color));
+
+    // Draw arrowhead markers for directed edges. Match the link's animation so
+    // the arrow color stays in sync with its line.
     problemData.links?.forEach(d => {
       if (d.directed) {
         const markerPath = d3.select(`#${d.markerId} path`);
-        markerPath.attr("fill", getColorByKey(d.color || "Edges"));
+        const delayMs = getDelayMs(d);
+        if (delayMs > 0 && d.color) {
+          markerPath.attr("fill", getColorByKey("Edges"))
+            .transition()
+            .delay(delayMs)
+            .duration(FADE_DURATION_MS)
+            .attr("fill", getColorByKey(d.color));
+        } else {
+          markerPath.attr("fill", getColorByKey(d.color || "Edges"));
+        }
       }
     });
 
-    // Draw nodes
+    // Draw nodes. Same delay-aware pattern as links: nodes with a positive
+    // delay start at the background color and animate to their final color
+    // after the delay.
     const node = svg.selectAll("circle")
       .data(data.nodes)
       .join("circle")
       .attr("r", 20)
       .attr("id", d => "id" + d.id.replace("!", "NOT"))
       .attr("class", d => "node" + d.id.replace("!", "NOT"))
-      .attr("fill", d => getColorByKey(d.color || "Background"))
+      .attr("fill", d => getDelayMs(d) > 0
+        ? getColorByKey("Background")
+        : getColorByKey(d.color || "Background"))
       .attr("stroke", d => d.outline ? getColorByKey(d.outline) : null)
       .attr("stroke-width", d => d.outline ? 2 : 0)
       .on("mouseover", (event, d) => {
@@ -165,6 +200,12 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
           clearHighlights(d.id, gadgetMap);
         }
       });
+
+    node.filter(d => getDelayMs(d) > 0 && d.color)
+      .transition()
+      .delay(d => getDelayMs(d))
+      .duration(FADE_DURATION_MS)
+      .attr("fill", d => getColorByKey(d.color));
 
     // Draw labels
     const text = svg.selectAll("text")
