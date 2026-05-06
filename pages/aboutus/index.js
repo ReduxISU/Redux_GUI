@@ -368,14 +368,44 @@ export default function AboutUsPage() {
                   {publications.map((pub, index) => (
   <Box key={index} sx={innerCard}>
     <Typography
-      sx={{
-        color: "#374151",
-        fontSize: "0.82rem",
-        lineHeight: 1.7,
-      }}
-    >
-      {pub.citation}
-    </Typography>
+  sx={{
+    color: "#374151",
+    fontSize: "0.82rem",
+    lineHeight: 1.7,
+  }}
+>
+  {pub.citation}{" "}
+
+  <Link
+    href={pub.doi}
+    target="_blank"
+    rel="noopener noreferrer"
+    underline="hover"
+    sx={{
+      color: "#F47C20",
+      fontWeight: 600,
+      fontSize: "0.8rem",
+      ml: 0.4,
+    }}
+  >
+    [DOI]
+  </Link>
+
+  <Link
+    href={pub.pdf}
+    target="_blank"
+    rel="noopener noreferrer"
+    underline="hover"
+    sx={{
+      color: "#F47C20",
+      fontWeight: 600,
+      fontSize: "0.8rem",
+      ml: 0.4,
+    }}
+  >
+    [PDF]
+  </Link>
+</Typography>
 
     <Box sx={{ mt: 1 }}>
       <Link
@@ -387,7 +417,7 @@ export default function AboutUsPage() {
           color: "#F47C20",
           fontWeight: 600,
           fontSize: "0.8rem",
-          mr: 1.5,
+          mr: 0.4,
         }}
       >
         [DOI]
