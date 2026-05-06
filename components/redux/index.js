@@ -306,9 +306,9 @@ export async function requestReductionOptions(url, problem, problemType = "NPC")
  * @returns the graph visualization of the reduced problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductionVisualization(url, reduction, solution, instance) {
+export async function requestReductionVisualization(url, reduction, solver, instance) {
   return await fetchPostJson(
-    `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solution=${solution}`,
+    `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solver=${solver}`,
     instance,
     () => `${reduction} VISUALIZE REQUEST FAILED`
   );
@@ -505,9 +505,9 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
  * @returns the graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualization(url, visualization, instance) {
+export async function requestVisualization(url, visualization, solver, instance) {
   return await fetchPostJson(
-    `${url}ProblemProvider/visualize?visualization=${visualization}`,
+    `${url}ProblemProvider/visualize?visualization=${visualization}&solver=${solver}`,
     instance,
     () => `${visualization} VISUALIZE REQUEST FAILED`
   );
