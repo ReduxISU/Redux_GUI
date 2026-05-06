@@ -407,36 +407,6 @@ export default function AboutUsPage() {
   </Link>
 </Typography>
 
-    <Box sx={{ mt: 1 }}>
-      <Link
-        href={pub.doi}
-        target="_blank"
-        rel="noopener noreferrer"
-        underline="hover"
-        sx={{
-          color: "#F47C20",
-          fontWeight: 600,
-          fontSize: "0.8rem",
-          mr: 0.4,
-        }}
-      >
-        [DOI]
-      </Link>
-
-      <Link
-        href={pub.pdf}
-        target="_blank"
-        rel="noopener noreferrer"
-        underline="hover"
-        sx={{
-          color: "#F47C20",
-          fontWeight: 600,
-          fontSize: "0.8rem",
-        }}
-      >
-        [PDF]
-      </Link>
-    </Box>
   </Box>
 ))}
               </Box>
