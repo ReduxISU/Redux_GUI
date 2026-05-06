@@ -366,25 +366,49 @@ export default function AboutUsPage() {
 
               <Box sx={{ display: "grid", gap: 0.8 }}>
                   {publications.map((pub, index) => (
-                    <Box key={index} sx={innerCard}>
+  <Box key={index} sx={innerCard}>
+    <Typography
+      sx={{
+        color: "#374151",
+        fontSize: "0.82rem",
+        lineHeight: 1.7,
+      }}
+    >
+      {pub.citation}
+    </Typography>
 
-                  
-                    <Box component="span" sx={{ color: "#6b7280", fontSize: "0.82rem" }}>{pub.authors}, </Box>
-                    <Box component="span" sx={{ color: "#111827", fontWeight: 600, fontSize: "0.82rem" }}>&quot;{pub.title},&quot; </Box>
-                    <Box component="span" sx={{ color: "#6b7280", fontStyle: "italic", fontSize: "0.82rem" }}>
-                      {pub.venue}.
-                    </Box>{" "}
-                    <Link
-                      href={pub.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      underline="hover"
-                      sx={{ color: "#F47C20", fontWeight: 600, fontSize: "0.8rem" }}
-                    >
-                      [PDF]
-                    </Link>
-                  </Box>
-                ))}
+    <Box sx={{ mt: 1 }}>
+      <Link
+        href={pub.doi}
+        target="_blank"
+        rel="noopener noreferrer"
+        underline="hover"
+        sx={{
+          color: "#F47C20",
+          fontWeight: 600,
+          fontSize: "0.8rem",
+          mr: 1.5,
+        }}
+      >
+        [DOI]
+      </Link>
+
+      <Link
+        href={pub.pdf}
+        target="_blank"
+        rel="noopener noreferrer"
+        underline="hover"
+        sx={{
+          color: "#F47C20",
+          fontWeight: 600,
+          fontSize: "0.8rem",
+        }}
+      >
+        [PDF]
+      </Link>
+    </Box>
+  </Box>
+))}
               </Box>
             </Box>
 
