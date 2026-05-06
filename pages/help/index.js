@@ -1,7 +1,5 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-/**
- * UI Components. Every concepts are taken from aboutus page.
- */
+
 import {
   createTheme,
   ThemeProvider,
@@ -11,47 +9,81 @@ import {
   CssBaseline,
   Link,
 } from "@mui/material";
-/**
- * External links for additional documentations. 
- */
-const resourceLinks = [
-  { label: "GitHub", url: "https://github.com/ReduxISU/" },
+
+const backgroundLinks = [
   {
-    label: "Wikipedia: What is NP-Complete?",
+    label: "Wikipedia: Computational problem",
+    url: "https://en.wikipedia.org/wiki/Computational_problem",
+  },
+  {
+    label: "Wikipedia: Algorithm",
+    url: "https://en.wikipedia.org/wiki/Algorithm",
+  },
+  {
+    label: "Wikipedia: List of algorithms",
+    url: "https://en.wikipedia.org/wiki/List_of_algorithms",
+  },
+  {
+    label: "Wikipedia: Complexity class",
+    url: "https://en.wikipedia.org/wiki/Complexity_class",
+  },
+  {
+    label: "Wikipedia: P (complexity)",
+    url: "https://en.wikipedia.org/wiki/P_(complexity)",
+  },
+  {
+    label: "Wikipedia: NP (complexity)",
+    url: "https://en.wikipedia.org/wiki/NP_(complexity)",
+  },
+  {
+    label: "Wikipedia: NP-hardness",
+    url: "https://en.wikipedia.org/wiki/NP-hardness",
+  },
+  {
+    label: "Wikipedia: NP-completeness",
     url: "https://en.wikipedia.org/wiki/NP-completeness",
   },
   {
-    label: "Karp's 21 NP-Complete Problems",
-    url: "https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf",
+    label: "Wikipedia: Karp's 21 NP-complete problems",
+    url: "https://en.wikipedia.org/wiki/Karp%27s_21_NP-complete_problems",
   },
   {
-    label: "Redux GUI Documentation",
-    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
+    label: "Wikipedia: List of NP-complete problems",
+    url: "https://en.wikipedia.org/wiki/List_of_NP-complete_problems",
   },
   {
-    label: "Redux Backend Documentation",
-    url: "https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md",
+    label: "Wikipedia: Many-one reduction",
+    url: "https://en.wikipedia.org/wiki/Many-one_reduction",
   },
   {
-    label: "API Swagger Documentation",
+    label: "Wikipedia: Gadget (computer science)",
+    url: "https://en.wikipedia.org/wiki/Gadget_(computer_science)",
+  },
+  {
+    label: "Wikipedia: Approximation algorithm",
+    url: "https://en.wikipedia.org/wiki/Approximation_algorithm",
+  },
+];
+
+const accessLinks = [
+  {
+    label: "RESTful API",
     url: "https://api.redux.portneuf.cose.isu.edu/swagger/index.html",
   },
 ];
-/**
- * This is the theme configuration for the whole page.
- */
+
 const theme = createTheme({
   palette: {
-    mode: "dark",
-    primary: { main: "#8b5cf6" },
-    secondary: { main: "#a855f7" },
+    mode: "light",
+    primary: { main: "#3F3F46" },
+    secondary: { main: "#F47C20" },
     background: {
-      default: "#07070b",
-      paper: "rgba(255,255,255,0.04)",
+      default: "#F9FAFB",
+      paper: "#FFFFFF",
     },
     text: {
-      primary: "#ffffff",
-      secondary: "#b4b4c7",
+      primary: "#111827",
+      secondary: "#4B5563",
     },
   },
   typography: {
@@ -60,33 +92,39 @@ const theme = createTheme({
   },
 });
 
-/**
- * We have box styling across all the sections. 
- * And this is the common pattern for the box styling
- */
 const sectionCardStyle = {
-  background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(10px)",
+  background: "#FFFFFF",
   borderRadius: "16px",
-  border: "1px solid rgba(255,255,255,0.10)",
+  border: "1px solid #E5E7EB",
   padding: { xs: 3, md: 4 },
-  transition: "all 0.3s ease",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
+  transition: "all 0.25s ease",
   "&:hover": {
-    borderColor: "rgba(168,85,247,0.4)",
-    boxShadow: "0 0 25px rgba(168,85,247,0.15)",
+    borderColor: "#8b5cf6",
+    boxShadow: "0 12px 30px rgba(0,0,0,0.07)",
   },
 };
 
-/**
- * This is the typography for each section's title.
- */
+const innerCard = {
+  background: "#F9FAFB",
+  border: "1px solid #E5E7EB",
+  borderRadius: "10px",
+  px: 1.2,
+  py: 1,
+  transition: "all 0.2s ease",
+  "&:hover": {
+    borderColor: "#8b5cf6",
+    background: "#FFFFFF",
+  },
+};
+
 function SectionTitle({ children }) {
   return (
     <Typography
       sx={{
-        color: "#ffffff",
+        color: "#111827",
         fontSize: "0.85rem",
-        fontWeight: 600,
+        fontWeight: 700,
         letterSpacing: "0.22em",
         mb: 2,
       }}
@@ -95,117 +133,120 @@ function SectionTitle({ children }) {
     </Typography>
   );
 }
-/**
- * This is the help page component. 
- * This provides the YouTube tutorial for Redux setup.
- */
+
 export default function HelpPage() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
 
-      {/* Background has been inserted with subtle purple gradient */}
       <Box
         sx={{
           minHeight: "100vh",
-          background: `
-            radial-gradient(circle at 50% -10%, rgba(139,92,246,0.18), transparent 50%),
-            linear-gradient(180deg, #09090f 0%, #07070b 100%)
-          `,
+          background:
+            "radial-gradient(circle at top, rgba(139,92,246,0.08), transparent 38%), #F9FAFB",
         }}
       >
         <ResponsiveAppBar />
 
-        <Container maxWidth="lg" sx={{ pt: 2 }}>
-          <Box sx={{ maxWidth: "900px", mx: "auto" }}>
-
-            {/* Intro Section */}
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 5 }}>
+          <Box sx={{ maxWidth: "980px", mx: "auto" }}>
             <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-              <SectionTitle>HELP</SectionTitle>
+              <SectionTitle>WELCOME TO REDUX</SectionTitle>
 
               <Typography
                 sx={{
-                  color: "#d1d5db",
+                  color: "#374151",
                   fontSize: "0.87rem",
                   lineHeight: 1.9,
+                  textAlign: "justify",
+                  mb: 2.2,
                 }}
               >
-                This page includes a setup tutorial and additional resources to help
-                you use Redux and explore NP-Complete problems in more detail.
-              </Typography>
-            </Box>
-
-            {/* Video Tutorial Section */}
-            <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-              <SectionTitle>VIDEO TUTORIAL</SectionTitle>
-
-              <Typography
-                sx={{
-                  color: "#d1d5db",
-                  fontSize: "0.87rem",
-                  lineHeight: 1.8,
-                  mb: 2,
-                }}
-              >
-                With the guidance of Dr. Paul Bodily and Michael Trosper, we are
-                excited to share the Redux setup tutorial. This video walks through
-                running Redux locally. More tutorials will be added over time.
+                Redux is a dynamic, interactive computer science knowledgebase
+                consisting of canonical computer science problems, solutions,
+                and reduction algorithms. The following pages provide helpful
+                background to the organization of problems, solutions, and
+                reductions in Redux based on the concept of complexity classes:
               </Typography>
 
-              <Box
-                sx={{
-                  width: "100%",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                }}
-              >
-                <iframe
-                  width="100%"
-                  height="420"
-                  src="https://www.youtube.com/embed/9vTl522tyhU"
-                  title="Redux Setup Tutorial"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </Box>
-            </Box>
-
-            {/* Section where there are links to the resources*/}
-            <Box sx={{ ...sectionCardStyle, mb: 4 }}>
-              <SectionTitle>LEARN MORE</SectionTitle>
-
-              <Typography
-                sx={{
-                  color: "#d1d5db",
-                  fontSize: "0.87rem",
-                  mb: 2,
-                }}
-              >
-                Additional documentation can be found at the following links:
-              </Typography>
-
-              <Box sx={{ display: "grid", gap: 1.2 }}>
-                {resourceLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="none"
-                    sx={{
-                      color: "#c084fc",
-                      fontSize: "0.8rem",
-                      "&:hover": { color: "#e9d5ff" },
-                    }}
-                  >
-                    • {link.label}
-                  </Link>
+              <Box sx={{ display: "grid", gap: 1 }}>
+                {backgroundLinks.map((link) => (
+                  <Box key={link.label} sx={innerCard}>
+                    <Link
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{
+                        color: "#F47C20",
+                        fontWeight: 600,
+                        fontSize: "0.82rem",
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  </Box>
                 ))}
               </Box>
             </Box>
 
+            <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
+              <SectionTitle>ACCESS REDUX CONTENT</SectionTitle>
+
+              <Typography
+                sx={{
+                  color: "#374151",
+                  fontSize: "0.87rem",
+                  lineHeight: 1.9,
+                  textAlign: "justify",
+                  mb: 2,
+                }}
+              >
+                All of the content of the Redux knowledge base can be accessed
+                directly via:
+              </Typography>
+
+              <Box sx={{ display: "grid", gap: 1 }}>
+                {accessLinks.map((link) => (
+                  <Box key={link.label} sx={innerCard}>
+                    <Link
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{
+                        color: "#F47C20",
+                        fontWeight: 600,
+                        fontSize: "0.82rem",
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  </Box>
+                ))}
+
+                <Box sx={innerCard}>
+                  <Typography
+                    sx={{
+                      color: "#374151",
+                      fontSize: "0.82rem",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    C# Library import{" "}
+                    <Box
+                      component="span"
+                      sx={{
+                        color: "#6B7280",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      (instructions coming soon)
+                    </Box>
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
           </Box>
         </Container>
       </Box>
