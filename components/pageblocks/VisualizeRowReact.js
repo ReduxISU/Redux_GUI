@@ -158,11 +158,11 @@ export default function VisualizeRowReact({
     const fetch = async () => {
       try {
         const data = await requestReductionVisualization(
-          url,
-          chosenReductionType,
-          solution,
-          problemInstance
-        );
+  url,
+  chosenReductionType,
+  chosenSolver,
+  problemInstance
+);
         setProblemReductionData(data ?? []);
       } catch (err) {
         console.error("Failed to load reduction visualization:", err);
@@ -170,7 +170,7 @@ export default function VisualizeRowReact({
     };
 
     fetch();
-  }, [showReduction, chosenReduceTo, problemInstance, solution]);
+  }, [showReduction, chosenReduceTo, chosenReductionType, problemInstance, chosenSolver]);
 
 
   // Fetch main visualization data
@@ -182,10 +182,11 @@ export default function VisualizeRowReact({
     const fetch = async () => {
       try {
         const data = await requestVisualization(
-          url,
-          chosenVisualization,
-          problemInstance,
-        );
+  url,
+  chosenVisualization,
+  chosenSolver,
+  problemInstance
+);
 
         if (!alive) return;
 
@@ -214,6 +215,7 @@ export default function VisualizeRowReact({
   }, [
     instanceReady,
     chosenVisualization,
+    chosenSolver,
     problemInstance,
     showReduction,
   ]);
