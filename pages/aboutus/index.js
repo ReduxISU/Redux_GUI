@@ -69,46 +69,38 @@ const theme = createTheme({
 //List of research papers
 const publications = [
   {
-    authors: "R. Phillips and P. M. Bodily",
-    title:
-      "Spade: A library for programmatic parsing and verification of discrete data structures",
-    venue:
-      "2025 Intermountain Engineering, Technology and Computing (IETC), pp. 1–5, IEEE, 2025",
-    pdfUrl:
-      "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11039449",
+    citation:
+      "A. Sevaljevic and P. M. Bodily. 2024. Comparative empirical analysis of dancing links implementations to solve the exact cover problem. In 2024 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 255–258.",
+    doi: "https://ieeexplore.ieee.org/document/10564396",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/IETC_2024_submission_dancing_links.pdf",
   },
+
   {
-    authors:
-      "K. Marchetti, A. Sevaljevic, A. Diviney, R. Phillips, C. Eardley, R. Khadka, D. Igbokwe, and P. M. Bodily",
-    title:
-      "Redux: An interactive, dynamic knowledge base for teaching NP-completeness",
-    venue:
-      "Proceedings of the 29th annual ACM conference on Innovation and Technology in Computer Science Education (ITiCSE), 2024",
-    pdfUrl: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2206",
+    citation:
+      "Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge Base for Teaching NP-completeness. In Proceedings of the 2024 on Innovation and Technology in Computer Science Education V. 1 (ITiCSE 2024). Association for Computing Machinery, New York, NY, USA, 255–261.",
+    doi: "https://dl.acm.org/doi/10.1145/3649217.3653544",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/ITiSCE_Redux_Submission_2024_WIP.pdf",
   },
+
   {
-    authors: "A. Sevaljevic and P. M. Bodily",
-    title:
-      "Comparative empirical analysis of dancing links implementations to solve the exact cover problem",
-    venue:
-      "Proceedings of the 4th Intermountain Engineering, Technology, and Computing Conference (i-ETC), pp. 255–258, IEEE, 2024",
-    pdfUrl: "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10564396",
+    citation:
+      "K. Marchetti and P. Bodily. 2022. KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–4.",
+    doi: "https://ieeexplore.ieee.org/document/9796945",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/KAMI_Leveraging_Open_Source_to_Solve_Complex_Problems.pdf",
   },
+
   {
-    authors: "K. Marchetti and P. Bodily",
-    title: "Visualizing the 3SAT to CLIQUE Reduction Process",
-    venue:
-      "2022 Intermountain Engineering, Technology and Computing (IETC), Orem, UT, USA, 2022, pp. 1-5",
-    pdfUrl:
-      "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9796851",
+    citation:
+      "R. Phillips and P. M. Bodily. 2025. SPADE: A library for programmatic parsing and verification of discrete data structures. In 2025 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/11039449",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/SPADE.pdf",
   },
+
   {
-    authors: "K. Marchetti and P. Bodily",
-    title:
-      "KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems",
-    venue:
-      "2022 Intermountain Engineering, Technology and Computing (IETC), Orem, UT, USA, 2022, pp. 1-4",
-    pdfUrl: "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796945",
+    citation:
+      "K. Marchetti and P. Bodily. 2022. Visualizing the 3SAT to CLIQUE Reduction Process. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/9796851",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/Visualizing_the_3SAT_to_CLIQUE_Reduction.pdf",
   },
 ];
 
