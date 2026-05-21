@@ -1,4 +1,5 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import isulogo from "../../components/images/ISULogo.png";
 
 import {
   createTheme,
@@ -12,55 +13,55 @@ import {
 
 const backgroundLinks = [
   {
-    label: "Wikipedia: Computational problem",
+    label: "Computational problem",
     url: "https://en.wikipedia.org/wiki/Computational_problem",
   },
   {
-    label: "Wikipedia: Algorithm",
+    label: "Algorithm",
     url: "https://en.wikipedia.org/wiki/Algorithm",
   },
   {
-    label: "Wikipedia: List of algorithms",
+    label: "List of algorithms",
     url: "https://en.wikipedia.org/wiki/List_of_algorithms",
   },
   {
-    label: "Wikipedia: Complexity class",
+    label: "Complexity class",
     url: "https://en.wikipedia.org/wiki/Complexity_class",
   },
   {
-    label: "Wikipedia: P (complexity)",
+    label: "P (complexity)",
     url: "https://en.wikipedia.org/wiki/P_(complexity)",
   },
   {
-    label: "Wikipedia: NP (complexity)",
+    label: "NP (complexity)",
     url: "https://en.wikipedia.org/wiki/NP_(complexity)",
   },
   {
-    label: "Wikipedia: NP-hardness",
+    label: "NP-hardness",
     url: "https://en.wikipedia.org/wiki/NP-hardness",
   },
   {
-    label: "Wikipedia: NP-completeness",
+    label: "NP-completeness",
     url: "https://en.wikipedia.org/wiki/NP-completeness",
   },
   {
-    label: "Wikipedia: Karp's 21 NP-complete problems",
+    label: "Karp's 21 NP-complete problems",
     url: "https://en.wikipedia.org/wiki/Karp%27s_21_NP-complete_problems",
   },
   {
-    label: "Wikipedia: List of NP-complete problems",
+    label: "List of NP-complete problems",
     url: "https://en.wikipedia.org/wiki/List_of_NP-complete_problems",
   },
   {
-    label: "Wikipedia: Many-one reduction",
+    label: "Many-one reduction",
     url: "https://en.wikipedia.org/wiki/Many-one_reduction",
   },
   {
-    label: "Wikipedia: Gadget (computer science)",
+    label: "Gadget (computer science)",
     url: "https://en.wikipedia.org/wiki/Gadget_(computer_science)",
   },
   {
-    label: "Wikipedia: Approximation algorithm",
+    label: "Approximation algorithm",
     url: "https://en.wikipedia.org/wiki/Approximation_algorithm",
   },
 ];
@@ -100,7 +101,7 @@ const sectionCardStyle = {
   boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
   transition: "all 0.25s ease",
   "&:hover": {
-    borderColor: "#8b5cf6",
+    borderColor: "#F47C20",
     boxShadow: "0 12px 30px rgba(0,0,0,0.07)",
   },
 };
@@ -113,7 +114,7 @@ const innerCard = {
   py: 1,
   transition: "all 0.2s ease",
   "&:hover": {
-    borderColor: "#8b5cf6",
+    borderColor: "#F47C20",
     background: "#FFFFFF",
   },
 };
@@ -169,25 +170,32 @@ export default function HelpPage() {
                 reductions in Redux based on the concept of complexity classes:
               </Typography>
 
-              <Box sx={{ display: "grid", gap: 1 }}>
-                {backgroundLinks.map((link) => (
-                  <Box key={link.label} sx={innerCard}>
-                    <Link
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      underline="hover"
-                      sx={{
-                        color: "#F47C20",
-                        fontWeight: 600,
-                        fontSize: "0.82rem",
-                      }}
-                    >
-                      {link.label}
-                    </Link>
-                  </Box>
-                ))}
-              </Box>
+              <Typography
+  sx={{
+    color: "#374151",
+    fontSize: "0.87rem",
+    lineHeight: 1.9,
+    textAlign: "justify",
+  }}
+>
+  {backgroundLinks.map((link, index) => (
+    <span key={link.label}>
+      <Link
+        href={link.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        underline="hover"
+        sx={{
+          color: "#F47C20",
+          fontWeight: 600,
+        }}
+      >
+        {link.label}
+      </Link>
+      {index < backgroundLinks.length - 1 ? ", " : "."}
+    </span>
+  ))}
+</Typography>
             </Box>
 
             <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
@@ -249,6 +257,36 @@ export default function HelpPage() {
             </Box>
           </Box>
         </Container>
+        <Box
+  sx={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    pt: 2,
+    pb: 3,
+  }}
+>
+  <Link
+    href="https://www.isu.edu/cs/"
+    target="_blank"
+    rel="noopener noreferrer"
+    underline="none"
+    sx={{ display: "inline-flex" }}
+  >
+    <Box
+      component="img"
+      src={isulogo.src}
+      alt="Idaho State University Computer Science"
+      sx={{
+        height: 72,
+        width: "auto",
+        display: "block",
+        opacity: 1,
+        filter: "none",
+      }}
+    />
+  </Link>
+</Box>
       </Box>
     </ThemeProvider>
   );
