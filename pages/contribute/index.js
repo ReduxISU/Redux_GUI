@@ -1,4 +1,5 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import isulogo from "../../components/images/ISULogo.png";
 
 import {
   createTheme,
@@ -56,7 +57,7 @@ const sectionCardStyle = {
   boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
   transition: "all 0.25s ease",
   "&:hover": {
-    borderColor: "#8b5cf6",
+    borderColor: "#F47C20",
     boxShadow: "0 12px 30px rgba(0,0,0,0.07)",
   },
 };
@@ -69,7 +70,7 @@ const innerCard = {
   py: 1,
   transition: "all 0.2s ease",
   "&:hover": {
-    borderColor: "#8b5cf6",
+    borderColor: "#F47C20",
     background: "#FFFFFF",
   },
 };
@@ -308,6 +309,36 @@ export default function ContributePage() {
             </Box>
           </Box>
         </Container>
+        <Box
+  sx={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    pt: 2,
+    pb: 3,
+  }}
+>
+  <Link
+    href="https://www.isu.edu/cs/"
+    target="_blank"
+    rel="noopener noreferrer"
+    underline="none"
+    sx={{ display: "inline-flex" }}
+  >
+    <Box
+      component="img"
+      src={isulogo.src}
+      alt="Idaho State University Computer Science"
+      sx={{
+        height: 72,
+        width: "auto",
+        display: "block",
+        opacity: 1,
+        filter: "none",
+      }}
+    />
+  </Link>
+</Box>
       </Box>
     </ThemeProvider>
   );
