@@ -1,6 +1,5 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
-//UI Components
 import {
   createTheme,
   ThemeProvider,
@@ -9,34 +8,82 @@ import {
   Typography,
   Link,
   Grid,
-  Avatar,
-  Tooltip,
   CssBaseline,
 } from "@mui/material";
+
 import isulogo from "../../components/images/ISULogo.png";
 
-// Awards
-const awards = [
+const publicationsAndAwards = [
   {
-    text: "Best Graduate Poster Presentation in Education, Learning & Training (Andrija Sevaljevic), 2026 ISU Research and Creative Works Symposium",
+    citation:
+      "K. Marchetti and P. Bodily. 2022. Visualizing the 3SAT to CLIQUE Reduction Process. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/9796851",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/Visualizing_the_3SAT_to_CLIQUE_Reduction.pdf",
+  },
+  {
+    citation:
+      "K. Marchetti and P. Bodily. 2022. KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–4. Best Student Paper Award.",
+    doi: "https://ieeexplore.ieee.org/document/9796945",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/KAMI_Leveraging_Open_Source_to_Solve_Complex_Problems.pdf",
+  },
+  {
+    citation:
+      "A. Sevaljevic and P. M. Bodily. 2024. Comparative empirical analysis of dancing links implementations to solve the exact cover problem. In 2024 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 255–258.",
+    doi: "https://ieeexplore.ieee.org/document/10564396",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/IETC_2024_submission_dancing_links.pdf",
+  },
+  {
+    citation:
+      "Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge Base for Teaching NP-completeness. In Proceedings of the 2024 on Innovation and Technology in Computer Science Education V. 1 (ITiCSE 2024). Association for Computing Machinery, New York, NY, USA, 255–261.",
+    doi: "https://dl.acm.org/doi/10.1145/3649217.3653544",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/ITiSCE_Redux_Submission_2024_WIP.pdf",
+  },
+  {
+    citation:
+      "R. Phillips and P. M. Bodily. 2025. SPADE: A library for programmatic parsing and verification of discrete data structures. In 2025 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/11039449",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/SPADE.pdf",
+  },
+  {
+    citation:
+      "Best Graduate Poster Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
     url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
   },
   {
-    text: "Best Graduate Oral Presentation in Education, Learning & Training (Andrija Sevaljevic), 2026 ISU Research and Creative Works Symposium",
+    citation:
+      "Best Graduate Oral Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
     url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
-  },
-  {
-    text: "Best Student Paper Award, K. Marchetti and P. M. Bodily, “KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems,” in Proceedings of the 2nd Intermountain Engineering, Technology, and Computing Conference (i-ETC), 2022",
-    url: "https://myemail.constantcontact.com/ISU-STEM-Connections.html?soid=1138359982044&aid=J1PvVbF7PHo",
   },
 ];
 
-const funding = [
-  "Bodily, P.M. (PI), Trosper, M. (Student), “Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” NSF (I-CREWS), $6,500, 2026",
-  "Bodily, P.M. (PI), Khadka, R. (Co-PI), “Crowd-Sourcing and Visualization of Advanced Computational Theory,” CAES, $15,000, 2024",
-  "Bodily, P.M. (PI), Khadka, R. (Co-PI), “Application of advanced computational theory to real-world combinatorial problems,” CAES, $22,570, 2022",
-  "Bodily, P.M. (PI), “Interactive visualization tools for teaching computer science theory,” ISU Office of Research, $4,954, 2022",
-  "Career Path Internship, Idaho State University, 2022 – Present",
+const contributors = [
+  "Kaden Marchetti",
+  "Caleb Eardley",
+  "Daniel Igbokwe",
+  "Alex Diviney",
+  "Janita Aamir",
+  "Andrija Sevaljevic",
+  "Garret Stouffer",
+  "Alex Svancara",
+  "Eric Hill",
+  "Porter Glines",
+  "Show Pratoomratana",
+  "Russell Phillips",
+  "Michael Crapse",
+  "Ian Gonzalez",
+  "Sabal Subedi",
+  "Himanshu Jha",
+  "Max Grünwoldt",
+  "Paul Gilbreath",
+  "Sansar Kharal",
+  "Pratham Khanal",
+  "George Lake",
+  "Grant Gardner",
+  "Jason Wright",
+  "Andreas Kramer",
+  "Courtney Bodily",
+  "Rakesh Itani",
+  "David Lindeman",
 ];
 
 const theme = createTheme({
@@ -59,82 +106,6 @@ const theme = createTheme({
   },
 });
 
-const publications = [
-  {
-    citation:
-      "A. Sevaljevic and P. M. Bodily. 2024. Comparative empirical analysis of dancing links implementations to solve the exact cover problem. In 2024 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 255–258.",
-    doi: "https://ieeexplore.ieee.org/document/10564396",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/IETC_2024_submission_dancing_links.pdf",
-  },
-  {
-    citation:
-      "Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge Base for Teaching NP-completeness. In Proceedings of the 2024 on Innovation and Technology in Computer Science Education V. 1 (ITiCSE 2024). Association for Computing Machinery, New York, NY, USA, 255–261.",
-    doi: "https://dl.acm.org/doi/10.1145/3649217.3653544",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/ITiSCE_Redux_Submission_2024_WIP.pdf",
-  },
-  {
-    citation:
-      "K. Marchetti and P. Bodily. 2022. KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–4.",
-    doi: "https://ieeexplore.ieee.org/document/9796945",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/KAMI_Leveraging_Open_Source_to_Solve_Complex_Problems.pdf",
-  },
-  {
-    citation:
-      "R. Phillips and P. M. Bodily. 2025. SPADE: A library for programmatic parsing and verification of discrete data structures. In 2025 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
-    doi: "https://ieeexplore.ieee.org/document/11039449",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/SPADE.pdf",
-  },
-  {
-    citation:
-      "K. Marchetti and P. Bodily. 2022. Visualizing the 3SAT to CLIQUE Reduction Process. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
-    doi: "https://ieeexplore.ieee.org/document/9796851",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/Visualizing_the_3SAT_to_CLIQUE_Reduction.pdf",
-  },
-];
-
-const contributorProfiles = {
-  "Pratham Khanal": {
-    image: "https://github.com/pkprathamkhanal.png",
-    github: "https://github.com/pkprathamkhanal",
-  },
-  "Sansar Kharal": {
-    image: "https://github.com/kharsans.png",
-    github: "https://github.com/kharsans",
-  },
-  "Himanshu Jha": {
-    image: "https://github.com/himanshujha05.png",
-    github: "https://github.com/himanshujha05",
-  },
-  "Andrija Sevaljevic": {
-    image: "https://github.com/Andrija-Sevaljevic.png",
-    github: "https://github.com/Andrija-Sevaljevic",
-  },
-  "Jason Wright": {
-    image: "https://github.com/wrigjl.png",
-    github: "https://github.com/wrigjl",
-  },
-  "Daniel Igbokwe": {
-    image: "https://github.com/igbodani.png",
-    github: "https://github.com/igbodani",
-  },
-  "Sabal Subedi": {
-    image: "https://github.com/sabal_subedi.png",
-    github: "https://github.com/sabal_subedi",
-  },
-  "Alex Svancara": {
-    image: "https://github.com/svanalex.png",
-    github: "https://github.com/svanalex",
-  },
-  "Michael Crapse": {
-    image: "https://github.com/mdcrapse.png",
-    github: "https://github.com/mdcrapse",
-  },
-  "Eric Hill": {
-    image: "https://github.com/starman2995.png",
-    github: "https://github.com/starman2995",
-  },
-};
-
 const theSectionCard = {
   background: "#FFFFFF",
   borderRadius: "16px",
@@ -143,7 +114,7 @@ const theSectionCard = {
   boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
   transition: "all 0.25s ease",
   "&:hover": {
-    borderColor: "#8b5cf6",
+    borderColor: "#F47C20",
     boxShadow: "0 12px 30px rgba(0,0,0,0.07)",
   },
 };
@@ -156,7 +127,7 @@ const innerCard = {
   py: 0.9,
   transition: "all 0.2s ease",
   "&:hover": {
-    borderColor: "#8b5cf6",
+    borderColor: "#F47C20",
     background: "#FFFFFF",
   },
 };
@@ -177,107 +148,8 @@ function TitleSection({ children }) {
   );
 }
 
-function ItemContributor({ name }) {
-  const profile = contributorProfiles[name];
-
-  if (!profile) {
-    return (
-      <Typography
-        sx={{
-          color: "#374151",
-          fontSize: "0.8rem",
-          lineHeight: 0.89,
-        }}
-      >
-        {name}
-      </Typography>
-    );
-  }
-
-  return (
-    <Tooltip
-      arrow
-      placement="right"
-      title={
-        <Box sx={{ p: 1, minWidth: 190 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
-            <Avatar
-              src={profile.image}
-              alt={name}
-              sx={{ width: 50, height: 50 }}
-            />
-
-            <Box>
-              <Typography
-                sx={{
-                  color: "#ffffff",
-                  fontWeight: 600,
-                  fontSize: "0.92rem",
-                }}
-              >
-                {name}
-              </Typography>
-
-              <Typography
-                sx={{
-                  color: "#cbd5e1",
-                  fontSize: "0.78rem",
-                }}
-              >
-                Contributor
-              </Typography>
-            </Box>
-          </Box>
-
-          <Link
-            href={profile.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="hover"
-            sx={{
-              color: "#e9d5ff",
-              fontSize: "0.9rem",
-              fontWeight: 500,
-              display: "inline-block",
-              mt: 0.25,
-              "&:hover": {
-                color: "#c084fc",
-              },
-            }}
-          >
-            View GitHub Profile
-          </Link>
-        </Box>
-      }
-      componentsProps={{
-        tooltip: {
-          sx: {
-            bgcolor: "#111118",
-            border: "1px solid rgba(168,85,247,0.35)",
-            borderRadius: "12px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-            padding: "10px 12px",
-          },
-        },
-      }}
-    >
-      <Box
-        component="span"
-        sx={{
-          color: "#374151",
-          fontSize: "0.9rem",
-          lineHeight: 1.35,
-          cursor: "pointer",
-          width: "100%",
-          "&:hover": {
-            color: "#8b5cf6",
-          },
-        }}
-      >
-        {name}
-      </Box>
-    </Tooltip>
-  );
+function getLastName(name) {
+  return name.split(" ").slice(-1)[0].toLowerCase();
 }
 
 export default function AboutUsPage() {
@@ -360,11 +232,7 @@ export default function AboutUsPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     underline="hover"
-                    sx={{
-                      color: "#F47C20",
-                      fontWeight: 600,
-                      ml: 0.4,
-                    }}
+                    sx={{ color: "#F47C20", fontWeight: 600, ml: 0.4 }}
                   >
                     [DOI]
                   </Link>
@@ -373,11 +241,7 @@ export default function AboutUsPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     underline="hover"
-                    sx={{
-                      color: "#F47C20",
-                      fontWeight: 600,
-                      ml: 0.4,
-                    }}
+                    sx={{ color: "#F47C20", fontWeight: 600, ml: 0.4 }}
                   >
                     [PDF]
                   </Link>
@@ -420,36 +284,8 @@ export default function AboutUsPage() {
               </Typography>
 
               <Grid container spacing={1.5}>
-                {[
-                  "Kaden Marchetti",
-                  "Caleb Eardley",
-                  "Daniel Igbokwe",
-                  "Alex Diviney",
-                  "Janita Aamir",
-                  "Andrija Sevaljevic",
-                  "Garret Stouffer",
-                  "Alex Svancara",
-                  "Eric Hill",
-                  "Porter Glines",
-                  "Show Pratoomratana",
-                  "Russell Phillips",
-                  "Michael Crapse",
-                  "Ian Gonzalez",
-                  "Sabal Subedi",
-                  "Himanshu Jha",
-                  "Max Grünwoldt",
-                  "Paul Gilbreath",
-                  "Sansar Kharal",
-                  "Pratham Khanal",
-                  "George Lake",
-                  "Grant Gardner",
-                  "Jason Wright",
-                  "Andreas Kramer",
-                  "Courtney Bodily",
-                  "Rakesh Itani",
-                  "David Lindeman",
-                ]
-                  .sort((a, b) => a.localeCompare(b))
+                {[...contributors]
+                  .sort((a, b) => getLastName(a).localeCompare(getLastName(b)))
                   .map((name) => (
                     <Grid item xs={12} sm={6} md={4} key={name}>
                       <Box
@@ -464,58 +300,24 @@ export default function AboutUsPage() {
                           alignItems: "center",
                           transition: "all 0.2s ease",
                           "&:hover": {
-                            borderColor: "#8b5cf6",
+                            borderColor: "#F47C20",
                             background: "#FFFFFF",
                           },
                         }}
                       >
-                        <ItemContributor name={name} />
+                        <Typography
+                          sx={{
+                            color: "#374151",
+                            fontSize: "0.9rem",
+                            lineHeight: 1.35,
+                          }}
+                        >
+                          {name}
+                        </Typography>
                       </Box>
                     </Grid>
                   ))}
               </Grid>
-            </Box>
-
-            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-              <TitleSection>SUPPORT</TitleSection>
-
-              <Typography
-  sx={{
-    color: "#374151",
-    fontSize: "0.87rem",
-    lineHeight: 1.9,
-    textAlign: "justify",
-  }}
->
-  Redux is an open educational and research initiative developed
-  at Idaho State University. The project is actively maintained
-  through faculty, student, and community contributions.
-</Typography>
-
-<Typography
-  sx={{
-    color: "#374151",
-    fontSize: "0.87rem",
-    lineHeight: 1.9,
-    textAlign: "justify",
-    mt: 2.2,
-  }}
->
-  If you are interested in supporting Redux through educational
-  collaboration, sponsorship, development contributions, or
-  research partnerships, please contact{" "}
-
-  <Link
-    href="mailto:bodipaul@isu.edu"
-    underline="hover"
-    sx={{
-      color: "#F47C20",
-      fontWeight: 600,
-    }}
-  >
-    Dr. Paul Bodily
-  </Link>.
-</Typography>
             </Box>
 
             <Box sx={{ ...theSectionCard, mb: 1.5 }}>
@@ -533,7 +335,7 @@ export default function AboutUsPage() {
               </Typography>
 
               <Box sx={{ display: "grid", gap: 0.8 }}>
-                {publications.map((pub, index) => (
+                {publicationsAndAwards.map((item, index) => (
                   <Box key={index} sx={innerCard}>
                     <Typography
                       sx={{
@@ -542,79 +344,58 @@ export default function AboutUsPage() {
                         lineHeight: 1.7,
                       }}
                     >
-                      {pub.citation}{" "}
-                      <Link
-                        href={pub.doi}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [DOI]
-                      </Link>
-                      <Link
-                        href={pub.pdf}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [PDF]
-                      </Link>
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
+                      {item.citation}{" "}
 
-              <Typography
-                sx={{
-                  color: "#9ca3af",
-                  fontSize: "0.87rem",
-                  mt: 3,
-                  mb: 2,
-                }}
-              >
-                Awards
-              </Typography>
+                      {item.doi && (
+                        <Link
+                          href={item.doi}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [DOI]
+                        </Link>
+                      )}
 
-              <Box sx={{ display: "grid", gap: 1.2 }}>
-                {awards.map((award, index) => (
-                  <Box key={index} sx={innerCard}>
-                    <Typography
-                      sx={{
-                        color: "#374151",
-                        fontSize: "0.82rem",
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {award.text}{" "}
-                      <Link
-                        href={award.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="none"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.5,
-                          "&:hover": {
-                            color: "#e9d5ff",
-                          },
-                        }}
-                      >
-                        [URL]
-                      </Link>
+                      {item.pdf && (
+                        <Link
+                          href={item.pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [PDF]
+                        </Link>
+                      )}
+
+                      {item.url && (
+                        <Link
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [URL]
+                        </Link>
+                      )}
                     </Typography>
                   </Box>
                 ))}
@@ -622,33 +403,54 @@ export default function AboutUsPage() {
             </Box>
 
             <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-              <TitleSection>FUNDING</TitleSection>
+              <TitleSection>SUPPORT</TitleSection>
 
               <Typography
                 sx={{
                   color: "#374151",
                   fontSize: "0.87rem",
-                  mb: 0.9,
+                  lineHeight: 1.9,
+                  mb: 2,
                 }}
               >
-                The Redux project has been supported through the following
-                funding sources.
+                Redux has been supported by the following grants:
               </Typography>
 
               <Box sx={{ display: "grid", gap: 0.8 }}>
-                {funding.map((item, index) => (
+                {[
+                  "“Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” Summer Authentic Research Experience (SARE), Idaho Community-engaged Resilience for Energy-Water Systems (I-CREWS), National Science Foundation (NSF). 2026.",
+                  "“Crowd-Sourcing and Visualization of Advanced Computational Theory to Facilitate Application of Algorithmic Knowledgebase to Real-World Combinatorial Problems,” Center for Advanced Energy Studies (CAES). 2024.",
+                  "“Application of advanced computational theory to facilitate efficient solutions to real-world combinatorial problems”, Center for Advanced Energy Studies (CAES). 2022.",
+                  "“Interactive visualization tools for teaching computer science theory”, Idaho State University Office of Research. 2022.",
+                ].map((grant, index) => (
                   <Box key={index} sx={innerCard}>
                     <Typography
                       sx={{
                         color: "#374151",
                         fontSize: "0.85rem",
+                        lineHeight: 1.7,
                       }}
                     >
-                      {item}
+                      {grant}
                     </Typography>
                   </Box>
                 ))}
               </Box>
+
+              <Typography
+                sx={{
+                  color: "#374151",
+                  fontSize: "0.82rem",
+                  lineHeight: 1.8,
+                  mt: 2.2,
+                  textAlign: "justify",
+                }}
+              >
+                Any opinions, findings, conclusions, or recommendations
+                expressed in this material are those of the author(s) and do not
+                necessarily reflect the views of the funding agencies who have
+                supported this work.
+              </Typography>
             </Box>
 
             <Box sx={{ ...theSectionCard, mb: 1.5 }}>
@@ -667,10 +469,7 @@ export default function AboutUsPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="hover"
-                  sx={{
-                    color: "#F47C20",
-                    fontWeight: 600,
-                  }}
+                  sx={{ color: "#F47C20", fontWeight: 600 }}
                 >
                   BSD 3-Clause License
                 </Link>.
@@ -693,9 +492,7 @@ export default function AboutUsPage() {
             target="_blank"
             rel="noopener noreferrer"
             underline="none"
-            sx={{
-              display: "inline-flex",
-            }}
+            sx={{ display: "inline-flex" }}
           >
             <Box
               component="img"
