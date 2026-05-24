@@ -408,8 +408,8 @@ export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver
     }
 
     const mappedSolution = await fetchPostJson(
-      `${url}SipserReduceToCliqueStandard/reverseMappedSolution`,
-      { problemFrom: instance, problemTo: reduction.reductionTo.instance, problemFromSolution: solution },
+      `${url}ProblemProvider/mapSolution?reduction=SipserReduceToSAT3&solution=${encodeURIComponent(solution)}`,
+      reduction.reductionTo.instance,
       () => "TRANSITIVE SOLVED REQUEST FAILED"
     );
 
