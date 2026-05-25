@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { OverlayTrigger, Popover } from "react-bootstrap";
 import {
   Button,
   Switch,
   FormControlLabel,
   IconButton,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import {
   SkipPrevious,
@@ -370,19 +370,9 @@ export default function VisualizeRowReact({
               Refresh
             </Button>
 
-            <OverlayTrigger
+            <Tooltip
               placement="bottom"
-              overlay={
-                isDisabled ? (
-                  <Popover>
-                    <Popover.Body>
-                      Navigation disabled during reduction or gadget mode.
-                    </Popover.Body>
-                  </Popover>
-                ) : (
-                  <></>
-                )
-              }
+              title={isDisabled ? "Navigation disabled during reduction or gadget mode." : ""}
             >
               <div
                 style={{ display: "flex", alignItems: "center", gap: "4px" }}
@@ -426,7 +416,7 @@ export default function VisualizeRowReact({
                   <FastForward />
                 </IconButton>
               </div>
-            </OverlayTrigger>
+            </Tooltip>
           </div>
 
           {/* Switches */}
