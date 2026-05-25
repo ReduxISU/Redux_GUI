@@ -48,13 +48,14 @@ export default function SearchBarExtensible({
       sx={{ width: 300 }}
       style={{ width: "100%" }}
       freeSolo
-      renderInput={({ InputProps, ...params }) => (
+      renderInput={({ slotProps: acSlots, ...params }) => (
         <TextField
           {...params}
           label={placeholder}
           slotProps={{
+            ...acSlots,
             input: {
-              ...InputProps,
+              ...acSlots?.input,
               ...(disabled ? { style: { fontSize: 12 } } : {}),
             },
           }}
