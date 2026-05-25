@@ -46,11 +46,16 @@ export default function SearchBarExtensible({
       sx={{ width: 300 }}
       style={{ width: "100%" }}
       freeSolo
-      renderInput={(params) => (
+      renderInput={({ InputProps, ...params }) => (
         <TextField
           {...params}
           label={placeholder}
-          InputProps={disabled ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }}
+          slotProps={{
+            input: {
+              ...InputProps,
+              ...(disabled ? { style: { fontSize: 12 } } : {}),
+            },
+          }}
         />
       )}
       // For rendering highlighted options with greater opacity
