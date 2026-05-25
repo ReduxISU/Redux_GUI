@@ -24,7 +24,7 @@ function useDefaultVisualizationMap(url, problemInfoMap) {
     requestDefaultVisualizationFileMap(url, problems, defaultVisualizationNames).then((defaultVisualizationFileNames) => {
       setDefaultVisualizationMap(defaultVisualizationFileNames);
     });
-  }, [problemInfoMap]);
+  }, [problemInfoMap, url]);
 
   //The requestDefaultVisualizationFileMap sets the Visualization names by the file name
   async function requestDefaultVisualizationFileMap(url, problems, defaultVisualizationNames) {
@@ -54,7 +54,7 @@ function useVisualizationOptions(url, problemName, problemType) {
         problemName && problemType ? (await requestVisualizations(url, problemName, problemType)) ?? [] : []
       );
     })();
-  }, [problemName, problemType]);
+  }, [problemName, problemType, url]);
 
   return [VisualizationOptions, setVisualizationOptions];
 }
@@ -104,7 +104,7 @@ function useVisualizationNameMap(url, problemNameMap) {
     requestVisualizationNameMap(url, problems).then((VisualizationMap) => {
       setVisualizationNameMap(VisualizationMap);
     });
-  }, [problemNameMap]);
+  }, [problemNameMap, url]);
 
   //The following the functions are used to set the Visualization names
   async function requestVisualizationNameMap(url, problems) {

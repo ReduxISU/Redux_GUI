@@ -143,7 +143,7 @@ export default function VisualizeRowReact({
     };
 
     fetchSolvedInstance();
-  }, [problemInstance, chosenSolver]);
+  }, [problemInstance, chosenSolver, url]);
 
   // Fetch reduction visualization
   useEffect(() => {
@@ -170,7 +170,7 @@ export default function VisualizeRowReact({
     };
 
     fetch();
-  }, [showReduction, chosenReduceTo, problemInstance, solution]);
+  }, [showReduction, chosenReduceTo, problemInstance, solution, chosenReductionType, url]);
 
 
   // Fetch main visualization data
@@ -216,6 +216,7 @@ export default function VisualizeRowReact({
     chosenVisualization,
     problemInstance,
     showReduction,
+    url,
   ]);
 
   // Fetch SAT3
@@ -246,7 +247,7 @@ export default function VisualizeRowReact({
     };
 
     fetchSAT3();
-  }, [problemInstance, problemName, chosenReductionType]);
+  }, [problemInstance, problemName, chosenReductionType, url]);
 
   useEffect(() => {
     setDisableSolution(!problemName);

@@ -39,7 +39,7 @@ export function useReducerInfo(url, reducer) {
     (async () => {
       setGenericInfo(!reducer ? {} : (await requestReductionInfo(url, (reducer ?? "").split("-")[0])) ?? {});
     })();
-  }, [reducer]);
+  }, [reducer, url]);
 
   return genericInfo; // There should be no reason to set the information
 }
@@ -61,7 +61,7 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
           : ""
       );
     })();
-  }, [chosenReductionType, problemInstance]);
+  }, [chosenReductionType, problemInstance, url]);
 
   return [reducedInstance, setReducedInstance];
 }
@@ -93,7 +93,7 @@ function useReduceToOptions(url, problemName, problemType) {
         (problemName && problemType ? (await requestReductionOptions(url, problemName, problemType)) ?? [] : []).sort()
       );
     })();
-  }, [problemName, problemType]);
+  }, [problemName, problemType, url]);
 
   return [reduceToOptions, setReduceToOptions];
 }
@@ -110,7 +110,7 @@ function useReductionTypeOptions(url, problemName, problemType, chosenReduceTo) 
         ).sort()
       );
     })();
-  }, [problemType, chosenReduceTo]);
+  }, [problemType, chosenReduceTo, url, problemName]);
 
   async function requestPreparedReductions(url, problemName, chosenReduceTo, problemType) {
     const reductions = (await requestReductions(url, problemName, chosenReduceTo, problemType)) ?? [];
@@ -158,7 +158,7 @@ function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOption
     } else {
       setChosenReductionType(!reductionTypeOptions.length ? "" : reductionTypeOptions[0]);
     }
-  }, [reductionTypeOptions]);
+  }, [reductionTypeOptions, chosenReduceTo]);
 
   return [chosenReductionType, setChosenReductionType];
 }
@@ -193,7 +193,12 @@ function useChosenReduceTo(problemName, reduceToOptions) {
     } else {
       setChosenReduceTo(!reduceToOptions.length ? "" : reduceToOptions[0]);
     }
-  }, [reduceToOptions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduceToOptions]); // problemName intentionally omitted: it's a follower of reduceToOptions.
+                         // When problemName changes, reduceToOptions recomputes and re-fires this
+                         // effect with the current problemName already in scope. Adding problemName
+                         // directly would fire this effect while reduceToOptions still holds stale
+                         // values from the previous problem, setting a wrong default.
 
   return [chosenReduceTo, setChosenReduceTo];
 }
@@ -209,7 +214,7 @@ function useReductionNameMap(url, problemName, chosenReduceTo) {
     } else {
       setReductionNameMap(new Map());
     }
-  }, [chosenReduceTo]);
+  }, [chosenReduceTo, url, problemName]);
 
   // The following the functions are used to set the reduction names
   async function requestReductionNameMap(url, problemFrom, problemTo) {

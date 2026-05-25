@@ -144,7 +144,7 @@ function MainPageContent() {
         // marginTop={'25%'}
         //Tried to push the logo down with the margin
       >
-        <Image src={isulogo} height={125} width={500}></Image>
+        <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
       </Box>
     </>
   );
