@@ -18,11 +18,13 @@ export default function SearchBarExtensible({
   return (
     <Autocomplete
       {...props}
-      PaperComponent={({ children }) => (
-        <SearchBarPaper input={input} optionsMap={optionsMap} extenderButtons={extenderButtons}>
-          {children}
-        </SearchBarPaper>
-      )}
+      slots={{
+        paper: ({ children }) => (
+          <SearchBarPaper input={input} optionsMap={optionsMap} extenderButtons={extenderButtons}>
+            {children}
+          </SearchBarPaper>
+        ),
+      }}
       onInputChange={(event, value) => {
         setInput(value ?? "");
       }}

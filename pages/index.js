@@ -137,12 +137,13 @@ function MainPageContent() {
         {/* </footer> */}
       </ThemeProvider>
       <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="10vh"
-        // marginTop={'25%'}
-        //Tried to push the logo down with the margin
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "10vh",
+          // marginTop: '25%',
+        }}
       >
         <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
       </Box>
