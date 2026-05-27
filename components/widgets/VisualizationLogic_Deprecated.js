@@ -9,7 +9,7 @@ import SAT3_SVG_React from "../Visualization/svgs/SAT3_SVG_React";
 import CLIQUE_SVG_REACT from "../Visualization/svgs/CLIQUE_SVG_REACT";
 import CliqueSvgReactV2 from "../Visualization/svgs/Clique_SVG_REACT_V2";
 import { tsvFormatValue } from 'd3';
-import Refresh from '@mui/icons-material/Refresh';
+import { Refresh as Refresh } from '@mui/icons-material';
 import {No_Viz_Svg, No_Reduction_Viz_Svg} from '../Visualization/svgs/No_Viz_SVG';
 import ArcSetSvgReact from '../Visualization/svgs/ArcSet_SVG_React';
 import Visualizations from '../Visualization/svgs/Visualizations.js'

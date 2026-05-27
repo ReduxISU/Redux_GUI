@@ -21,7 +21,7 @@ import {
   FastRewind,
   FastForward,
 } from "@mui/icons-material";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import RefreshIcon from "@mui/icons-material/Refresh.js";
 import Link from "next/link"; // <-- IMPORTANT for Quantum button
 
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";

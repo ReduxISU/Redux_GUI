@@ -12,7 +12,7 @@ import React from "react";
 import { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "@mui/material";
-import DownloadIcon from '@mui/icons-material/Download';
+import { Download as DownloadIcon } from '@mui/icons-material';
 
 import { requestSolvedInstanceTemporarySat3CliqueSolver } from "../redux";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
