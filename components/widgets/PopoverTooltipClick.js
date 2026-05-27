@@ -1,6 +1,6 @@
 import { OverlayTrigger, Popover, Button } from 'react-bootstrap';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { InfoOutlined as InfoOutlinedIcon } from '@mui/icons-material';
+import { OpenInNew as OpenInNewIcon } from '@mui/icons-material';
 
 function popOver(props) {
   const t = props?.toolTip || {};

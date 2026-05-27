@@ -14,7 +14,7 @@ import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Card } from 'react-bootstrap'
 import { Button } from '@mui/material'
-import DownloadIcon from '@mui/icons-material/Download';
+import { Download as DownloadIcon } from '@mui/icons-material';
 
 import { requestReducedInstanceFromPath } from '../redux'
 import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
