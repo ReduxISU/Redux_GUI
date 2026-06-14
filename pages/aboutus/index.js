@@ -271,7 +271,7 @@ function ItemContributor({ name }) {
           </Link>
         </Box>
       }
-      componentsProps={{
+      slotProps={{
         tooltip: {
           sx: {
             bgcolor: "#111118",
@@ -455,7 +455,7 @@ export default function AboutUsPage() {
       "Rakesh Itani",
       "David Lindeman",
     ].map((name) => (
-      <Grid item xs={12} sm={6} md={4} key={name}>
+      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
         <Box
           sx={{
             border: "1px solid rgba(255,255,255,0.06)",
