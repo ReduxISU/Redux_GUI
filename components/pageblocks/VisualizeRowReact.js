@@ -5,7 +5,7 @@
  * and async loading of visualization data.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { OverlayTrigger, Popover } from "react-bootstrap";
 import {
@@ -173,9 +173,17 @@ export default function VisualizeRowReact({
   }, [showReduction, chosenReduceTo, problemInstance, solution]);
 
 
+  // Guards against fetching visualization with a stale instance from the previous problem.
+  // chosenVisualization updates synchronously on problem change, but problemInstance
+  // updates async (after useProblemInfo completes), so we suppress the fetch until they're in sync.
+  const instanceMatchesProblem = useRef(true);
+  useEffect(() => { instanceMatchesProblem.current = false; }, [problemName]);
+  useEffect(() => { instanceMatchesProblem.current = true; }, [problemInstance]);
+
   // Fetch main visualization data
   useEffect(() => {
     if (!instanceReady || !chosenVisualization) return;
+    if (!instanceMatchesProblem.current) return;
 
     let alive = true;
 
