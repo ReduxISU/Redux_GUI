@@ -3,8 +3,10 @@ import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
 import { getColorByKey } from '../constants/VisColorsArray';
 
+const GRAPH_MARGIN = { top: 200, right: 30, bottom: 30, left: 200 };
+
 function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
-  const margin = { top: 200, right: 30, bottom: 30, left: 200 },
+  const margin = GRAPH_MARGIN,
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
 
@@ -255,7 +257,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
         .text(d => d.name);
     }
 
-  }, [problemData, charge, gadgetMap]);
+  }, [problemData, charge, gadgetMap, height, width, margin.left, margin.top]);
 
   return (
     <svg

@@ -24,7 +24,7 @@ function useDefaultVerifierMap(url, problemInfoMap) {
     requestDefaultVerifierFileMap(url, problems, defaultVerifierNames).then((defaultVerifierFileNames) => {
       setDefaultVerifierMap(defaultVerifierFileNames);
     });
-  }, [problemInfoMap]);
+  }, [problemInfoMap, url]);
 
   //The requestDefaultVerifierFileMap sets the verifier names by the file name
   async function requestDefaultVerifierFileMap(url, problems, defaultVerifierNames) {
@@ -54,7 +54,7 @@ function useVerifierOptions(url, problemName, problemType) {
         problemName && problemType ? (await requestVerifiers(url, problemName, problemType)) ?? [] : []
       );
     })();
-  }, [problemName, problemType]);
+  }, [problemName, problemType, url]);
 
   return [verifierOptions, setVerifierOptions];
 }
@@ -93,7 +93,7 @@ function useVerifierNameMap(url, problemNameMap) {
     requestVerifierNameMap(url, problems).then((verifierMap) => {
       setVerifierNameMap(verifierMap);
     });
-  }, [problemNameMap]);
+  }, [problemNameMap, url]);
 
   //The following the functions are used to set the verifier names
   async function requestVerifierNameMap(url, problems) {

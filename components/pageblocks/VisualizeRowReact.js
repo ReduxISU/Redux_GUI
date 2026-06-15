@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { OverlayTrigger, Popover } from "react-bootstrap";
 import {
   Button,
   Switch,
   FormControlLabel,
   IconButton,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import {
   SkipPrevious,
@@ -143,7 +143,7 @@ export default function VisualizeRowReact({
     };
 
     fetchSolvedInstance();
-  }, [problemInstance, chosenSolver]);
+  }, [problemInstance, chosenSolver, url]);
 
   // Fetch reduction visualization
   useEffect(() => {
@@ -170,7 +170,7 @@ export default function VisualizeRowReact({
     };
 
     fetch();
-  }, [showReduction, chosenReduceTo, problemInstance, solution]);
+  }, [showReduction, chosenReduceTo, problemInstance, solution, chosenReductionType, url]);
 
 
   // Fetch main visualization data
@@ -216,6 +216,7 @@ export default function VisualizeRowReact({
     chosenVisualization,
     problemInstance,
     showReduction,
+    url,
   ]);
 
   // Fetch SAT3
@@ -246,7 +247,7 @@ export default function VisualizeRowReact({
     };
 
     fetchSAT3();
-  }, [problemInstance, problemName, chosenReductionType]);
+  }, [problemInstance, problemName, chosenReductionType, url]);
 
   useEffect(() => {
     setDisableSolution(!problemName);
@@ -369,19 +370,9 @@ export default function VisualizeRowReact({
               Refresh
             </Button>
 
-            <OverlayTrigger
+            <Tooltip
               placement="bottom"
-              overlay={
-                isDisabled ? (
-                  <Popover>
-                    <Popover.Body>
-                      Navigation disabled during reduction or gadget mode.
-                    </Popover.Body>
-                  </Popover>
-                ) : (
-                  <></>
-                )
-              }
+              title={isDisabled ? "Navigation disabled during reduction or gadget mode." : ""}
             >
               <div
                 style={{ display: "flex", alignItems: "center", gap: "4px" }}
@@ -425,7 +416,7 @@ export default function VisualizeRowReact({
                   <FastForward />
                 </IconButton>
               </div>
-            </OverlayTrigger>
+            </Tooltip>
           </div>
 
           {/* Switches */}

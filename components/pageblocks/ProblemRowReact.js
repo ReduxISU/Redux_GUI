@@ -130,7 +130,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     setProblemLocalInstance(problemVal);
     setProblemInstance(problemVal);
 
-  }, [problemInfo])
+  }, [problemInfo, setProblemInstance])
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {

@@ -41,7 +41,7 @@ function useSolverNameMap(url, problemNameMap) {
     requestSolverNameMap(url, problems).then((solverMap) => {
       setSolverNameMap(solverMap);
     });
-  }, [problemNameMap]);
+  }, [problemNameMap, url]);
 
   //The following the functions are used to set the solver names
   async function requestSolverNameMap(url, problems) {
@@ -71,7 +71,7 @@ function useDefaultSolverMap(url, problemInfoMap) {
     requestDefaultSolverFileMap(url, problems, defaultSolverNames).then((defaultSolverFileNames) => {
       setDefaultSolverMap(defaultSolverFileNames);
     });
-  }, [problemInfoMap]);
+  }, [problemInfoMap, url]);
 
   //The requestDefaultSolverFileMap sets the solver names by the file name
   async function requestDefaultSolverFileMap(url, problems, defaultSolverNames) {
@@ -99,7 +99,7 @@ function useSolverOptions(url, problemName, problemType) {
     (async () => {
       setSolverOptions(problemName && problemType ? (await requestSolvers(url, problemName, problemType)) ?? [] : []);
     })();
-  }, [problemName, problemType]);
+  }, [problemName, problemType, url]);
 
   return [solverOptions, setSolverOptions];
 }

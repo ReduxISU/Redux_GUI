@@ -32,7 +32,7 @@ export function useGenericInfo(url, info) {
     (async () => {
       setGenericInfo(!info ? {} : (await requestInfo(url, info)) ?? {});
     })();
-  }, [info]);
+  }, [info, url]);
 
   return genericInfo; // There should be no reason to set the information
 }

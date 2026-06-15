@@ -40,7 +40,7 @@ export default function VisualizationLogic({
   useEffect(() => {
     if (problemInstance && problemData) {
       setLoadingMap(true);
-      processReductions(url, chosenReductionType, problemInstance) 
+      processReductions(url, chosenReductionType, problemInstance)
         .then(rawGadgetMap => {
           const { gadgets, fromIdMap } = makeIdsUnique(rawGadgetMap);
           setGadgetMap(gadgets);
@@ -48,7 +48,7 @@ export default function VisualizationLogic({
         })
         .finally(() => setLoadingMap(false));
     }
-  }, [problemData]);
+  }, [problemData, url, chosenReductionType, problemInstance]);
 
 useEffect(() => {
   if (visualizationState.reductionOn && reductionVisualization && url && problemInstance) {
