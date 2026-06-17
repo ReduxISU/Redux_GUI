@@ -39,6 +39,9 @@ pids
 .next/cache/
 .eslintcache
 
+# ESLint SARIF output
+eslint-results.sarif
+
 # Local coverage
 coverage/
 
