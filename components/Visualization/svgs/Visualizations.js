@@ -4,6 +4,7 @@ import StandardCircuitSvgReact from "./StandardCircuitSvgReact";
 import QuantumCircuitVis from "../QuantumCircuitVis";
 import LaTeXGraphSvgReact from "./LaTeXGraphSvgReact";
 import StandardSetSvgReact from "./StandardSetSvgReact";
+import PumpSchedulingSvgReact from "./PumpSchedulingSvgReact";
 
 const Visualizations = new Map([
     ["Boolean Satisfiability" , (solve, url, problemData, gadgetMap, gadgetsOn) => {
@@ -69,6 +70,15 @@ const Visualizations = new Map([
                 url={url}
                 gadgetMap={gadgetMap}
                 gadgetsOn={gadgetsOn}
+            />
+        );
+    }],
+    ["pump", (solve, url, problemData) => {
+        return (
+            <PumpSchedulingSvgReact
+                problemData={problemData}
+                solve={solve}
+                url={url}
             />
         );
     }],
