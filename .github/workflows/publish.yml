@@ -5,6 +5,10 @@ on:
     branches:
       - ReduxAPI_GUI
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
