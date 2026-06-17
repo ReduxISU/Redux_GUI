@@ -125,7 +125,15 @@ export default function VisualizeRowReact({
   useEffect(() => {
     setProblemData([]);
     setCurrentProblemData(null);
+    setCurrentStep(0);
   }, [problemName, problemInstance, chosenVisualization]);
+
+  // When the problem changes with no auto-selected visualization, fall back to the first available option
+  useEffect(() => {
+    if (!chosenVisualization && VisualizationOptions?.length > 0) {
+      setChosenVisualization(VisualizationOptions[0]);
+    }
+  }, [problemName, VisualizationOptions, chosenVisualization]);
 
   // fetch solution when instance or solver changes, since it's needed for some visualizations and reductions
   const [solution, setSolution] = useState(undefined);
@@ -217,6 +225,7 @@ export default function VisualizeRowReact({
     problemInstance,
     showReduction,
     url,
+    problemName,
   ]);
 
   // Fetch SAT3

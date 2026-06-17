@@ -11,10 +11,10 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import TextField from '@mui/material/TextField';
+import { TextField } from '@mui/material';
 import { Button, Stack, Box } from "@mui/material";
-import FolderIcon from '@mui/icons-material/Folder';
-import DownloadIcon from '@mui/icons-material/Download';
+import { Folder as FolderIcon } from '@mui/icons-material';
+import { Download as DownloadIcon } from '@mui/icons-material';
 
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import { useProblemInfo } from '../hooks/ProblemProvider'
