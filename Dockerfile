@@ -16,9 +16,6 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
-ARG NEXT_PUBLIC_REDUX_BASE_URL=https://api.redux.portneuf.cose.isu.edu/
-ENV NEXT_PUBLIC_REDUX_BASE_URL=$NEXT_PUBLIC_REDUX_BASE_URL
-
 RUN npm run build
 
 # Production image, copy all the files and run next
