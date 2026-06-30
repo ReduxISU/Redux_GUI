@@ -386,61 +386,6 @@ export async function requestSolvedInstance(url, solver, instance) {
 }
 
 /**
- * Temporary solution to allow solving 3 SAT with a Clique solver.
- * All calls to this function should eventually be replace with `requestSolvedInstance`.
- * A verbose name was purposefully chosen as a reminder to fix this.
- * @returns the solved `instance` from the specified `solver`.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver, instance) {
-  // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
-  // remove first if once this functionality is added for all problems, the else code block was the original
-  // functionality
-  if (solver == "CliqueBruteForce - via SipserReduceToCliqueStandard") {
-    const reduction = await requestReducedInstance(url, "SipserReduceToCliqueStandard", instance);
-    if (!reduction) {
-      return undefined;
-    }
-
-    const solution = await requestSolvedInstance(url, "CliqueBruteForce", reduction.reductionTo.instance);
-    if (!solution) {
-      return undefined;
-    }
-
-    const mappedSolution = await fetchPostJson(
-      `${url}ProblemProvider/mapSolution?reduction=SipserReduceToSAT3&solution=${encodeURIComponent(solution)}`,
-      reduction.reductionTo.instance,
-      () => "TRANSITIVE SOLVED REQUEST FAILED"
-    );
-
-    return mappedSolution;
-  } else {
-    return await requestSolvedInstance(url, solver, instance);
-  }
-}
-
-/**
- * @returns the solved graph visualization of the problem instance.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolvedVisualization(url, problem, instance, solution) {
-  // TODO: convert to POST request for problem instance
-  var preparedSolution = solution.replaceAll("&", "%26");
-  var preparedInstance = instance.replaceAll("&", "%26");
-  if (problem == "SipserReduceToCliqueStandard") {
-    return await fetchJson(
-      `${url}${problem}/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  } else {
-    return await fetchJson(
-      `${url}${problem}Generic/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  }
-}
-
-/**
  * @returns the `steps` from the specified `solver`.
  * @returns `undefined` on failure and logs the error.
  */

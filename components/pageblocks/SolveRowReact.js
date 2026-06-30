@@ -14,7 +14,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "@mui/material";
 import { Download as DownloadIcon } from '@mui/icons-material';
 
-import { requestSolvedInstanceTemporarySat3CliqueSolver } from "../redux";
+import { requestSolvedInstance } from "../redux";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import ProblemSection from "../widgets/ProblemSection";
@@ -48,7 +48,7 @@ export default function SolveRowReact({
   async function handleSolve() {
     setSolvedInstance(
       chosenSolver && problemInstance
-        ? (await requestSolvedInstanceTemporarySat3CliqueSolver(url, chosenSolver, problemInstance)) ?? ""
+        ? (await requestSolvedInstance(url, chosenSolver, problemInstance)) ?? ""
         : ""
     );
   }
