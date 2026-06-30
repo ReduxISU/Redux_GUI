@@ -290,57 +290,6 @@ export async function requestReductionVisualization(url, reduction, solution, in
   );
 }
 
-export async function processReductionVisualizations(url, reductionPath, instance) {
-  const reductions = reductionPath.split("-").map(r => r.trim());
-
-  let currentInstance = instance;
-  let solution = requestSolvedInstance(url, solver, currentInstance)
-  let finalVisualization = null;
-
-  for (const reduction of reductions) {
-    finalVisualization = await requestReductionVisualization(url, reduction, currentInstance, solution);
-    const info = await requestInfo(url, reduction, instance);
-    currentInstance = info.reductionTo.defaultInstance;
-    solution = requestMappedSolution(url, solution, currentInstance);
-  }
-
-  return finalVisualization;
-}
-
-/**
- * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
- */
-export async function requestMappedSolutionTransitive(url, reductionPath, problemInstance, solution) {
-  let problemFrom = problemInstance;
-  let mappedSolution = solution;
-  for (const reduction of reductionPath.split("-")) {
-    const reduced = await requestReducedInstance(url, reduction, problemFrom);
-    if (!reduced) {
-      console.log(`${reductionPath} AT ${reduction} REDUCTION FOR SOLUTION MAPPING REQUEST FAILED`);
-      break;
-    }
-    const problemTo = reduced.reductionTo.instance;
-
-    const solution = await requestMappedSolution(url, reduction, problemFrom, problemTo, mappedSolution);
-    if (!solution) {
-      console.log("SOLUTION MAPPING REQUEST FAILED");
-      break;
-    }
-    mappedSolution = solution;
-
-    problemFrom = problemTo;
-  }
-  return mappedSolution;
-}
-
-export async function requestMappedSolution(url, reduction, problemFrom, problemTo, solution) {
-  return await fetchPostJson(
-    `${url}${reduction}/mapSolution`,
-    { problemFrom: problemFrom, problemTo: problemTo, problemFromSolution: solution },
-    () => `${reduction} MAPPED SOLUTION REQUEST FAILED`
-  );
-}
-
 /**
  * @returns an array of all implemented problems identifiers.
  * @returns `undefined` on failure and logs the error.
