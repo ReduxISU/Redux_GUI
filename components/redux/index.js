@@ -335,18 +335,6 @@ export async function requestSolvedInstance(url, solver, instance) {
 }
 
 /**
- * @returns the `steps` from the specified `solver`.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolverSteps(url, solver, instance) {
-  return await fetchPostJson(
-    `${url}ProlemProvider/steps?solver=${solver}`,
-    instance,
-    () => `${solver} SOLVED INSTANCE REQUEST FAILED`
-  );
-}
-
-/**
  * @returns an array of solvers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */
