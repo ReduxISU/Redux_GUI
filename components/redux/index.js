@@ -300,8 +300,9 @@ export async function processReductionVisualizations(url, reductionPath, instanc
   for (const reduction of reductions) {
     finalVisualization = await requestReductionVisualization(url, reduction, currentInstance, solution);
     const info = await requestInfo(url, reduction, instance);
+    const sourceInstance = currentInstance;
     currentInstance = info.reductionTo.defaultInstance;
-    solution = requestMappedSolution(url, solution, currentInstance);
+    solution = await requestMappedSolution(url, reduction, sourceInstance, currentInstance, solution);
   }
 
   return finalVisualization;
@@ -334,9 +335,12 @@ export async function requestMappedSolutionTransitive(url, reductionPath, proble
 }
 
 export async function requestMappedSolution(url, reduction, problemFrom, problemTo, solution) {
+  // Canonical generic route. The backend constructs the reduction object from
+  // the source instance (problemFrom); `solution` is the certificate to map.
+  // problemTo is no longer needed by the API and is kept only for caller compat.
   return await fetchPostJson(
-    `${url}${reduction}/mapSolution`,
-    { problemFrom: problemFrom, problemTo: problemTo, problemFromSolution: solution },
+    `${url}ProblemProvider/mapSolution?reduction=${reduction}&solution=${encodeURIComponent(solution)}`,
+    problemFrom,
     () => `${reduction} MAPPED SOLUTION REQUEST FAILED`
   );
 }
