@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { OverlayTrigger, Popover } from "react-bootstrap";
 import {
   Button,
   Switch,
   FormControlLabel,
   IconButton,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import {
   SkipPrevious,
@@ -32,6 +32,7 @@ import {
   requestReducedInstance,
   requestVisualization,
   requestReductionVisualization,
+  requestSolvedInstance,
 } from "../redux";
 
 import VisualizationLogic from "../widgets/VisualizationLogic";
@@ -124,19 +125,51 @@ export default function VisualizeRowReact({
   useEffect(() => {
     setProblemData([]);
     setCurrentProblemData(null);
+    setCurrentStep(0);
   }, [problemName, problemInstance, chosenVisualization]);
+
+  // When the problem changes with no auto-selected visualization, fall back to the first available option
+  useEffect(() => {
+    if (!chosenVisualization && VisualizationOptions?.length > 0) {
+      setChosenVisualization(VisualizationOptions[0]);
+    }
+  }, [problemName, VisualizationOptions, chosenVisualization]);
+
+  // fetch solution when instance or solver changes, since it's needed for some visualizations and reductions
+  const [solution, setSolution] = useState(undefined);
+
+  useEffect(() => {
+    if (!problemInstance || !chosenSolver) return;
+
+    const fetchSolvedInstance = async () => {
+      try {
+        const solved = await requestSolvedInstance(url, chosenSolver, problemInstance);
+        setSolution(solved);
+      } catch (err) {
+        console.error("Failed to solve instance:", err);
+      }
+    };
+
+    fetchSolvedInstance();
+  }, [problemInstance, chosenSolver, url]);
 
   // Fetch reduction visualization
   useEffect(() => {
-    if (!chosenReduceTo || !problemInstance || !showReduction) return;
+    if (
+      !chosenReduceTo ||
+      !problemInstance ||
+      !showReduction ||
+      !solution
+    )
+      return;
 
     const fetch = async () => {
       try {
         const data = await requestReductionVisualization(
           url,
           chosenReductionType,
-          problemInstance,
-          chosenSolver
+          solution,
+          problemInstance
         );
         setProblemReductionData(data ?? []);
       } catch (err) {
@@ -145,7 +178,8 @@ export default function VisualizeRowReact({
     };
 
     fetch();
-  }, [showReduction, problemName, problemInstance]);
+  }, [showReduction, chosenReduceTo, problemInstance, solution, chosenReductionType, url]);
+
 
   // Fetch main visualization data
   useEffect(() => {
@@ -159,7 +193,6 @@ export default function VisualizeRowReact({
           url,
           chosenVisualization,
           problemInstance,
-          chosenSolver
         );
 
         if (!alive) return;
@@ -190,8 +223,9 @@ export default function VisualizeRowReact({
     instanceReady,
     chosenVisualization,
     problemInstance,
-    chosenSolver,
     showReduction,
+    url,
+    problemName,
   ]);
 
   // Fetch SAT3
@@ -222,7 +256,7 @@ export default function VisualizeRowReact({
     };
 
     fetchSAT3();
-  }, [problemInstance, problemName, chosenReductionType]);
+  }, [problemInstance, problemName, chosenReductionType, url]);
 
   useEffect(() => {
     setDisableSolution(!problemName);
@@ -284,18 +318,18 @@ export default function VisualizeRowReact({
 
   const tip = chosenVisualization
     ? {
-        header: visualizationInfo.visualizationName ?? "",
-        formalDef: visualizationInfo.visualizationDefinition ?? "",
-        info: visualizationInfo.info ?? visualizationInfo.description ?? "",
-        source: visualizationInfo.source,
-        credit:
-          Array.isArray(visualizationInfo.contributors) &&
+      header: visualizationInfo.visualizationName ?? "",
+      formalDef: visualizationInfo.visualizationDefinition ?? "",
+      info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+      source: visualizationInfo.source,
+      credit:
+        Array.isArray(visualizationInfo.contributors) &&
           visualizationInfo.contributors.length
-            ? visualizationInfo.contributors.join(", ")
-            : "",
-        componentLink: visualizationInfo.visualizationLink || "",
-        sourceLink: visualizationInfo.sourceLink || "",
-      }
+          ? visualizationInfo.contributors.join(", ")
+          : "",
+      componentLink: visualizationInfo.visualizationLink || "",
+      sourceLink: visualizationInfo.sourceLink || "",
+    }
     : TOOLTIP;
 
   return (
@@ -345,19 +379,9 @@ export default function VisualizeRowReact({
               Refresh
             </Button>
 
-            <OverlayTrigger
+            <Tooltip
               placement="bottom"
-              overlay={
-                isDisabled ? (
-                  <Popover>
-                    <Popover.Body>
-                      Navigation disabled during reduction or gadget mode.
-                    </Popover.Body>
-                  </Popover>
-                ) : (
-                  <></>
-                )
-              }
+              title={isDisabled ? "Navigation disabled during reduction or gadget mode." : ""}
             >
               <div
                 style={{ display: "flex", alignItems: "center", gap: "4px" }}
@@ -401,7 +425,7 @@ export default function VisualizeRowReact({
                   <FastForward />
                 </IconButton>
               </div>
-            </OverlayTrigger>
+            </Tooltip>
           </div>
 
           {/* Switches */}

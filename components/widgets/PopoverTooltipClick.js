@@ -1,88 +1,118 @@
-import { OverlayTrigger, Popover, Button } from 'react-bootstrap';
+import { useState } from 'react';
+import {
+  Box,
+  Divider,
+  Link,
+  Popover,
+  Typography,
+} from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
-function popOver(props) {
-  const t = props?.toolTip || {};
+function PopoverTooltipClick({ toolTip = {} }) {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (e) => {
+    setAnchorEl(e.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const t = toolTip || {};
 
   return (
-    <Popover id="popover-basic" className="tooltip">
-      {t.header && (
-        <Popover.Header as="h3" style={{ fontWeight: 700 }}>
-          {t.header}
-        </Popover.Header>
-      )}
+    <>
+      <InfoOutlinedIcon
+        onClick={handleClick}
+        style={{ cursor: 'pointer' }}
+        fontSize="small"
+      />
 
-      <Popover.Body style={{ maxWidth: 480, lineHeight: 1.35 }}>
-        {t.formalDef && t.isMathDef ? (
-          <div
-            style={{
-              padding: "8px 10px",
-              borderRadius: 6,
-              background: "rgba(0,0,0,0.06)",
-              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-              whiteSpace: "pre-wrap",
-              marginBottom: 12
-            }}
-          >
-            {t.formalDef}
-          </div>
-        ) : t.formalDef ? (
-          <div style={{ marginBottom: 12 }}>{t.formalDef}</div>
-        ) : null}
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        disableRestoreFocus
+      >
+        <Box sx={{ maxWidth: 520, p: 0 }}>
+          {t.header && (
+            <>
+              <Box sx={{ px: 2, py: 1, fontWeight: 700, bgcolor: 'grey.100' }}>
+                <Typography variant="subtitle2" fontWeight={700}>
+                  {t.header}
+                </Typography>
+              </Box>
+              <Divider />
+            </>
+          )}
 
-        {t.info ? (
-          <div style={{ marginBottom: 12, whiteSpace: "pre-wrap" }}>
-            <strong>Definition:</strong> {t.info}
-            {t.componentLink && (
-              <a
-                href={t.componentLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ marginLeft: 4 }}
+          <Box sx={{ px: 2, py: 1.5, maxWidth: 480 }}>
+            {t.formalDef && t.isMathDef ? (
+              <Box
+                sx={{
+                  p: '8px 10px',
+                  borderRadius: 1,
+                  bgcolor: 'rgba(0,0,0,0.06)',
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                  fontSize: '0.85em',
+                  whiteSpace: 'pre-wrap',
+                  mb: 1.5,
+                }}
               >
-                <OpenInNewIcon fontSize="small" />
-              </a>
-            )}
-          </div>
-        ) : null}
+                {t.formalDef}
+              </Box>
+            ) : t.formalDef ? (
+              <Typography variant="body2" sx={{ mb: 1.5 }}>
+                {t.formalDef}
+              </Typography>
+            ) : null}
 
-        {t.source ? (
-          <div style={{ marginBottom: 6 }}>
-            <strong>Source:</strong> {t.source}
-            {t.sourceLink && (
-              <a
-                href={t.sourceLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ marginLeft: 4 }}
-              >
-                <OpenInNewIcon fontSize="small" />
-              </a>
-            )}
-          </div>
-        ) : null}
+            {t.info ? (
+              <Typography variant="body2" sx={{ mb: 1.5, whiteSpace: 'pre-wrap', lineHeight: 1.35 }}>
+                <strong>Definition:</strong> {t.info}
+                {t.componentLink && (
+                  <Link
+                    href={t.componentLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{ ml: 0.5, verticalAlign: 'middle' }}
+                  >
+                    <OpenInNewIcon fontSize="inherit" />
+                  </Link>
+                )}
+              </Typography>
+            ) : null}
 
-        {t.credit ? (
-          <div>
-            <strong>Contributed by:</strong> {t.credit}
-          </div>
-        ) : null}
-      </Popover.Body>
-    </Popover>
-  );
-}
+            {t.source ? (
+              <Typography variant="body2" sx={{ mb: 0.75, lineHeight: 1.35 }}>
+                <strong>Source:</strong> {t.source}
+                {t.sourceLink && (
+                  <Link
+                    href={t.sourceLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{ ml: 0.5, verticalAlign: 'middle' }}
+                  >
+                    <OpenInNewIcon fontSize="inherit" />
+                  </Link>
+                )}
+              </Typography>
+            ) : null}
 
-function PopoverTooltipClick(props) {
-  return (
-    <OverlayTrigger
-      rootClose={true}
-      trigger="click"
-      placement="bottom"
-      overlay={popOver(props)}
-    >
-      <InfoOutlinedIcon style={{ cursor: "pointer" }} />
-    </OverlayTrigger>
+            {t.credit ? (
+              <Typography variant="body2" sx={{ lineHeight: 1.35 }}>
+                <strong>Contributed by:</strong> {t.credit}
+              </Typography>
+            ) : null}
+          </Box>
+        </Box>
+      </Popover>
+    </>
   );
 }
 

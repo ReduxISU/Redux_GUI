@@ -22,7 +22,7 @@ export function useProblemInfo(url, problemName) {
     (async () => {
       setProblemInfo(problemName ? (await requestInfo(url, problemName)) ?? {} : {});
     })();
-  }, [problemName]);
+  }, [problemName, url]);
 
   return problemInfo; // There should be no reason to set the problem information
 }
@@ -35,7 +35,7 @@ function useProblemInfoMap(url) {
       const problems = (await requestProblems(url)) ?? [];
       setProblemInfoMap(await requestProblemInfoMap(url, problems));
     })();
-  }, []);
+  }, [url]);
 
   async function requestProblemInfoMap(url, problems) {
     let map = new Map();

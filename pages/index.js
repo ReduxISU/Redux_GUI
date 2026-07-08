@@ -38,8 +38,7 @@ const VisualizeRowMemo = memo(VisualizeRowReact);
 const SolveRowMemo = memo(SolveRowReact);
 const VerifyRowMemo = memo(VerifyRowReact);
 
-//const reduxBaseUrl = 'http://redux.aws.cose.isu.edu:27000/';
-const reduxBaseUrl = process.env.NEXT_PUBLIC_REDUX_BASE_URL; //redux url. Note the trailing slash
+const reduxBaseUrl = '/api/redux/';
 /**
  * Generates the actual page contents
  *
@@ -137,14 +136,15 @@ function MainPageContent() {
         {/* </footer> */}
       </ThemeProvider>
       <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="10vh"
-        // marginTop={'25%'}
-        //Tried to push the logo down with the margin
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "10vh",
+          // marginTop: '25%',
+        }}
       >
-        <Image src={isulogo} height={125} width={500}></Image>
+        <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
       </Box>
     </>
   );

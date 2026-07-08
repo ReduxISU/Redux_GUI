@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from 'react-bootstrap/Button';
-import ShareIcon from '@mui/icons-material/Share';
+import { Share as ShareIcon } from '@mui/icons-material';
 
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 

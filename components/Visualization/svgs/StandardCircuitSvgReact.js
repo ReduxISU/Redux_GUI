@@ -9,6 +9,33 @@ const CIRCUIT_MARGIN = { top: 80, right: 30, bottom: 40, left: 70 };
 const GATE_WIDTH = 44;
 const GATE_HEIGHT = 26;
 
+const GATE_PALETTE = {
+  oracle: { label: "Oracle", fill: getColorByKey("Purple") || "#AA4499" },
+  block: { label: "Block", fill: getColorByKey("Sand") || "#DDCC77" },
+  rz: { label: "RZ", fill: getColorByKey("Teal") || "#44AA99" },
+  ry: { label: "RY", fill: getColorByKey("Cyan") || "#88CCEE" },
+  rx: { label: "RX", fill: getColorByKey("Rose") || "#CC6677" },
+  u3: { label: "U3", fill: getColorByKey("Olive") || "#999933" },
+  u2: { label: "U2", fill: getColorByKey("Olive") || "#999933" },
+  u1: { label: "U1", fill: getColorByKey("Olive") || "#999933" },
+};
+const GATE_TITLE_MAP = {
+  h: "Hadamard",
+  x: "Pauli-X",
+  y: "Pauli-Y",
+  z: "Pauli-Z",
+  cx: "CNOT",
+  m: "Measurement",
+  oracle: "Oracle",
+  block: "Block",
+  rz: "RZ",
+  ry: "RY",
+  rx: "RX",
+  u1: "U1",
+  u2: "U2",
+  u3: "U3",
+};
+
 // Renders a quantum circuit layout using D3. Supports single-qubit gates (h, x),
 // controlled-not (cx), measurements (m), and additional labeled gates (oracle, block,
 // rz, ry, u3, etc). If the backend sends an  payload string, we parse it;
@@ -26,32 +53,8 @@ export default function StandardCircuitSvgReact({
 
   const parsedData = parseCircuitData(problemData);
 
-  const gatePalette = {
-    oracle: { label: "Oracle", fill: getColorByKey("Purple") || "#AA4499" },
-    block: { label: "Block", fill: getColorByKey("Sand") || "#DDCC77" },
-    rz: { label: "RZ", fill: getColorByKey("Teal") || "#44AA99" },
-    ry: { label: "RY", fill: getColorByKey("Cyan") || "#88CCEE" },
-    rx: { label: "RX", fill: getColorByKey("Rose") || "#CC6677" },
-    u3: { label: "U3", fill: getColorByKey("Olive") || "#999933" },
-    u2: { label: "U2", fill: getColorByKey("Olive") || "#999933" },
-    u1: { label: "U1", fill: getColorByKey("Olive") || "#999933" },
-  };
-  const gateTitleMap = {
-    h: "Hadamard",
-    x: "Pauli-X",
-    y: "Pauli-Y",
-    z: "Pauli-Z",
-    cx: "CNOT",
-    m: "Measurement",
-    oracle: "Oracle",
-    block: "Block",
-    rz: "RZ",
-    ry: "RY",
-    rx: "RX",
-    u1: "U1",
-    u2: "U2",
-    u3: "U3",
-  };
+  const gatePalette = GATE_PALETTE;
+  const gateTitleMap = GATE_TITLE_MAP;
 
   useEffect(() => {
     if (!parsedData) return;
@@ -507,7 +510,7 @@ export default function StandardCircuitSvgReact({
         offsetX += 18 + label.length * 7;
       });
     }
-  }, [parsedData, useSolutionCircuit]);
+  }, [parsedData, useSolutionCircuit, gatePalette, gateTitleMap, margin.bottom, margin.left, margin.right, margin.top]);
 
   const oracle = parsedData?.metadata?.oracleType;
   const solution = parsedData?.metadata?.solution;

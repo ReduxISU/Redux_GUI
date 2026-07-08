@@ -14,13 +14,7 @@ export function useSolver(url, problemName, problemType, problemNameMap, problem
 }
 
 export function useSolverInfo(url, solver) {
-  // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
-  // remove first if once this functionality is added for all problems, the false expression was the original
-  // functionality
-  return useGenericInfo(
-    url,
-    solver === "CliqueBruteForce - via SipserReduceToCliqueStandard" ? "CliqueBruteForce" : solver
-  );
+  return useGenericInfo(url, solver);
 }
 
 function useSolvedInstance(problemInstance, chosenSolver) {
@@ -41,7 +35,7 @@ function useSolverNameMap(url, problemNameMap) {
     requestSolverNameMap(url, problems).then((solverMap) => {
       setSolverNameMap(solverMap);
     });
-  }, [problemNameMap]);
+  }, [problemNameMap, url]);
 
   //The following the functions are used to set the solver names
   async function requestSolverNameMap(url, problems) {
@@ -71,7 +65,7 @@ function useDefaultSolverMap(url, problemInfoMap) {
     requestDefaultSolverFileMap(url, problems, defaultSolverNames).then((defaultSolverFileNames) => {
       setDefaultSolverMap(defaultSolverFileNames);
     });
-  }, [problemInfoMap]);
+  }, [problemInfoMap, url]);
 
   //The requestDefaultSolverFileMap sets the solver names by the file name
   async function requestDefaultSolverFileMap(url, problems, defaultSolverNames) {
@@ -99,7 +93,7 @@ function useSolverOptions(url, problemName, problemType) {
     (async () => {
       setSolverOptions(problemName && problemType ? (await requestSolvers(url, problemName, problemType)) ?? [] : []);
     })();
-  }, [problemName, problemType]);
+  }, [problemName, problemType, url]);
 
   return [solverOptions, setSolverOptions];
 }
