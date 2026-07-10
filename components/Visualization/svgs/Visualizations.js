@@ -5,6 +5,7 @@ import QuantumCircuitVis from "../QuantumCircuitVis";
 import LaTeXGraphSvgReact from "./LaTeXGraphSvgReact";
 import StandardSetSvgReact from "./StandardSetSvgReact";
 import PumpSchedulingSvgReact from "./PumpSchedulingSvgReact";
+import SSSPTableVisualization from "./SSSPTableSvgReact";
 
 const Visualizations = new Map([
     ["Boolean Satisfiability" , (solve, url, problemData, gadgetMap, gadgetsOn) => {
@@ -82,6 +83,15 @@ const Visualizations = new Map([
             />
         );
     }],
+    ["SSSP Table", (solve, url, problemData) => {
+        return (
+            <SSSPTableVisualization
+                problemData={problemData}
+                solve={solve}
+                url={url}
+            />
+        );
+    }]
 ])
 
 export default Visualizations;
