@@ -26,7 +26,6 @@ async function fetchJson(url, failMsg) {
  * @returns the JSON format of the fetch request.
  * @returns `undefined` on failure and logs the error.
  */
-//Batch endpoints are POSTs with no body. 
 async function fetchPostJson(url, body, failMsg) {
   try {
     const options = {
@@ -48,8 +47,6 @@ async function fetchPostJson(url, body, failMsg) {
   }
   return undefined;
 }
-
-
 
 /**
  * This function is a temporary solution for validating user input until it is ported to the Redux API.
