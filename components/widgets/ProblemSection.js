@@ -53,7 +53,7 @@ export default function ProblemSection({ children, defaultCollapsed = true }) {
 ProblemSection.Header = function Header({ children, title, titleWidth }) {
   return (
     <Card.Header>
-      <Stack direction="row" gap={2} alignItems="center">
+      <Stack direction="row" gap={2} sx={{ alignItems: "center" }}>
         <Box
           sx={{
             width: titleWidth ?? "10%",

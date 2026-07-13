@@ -314,58 +314,6 @@ export async function requestReductionVisualization(url, reduction, solver, inst
   );
 }
 
-export async function processReductionVisualizations(url, reductionPath, instance) {
-  const reductions = reductionPath.split("-").map(r => r.trim());
-
-  let currentInstance = instance;
-  let solution = requestSolvedInstance(url, solver, currentInstance)
-  let finalVisualization = null;
-
-  for (const reduction of reductions) {
-    finalVisualization = await requestReductionVisualization(url, reduction, currentInstance, solution);
-    const allInfo = await requestAllInfo(url);
-    const info = allInfo[reduction];
-    currentInstance = info.reductionTo.defaultInstance;
-    solution = requestMappedSolution(url, solution, currentInstance);
-  }
-
-  return finalVisualization;
-}
-
-/**
- * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
- */
-export async function requestMappedSolutionTransitive(url, reductionPath, problemInstance, solution) {
-  let problemFrom = problemInstance;
-  let mappedSolution = solution;
-  for (const reduction of reductionPath.split("-")) {
-    const reduced = await requestReducedInstance(url, reduction, problemFrom);
-    if (!reduced) {
-      console.log(`${reductionPath} AT ${reduction} REDUCTION FOR SOLUTION MAPPING REQUEST FAILED`);
-      break;
-    }
-    const problemTo = reduced.reductionTo.instance;
-
-    const solution = await requestMappedSolution(url, reduction, problemFrom, problemTo, mappedSolution);
-    if (!solution) {
-      console.log("SOLUTION MAPPING REQUEST FAILED");
-      break;
-    }
-    mappedSolution = solution;
-
-    problemFrom = problemTo;
-  }
-  return mappedSolution;
-}
-
-export async function requestMappedSolution(url, reduction, problemFrom, problemTo, solution) {
-  return await fetchPostJson(
-    `${url}${reduction}/mapSolution`,
-    { problemFrom: problemFrom, problemTo: problemTo, problemFromSolution: solution },
-    () => `${reduction} MAPPED SOLUTION REQUEST FAILED`
-  );
-}
-
 /**
  * @returns an array of all implemented problems identifiers.
  * @returns `undefined` on failure and logs the error.
@@ -401,67 +349,6 @@ export async function requestReductions(url, problemFrom, problemTo, problemType
 export async function requestSolvedInstance(url, solver, instance) {
   return await fetchPostJson(
     `${url}ProblemProvider/solve?solver=${solver}`,
-    instance,
-    () => `${solver} SOLVED INSTANCE REQUEST FAILED`
-  );
-}
-/**
- * Temporary solution to allow solving 3 SAT with a Clique solver.
- * All calls to this function should eventually be replace with `requestSolvedInstance`.
- * A verbose name was purposefully chosen as a reminder to fix this.
- * @returns the solved `instance` from the specified `solver`.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver, instance) {
-  // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
-  // remove first if once this functionality is added for all problems, the else code block was the original
-  // functionality
-  if (solver == "CliqueBruteForce - via SipserReduceToCliqueStandard") {
-    const reduction = await requestReducedInstance(url, "SipserReduceToCliqueStandard", instance);
-    if (!reduction) {
-      return undefined;
-    }
-    const solution = await requestSolvedInstance(url, "CliqueBruteForce", reduction.reductionTo.instance);
-    if (!solution) {
-      return undefined;
-    }
-    const mappedSolution = await fetchPostJson(
-      `${url}SipserReduceToCliqueStandard/reverseMappedSolution`,
-      { problemFrom: instance, problemTo: reduction.reductionTo.instance, problemFromSolution: solution },
-      () => "TRANSITIVE SOLVED REQUEST FAILED"
-    );
-    return mappedSolution;
-  } else {
-    return await requestSolvedInstance(url, solver, instance);
-  }
-}
-/**
- * @returns the solved graph visualization of the problem instance.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolvedVisualization(url, problem, instance, solution) {
-  // TODO: convert to POST request for problem instance
-  var preparedSolution = solution.replaceAll("&", "%26");
-  var preparedInstance = instance.replaceAll("&", "%26");
-  if (problem == "SipserReduceToCliqueStandard") {
-    return await fetchJson(
-      `${url}${problem}/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  } else {
-    return await fetchJson(
-      `${url}${problem}Generic/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  }
-}
-/**
- * @returns the `steps` from the specified `solver`.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolverSteps(url, solver, instance) {
-  return await fetchPostJson(
-    `${url}ProblemProvider/steps?solver=${solver}`,
     instance,
     () => `${solver} SOLVED INSTANCE REQUEST FAILED`
   );

@@ -18,11 +18,13 @@ export default function SearchBarExtensible({
   return (
     <Autocomplete
       {...props}
-      PaperComponent={({ children }) => (
-        <SearchBarPaper input={input} optionsMap={optionsMap} extenderButtons={extenderButtons}>
-          {children}
-        </SearchBarPaper>
-      )}
+      slots={{
+        paper: ({ children }) => (
+          <SearchBarPaper input={input} optionsMap={optionsMap} extenderButtons={extenderButtons}>
+            {children}
+          </SearchBarPaper>
+        ),
+      }}
       onInputChange={(event, value) => {
         setInput(value ?? "");
       }}
@@ -46,11 +48,17 @@ export default function SearchBarExtensible({
       sx={{ width: 300 }}
       style={{ width: "100%" }}
       freeSolo
-      renderInput={(params) => (
+      renderInput={({ slotProps: acSlots, ...params }) => (
         <TextField
           {...params}
           label={placeholder}
-          InputProps={disabled ? { ...params.InputProps, style: { fontSize: 12 } } : { ...params.InputProps }}
+          slotProps={{
+            ...acSlots,
+            input: {
+              ...acSlots?.input,
+              ...(disabled ? { style: { fontSize: 12 } } : {}),
+            },
+          }}
         />
       )}
       // For rendering highlighted options with greater opacity

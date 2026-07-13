@@ -9,9 +9,8 @@
 
 
 import dynamic from "next/dynamic";
-// import { useEffect, useState } from "react";
 
-const Graphviz = dynamic(() => import("graphviz-react"), { ssr: false });
+const Graphviz = dynamic(() => import("./GraphvizWrapper"), { ssr: false });
 
 
 const graphTest = `graph GRAPHCOLORING {  

@@ -3,8 +3,10 @@ import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
 import { getColorByKey } from '../constants/VisColorsArray';
 
+const GRAPH_MARGIN = { top: 200, right: 30, bottom: 30, left: 200 };
+
 function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
-  const margin = { top: 200, right: 30, bottom: 30, left: 200 },
+  const margin = GRAPH_MARGIN,
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
 
@@ -207,8 +209,20 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
       .duration(FADE_DURATION_MS)
       .attr("fill", d => getColorByKey(d.color));
 
+    // Draw edge weight labels for weighted graphs (MaxCut, MinSTCut, etc.)
+    const linkLabel = svg.selectAll(".link-label")
+      .data(data.links.filter(d => d.weighted))
+      .enter()
+      .append("text")
+      .attr("class", "link-label")
+      .attr("fill", "black")
+      .attr("font-size", "11px")
+      .attr("text-anchor", "middle")
+      .style("pointer-events", "none")
+      .text(d => d.weight);
+
     // Draw labels
-    const text = svg.selectAll("text")
+    const text = svg.selectAll("text:not(.link-label)")
       .data(data.nodes)
       .enter()
       .append("text")
@@ -248,6 +262,11 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
         .attr("cx", d => d.x)
         .attr("cy", d => d.y);
 
+      linkLabel
+        .attr("x", d => (d.source.x + d.target.x) / 2)
+        .attr("y", d => (d.source.y + d.target.y) / 2)
+        .attr("dy", -4);
+
       text
         .attr("x", d => d.x)
         .attr("y", d => d.y)
@@ -255,7 +274,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
         .text(d => d.name);
     }
 
-  }, [problemData, charge, gadgetMap]);
+  }, [problemData, charge, gadgetMap, height, width, margin.left, margin.top]);
 
   return (
     <svg
