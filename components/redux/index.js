@@ -413,66 +413,94 @@ export async function requestVisualizations(url, problem, problemType = "NPC") {
  * @returns an object mapping problem names for the given `problemType`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestAllProblems(url, problemType = "NPC") {
-  return await fetchPostJson(
-    `${url}Navigation/Batch/allProblems?problemType=${problemType}`,
-    undefined,
-    () => `ALL PROBLEMS REQUEST FAILED`
+export function requestAllProblems(url, problemType = "NPC") {
+  return cachedRequest(
+    `${url}|${problemType}|allProblems`,
+    () =>
+      fetchPostJson(
+        `${url}Navigation/Batch/allProblems?problemType=${problemType}`,
+        undefined,
+        () => "ALL PROBLEMS REQUEST FAILED"
+      )
   );
 }
 /**
  * @returns an object mapping each problem to its available solvers.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestAllSolvers(url, problemType = "NPC") {
-  return await fetchPostJson(
-    `${url}Navigation/Batch/allSolvers?problemType=${problemType}`,
-    undefined,
-    () => `ALL SOLVERS REQUEST FAILED`
+export function requestAllSolvers(url, problemType = "NPC") {
+  return cachedRequest(
+    `${url}|${problemType}|allSolvers`,
+    () =>
+      fetchPostJson(
+        `${url}Navigation/Batch/allSolvers?problemType=${problemType}`,
+        undefined,
+        () => "ALL SOLVERS REQUEST FAILED"
+      )
   );
 }
 /**
  * @returns an object mapping each problem to its available verifiers.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestAllVerifiers(url, problemType = "NPC") {
-  return await fetchPostJson(
-    `${url}Navigation/Batch/allVerifiers?problemType=${problemType}`,
-    undefined,
-    () => `ALL VERIFIERS REQUEST FAILED`
+export function requestAllVerifiers(url, problemType = "NPC") {
+  return cachedRequest(
+    `${url}|${problemType}|allVerifiers`,
+    () =>
+      fetchPostJson(
+        `${url}Navigation/Batch/allVerifiers?problemType=${problemType}`,
+        undefined,
+        () => "ALL VERIFIERS REQUEST FAILED"
+      )
   );
 }
 /**
  * @returns an object mapping each problem to its available visualizations.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestAllVisualizations(url, problemType = "NPC") {
-  return await fetchPostJson(
-    `${url}Navigation/Batch/allVisualizations?problemType=${problemType}`,
-    undefined,
-    () => `ALL VISUALIZATIONS REQUEST FAILED`
+export function requestAllVisualizations(url, problemType = "NPC") {
+  return cachedRequest(
+    `${url}|${problemType}|allVisualizations`,
+    () =>
+      fetchPostJson(
+        `${url}Navigation/Batch/allVisualizations?problemType=${problemType}`,
+        undefined,
+        () => "ALL VISUALIZATIONS REQUEST FAILED"
+      )
   );
 }
-const allInfoCache = new Map();
+const requestCache = new Map();
+
+async function cachedRequest(cacheKey, requestFn) {
+  if (requestCache.has(cacheKey)) {
+    return requestCache.get(cacheKey);
+  }
+
+  const promise = requestFn();
+  requestCache.set(cacheKey, promise);
+
+  const result = await promise;
+
+  // Don't cache failed requests.
+  if (!result) {
+    requestCache.delete(cacheKey);
+  }
+
+  return result;
+}
 /**
  * @returns an object containing metadata (`info`) for all interfaces (problems, solvers, verifiers, visualizations).
  * @returns cached data when available to reduce API calls.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestAllInfo(url, problemType = "NPC") {
-  const cacheKey = `${url}|${problemType}`;
-  if (allInfoCache.has(cacheKey)) {
-    return await allInfoCache.get(cacheKey);
-  }
-  const promise = fetchPostJson(
-    `${url}Navigation/Batch/allInfo?problemType=${problemType}`,
-    undefined,
-    () => `ALL INFO REQUEST FAILED`
+export function requestAllInfo(url, problemType = "NPC") {
+  return cachedRequest(
+    `${url}|${problemType}|allInfo`,
+    () =>
+      fetchPostJson(
+        `${url}Navigation/Batch/allInfo?problemType=${problemType}`,
+        undefined,
+        () => "ALL INFO REQUEST FAILED"
+      )
   );
-  allInfoCache.set(cacheKey, promise);
-  const result = await promise;
-  if (!result) {
-    allInfoCache.delete(cacheKey);
-  }
-  return result;
 }
