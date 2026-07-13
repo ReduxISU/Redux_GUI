@@ -178,7 +178,7 @@ export default function VisualizeRowReact({
     };
 
     fetch();
-  }, [showReduction, chosenReduceTo, chosenReductionType, problemInstance, chosenSolver]);
+  }, [showReduction, chosenReduceTo, chosenReductionType, problemInstance, chosenSolver, solution, url]);
 
 
   // Fetch main visualization data

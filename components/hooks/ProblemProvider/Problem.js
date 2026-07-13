@@ -1,5 +1,5 @@
 import { requestAllProblems, requestAllInfo } from "../../redux";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 
 // For initial startup defaults
 const DEFAULT_PROBLEM_NAME = "SAT3";
@@ -8,7 +8,7 @@ export function useProblem(url) {
   const state = {};
   [state.problemType, state.setProblemType] = useState("NPC");
   [state.problemInfoMap] = useProblemInfoMap(url, state.problemType);
-  [state.problemNameMap] = useProblemNameMap(state.problemInfoMap);
+  state.problemNameMap = useProblemNameMap(state.problemInfoMap);
   [state.problemName, state.setProblemName] = useProblemName(state.problemNameMap);
   [state.problemInstance, state.setProblemInstance] = useState("{{1,2,3},{1,2},GENERIC}");
   return state;
@@ -52,7 +52,7 @@ function useProblemName(problemNameMap) {
 
   useEffect(() => {
     const storedData = null;
-    
+
     if(storedData) {
       const allData = JSON.parse(storedData);
       setProblemName(allData.problem);
@@ -66,11 +66,8 @@ function useProblemName(problemNameMap) {
 }
 
 function useProblemNameMap(problemInfoMap) {
-  const [problemNameMap, setProblemNameMap] = useState(new Map());
-
-  useEffect(() => {
-    setProblemNameMap(new Map([...problemInfoMap].map(([name, info]) => [name, info?.problemName || name])));
-  }, [problemInfoMap]);
-
-  return [problemNameMap, setProblemNameMap];
+  return useMemo(
+    () => new Map([...problemInfoMap].map(([name, info]) => [name, info?.problemName || name])),
+    [problemInfoMap]
+  );
 }
