@@ -101,6 +101,15 @@ function useReduceToOptions(url, problemName) {
 function useReductionTypeOptions(url, problemName, chosenReduceTo) {
   const [reductionTypeOptions, setReductionTypeOptions] = useState([]);
 
+  async function requestPreparedReductions(url, problemName, chosenReduceTo) {
+    const reductions = (await requestReductions(url, problemName, chosenReduceTo)) ?? [];
+    let path = "";
+    for (const reduction of reductions) {
+      path += reduction[0] + "-";
+    }
+    return path !== "" ? [path.slice(0, -1)] : [];
+  }
+
   useEffect(() => {
     (async () => {
       setReductionTypeOptions(
@@ -111,15 +120,6 @@ function useReductionTypeOptions(url, problemName, chosenReduceTo) {
       );
     })();
   }, [chosenReduceTo, url, problemName]);
-
-  async function requestPreparedReductions(url, problemName, chosenReduceTo) {
-    const reductions = (await requestReductions(url, problemName, chosenReduceTo)) ?? [];
-    let path = "";
-    for (const reduction of reductions) {
-      path += reduction[0] + "-";
-    }
-    return path !== "" ? [path.slice(0, -1)] : [];
-  }
 
   return [reductionTypeOptions, setReductionTypeOptions];
 }
