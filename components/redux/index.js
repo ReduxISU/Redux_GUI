@@ -271,9 +271,9 @@ export async function requestReductionInfo(url, apiCall) {
  * @returns an array of problems that have implemented reductions from `problem`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductionOptions(url, problem, problemType = "NPC") {
+export async function requestReductionOptions(url, problem) {
   return await fetchJson(
-    `${url}Navigation/NPC_NavGraph/availableReductions/?chosenProblem=${problem}&problemType=${problemType}`,
+    `${url}Navigation/NPC_NavGraph/availableReductions/?chosenProblem=${problem}`,
     () => `${problem} REDUCTION OPTIONS REQUEST FAILED`
   );
 }
@@ -315,9 +315,9 @@ export async function requestProblemGenericInstance(url, problem, instance) {
  * @returns an array of arrays of reductions implemented for reducing a problem to another problem.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductions(url, problemFrom, problemTo, problemType = "NPC") {
+export async function requestReductions(url, problemFrom, problemTo) {
   return await fetchJson(
-    `${url}Navigation/NPC_NavGraph/reductionPath/?reducingFrom=${problemFrom}&reducingTo=${problemTo}&problemType=${problemType}`,
+    `${url}Navigation/NPC_NavGraph/reductionPath/?reducingFrom=${problemFrom}&reducingTo=${problemTo}`,
     () => `${problemFrom} TO ${problemTo} REDUCTIONS REQUEST FAILED`
   );
 }
@@ -338,9 +338,9 @@ export async function requestSolvedInstance(url, solver, instance) {
  * @returns an array of solvers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestSolvers(url, problem, problemType = "NPC") {
+export async function requestSolvers(url, problem) {
   return await fetchJson(
-    `${url}Navigation/Problem_SolversRefactor/?chosenProblem=${problem}&problemType=${problemType}`,
+    `${url}Navigation/Problem_SolversRefactor/?chosenProblem=${problem}`,
     () => `${problem} SOLVERS REQUEST FAILED`
   );
 }
@@ -349,9 +349,9 @@ export async function requestSolvers(url, problem, problemType = "NPC") {
  * @returns an array of verifiers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVerifiers(url, problem, problemType = "NPC") {
+export async function requestVerifiers(url, problem) {
   return await fetchJson(
-    `${url}Navigation/Problem_VerifiersRefactor/?chosenProblem=${problem}&problemType=${problemType}`,
+    `${url}Navigation/Problem_VerifiersRefactor/?chosenProblem=${problem}`,
     () => `${problem} VERIFIERS REQUEST FAILED`
   );
 }
@@ -389,9 +389,9 @@ export async function requestVisualization(url, visualization, instance) {
  * @returns an array of visualizations implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualizations(url, problem, problemType = "NPC") {
+export async function requestVisualizations(url, problem) {
   return await fetchJson(
-    `${url}Navigation/Problem_VisualizationsRefactor/?chosenProblem=${problem}&problemType=${problemType}`,
+    `${url}Navigation/Problem_VisualizationsRefactor/?chosenProblem=${problem}`,
     () => `${problem} VISUALIZATIONS REQUEST FAILED`
   );
 }

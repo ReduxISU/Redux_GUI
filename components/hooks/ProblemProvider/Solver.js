@@ -2,11 +2,11 @@ import { useGenericInfo } from "../ProblemProvider";
 import { requestInfo, requestSolvers } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
-export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance) {
+export function useSolver(url, problemName, problemNameMap, problemInfoMap, problemInstance) {
   const state = {};
   /// Maps each problem name to its default solver name.
   [state.defaultSolverMap] = useDefaultSolverMap(url, problemInfoMap);
-  [state.solverOptions] = useSolverOptions(url, problemName, problemType);
+  [state.solverOptions] = useSolverOptions(url, problemName);
   [state.chosenSolver, state.setChosenSolver] = useChosenSolver(problemName, state.defaultSolverMap);
   [state.solverNameMap] = useSolverNameMap(url, problemNameMap);
   [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(problemInstance, state.chosenSolver);
@@ -86,14 +86,14 @@ function useDefaultSolverMap(url, problemInfoMap) {
   return [defaultSolverMap, setDefaultSolverMap];
 }
 
-function useSolverOptions(url, problemName, problemType) {
+function useSolverOptions(url, problemName) {
   const [solverOptions, setSolverOptions] = useState([]);
 
   useEffect(() => {
     (async () => {
-      setSolverOptions(problemName && problemType ? (await requestSolvers(url, problemName, problemType)) ?? [] : []);
+      setSolverOptions(problemName ? (await requestSolvers(url, problemName)) ?? [] : []);
     })();
-  }, [problemName, problemType, url]);
+  }, [problemName, url]);
 
   return [solverOptions, setSolverOptions];
 }

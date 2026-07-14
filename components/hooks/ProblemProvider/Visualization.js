@@ -2,10 +2,10 @@ import { useGenericInfo } from "../ProblemProvider";
 import { requestInfo, requestVisualizations } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
-export function useVisualization(url, problemName, problemType, problemNameMap, problemInfoMap) {
+export function useVisualization(url, problemName, problemNameMap, problemInfoMap) {
   const state = {};
   [state.defaultVisualizationMap] = useDefaultVisualizationMap(url, problemInfoMap);
-  [state.VisualizationOptions] = useVisualizationOptions(url, problemName, problemType);
+  [state.VisualizationOptions] = useVisualizationOptions(url, problemName);
   [state.chosenVisualization, state.setChosenVisualization] = useChosenVisualization(problemName, state.defaultVisualizationMap);
   [state.VisualizationNameMap] = useVisualizationNameMap(url, problemNameMap);
   return state;
@@ -45,16 +45,16 @@ function useDefaultVisualizationMap(url, problemInfoMap) {
   return [defaultVisualizationMap, setDefaultVisualizationMap];
 }
 
-function useVisualizationOptions(url, problemName, problemType) {
+function useVisualizationOptions(url, problemName) {
   const [VisualizationOptions, setVisualizationOptions] = useState([]);
 
   useEffect(() => {
     (async () => {
       setVisualizationOptions(
-        problemName && problemType ? (await requestVisualizations(url, problemName, problemType)) ?? [] : []
+        problemName ? (await requestVisualizations(url, problemName)) ?? [] : []
       );
     })();
-  }, [problemName, problemType, url]);
+  }, [problemName, url]);
 
   return [VisualizationOptions, setVisualizationOptions];
 }

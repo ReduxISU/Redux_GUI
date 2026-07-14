@@ -2,10 +2,10 @@ import { useGenericInfo } from "../ProblemProvider";
 import { requestInfo, requestVerifiers } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
-export function useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap) {
+export function useVerifier(url, problemName, problemNameMap, problemInfoMap) {
   const state = {};
   [state.defaultVerifierMap] = useDefaultVerifierMap(url, problemInfoMap);
-  [state.verifierOptions] = useVerifierOptions(url, problemName, problemType);
+  [state.verifierOptions] = useVerifierOptions(url, problemName);
   [state.chosenVerifier, state.setChosenVerifier] = useChosenVerifier(problemName, state.defaultVerifierMap);
   [state.verifierNameMap] = useVerifierNameMap(url, problemNameMap);
   return state;
@@ -45,16 +45,16 @@ function useDefaultVerifierMap(url, problemInfoMap) {
   return [defaultVerifierMap, setDefaultVerifierMap];
 }
 
-function useVerifierOptions(url, problemName, problemType) {
+function useVerifierOptions(url, problemName) {
   const [verifierOptions, setVerifierOptions] = useState([]);
 
   useEffect(() => {
     (async () => {
       setVerifierOptions(
-        problemName && problemType ? (await requestVerifiers(url, problemName, problemType)) ?? [] : []
+        problemName ? (await requestVerifiers(url, problemName)) ?? [] : []
       );
     })();
-  }, [problemName, problemType, url]);
+  }, [problemName, url]);
 
   return [verifierOptions, setVerifierOptions];
 }

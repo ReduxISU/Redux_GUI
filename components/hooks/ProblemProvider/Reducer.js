@@ -8,12 +8,12 @@ const DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE = "SipserReduceToCliqueStandard";
 const DEFAULT_CLIQUE_CHOSEN_REDUCE_TO = "VERTEXCOVER";
 const DEFAULT_VERTEXCOVER_CHOSEN_REDUCTION_TYPE = "sipserReduceToVC";
 
-export function useReducer(url, problemName, problemType, problemInstance) {
+export function useReducer(url, problemName, problemInstance) {
   const state = {};
-  [state.reduceToOptions] = useReduceToOptions(url, problemName, problemType);
+  [state.reduceToOptions] = useReduceToOptions(url, problemName);
   [state.chosenReduceTo, state.setChosenReduceTo] = useChosenReduceTo(problemName, state.reduceToOptions);
   [state.reductionNameMap] = useReductionNameMap(url, problemName, state.chosenReduceTo);
-  [state.reductionTypeOptions] = useReductionTypeOptions(url, problemName, problemType, state.chosenReduceTo);
+  [state.reductionTypeOptions] = useReductionTypeOptions(url, problemName, state.chosenReduceTo);
   [state.chosenReductionType, state.setChosenReductionType] = useChosenReductionType(
     problemName,
     state.chosenReduceTo,
@@ -84,36 +84,36 @@ function useReductionVisualization(url, chosenReduceTo) {
   return [reductionVisualization, setReductionVisualization];
 }
 
-function useReduceToOptions(url, problemName, problemType) {
+function useReduceToOptions(url, problemName) {
   const [reduceToOptions, setReduceToOptions] = useState([]);
 
   useEffect(() => {
     (async () => {
       setReduceToOptions(
-        (problemName && problemType ? (await requestReductionOptions(url, problemName, problemType)) ?? [] : []).sort()
+        (problemName ? (await requestReductionOptions(url, problemName)) ?? [] : []).sort()
       );
     })();
-  }, [problemName, problemType, url]);
+  }, [problemName, url]);
 
   return [reduceToOptions, setReduceToOptions];
 }
 
-function useReductionTypeOptions(url, problemName, problemType, chosenReduceTo) {
+function useReductionTypeOptions(url, problemName, chosenReduceTo) {
   const [reductionTypeOptions, setReductionTypeOptions] = useState([]);
 
   useEffect(() => {
     (async () => {
       setReductionTypeOptions(
-        (problemName && problemType && chosenReduceTo
-          ? (await requestPreparedReductions(url, problemName, chosenReduceTo, problemType)) ?? []
+        (problemName && chosenReduceTo
+          ? (await requestPreparedReductions(url, problemName, chosenReduceTo)) ?? []
           : []
         ).sort()
       );
     })();
-  }, [problemType, chosenReduceTo, url, problemName]);
+  }, [chosenReduceTo, url, problemName]);
 
-  async function requestPreparedReductions(url, problemName, chosenReduceTo, problemType) {
-    const reductions = (await requestReductions(url, problemName, chosenReduceTo, problemType)) ?? [];
+  async function requestPreparedReductions(url, problemName, chosenReduceTo) {
+    const reductions = (await requestReductions(url, problemName, chosenReduceTo)) ?? [];
     let path = "";
     for (const reduction of reductions) {
       path += reduction[0] + "-";

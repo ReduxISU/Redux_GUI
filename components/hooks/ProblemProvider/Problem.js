@@ -8,7 +8,6 @@ export function useProblem(url) {
   const state = {};
   [state.problemInfoMap] = useProblemInfoMap(url);
   [state.problemNameMap] = useProblemNameMap(state.problemInfoMap);
-  [state.problemType, state.setProblemType] = useState("NPC");
   [state.problemName, state.setProblemName] = useProblemName(state.problemNameMap);
   [state.problemInstance, state.setProblemInstance] = useState("{{1,2,3},{1,2},GENERIC}"); // Careful about changing this value, the application boot up sequence is dependent on having a default value.
   return state;
