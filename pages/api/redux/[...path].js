@@ -12,6 +12,26 @@ export default async function handler(req, res) {
   const suffix = req.url.replace(/^\/api\/redux\/?/, '');
   const targetUrl = `${baseUrl.replace(/\/$/, '')}/${suffix}`;
 
+  // Guard against SSRF: the user-controlled suffix must not be able to steer the
+  // request to a host/scheme other than the configured backend. Resolve the URL
+  // with the WHATWG parser and require it to stay on the backend's origin.
+  let target;
+  let base;
+  try {
+    target = new URL(targetUrl);
+    base = new URL(baseUrl);
+  } catch {
+    res.status(400).json({ error: 'Invalid request path' });
+    return;
+  }
+
+  const isSameOrigin = target.origin === base.origin;
+  const isAllowedScheme = target.protocol === 'http:' || target.protocol === 'https:';
+  if (!isSameOrigin || !isAllowedScheme) {
+    res.status(400).json({ error: 'Refusing to proxy request outside the configured backend' });
+    return;
+  }
+
   const headers = {};
   for (const [key, value] of Object.entries(req.headers)) {
     if (!['host', 'connection', 'transfer-encoding'].includes(key.toLowerCase())) {
@@ -19,7 +39,10 @@ export default async function handler(req, res) {
     }
   }
 
-  const fetchOptions = { method: req.method, headers };
+  // Do not follow redirects server-side: a compromised or misbehaving backend
+  // could 3xx us toward an internal address (another SSRF path). Forward the
+  // redirect response to the client and let the browser decide what to do.
+  const fetchOptions = { method: req.method, headers, redirect: 'manual' };
 
   if (!['GET', 'HEAD'].includes(req.method)) {
     const chunks = [];
@@ -31,7 +54,7 @@ export default async function handler(req, res) {
 
   let upstream;
   try {
-    upstream = await fetch(targetUrl, fetchOptions);
+    upstream = await fetch(target, fetchOptions);
   } catch (err) {
     res.status(502).json({ error: `Upstream unreachable: ${err.message}` });
     return;
