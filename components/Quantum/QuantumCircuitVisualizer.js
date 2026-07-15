@@ -7,7 +7,7 @@ export default function QuantumCircuitVisualizer({ circuit }) {
   const svgRef = useRef();
 
   const [activeCircuit, setActiveCircuit] = useState(circuit);
-  const [svgWidth, setSvgWidth] = useState("100%");
+  const svgWidth = "100%";
   const [zoomLevel, setZoomLevel] = useState(1.0);
 
   const [gateType, setGateType] = useState("h");
@@ -207,7 +207,7 @@ export default function QuantumCircuitVisualizer({ circuit }) {
     }
 
     drawCircuit(activeCircuit);
-  }, [activeCircuit, svgWidth]);
+  }, [activeCircuit]);
 
   return (
     <div style={{ width: "100%", padding: "20px" }}>
