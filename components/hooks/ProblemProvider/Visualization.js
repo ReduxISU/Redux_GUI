@@ -1,11 +1,11 @@
 import { useGenericInfo } from "../ProblemProvider";
-import { requestInfo, requestVisualizations } from "../../redux";
+import { requestAllVisualizations, requestAllInfo } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
-export function useVisualization(url, problemName, problemType, problemNameMap, problemInfoMap) {
+export function useVisualization(url, problemName, problemNameMap, problemInfoMap) {
   const state = {};
   [state.defaultVisualizationMap] = useDefaultVisualizationMap(url, problemInfoMap);
-  [state.VisualizationOptions] = useVisualizationOptions(url, problemName, problemType);
+  [state.VisualizationOptions] = useVisualizationOptions(url, problemName);
   [state.chosenVisualization, state.setChosenVisualization] = useChosenVisualization(problemName, state.defaultVisualizationMap);
   [state.VisualizationNameMap] = useVisualizationNameMap(url, problemNameMap);
   return state;
@@ -20,41 +20,49 @@ function useDefaultVisualizationMap(url, problemInfoMap) {
 
   useEffect(() => {
     const problems = [...problemInfoMap.keys()];
-    const defaultVisualizationNames = [...problemInfoMap.values()].map((info) => info.defaultVisualization.VisualizationName);
-    requestDefaultVisualizationFileMap(url, problems, defaultVisualizationNames).then((defaultVisualizationFileNames) => {
-      setDefaultVisualizationMap(defaultVisualizationFileNames);
-    });
-  }, [problemInfoMap, url]);
+    const defaultVisualizationNames = [...problemInfoMap.values()]
+      .map(
+        (info) =>
+          info?.defaultVisualization?.visualizationName ||
+          info?.defaultVisualization?.VisualizationName
+      )
+      .filter(Boolean);
+    (async () => {
+      const allVisualizations = (await requestAllVisualizations(url)) ?? {};
+      const allInfo = (await requestAllInfo(url)) ?? {};
 
-  //The requestDefaultVisualizationFileMap sets the Visualization names by the file name
-  async function requestDefaultVisualizationFileMap(url, problems, defaultVisualizationNames) {
-    let map = new Map();
-    for (const problem of problems) {
-      const Visualizations = (await requestVisualizations(url, problem)) ?? [];
-      for (const v of Visualizations) {
-        const Visualization = v.split(" ")[0];
-        const info = await requestInfo(url, Visualization);
-        if (info && defaultVisualizationNames.includes(info.VisualizationName)) {
-          map.set(problem, v);
+      let map = new Map();
+      for (const problem of problems) {
+        const visualizations = allVisualizations[problem] ?? [];
+        for (const v of visualizations) {
+          const visualization = v.split(" ")[0];
+          const info = allInfo[visualization];
+          const visName = info?.visualizationName || info?.VisualizationName;
+          if (visName && defaultVisualizationNames.includes(visName)) {
+            map.set(problem, v);
+          }
         }
       }
-    }
-    return map;
-  }
+      setDefaultVisualizationMap(map);
+    })();
+  }, [url, problemInfoMap]);
 
   return [defaultVisualizationMap, setDefaultVisualizationMap];
 }
 
-function useVisualizationOptions(url, problemName, problemType) {
+function useVisualizationOptions(url, problemName) {
   const [VisualizationOptions, setVisualizationOptions] = useState([]);
 
   useEffect(() => {
     (async () => {
-      setVisualizationOptions(
-        problemName && problemType ? (await requestVisualizations(url, problemName, problemType)) ?? [] : []
-      );
+      if (!problemName) {
+        setVisualizationOptions([]);
+        return;
+      }
+      const allVisualizations = (await requestAllVisualizations(url)) ?? {};
+      setVisualizationOptions(allVisualizations[problemName] ?? []);
     })();
-  }, [problemName, problemType, url]);
+  }, [problemName, url]);
 
   return [VisualizationOptions, setVisualizationOptions];
 }
@@ -101,25 +109,25 @@ function useVisualizationNameMap(url, problemNameMap) {
 
   useEffect(() => {
     const problems = Array.from(problemNameMap.keys());
-    requestVisualizationNameMap(url, problems).then((VisualizationMap) => {
-      setVisualizationNameMap(VisualizationMap);
-    });
-  }, [problemNameMap, url]);
 
-  //The following the functions are used to set the Visualization names
-  async function requestVisualizationNameMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      const Visualizations = (await requestVisualizations(url, problem)) ?? [];
-      for (const Visualization of Visualizations) {
-        const info = await requestInfo(url, Visualization);
-        if (info) {
-          map.set(Visualization, info.visualizationName);
+    (async () => {
+      const allVisualizations = (await requestAllVisualizations(url)) ?? {};
+      const allInfo = (await requestAllInfo(url)) ?? {};
+
+      let map = new Map();
+      for (const problem of problems) {
+        const visualizations = allVisualizations[problem] ?? [];
+        for (const visualization of visualizations) {
+          const info = allInfo[visualization];
+          map.set(
+            visualization,
+            info?.visualizationName || info?.VisualizationName || visualization
+          );
         }
       }
-    }
-    return map;
-  }
+      setVisualizationNameMap(map);
+    })();
+  }, [url, problemNameMap]);
 
   return [VisualizationNameMap, setVisualizationNameMap];
 }

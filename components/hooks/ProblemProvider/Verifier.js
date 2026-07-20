@@ -1,11 +1,11 @@
 import { useGenericInfo } from "../ProblemProvider";
-import { requestInfo, requestVerifiers } from "../../redux";
+import { requestAllVerifiers, requestAllInfo } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
-export function useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap) {
+export function useVerifier(url, problemName, problemNameMap, problemInfoMap) {
   const state = {};
   [state.defaultVerifierMap] = useDefaultVerifierMap(url, problemInfoMap);
-  [state.verifierOptions] = useVerifierOptions(url, problemName, problemType);
+  [state.verifierOptions] = useVerifierOptions(url, problemName);
   [state.chosenVerifier, state.setChosenVerifier] = useChosenVerifier(problemName, state.defaultVerifierMap);
   [state.verifierNameMap] = useVerifierNameMap(url, problemNameMap);
   return state;
@@ -20,41 +20,46 @@ function useDefaultVerifierMap(url, problemInfoMap) {
 
   useEffect(() => {
     const problems = [...problemInfoMap.keys()];
-    const defaultVerifierNames = [...problemInfoMap.values()].map((info) => info.defaultVerifier.verifierName);
-    requestDefaultVerifierFileMap(url, problems, defaultVerifierNames).then((defaultVerifierFileNames) => {
-      setDefaultVerifierMap(defaultVerifierFileNames);
-    });
-  }, [problemInfoMap, url]);
+    const defaultVerifierNames = [...problemInfoMap.values()]
+      .map((info) => info?.defaultVerifier?.verifierName)
+      .filter(Boolean);
 
-  //The requestDefaultVerifierFileMap sets the verifier names by the file name
-  async function requestDefaultVerifierFileMap(url, problems, defaultVerifierNames) {
-    let map = new Map();
-    for (const problem of problems) {
-      const verifiers = (await requestVerifiers(url, problem)) ?? [];
-      for (const v of verifiers) {
-        const verifier = v.split(" ")[0];
-        const info = await requestInfo(url, verifier);
-        if (info && defaultVerifierNames.includes(info.verifierName)) {
-          map.set(problem, v);
+    (async () => {
+      const allVerifiers = (await requestAllVerifiers(url)) ?? {};
+      const allInfo = (await requestAllInfo(url)) ?? {};
+
+      let map = new Map();
+      for (const problem of problems) {
+        const verifiers = allVerifiers[problem] ?? [];
+        for (const v of verifiers) {
+          const verifier = v.split(" ")[0];
+          const info = allInfo[verifier];
+          if (info && defaultVerifierNames.includes(info.verifierName)) {
+            map.set(problem, v);
+          }
         }
       }
-    }
-    return map;
-  }
+
+      setDefaultVerifierMap(map);
+    })();
+  }, [url, problemInfoMap]);
 
   return [defaultVerifierMap, setDefaultVerifierMap];
 }
 
-function useVerifierOptions(url, problemName, problemType) {
+function useVerifierOptions(url, problemName) {
   const [verifierOptions, setVerifierOptions] = useState([]);
 
   useEffect(() => {
     (async () => {
-      setVerifierOptions(
-        problemName && problemType ? (await requestVerifiers(url, problemName, problemType)) ?? [] : []
-      );
+      if (!problemName) {
+        setVerifierOptions([]);
+        return;
+      }
+      const allVerifiers = (await requestAllVerifiers(url)) ?? {};
+      setVerifierOptions(allVerifiers[problemName] ?? []);
     })();
-  }, [problemName, problemType, url]);
+  }, [problemName, url]);
 
   return [verifierOptions, setVerifierOptions];
 }
@@ -64,7 +69,7 @@ function useChosenVerifier(problemName, defaultVerifierMap) {
   const isFirstRender = useRef(true);
 
   useEffect(() => {
-    if(!problemName || defaultVerifierMap.size === 0) return;
+    if (!problemName || defaultVerifierMap.size === 0) return;
 
     let verifierVar = !problemName ? "" : defaultVerifierMap.get(problemName);
     const storedData = null;
@@ -74,11 +79,11 @@ function useChosenVerifier(problemName, defaultVerifierMap) {
       if (storedData) {
         const allData = JSON.parse(storedData);
         verifierVar = allData.verifier;
-        
+
       }
       isFirstRender.current = false;
     }
-    
+
     setChosenVerifier(verifierVar);
   }, [problemName, defaultVerifierMap]);
 
@@ -90,25 +95,22 @@ function useVerifierNameMap(url, problemNameMap) {
 
   useEffect(() => {
     const problems = Array.from(problemNameMap.keys());
-    requestVerifierNameMap(url, problems).then((verifierMap) => {
-      setVerifierNameMap(verifierMap);
-    });
-  }, [problemNameMap, url]);
 
-  //The following the functions are used to set the verifier names
-  async function requestVerifierNameMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      const verifiers = (await requestVerifiers(url, problem)) ?? [];
-      for (const verifier of verifiers) {
-        const info = await requestInfo(url, verifier);
-        if (info) {
-          map.set(verifier, info.verifierName);
+    (async () => {
+      const allVerifiers = (await requestAllVerifiers(url)) ?? {};
+      const allInfo = (await requestAllInfo(url)) ?? {};
+
+      let map = new Map();
+      for (const problem of problems) {
+        const verifiers = allVerifiers[problem] ?? [];
+        for (const verifier of verifiers) {
+          const info = allInfo[verifier];
+          map.set(verifier, info?.verifierName || verifier);
         }
       }
-    }
-    return map;
-  }
+      setVerifierNameMap(map);
+    })();
+  }, [url, problemNameMap]);
 
   return [verifierNameMap, setVerifierNameMap];
 }
