@@ -1,5 +1,5 @@
 import { requestAllProblems, requestAllInfo } from "../../redux";
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 // For initial startup defaults
 const DEFAULT_PROBLEM_NAME = "SAT3";
