@@ -16,14 +16,12 @@ export default function VisualizationLogic({
   reductionName,
   chosenReductionType,
   reductionNameMap,
-  reducedInstance,
   visualizationState,
   loading,
   visualizationType,
   problemData,
   reductionData,
   reductionVisualization,
-  chosenReduceTo,
 }) {
   const [gadgetMap, setGadgetMap] = useState([]);
   let visualization;
@@ -31,35 +29,30 @@ export default function VisualizationLogic({
 
   const solve = visualizationState.solverOn
 
-  const handleBar = (sizes) => { }
+  const handleBar = () => { }
 
-  const [loadingMap, setLoadingMap] = useState(false);
   const [mappedProblemData, setMappedProblemData] = useState(null);
   const [mappedReductionData, setMappedReductionData] = useState(null);
 
   useEffect(() => {
     if (problemInstance && problemData) {
-      setLoadingMap(true);
       processReductions(url, chosenReductionType, problemInstance)
         .then(rawGadgetMap => {
           const { gadgets, fromIdMap } = makeIdsUnique(rawGadgetMap);
           setGadgetMap(gadgets);
           setMappedProblemData(remapIdsDeep(problemData, fromIdMap) || problemData);
         })
-        .finally(() => setLoadingMap(false));
     }
   }, [problemData, url, chosenReductionType, problemInstance]);
 
 useEffect(() => {
   if (visualizationState.reductionOn && reductionVisualization && url && problemInstance) {
-    setLoadingMap(true);
     processReductions(url, chosenReductionType, problemInstance)
       .then(rawGadgetMap => {
         const { gadgets, toIdMap } = makeIdsUnique(rawGadgetMap);
         setGadgetMap(gadgets);
         setMappedReductionData(remapIdsDeep(reductionData, toIdMap) || reductionData);
       })
-      .finally(() => setLoadingMap(false));
   }
 }, [
   visualizationState.reductionOn,

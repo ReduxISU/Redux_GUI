@@ -1,12 +1,12 @@
 import { useGenericInfo } from "../ProblemProvider";
-import { requestInfo, requestSolvers } from "../../redux";
+import { requestAllSolvers, requestAllInfo } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
-export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance) {
+export function useSolver(url, problemName, problemNameMap, problemInfoMap, problemInstance) {
   const state = {};
   /// Maps each problem name to its default solver name.
   [state.defaultSolverMap] = useDefaultSolverMap(url, problemInfoMap);
-  [state.solverOptions] = useSolverOptions(url, problemName, problemType);
+  [state.solverOptions] = useSolverOptions(url, problemName);
   [state.chosenSolver, state.setChosenSolver] = useChosenSolver(problemName, state.defaultSolverMap);
   [state.solverNameMap] = useSolverNameMap(url, problemNameMap);
   [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(problemInstance, state.chosenSolver);
@@ -32,26 +32,22 @@ function useSolverNameMap(url, problemNameMap) {
 
   useEffect(() => {
     const problems = Array.from(problemNameMap.keys());
-    requestSolverNameMap(url, problems).then((solverMap) => {
-      setSolverNameMap(solverMap);
-    });
-  }, [problemNameMap, url]);
+    (async () => {
+      const allSolvers = (await requestAllSolvers(url)) ?? {};
+      const allInfo = (await requestAllInfo(url)) ?? {};
+      let map = new Map();
 
-  //The following the functions are used to set the solver names
-  async function requestSolverNameMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      const solvers = (await requestSolvers(url, problem)) ?? [];
-      for (const s of solvers) {
-        let solver = s.split(" ")[0];
-        const info = await requestInfo(url, solver);
-        if (info) {
-          map.set(s, info.solverName);
+      for (const problem of problems) {
+        const solvers = allSolvers[problem] ?? [];
+        for (const s of solvers) {
+          const solver = s.split(" ")[0];
+          const info = allInfo[solver];
+          map.set(s, info?.solverName || s);
         }
       }
-    }
-    return map;
-  }
+      setSolverNameMap(map);
+    })();
+  }, [url, problemNameMap]);
 
   return [solverNameMap, setSolverNameMap];
 }
@@ -60,40 +56,46 @@ function useDefaultSolverMap(url, problemInfoMap) {
   const [defaultSolverMap, setDefaultSolverMap] = useState(new Map());
 
   useEffect(() => {
-    const problems = [...problemInfoMap.keys()];
-    const defaultSolverNames = [...problemInfoMap.values()].map((info) => info.defaultSolver.solverName);
-    requestDefaultSolverFileMap(url, problems, defaultSolverNames).then((defaultSolverFileNames) => {
-      setDefaultSolverMap(defaultSolverFileNames);
-    });
-  }, [problemInfoMap, url]);
+  const problems = [...problemInfoMap.keys()];
+  const defaultSolverNames = [...problemInfoMap.values()]
+    .map((info) => info?.defaultSolver?.solverName)
+    .filter(Boolean);
 
-  //The requestDefaultSolverFileMap sets the solver names by the file name
-  async function requestDefaultSolverFileMap(url, problems, defaultSolverNames) {
+  (async () => {
+    const allSolvers = (await requestAllSolvers(url)) ?? {};
+    const allInfo = (await requestAllInfo(url)) ?? {};
+
     let map = new Map();
     for (const problem of problems) {
-      const solvers = (await requestSolvers(url, problem)) ?? [];
+      const solvers = allSolvers[problem] ?? [];
       for (const s of solvers) {
-        let solver = s.split(" ")[0];
-        const info = await requestInfo(url, solver);
+        const solver = s.split(" ")[0];
+        const info = allInfo[solver];
         if (info && defaultSolverNames.includes(info.solverName)) {
           map.set(problem, s);
         }
       }
     }
-    return map;
-  }
+    setDefaultSolverMap(map);
+  })();
+}, [url, problemInfoMap]);
 
   return [defaultSolverMap, setDefaultSolverMap];
 }
 
-function useSolverOptions(url, problemName, problemType) {
+function useSolverOptions(url, problemName) {
   const [solverOptions, setSolverOptions] = useState([]);
 
   useEffect(() => {
     (async () => {
-      setSolverOptions(problemName && problemType ? (await requestSolvers(url, problemName, problemType)) ?? [] : []);
+      if (!problemName) {
+        setSolverOptions([]);
+        return;
+      }
+      const allSolvers = (await requestAllSolvers(url)) ?? {};
+      setSolverOptions(allSolvers[problemName] ?? []);
     })();
-  }, [problemName, problemType, url]);
+  }, [problemName, url]);
 
   return [solverOptions, setSolverOptions];
 }

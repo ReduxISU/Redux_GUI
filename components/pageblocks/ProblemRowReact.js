@@ -134,9 +134,6 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {
-    try {
-    }
-    catch (error) { console.log("Couldn't clean problem instance: ", error); }
     setProblemLocalInstance(event.target.value)
     if (!instanceParsed.test) {
       defaultInstanceParsed.exampleStr = "";
