@@ -8,6 +8,7 @@ import PumpSchedulingSvgReact from "./PumpSchedulingSvgReact";
 import SSSPTableVisualization from "./SSSPTableSvgReact";
 import DFATableVisualization from "./DFATableSvgReact";
 import NFATableVisualization from "./NFATableSvgReact";
+import DynamicTableSvgReact from "./DynamicTableSvgReact";
 
 const Visualizations = new Map([
     ["Boolean Satisfiability" , (solve, url, problemData, gadgetMap, gadgetsOn) => {
@@ -85,9 +86,9 @@ const Visualizations = new Map([
             />
         );
     }],
-    ["SSSP Table", (solve, url, problemData) => {
+    ["Dynamic Table", (solve, url, problemData) => {
         return (
-            <SSSPTableVisualization
+            <DynamicTableSvgReact
                 problemData={problemData}
                 solve={solve}
                 url={url}
