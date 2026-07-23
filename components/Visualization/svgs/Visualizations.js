@@ -5,7 +5,6 @@ import QuantumCircuitVis from "../QuantumCircuitVis";
 import LaTeXGraphSvgReact from "./LaTeXGraphSvgReact";
 import StandardSetSvgReact from "./StandardSetSvgReact";
 import PumpSchedulingSvgReact from "./PumpSchedulingSvgReact";
-import SSSPTableVisualization from "./SSSPTableSvgReact";
 import DFATableVisualization from "./DFATableSvgReact";
 import NFATableVisualization from "./NFATableSvgReact";
 import DynamicTableSvgReact from "./DynamicTableSvgReact";
