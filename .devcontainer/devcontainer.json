@@ -1,0 +1,28 @@
+{
+  "name": "Redux GUI Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "26" },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": { "moby": false },
+    "ghcr.io/reduxisu/features/rbs:1": {}
+  },
+  "appPort": [3000],
+  "portsAttributes": {
+    "3000": { "label": "Redux GUI (Next.js)", "onAutoForward": "notify" }
+  },
+  "mounts": [
+    "source=redux_gui-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=redux_gui-next,target=${containerWorkspaceFolder}/.next,type=volume"
+  ],
+  "containerEnv": { "DEV_HOST": "0.0.0.0" },
+  "containerUser": "vscode",
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "postStartCommand": "if [ \"$(stat -c %U /workspaces/Redux_GUI)\" != \"vscode\" ]; then sudo chown -R vscode:vscode /workspaces/Redux_GUI; fi",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "biomejs.biome"]
+    }
+  }
+}

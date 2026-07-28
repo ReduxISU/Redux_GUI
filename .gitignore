@@ -38,6 +38,11 @@ pids
 .cache/
 .next/cache/
 .eslintcache
+cache/
+
+# Redux Build System output
+.rbs/
+report.md
 
 # ESLint SARIF output
 eslint-results.sarif
