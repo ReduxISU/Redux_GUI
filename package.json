@@ -13,6 +13,7 @@
     "lint:fix": "eslint . --fix",
     "format": "biome check --write .",
     "format:check": "biome check .",
+    "check:visualizations": "node Tools/check-visualization-coverage.mjs",
     "postinstall": "next telemetry disable"
   },
   "dependencies": {

@@ -31,6 +31,17 @@ const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to 
 const TOOLTIP2 = { header: "Reduction Type", formalDef: "Choose a type of reduction to see information about it", info: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } }
 
+// ReductionCost describes output-size blowup relative to input size -- the
+// closest thing reductions have to a Big-O figure (reductions themselves
+// don't have a runtime complexity class the way problems/solvers do).
+const REDUCTION_COST_LABELS = {
+  Linear: "Linear (O(n))",
+  Quadratic: "Quadratic (O(n²))",
+  Cubic: "Cubic (O(n³))",
+  HigherPolynomial: "Higher polynomial (O(n^k), k > 3)",
+  Unclassified: "Unclassified",
+}
+
 export default function ReduceToRowReact({
   url,
   problemName,
@@ -95,10 +106,13 @@ export default function ReduceToRowReact({
               ? {
                 header: reduceToInfo.problemName ?? "",
                 formalDef: reduceToInfo.formalDefinition ?? "",
-                // description only 
+                // description only
                 info: reduceToInfo.problemDefinition ?? "",
-                // show source 
-                source: reduceToInfo.source, 
+                classification: [
+                  { label: "Complexity class", value: reduceToInfo.complexityClass || "Unclassified" },
+                ],
+                // show source
+                source: reduceToInfo.source,
                 credit:
                   Array.isArray(reduceToInfo.contributors) &&
                     reduceToInfo.contributors.length
@@ -142,6 +156,12 @@ export default function ReduceToRowReact({
                 formalDef: reducerInfo.reductionDefinition ?? "",
                 // plain description for the reduction
                 info: reducerInfo.info ?? reducerInfo.description ?? "",
+                classification: [
+                  {
+                    label: "Reduction cost",
+                    value: REDUCTION_COST_LABELS[reducerInfo.cost] || reducerInfo.cost || "Unclassified",
+                  },
+                ],
                 // separate Source line
                 source: reducerInfo.source,
                 // contributors if present
