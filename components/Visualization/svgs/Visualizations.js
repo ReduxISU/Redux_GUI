@@ -5,6 +5,8 @@ import QuantumCircuitVis from "../QuantumCircuitVis";
 import LaTeXGraphSvgReact from "./LaTeXGraphSvgReact";
 import StandardSetSvgReact from "./StandardSetSvgReact";
 import PumpSchedulingSvgReact from "./PumpSchedulingSvgReact";
+import DFATableVisualization from "./DFATableSvgReact";
+import NFATableVisualization from "./NFATableSvgReact";
 import DynamicTableSvgReact from "./DynamicTableSvgReact";
 
 const Visualizations = new Map([
@@ -86,6 +88,24 @@ const Visualizations = new Map([
     ["Dynamic Table", (solve, url, problemData) => {
         return (
             <DynamicTableSvgReact
+                problemData={problemData}
+                solve={solve}
+                url={url}
+            />
+        );
+    }],
+    ["DFA Table", (solve, url, problemData) => {
+        return (
+            <DFATableVisualization
+                problemData={problemData}
+                solve={solve}
+                url={url}
+            />
+        );
+    }],
+    ["NFA Table", (solve, url, problemData) => {
+        return (
+            <NFATableVisualization
                 problemData={problemData}
                 solve={solve}
                 url={url}
