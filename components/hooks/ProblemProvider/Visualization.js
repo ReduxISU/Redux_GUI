@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   requestAllInfo,
   requestAllVisualizations,
@@ -131,55 +131,37 @@ function useChosenVisualization(
   VisualizationOptions,
   visualizationTypeMap,
 ) {
-  const [chosenVisualization, setChosenVisualization] = useState("");
   const [byProblem, setByProblem] = useState({}); // { [problemName]: vis }
-  const userSelected = useRef(false);
-  const lastProblem = useRef(null);
 
   const setChosenVisualizationSafe = (value) => {
-    userSelected.current = true;
     setByProblem((prev) => ({ ...prev, [problemName]: value }));
-    setChosenVisualization(value);
   };
 
-  useEffect(() => {
-    if (!problemName) return;
-
-    if (problemName !== lastProblem.current) {
-      lastProblem.current = problemName;
-      userSelected.current = false;
-    }
-
-    // An explicit user choice (this session) always wins; never overwrite it
-    // with a re-resolved default.
-    if (userSelected.current) return;
-
+  // Derived, not stored: chosenVisualization is a pure function of the arguments above, so
+  // it's computed directly during render instead of via an Effect + setState (the latter
+  // triggers an extra "cascading render" -- see
+  // https://react.dev/learn/you-might-not-need-an-effect). byProblem already reflects a
+  // just-made user choice by the very next render (setByProblem and this computation now
+  // run in the same pass), so no separate "user selected" guard is needed: an explicit
+  // choice already wins via the `stored` branch below, with no effect-lag window where it
+  // could be raced by a re-resolved default.
+  //
+  // Resolution order:
+  //   1. stored per-problem user choice (survives switching problems and back)
+  //   2. backend-declared default from defaultVisualizationMap, iff it is renderable
+  //   3. first renderable option
+  //   4. "" -- explicit empty state; nothing renderable for this problem
+  let chosenVisualization = "";
+  if (problemName) {
     const isOptionRenderable = (option) => isRenderable(visualizationTypeMap.get(option));
-
-    // Resolution order:
-    //   1. stored per-problem user choice (survives switching problems and back)
-    //   2. backend-declared default from defaultVisualizationMap, iff it is renderable
-    //   3. first renderable option
-    //   4. "" -- explicit empty state; nothing renderable for this problem
     const stored = byProblem[problemName];
     const backendDefault = defaultVisualizationMap.get(problemName);
-    const next =
+    chosenVisualization =
       stored ??
       (backendDefault && isOptionRenderable(backendDefault) ? backendDefault : undefined) ??
       (VisualizationOptions ?? []).find(isOptionRenderable) ??
       "";
-
-    if (next !== chosenVisualization) {
-      setChosenVisualization(next);
-    }
-  }, [
-    problemName,
-    defaultVisualizationMap,
-    VisualizationOptions,
-    visualizationTypeMap,
-    byProblem,
-    chosenVisualization,
-  ]);
+  }
 
   return [chosenVisualization, setChosenVisualizationSafe];
 }
