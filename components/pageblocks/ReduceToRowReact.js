@@ -178,6 +178,7 @@ export default function ReduceToRowReact({
             <DownloadIcon />
           </Button>
           <Button
+            data-tour-id="reduce-button"
             size="large"
             color="white"
             style={{ backgroundColor: THEME.colors.grey }}

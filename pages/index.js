@@ -29,6 +29,7 @@ import { useProblemProvider } from "../components/hooks/ProblemProvider";
 import { useEffect, memo } from "react";
 import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
+import TourLauncher from "../components/tour/TourLauncher";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
 
 const SHOW_QUANTUM_VIS = false; //Flag to show a quantum circuit visualizer (sandbox feature)
@@ -95,12 +96,13 @@ function MainPageContent() {
                 verifier={verifier}
                 reducer={reducer}
               />
+              <TourLauncher />
             </div>
 
             <div className="p-2 col-example">
               <ProblemRowMemo url={reduxBaseUrl} {...problem} />
             </div>
-            <div className="p-2 col-example">
+            <div className="p-2 col-example" data-tour-id="reduce-row">
               <ReduceToRowMemo url={reduxBaseUrl} {...problem} {...reducer} />
             </div>
 
@@ -115,7 +117,7 @@ function MainPageContent() {
               />
             </div>
 
-            <div className="p-2 col-example">
+            <div className="p-2 col-example" data-tour-id="solve-row">
               <SolveRowMemo
                 url={reduxBaseUrl}
                 {...problem}
@@ -124,7 +126,7 @@ function MainPageContent() {
               />
             </div>
 
-            <div className="p-2 col-example">
+            <div className="p-2 col-example" data-tour-id="verify-row">
               <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />
             </div>
           </div>
