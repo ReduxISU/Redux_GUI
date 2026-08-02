@@ -1,5 +1,5 @@
-import { requestProblems, requestInfo } from "../../redux";
-import React, { useEffect, useState } from "react";
+import { requestAllProblems, requestAllInfo } from "../../redux";
+import { useEffect, useState, useMemo } from "react";
 
 // For initial startup defaults
 const DEFAULT_PROBLEM_NAME = "SAT3";
@@ -19,7 +19,8 @@ export function useProblemInfo(url, problemName) {
   useEffect(() => {
     if(!problemName) return;
     (async () => {
-      setProblemInfo(problemName ? (await requestInfo(url, problemName)) ?? {} : {});
+      const allInfo = (await requestAllInfo(url)) ?? {};
+      setProblemInfo(allInfo[problemName] ?? {});
     })();
   }, [problemName, url]);
 
@@ -31,8 +32,16 @@ function useProblemInfoMap(url) {
 
   useEffect(() => {
     (async () => {
-      const problems = (await requestProblems(url)) ?? [];
-      setProblemInfoMap(await requestProblemInfoMap(url, problems));
+      const problems = (await requestAllProblems(url)) ?? [];
+      const allInfo = (await requestAllInfo(url)) ?? {};
+      let map = new Map();
+      for (const problem of problems) {
+        const info = allInfo[problem];
+        if (info) {
+          map.set(problem, info);
+        }
+      }
+      setProblemInfoMap(map);
     })();
   }, [url]);
 
@@ -68,12 +77,9 @@ function useProblemName(problemNameMap) {
   return [problemName, setProblemName];
 }
 
-function useProblemNameMap(problemInfoMap) {
-  const [problemNameMap, setProblemNameMap] = useState(new Map());
-
-  useEffect(() => {
-    setProblemNameMap(new Map([...problemInfoMap].map(([name, info]) => [name, info.problemName])));
-  }, [problemInfoMap]);
-
-  return [problemNameMap, setProblemNameMap];
+function useProblemNameMap(problemInfoMap = new Map()) {
+  return [useMemo(
+    () => new Map([...problemInfoMap].map(([name, info]) => [name, info?.problemName || name])),
+    [problemInfoMap]
+  )];
 }

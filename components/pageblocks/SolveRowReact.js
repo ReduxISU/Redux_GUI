@@ -27,6 +27,9 @@ const TOOLTIP = {
   header: "Solver Information",
   formalDef: "Choose a type of solver to see information about it",
   info: "",
+  solverType: "",
+  complexity: "",
+  complexityBucket: "",
 };
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
@@ -73,7 +76,7 @@ export default function SolveRowReact({
         formalDef: solverInfo.solverDefinition ?? "",
         // Keep description clean
         info: solverInfo.info ?? solverInfo.description ?? "",
-        // Source on its own line 
+        // Source on its own line
         source: solverInfo.source,
         credit:
           Array.isArray(solverInfo.contributors) && solverInfo.contributors.length
@@ -82,6 +85,12 @@ export default function SolveRowReact({
 
         componentLink: solverInfo.solverLink || "",
         sourceLink: solverInfo.sourceLink || "",
+
+        classification: [
+          { label: "Solver type", value: solverInfo.solverType || "Unclassified" },
+          { label: "Complexity bucket", value: solverInfo.complexityBucket || "Unclassified" },
+          { label: "Big-O", value: solverInfo.complexity || "Not yet determined" },
+        ],
       }
       : TOOLTIP;
 

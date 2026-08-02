@@ -28,7 +28,7 @@ function PopoverTooltipClick({ toolTip = {} }) {
       <InfoOutlinedIcon
         onClick={handleClick}
         style={{ cursor: 'pointer' }}
-        fontSize="small"
+        fontSize="medium"
       />
 
       <Popover
@@ -86,6 +86,23 @@ function PopoverTooltipClick({ toolTip = {} }) {
                   </Link>
                 )}
               </Typography>
+            ) : null}
+
+            {Array.isArray(t.classification) && t.classification.length > 0 ? (
+              <Box
+                sx={{
+                  mb: 1.5,
+                  p: '6px 10px',
+                  borderRadius: 1,
+                  bgcolor: 'rgba(0,0,0,0.04)',
+                }}
+              >
+                {t.classification.map(({ label, value }) => (
+                  <Typography key={label} variant="body2" sx={{ lineHeight: 1.35 }}>
+                    <strong>{label}:</strong> {value}
+                  </Typography>
+                ))}
+              </Box>
             ) : null}
 
             {t.source ? (

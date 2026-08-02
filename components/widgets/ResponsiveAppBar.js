@@ -12,24 +12,16 @@ import {
     AppBar,
     Box,
     Toolbar,
-    IconButton,
     Typography,
-    Menu,
     Container,
-    Avatar,
     Button,
-    Tooltip,
-    MenuItem
 } from '@mui/material'; // Grouped all directory imports safely into a named root import
-import { Menu as MenuIcon, Adb as AdbIcon } from '@mui/icons-material'; // Grouped icons safely
+import { Adb as AdbIcon } from '@mui/icons-material'; // Grouped icons safely
 
 //const pages = ['Home', 'Tutorials', 'About Us', 'Navigation Graph'];
-const pages = ['Home', 'About Us']
+const pages = ['Home', 'About Us', 'Browse']
 
-const ResponsiveAppBar = (props) => {
-    const [anchorElNav, setAnchorElNav] = React.useState(null);
-    const [anchorElUser, setAnchorElUser] = React.useState(null);
-
+const ResponsiveAppBar = () => {
     return (
         <AppBar position="static">
             <Container maxWidth="xl">

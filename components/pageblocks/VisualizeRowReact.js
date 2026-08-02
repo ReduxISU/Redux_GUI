@@ -38,6 +38,7 @@ import {
 import VisualizationLogic from "../widgets/VisualizationLogic";
 import ProblemSection from "../widgets/ProblemSection";
 import { useVisualizationInfo } from "../hooks/ProblemProvider";
+import { isRenderable } from "../Visualization/svgs/renderability";
 
 const CARD = { cardBodyText: "DEFAULT BODY", cardHeaderText: "Visualize" };
 const SWITCHES = {
@@ -69,8 +70,17 @@ export default function VisualizeRowReact({
   setChosenVisualization,
   VisualizationOptions,
   defaultVisualizationMap,
+  visualizationTypeMap,
 }) {
   const visualizationInfo = useVisualizationInfo(url, chosenVisualization);
+
+  const unrenderableOptions = (VisualizationOptions || []).filter(
+    (option) => !isRenderable(visualizationTypeMap?.get(option))
+  );
+  const hasRenderableOption = (VisualizationOptions || []).some(
+    (option) => !unrenderableOptions.includes(option)
+  );
+  const noRenderableOptions = (VisualizationOptions || []).length > 0 && !hasRenderableOption;
 
   const defaultSat3VisualizationArr = [
     ["x1", "!x2", "x3"],
@@ -128,12 +138,11 @@ export default function VisualizeRowReact({
     setCurrentStep(0);
   }, [problemName, problemInstance, chosenVisualization]);
 
-  // When the problem changes with no auto-selected visualization, fall back to the first available option
-  useEffect(() => {
-    if (!chosenVisualization && VisualizationOptions?.length > 0) {
-      setChosenVisualization(VisualizationOptions[0]);
-    }
-  }, [problemName, VisualizationOptions, chosenVisualization]);
+  // Visualization selection (stored choice / renderable default / first renderable option /
+  // explicit empty state) is fully resolved inside useChosenVisualization -- see
+  // components/hooks/ProblemProvider/Visualization.js. Do not add a fallback-pick effect here:
+  // calling setChosenVisualization from this component marks the pick as "user selected" and
+  // permanently blocks the hook's own default resolution for that problem.
 
   // fetch solution when instance or solver changes, since it's needed for some visualizations and reductions
   const [solution, setSolution] = useState(undefined);
@@ -207,8 +216,17 @@ export default function VisualizeRowReact({
           ];
         }
 
+        // The DFA table trace is most useful read from its finished state
+        // (full row history, final accept/reject), so default its slider to
+        // the last step instead of the first.
+        const defaultStep =
+          visualizationInfo?.visualizationType === "DFA Table" && processedData.length > 0
+            ? processedData.length - 1
+            : 0;
+
         setProblemData(processedData);
-        setCurrentProblemData(processedData?.[0] ?? null);
+        setCurrentStep(defaultStep);
+        setCurrentProblemData(processedData?.[defaultStep] ?? null);
       } catch (err) {
         console.error(err);
       }
@@ -226,6 +244,7 @@ export default function VisualizeRowReact({
     showReduction,
     url,
     problemName,
+    visualizationInfo?.visualizationType,
   ]);
 
   // Fetch SAT3
@@ -321,6 +340,9 @@ export default function VisualizeRowReact({
       header: visualizationInfo.visualizationName ?? "",
       formalDef: visualizationInfo.visualizationDefinition ?? "",
       info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+      classification: [
+        { label: "Visualization type", value: visualizationInfo.visualizationType || "Unclassified" },
+      ],
       source: visualizationInfo.source,
       credit:
         Array.isArray(visualizationInfo.contributors) &&
@@ -341,8 +363,14 @@ export default function VisualizeRowReact({
           onSelect={setChosenVisualization}
           options={VisualizationOptions || []}
           optionsMap={VisualizationNameMap}
-          disabled={!problemName}
-          disabledMessage="No visualization available. Please select a problem."
+          optionsDisabled={unrenderableOptions}
+          disabledOptionHint="no renderer available"
+          disabled={!problemName || noRenderableOptions}
+          disabledMessage={
+            noRenderableOptions
+              ? "No renderable visualization for this problem"
+              : "No visualization available. Please select a problem."
+          }
           extenderButtons={(input) => [
             {
               label: `Add new visualization "${input}"`,

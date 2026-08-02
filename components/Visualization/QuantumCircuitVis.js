@@ -4,12 +4,7 @@ import { openqasmToQText } from "./openqasmToQText";
 
 const QuantumCircuitVis = ({
   problemData,
-  useSolutionCircuit = false,
-  // Unused today but kept for signature parity with other visualizations
-  solve,
-  url,
-  gadgetMap,
-  gadgetsOn,
+  useSolutionCircuit = false
 }) => {
   const [qReady, setQReady] = useState(false);
   const containerRef = useRef(null);

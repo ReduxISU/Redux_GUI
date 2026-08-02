@@ -46,6 +46,36 @@ async function fetchPostJson(url, body, failMsg) {
 }
 
 /**
+ * Caches the result of an async request in memory, keyed by `cacheKey`.
+ * Repeated calls with the same key reuse the in-flight or resolved result
+ * instead of re-requesting. Cache is per-page-load only and is cleared on
+ * refresh. Failed (falsy) results are not cached.
+ * @param cacheKey Unique key identifying this request.
+ * @param requestFn Function that performs the request when not cached.
+ * @returns the cached or freshly-fetched result.
+ * @returns `undefined` if the request fails; failed results are not cached.
+ */
+const requestCache = new Map();
+
+async function cachedRequest(cacheKey, requestFn) {
+  if (requestCache.has(cacheKey)) {
+    return requestCache.get(cacheKey);
+  }
+
+  const promise = requestFn();
+  requestCache.set(cacheKey, promise);
+
+  const result = await promise;
+
+  // Don't cache failed requests.
+  if (!result) {
+    requestCache.delete(cacheKey);
+  }
+
+  return result;
+}
+
+/**
  * This function is a temporary solution for validating user input until it is ported to the Redux API.
  * @returns `true` if the specified verifier certificate is valid.
  */
@@ -394,4 +424,107 @@ export async function requestVisualizations(url, problem) {
     `${url}Navigation/Problem_VisualizationsRefactor/?chosenProblem=${problem}`,
     () => `${problem} VISUALIZATIONS REQUEST FAILED`
   );
+}
+/**
+ * @returns an object mapping problem names for the given `problemType`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllProblems(url) {
+  return cachedRequest(
+    `${url}|allProblems`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allProblems`,
+        () => "ALL PROBLEMS REQUEST FAILED"
+      )
+  );
+}
+/**
+ * @returns an object mapping each problem to its available solvers.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllSolvers(url) {
+  return cachedRequest(
+    `${url}|allSolvers`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allSolvers`,
+        () => "ALL SOLVERS REQUEST FAILED"
+      )
+  );
+}
+/**
+ * @returns an object mapping each problem to its available verifiers.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllVerifiers(url) {
+  return cachedRequest(
+    `${url}|allVerifiers`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allVerifiers`,
+        () => "ALL VERIFIERS REQUEST FAILED"
+      )
+  );
+}
+/**
+ * @returns an object mapping each problem to its available visualizations.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllVisualizations(url) {
+  return cachedRequest(
+    `${url}|allVisualizations`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allVisualizations`,
+        () => "ALL VISUALIZATIONS REQUEST FAILED"
+      )
+  );
+}
+
+/**
+ * @returns an object containing metadata (`info`) for all interfaces (problems, solvers, verifiers, visualizations).
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllInfo(url) {
+  return cachedRequest(
+    `${url}|allInfo`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allInfo`,
+        () => "ALL INFO REQUEST FAILED"
+      )
+  );
+}
+
+/**
+ * @returns an object mapping each visualization class name (e.g. "CliqueDefaultVisualization")
+ * to its `visualizationType` wire value (e.g. "GraphD3").
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error, including when the endpoint doesn't exist
+ * yet on the connected API -- callers should fall back to deriving this mapping from
+ * `requestAllInfo` in that case.
+ */
+export function requestAllVisualizationTypes(url) {
+  return cachedRequest(
+    `${url}|allVisualizationTypes`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allVisualizationTypes`,
+        () => "ALL VISUALIZATION TYPES REQUEST FAILED"
+      )
+  );
+}
+
+/**
+ * @returns the full reduction graph as an adjacency map:
+ * `{ [fromProblemName]: { [toProblemName]: [{className, endpoint, inputType, outputType,
+ * fromComplexity, toComplexity, cost}] } }`.
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestReductionGraph(url) {
+  return cachedRequest(`${url}|reductionGraph`, () =>
+    fetchJson(`${url}Navigation/Reductions`, () => "REDUCTION GRAPH REQUEST FAILED"));
 }

@@ -7,16 +7,13 @@ export default function QuantumCircuitVisualizer({ circuit }) {
   const svgRef = useRef();
 
   const [activeCircuit, setActiveCircuit] = useState(circuit);
-  const [svgWidth, setSvgWidth] = useState("100%");
-  const [zoomLevel, setZoomLevel] = useState(1.0);
+  const svgWidth = "100%";
 
   const [gateType, setGateType] = useState("h");
   const [gateQubit, setGateQubit] = useState(0);
   const [gateTime, setGateTime] = useState(0);
   const [gateControl, setGateControl] = useState(0);
   const [gateTarget, setGateTarget] = useState(1);
-
-  const [selectedGate, setSelectedGate] = useState(null);
 
   const handleJSONImport = (event) => {
     const file = event.target.files[0];
@@ -207,7 +204,7 @@ export default function QuantumCircuitVisualizer({ circuit }) {
     }
 
     drawCircuit(activeCircuit);
-  }, [activeCircuit, svgWidth]);
+  }, [activeCircuit]);
 
   return (
     <div style={{ width: "100%", padding: "20px" }}>
