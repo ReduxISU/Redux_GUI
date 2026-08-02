@@ -497,3 +497,34 @@ export function requestAllInfo(url) {
       )
   );
 }
+
+/**
+ * @returns an object mapping each visualization class name (e.g. "CliqueDefaultVisualization")
+ * to its `visualizationType` wire value (e.g. "GraphD3").
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error, including when the endpoint doesn't exist
+ * yet on the connected API -- callers should fall back to deriving this mapping from
+ * `requestAllInfo` in that case.
+ */
+export function requestAllVisualizationTypes(url) {
+  return cachedRequest(
+    `${url}|allVisualizationTypes`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allVisualizationTypes`,
+        () => "ALL VISUALIZATION TYPES REQUEST FAILED"
+      )
+  );
+}
+
+/**
+ * @returns the full reduction graph as an adjacency map:
+ * `{ [fromProblemName]: { [toProblemName]: [{className, endpoint, inputType, outputType,
+ * fromComplexity, toComplexity, cost}] } }`.
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestReductionGraph(url) {
+  return cachedRequest(`${url}|reductionGraph`, () =>
+    fetchJson(`${url}Navigation/Reductions`, () => "REDUCTION GRAPH REQUEST FAILED"));
+}

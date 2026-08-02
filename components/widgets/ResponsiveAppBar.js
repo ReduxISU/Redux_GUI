@@ -19,7 +19,7 @@ import {
 import { Adb as AdbIcon } from '@mui/icons-material'; // Grouped icons safely
 
 //const pages = ['Home', 'Tutorials', 'About Us', 'Navigation Graph'];
-const pages = ['Home', 'About Us']
+const pages = ['Home', 'About Us', 'Browse']
 
 const ResponsiveAppBar = () => {
     return (

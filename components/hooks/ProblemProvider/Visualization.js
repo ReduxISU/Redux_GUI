@@ -1,12 +1,23 @@
+import { useEffect, useState } from "react";
+import {
+  requestAllInfo,
+  requestAllVisualizations,
+  requestAllVisualizationTypes,
+} from "../../redux";
+import { isRenderable } from "../../Visualization/svgs/renderability";
 import { useGenericInfo } from "../ProblemProvider";
-import { requestAllVisualizations, requestAllInfo } from "../../redux";
-import React, { useEffect, useState, useRef } from "react";
 
 export function useVisualization(url, problemName, problemNameMap, problemInfoMap) {
   const state = {};
   [state.defaultVisualizationMap] = useDefaultVisualizationMap(url, problemInfoMap);
   [state.VisualizationOptions] = useVisualizationOptions(url, problemName);
-  [state.chosenVisualization, state.setChosenVisualization] = useChosenVisualization(problemName, state.defaultVisualizationMap);
+  state.visualizationTypeMap = useVisualizationTypeMap(url, state.VisualizationOptions);
+  [state.chosenVisualization, state.setChosenVisualization] = useChosenVisualization(
+    problemName,
+    state.defaultVisualizationMap,
+    state.VisualizationOptions,
+    state.visualizationTypeMap,
+  );
   [state.VisualizationNameMap] = useVisualizationNameMap(url, problemNameMap);
   return state;
 }
@@ -24,7 +35,7 @@ function useDefaultVisualizationMap(url, problemInfoMap) {
       .map(
         (info) =>
           info?.defaultVisualization?.visualizationName ||
-          info?.defaultVisualization?.VisualizationName
+          info?.defaultVisualization?.VisualizationName,
       )
       .filter(Boolean);
     (async () => {
@@ -34,12 +45,11 @@ function useDefaultVisualizationMap(url, problemInfoMap) {
       let map = new Map();
       for (const problem of problems) {
         const visualizations = allVisualizations[problem] ?? [];
-        for (const v of visualizations) {
-          const visualization = v.split(" ")[0];
+        for (const visualization of visualizations) {
           const info = allInfo[visualization];
           const visName = info?.visualizationName || info?.VisualizationName;
           if (visName && defaultVisualizationNames.includes(visName)) {
-            map.set(problem, v);
+            map.set(problem, visualization);
           }
         }
       }
@@ -67,42 +77,94 @@ function useVisualizationOptions(url, problemName) {
   return [VisualizationOptions, setVisualizationOptions];
 }
 
-function useChosenVisualization(problemName, defaultVisualizationMap) {
-  const [chosenVisualization, setChosenVisualization] = useState("");
-  const [byProblem, setByProblem] = useState({}); // { [problemName]: vis }
-  const userSelected = useRef(false);
-  const lastProblem = useRef(null);
-
-  const setChosenVisualizationSafe = (value) => {
-    userSelected.current = true;
-    setByProblem((prev) => ({ ...prev, [problemName]: value }));
-    setChosenVisualization(value);
-  };
+/**
+ * Bridges `VisualizationOptions` (visualization CLASS NAMES, e.g.
+ * "CliqueDefaultVisualization") to the renderer registry, which is keyed on
+ * `visualizationType` (e.g. "GraphD3") -- returns a `Map<className, type>`.
+ *
+ * Prefers the `Navigation/Batch/allVisualizationTypes` endpoint. That
+ * endpoint may not be deployed on the connected API yet, in which case
+ * `requestAllVisualizationTypes` resolves to `undefined` (fetchJson
+ * swallows the failure), and this falls back to reading `visualizationType`
+ * off each class's entry in `allInfo` instead. Both paths must work.
+ */
+function useVisualizationTypeMap(url, VisualizationOptions) {
+  const [visualizationTypeMap, setVisualizationTypeMap] = useState(new Map());
 
   useEffect(() => {
-    if (!problemName) return;
+    (async () => {
+      if (!VisualizationOptions?.length) {
+        setVisualizationTypeMap(new Map());
+        return;
+      }
 
-    // On problem change: load stored or default
-    if (problemName !== lastProblem.current) {
-      lastProblem.current = problemName;
-      userSelected.current = false;
-      const stored = byProblem[problemName];
-      const def = defaultVisualizationMap.get(problemName) || "";
-      const next = stored ?? def;
-      setChosenVisualization(next);
-      return;
-    }
+      const allTypes = await requestAllVisualizationTypes(url);
+      const map = new Map();
 
-    // After defaults load for the same problem: only if nothing chosen/stored
-    if (!userSelected.current && !byProblem[problemName] && !chosenVisualization) {
-      const def = defaultVisualizationMap.get(problemName) || "";
-      setChosenVisualization(def);
-    }
-  }, [problemName, defaultVisualizationMap, chosenVisualization, byProblem]);
+      if (allTypes) {
+        for (const className of VisualizationOptions) {
+          const type = allTypes[className];
+          if (type) map.set(className, type);
+        }
+      } else {
+        // allVisualizationTypes isn't deployed on the connected API yet --
+        // derive the same className -> type mapping from allInfo, which
+        // already carries visualizationType per visualization.
+        const allInfo = (await requestAllInfo(url)) ?? {};
+        for (const className of VisualizationOptions) {
+          const type =
+            allInfo[className]?.visualizationType || allInfo[className]?.VisualizationType;
+          if (type) map.set(className, type);
+        }
+      }
+
+      setVisualizationTypeMap(map);
+    })();
+  }, [url, VisualizationOptions]);
+
+  return visualizationTypeMap;
+}
+
+function useChosenVisualization(
+  problemName,
+  defaultVisualizationMap,
+  VisualizationOptions,
+  visualizationTypeMap,
+) {
+  const [byProblem, setByProblem] = useState({}); // { [problemName]: vis }
+
+  const setChosenVisualizationSafe = (value) => {
+    setByProblem((prev) => ({ ...prev, [problemName]: value }));
+  };
+
+  // Derived, not stored: chosenVisualization is a pure function of the arguments above, so
+  // it's computed directly during render instead of via an Effect + setState (the latter
+  // triggers an extra "cascading render" -- see
+  // https://react.dev/learn/you-might-not-need-an-effect). byProblem already reflects a
+  // just-made user choice by the very next render (setByProblem and this computation now
+  // run in the same pass), so no separate "user selected" guard is needed: an explicit
+  // choice already wins via the `stored` branch below, with no effect-lag window where it
+  // could be raced by a re-resolved default.
+  //
+  // Resolution order:
+  //   1. stored per-problem user choice (survives switching problems and back)
+  //   2. backend-declared default from defaultVisualizationMap, iff it is renderable
+  //   3. first renderable option
+  //   4. "" -- explicit empty state; nothing renderable for this problem
+  let chosenVisualization = "";
+  if (problemName) {
+    const isOptionRenderable = (option) => isRenderable(visualizationTypeMap.get(option));
+    const stored = byProblem[problemName];
+    const backendDefault = defaultVisualizationMap.get(problemName);
+    chosenVisualization =
+      stored ??
+      (backendDefault && isOptionRenderable(backendDefault) ? backendDefault : undefined) ??
+      (VisualizationOptions ?? []).find(isOptionRenderable) ??
+      "";
+  }
 
   return [chosenVisualization, setChosenVisualizationSafe];
 }
-
 
 function useVisualizationNameMap(url, problemNameMap) {
   const [VisualizationNameMap, setVisualizationNameMap] = useState(new Map());
@@ -121,7 +183,7 @@ function useVisualizationNameMap(url, problemNameMap) {
           const info = allInfo[visualization];
           map.set(
             visualization,
-            info?.visualizationName || info?.VisualizationName || visualization
+            info?.visualizationName || info?.VisualizationName || visualization,
           );
         }
       }

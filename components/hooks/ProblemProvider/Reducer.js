@@ -77,7 +77,7 @@ function useReductionVisualization(url, chosenReduceTo) {
 
     (async () => {
       const info = await requestInfo(url, chosenReduceTo);
-      setReductionVisualization(info?.defaultVisualization.visualizationType ?? "");
+      setReductionVisualization(info?.defaultVisualization?.visualizationType ?? "");
     })();
   }, [url, chosenReduceTo]);
 

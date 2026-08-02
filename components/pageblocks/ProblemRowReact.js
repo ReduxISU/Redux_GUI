@@ -17,7 +17,10 @@ import { Folder as FolderIcon } from '@mui/icons-material';
 import { Download as DownloadIcon } from '@mui/icons-material';
 
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
+import ProblemFilterMenu from '../widgets/ProblemFilterMenu';
 import { useProblemInfo } from '../hooks/ProblemProvider'
+import { useProblemIndex } from '../hooks/ProblemFilters/useProblemIndex';
+import { useProblemFilters } from '../hooks/ProblemFilters/useProblemFilters';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
@@ -28,11 +31,28 @@ var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstanc
 const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
+// Display order for the dropdown's complexity-class sections. Unclassified
+// last -- it's the "not yet tagged" bucket, not a real complexity class.
+const COMPLEXITY_CLASS_ORDER = ["P", "NPComplete", "NPHard", "NPIntermediate", "QuantumOracle", "Unclassified"];
+
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
  */
 export default function ProblemRowReact({ url, problemName, setProblemName, problemNameMap, setProblemInstance }) {
   const problemInfo = useProblemInfo(url, problemName);
+  const { problemIndex, reductionGraph } = useProblemIndex(url);
+  const {
+    selectedComplexityClasses,
+    setSelectedComplexityClasses,
+    selectedSolverComplexityBuckets,
+    setSelectedSolverComplexityBuckets,
+    filteredProblems,
+    clearFilters,
+  } = useProblemFilters(problemIndex, reductionGraph);
+  // problemIndex is fetched independently of problemNameMap (a separate hook
+  // chain); intersect so a momentary population lag between the two can't put
+  // an unlabeled option in the dropdown.
+  const filteredProblemOptions = filteredProblems.filter((name) => problemNameMap.has(name));
   const [problemLocalInstance, setProblemLocalInstance] = useState("")
   const defaultInstanceParsed = {
     test: true,
@@ -148,8 +168,11 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
       ? {
           header: problemInfo.problemName ?? "",
           formalDef: problemInfo.formalDefinition ?? "",
-          // It makes description clean 
+          // It makes description clean
           info: problemInfo.problemDefinition ?? "",
+          classification: [
+            { label: "Complexity class", value: problemInfo.complexityClass || "Unclassified" },
+          ],
           // Source shown on its own line here
           source:
             problemInfo.source ||
@@ -174,14 +197,24 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={problemName}
           onSelect={setProblemName}
-          options={[...problemNameMap.keys()]}
+          options={filteredProblemOptions}
           optionsMap={problemNameMap}
+          groupBy={(key) => problemIndex.get(key)?.complexityClass || "Unclassified"}
+          groupOrder={COMPLEXITY_CLASS_ORDER}
           extenderButtons={(input) => [
             {
               label: `Add new problem "${input}"`,
               href: `${url}ProblemTemplate/?problemName=${input}`,
             },
           ]}
+        />{" "}
+        <ProblemFilterMenu
+          problemIndex={problemIndex}
+          selectedComplexityClasses={selectedComplexityClasses}
+          setSelectedComplexityClasses={setSelectedComplexityClasses}
+          selectedSolverComplexityBuckets={selectedSolverComplexityBuckets}
+          setSelectedSolverComplexityBuckets={setSelectedSolverComplexityBuckets}
+          clearFilters={clearFilters}
         />{" "}
          <PopoverTooltipClick toolTip={tip} />
       </ProblemSection.Header>
