@@ -1,0 +1,17 @@
+# Redux Build System pipeline config. See github.com/ReduxISU/Redux_Build_System.
+engine = "npm"
+
+[artifact]
+image = "ghcr.io/reduxisu/redux_gui"
+port = 3000
+health-path = "/"
+
+# `unit-test` reports `skipped` until package.json gains a `test` script — it never passes
+# vacuously. `integration-test` and `push` are not implemented in rbs yet and report `skipped`.
+#
+# When integration-test lands it needs a backend container alongside the GUI image (the proxy is
+# useless without one) wired via REDUX_BASE_URL. Those keys are added with that implementation
+# rather than guessed at here.
+
+[push]
+on-branch = "ReduxAPI_GUI"
