@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test:e2e": "playwright test",
     "format": "biome check --write .",
     "format:check": "biome check .",
     "check:visualizations": "node Tools/check-visualization-coverage.mjs",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.6",
+    "@playwright/test": "^1.62.1",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.2.12",
     "eslint-config-prettier": "^10.1.8",

@@ -19,3 +19,14 @@ sudo chown "$(id -u):$(id -g)" node_modules .next
 # Seed local env from template, then install deps.
 [ -f .env.local ] || cp .env.example .env.local
 npm ci
+
+# Chromium for the integration tests (see TESTING.md). Guarded like mise above: this also runs in
+# CI via devcontainers/ci, so a download failure must not fail container creation or redden a PR.
+#
+# `sudo -E` on its own is NOT enough: sudoers' secure_path replaces PATH regardless, npx is not
+# found, and the deps quietly never install. Chromium then dies with exit 127 and
+# "error while loading shared libraries: libglib-2.0.so.0" — which looks nothing like the cause.
+if ! sudo -E env "PATH=${PATH}" npx --yes playwright install-deps chromium; then
+  echo "warn: playwright system deps failed to install — browser tests will not be able to start"
+fi
+npx playwright install chromium || echo "warn: chromium download failed; 'npm run test:e2e' unavailable"
