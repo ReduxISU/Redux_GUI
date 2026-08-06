@@ -44,6 +44,12 @@ cache/
 .rbs/
 report.md
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
 # ESLint SARIF output
 eslint-results.sarif
 

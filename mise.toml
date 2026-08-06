@@ -8,6 +8,10 @@ run = "npm run dev -- -H ${DEV_HOST:-127.0.0.1} -p 3000"
 description = "Production build"
 run = "npm run build"
 
+[tasks.e2e]
+description = "Integration tests against a running stack (see TESTING.md)"
+run = "npm run test:e2e"
+
 [tasks.lint]
 description = "Lint with ESLint"
 run = "npm run lint"
