@@ -26,6 +26,7 @@ import Link from "next/link"; // <-- IMPORTANT for Quantum button
 
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
+import { visualizationTypeCategory } from "../Visualization/svgs/visualizationCategories";
 
 import {
   requestProblemGenericInstance,
@@ -341,7 +342,12 @@ export default function VisualizeRowReact({
       formalDef: visualizationInfo.visualizationDefinition ?? "",
       info: visualizationInfo.info ?? visualizationInfo.description ?? "",
       classification: [
-        { label: "Visualization type", value: visualizationInfo.visualizationType || "Unclassified" },
+        {
+          label: "Visualization type",
+          value: visualizationInfo.visualizationType
+            ? visualizationTypeCategory(visualizationInfo.visualizationType)
+            : "Unclassified",
+        },
       ],
       source: visualizationInfo.source,
       credit:

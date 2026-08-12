@@ -28,12 +28,21 @@ const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
 const REDUCE_BUTTON = { buttonText: "Reduce" }
 const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" }
 const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to reduce your original problem to to see information about it", info: "" }
-const TOOLTIP2 = { header: "Reduction Type", formalDef: "Choose a type of reduction to see information about it", info: "" }
+const TOOLTIP2 = {
+  header: "Reduction Type",
+  formalDef: "Choose a type of reduction to see information about it",
+  info: "",
+  reductionType: "",
+  complexity: "",
+  complexityBucket: "",
+}
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } }
 
-// ReductionCost describes output-size blowup relative to input size -- the
-// closest thing reductions have to a Big-O figure (reductions themselves
-// don't have a runtime complexity class the way problems/solvers do).
+// ReductionCost describes output-size blowup relative to input size, a
+// separate axis from ReductionComplexityBucket (runtime, shown below as
+// "Complexity bucket") and the free-text `complexity` Big-O string (issue
+// #376) -- a reduction declares all three independently, see
+// Interfaces/ReductionCost.cs / ReductionComplexityBucket.cs in the API repo.
 const REDUCTION_COST_LABELS = {
   Linear: "Linear (O(n))",
   Quadratic: "Quadratic (O(n²))",
@@ -161,6 +170,9 @@ export default function ReduceToRowReact({
                     label: "Reduction cost",
                     value: REDUCTION_COST_LABELS[reducerInfo.cost] || reducerInfo.cost || "Unclassified",
                   },
+                  { label: "Reduction type", value: reducerInfo.reductionType || "Unclassified" },
+                  { label: "Complexity bucket", value: reducerInfo.complexityBucket || "Unclassified" },
+                  { label: "Big-O", value: reducerInfo.complexity || "Not yet determined" },
                 ],
                 // separate Source line
                 source: reducerInfo.source,

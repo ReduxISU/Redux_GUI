@@ -53,11 +53,9 @@ function PopoverTooltipClick({ toolTip = {} }) {
 
           <Box sx={{ px: 2, py: 1.5, maxWidth: 480 }}>
             {t.formalDef && t.isMathDef ? (
-              <Box
+              <Typography
+                variant="body2"
                 sx={{
-                  p: '8px 10px',
-                  borderRadius: 1,
-                  bgcolor: 'rgba(0,0,0,0.06)',
                   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
                   fontSize: '0.85em',
                   whiteSpace: 'pre-wrap',
@@ -65,7 +63,7 @@ function PopoverTooltipClick({ toolTip = {} }) {
                 }}
               >
                 {t.formalDef}
-              </Box>
+              </Typography>
             ) : t.formalDef ? (
               <Typography variant="body2" sx={{ mb: 1.5 }}>
                 {t.formalDef}
@@ -89,14 +87,7 @@ function PopoverTooltipClick({ toolTip = {} }) {
             ) : null}
 
             {Array.isArray(t.classification) && t.classification.length > 0 ? (
-              <Box
-                sx={{
-                  mb: 1.5,
-                  p: '6px 10px',
-                  borderRadius: 1,
-                  bgcolor: 'rgba(0,0,0,0.04)',
-                }}
-              >
+              <Box sx={{ mb: 1.5 }}>
                 {t.classification.map(({ label, value }) => (
                   <Typography key={label} variant="body2" sx={{ lineHeight: 1.35 }}>
                     <strong>{label}:</strong> {value}
