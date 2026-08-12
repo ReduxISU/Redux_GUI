@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import { Container } from "react-bootstrap";
 import { useProblemProvider } from "../components/hooks/ProblemProvider";
-import { useEffect, memo } from "react";
+import { useEffect, memo, useState } from "react"; // CHANGED: added useState for row order
 import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
@@ -80,6 +80,62 @@ function MainPageContent() {
 
   //useUnload(problem, solver, verifier, reducer);
 
+  // ==================== CHANGED: added drag-and-drop state and handlers ====================
+  const [rowOrder, setRowOrder] = useState([
+    "problem",
+    "reduce",
+    "visualize",
+    "solve",
+    "verify",
+  ]);
+
+  const rowMap = {
+    problem: <ProblemRowMemo url={reduxBaseUrl} {...problem} />,
+    reduce: <ReduceToRowMemo url={reduxBaseUrl} {...problem} {...reducer} />,
+    visualize: (
+      <VisualizeRowMemo
+        url={reduxBaseUrl}
+        {...problem}
+        {...reducer}
+        chosenSolver={solver.chosenSolver}
+        defaultSolverMap={solver.defaultSolverMap}
+        {...visualization}
+      />
+    ),
+    solve: (
+      <SolveRowMemo
+        url={reduxBaseUrl}
+        {...problem}
+        {...solver}
+        chosenReduceTo={reducer.chosenReduceTo}
+      />
+    ),
+    verify: <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />,
+  };
+
+  function handleDragStart(e, key) {
+    e.dataTransfer.setData("text/plain", key);
+    e.dataTransfer.effectAllowed = "move";
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+  }
+
+  function handleDrop(e, targetKey) {
+    e.preventDefault();
+    const draggedKey = e.dataTransfer.getData("text/plain");
+    if (draggedKey === targetKey) return;
+
+    setRowOrder((prev) => {
+      const next = prev.filter((k) => k !== draggedKey);
+      const targetIndex = next.indexOf(targetKey);
+      next.splice(targetIndex, 0, draggedKey);
+      return next;
+    });
+  }
+  // ==================== END CHANGED ====================
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -97,36 +153,23 @@ function MainPageContent() {
               />
             </div>
 
-            <div className="p-2 col-example">
-              <ProblemRowMemo url={reduxBaseUrl} {...problem} />
-            </div>
-            <div className="p-2 col-example">
-              <ReduceToRowMemo url={reduxBaseUrl} {...problem} {...reducer} />
-            </div>
-
-            <div className="p-2 col-example">
-              <VisualizeRowMemo
-                url={reduxBaseUrl}
-                {...problem}
-                {...reducer}
-                chosenSolver={solver.chosenSolver}
-                defaultSolverMap={solver.defaultSolverMap}
-                {...visualization}
-              />
-            </div>
-
-            <div className="p-2 col-example">
-              <SolveRowMemo
-                url={reduxBaseUrl}
-                {...problem}
-                {...solver}
-                chosenReduceTo={reducer.chosenReduceTo}
-              />
-            </div>
-
-            <div className="p-2 col-example">
-              <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />
-            </div>
+            {/* ==================== CHANGED: whole row is draggable, no handle indicator ==================== */}
+            {rowOrder.map((key) => (
+              <div
+                key={key}
+                draggable
+                onDragStart={(e) => handleDragStart(e, key)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, key)}
+                className="p-2 col-example"
+                style={{ cursor: "grab" }}
+              >
+                {rowMap[key]}
+              </div>
+            ))}
+            {/* ==================== END CHANGED ====================
+                 Previously five separate hardcoded divs (Problem/ReduceTo/Visualize/Solve/Verify)
+                 in a fixed order. Now generated from rowOrder + rowMap, each row itself draggable. */}
           </div>
         </div>
 
