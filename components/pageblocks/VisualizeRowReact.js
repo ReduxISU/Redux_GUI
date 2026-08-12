@@ -385,6 +385,7 @@ export default function VisualizeRowReact({
       <ProblemSection.Body>
         {/* Controls */}
         <div
+          data-tour-id="viz-controls"
           style={{
             border: "2px solid #ccc",
             borderRadius: "8px",
