@@ -294,7 +294,13 @@ export async function requestReducedInstance(url, reduction, instance) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestReductionInfo(url, apiCall) {
-  return await fetchJson(`${url}${apiCall}/info`, () => `${apiCall} INFO REQUEST FAILED`);
+  // Reductions are served by the same generic ProblemProvider/info?interface=
+  // endpoint as problems/solvers/verifiers (see requestInfo above) -- this used to
+  // request `${apiCall}/info` directly, a route that doesn't exist on the API and
+  // 404s every time, silently leaving reducerInfo as {} (empty) and every reduction
+  // tooltip field (cost/reductionType/complexityBucket/complexity) on its fallback
+  // text no matter what the backend actually has classified.
+  return await requestInfo(url, apiCall);
 }
 
 /**

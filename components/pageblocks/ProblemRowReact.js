@@ -46,6 +46,8 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     setSelectedComplexityClasses,
     selectedSolverComplexityBuckets,
     setSelectedSolverComplexityBuckets,
+    selectedVisualizationTypes,
+    setSelectedVisualizationTypes,
     filteredProblems,
     clearFilters,
   } = useProblemFilters(problemIndex, reductionGraph);
@@ -215,6 +217,8 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           setSelectedComplexityClasses={setSelectedComplexityClasses}
           selectedSolverComplexityBuckets={selectedSolverComplexityBuckets}
           setSelectedSolverComplexityBuckets={setSelectedSolverComplexityBuckets}
+          selectedVisualizationTypes={selectedVisualizationTypes}
+          setSelectedVisualizationTypes={setSelectedVisualizationTypes}
           clearFilters={clearFilters}
         />{" "}
          <PopoverTooltipClick toolTip={tip} />

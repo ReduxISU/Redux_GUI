@@ -13,3 +13,27 @@ export function buildFacetOptions(problemIndex, pickValues) {
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([key, count]) => ({ key, label: key, count }));
 }
+
+/**
+ * Same option-building as `buildFacetOptions`, but grouped under a coarser display
+ * category (e.g. visualizationType "GraphD3"/"GraphLaTeX" grouped under "Graph",
+ * issue #378/#379). The underlying option `key` stays the raw value -- selecting it
+ * still toggles the raw value into filter state, so matching logic elsewhere
+ * (`useProblemFilters`) is untouched; `categorize` only changes how options are
+ * grouped/labeled for display.
+ *
+ * @returns `[{category, options: [{key, label, count}]}]`, categories and options
+ * both sorted alphabetically.
+ */
+export function buildGroupedFacetOptions(problemIndex, pickValues, categorize) {
+  const flat = buildFacetOptions(problemIndex, pickValues);
+  const groups = new Map();
+  for (const option of flat) {
+    const category = categorize(option.key) || option.key;
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category).push(option);
+  }
+  return [...groups.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([category, options]) => ({ category, options }));
+}
