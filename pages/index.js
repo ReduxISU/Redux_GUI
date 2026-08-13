@@ -31,7 +31,6 @@ import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
 
-// ==================== CHANGED: dnd-kit imports ====================
 import {
   DndContext,
   closestCenter,
@@ -47,7 +46,6 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-// ==================== END CHANGED ====================
 
 const SHOW_QUANTUM_VIS = false; //Flag to show a quantum circuit visualizer (sandbox feature)
 const ProblemRowMemo = memo(ProblemRowReact);
