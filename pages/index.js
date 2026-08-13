@@ -31,6 +31,24 @@ import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
 
+// ==================== CHANGED: dnd-kit imports ====================
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+// ==================== END CHANGED ====================
+
 const SHOW_QUANTUM_VIS = false; //Flag to show a quantum circuit visualizer (sandbox feature)
 const ProblemRowMemo = memo(ProblemRowReact);
 const ReduceToRowMemo = memo(ReduceToRowReact);
@@ -39,6 +57,36 @@ const SolveRowMemo = memo(SolveRowReact);
 const VerifyRowMemo = memo(VerifyRowReact);
 
 const reduxBaseUrl = '/api/redux/';
+
+function SortableRow({ id, children }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    position: "relative",
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  // Pass dragHandleProps directly into child component
+  const childrenWithProps = React.cloneElement(children, {
+    dragHandleProps: { attributes, listeners },
+  });
+
+  return (
+    <div ref={setNodeRef} style={style} className="p-2 col-example">
+      {childrenWithProps}
+    </div>
+  );
+}
+
 /**
  * Generates the actual page contents
  *
@@ -78,9 +126,6 @@ function MainPageContent() {
   const { problem, solver, verifier, reducer, visualization } =
     useProblemProvider(reduxBaseUrl);
 
-  //useUnload(problem, solver, verifier, reducer);
-
-  // ==================== CHANGED: added drag-and-drop state and handlers ====================
   const [rowOrder, setRowOrder] = useState([
     "problem",
     "reduce",
@@ -88,6 +133,12 @@ function MainPageContent() {
     "solve",
     "verify",
   ]);
+
+  // PointerSensor covers mouse; TouchSensor adds mobile/tablet support 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor)
+  );
 
   const rowMap = {
     problem: <ProblemRowMemo url={reduxBaseUrl} {...problem} />,
@@ -113,28 +164,17 @@ function MainPageContent() {
     verify: <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />,
   };
 
-  function handleDragStart(e, key) {
-    e.dataTransfer.setData("text/plain", key);
-    e.dataTransfer.effectAllowed = "move";
+  // Replaces the old handleDragStart/handleDragOver/handleDrop trio.
+  function handleDragEnd(event) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setRowOrder((items) => {
+        const oldIndex = items.indexOf(active.id);
+        const newIndex = items.indexOf(over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   }
-
-  function handleDragOver(e) {
-    e.preventDefault();
-  }
-
-  function handleDrop(e, targetKey) {
-    e.preventDefault();
-    const draggedKey = e.dataTransfer.getData("text/plain");
-    if (draggedKey === targetKey) return;
-
-    setRowOrder((prev) => {
-      const next = prev.filter((k) => k !== draggedKey);
-      const targetIndex = next.indexOf(targetKey);
-      next.splice(targetIndex, 0, draggedKey);
-      return next;
-    });
-  }
-  // ==================== END CHANGED ====================
 
   return (
     <>
@@ -152,24 +192,19 @@ function MainPageContent() {
                 reducer={reducer}
               />
             </div>
-
-            {/* ==================== CHANGED: whole row is draggable, no handle indicator ==================== */}
-            {rowOrder.map((key) => (
-              <div
-                key={key}
-                draggable
-                onDragStart={(e) => handleDragStart(e, key)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, key)}
-                className="p-2 col-example"
-                style={{ cursor: "grab" }}
-              >
-                {rowMap[key]}
-              </div>
-            ))}
-            {/* ==================== END CHANGED ====================
-                 Previously five separate hardcoded divs (Problem/ReduceTo/Visualize/Solve/Verify)
-                 in a fixed order. Now generated from rowOrder + rowMap, each row itself draggable. */}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={rowOrder} strategy={verticalListSortingStrategy}>
+                {rowOrder.map((key) => (
+                  <SortableRow key={key} id={key}>
+                    {rowMap[key]}
+                  </SortableRow>
+                ))}
+              </SortableContext>
+            </DndContext>
           </div>
         </div>
 
