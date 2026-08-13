@@ -122,7 +122,7 @@ if (url && problemInstance && mappedProblemData && Object.keys(mappedProblemData
 if (!visualizationState.reductionOn && !loading) {
   return (
     <>
-      <Container>
+      <Container data-tour-id="viz-canvas">
         {visualization}
       </Container>
     </>
@@ -138,7 +138,7 @@ else if (visualizationState.reductionOn && !loading) {
         style={{ height: 'inherit' }}
         onDragStart={handleBar}
       >
-        <Container>
+        <Container data-tour-id="viz-canvas">
           {/* {"Container1"} */}
           {visualization}
         </Container>

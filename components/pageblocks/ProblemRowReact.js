@@ -196,6 +196,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText}>
         <SearchBarExtensible
+          data-tour-id="problem-picker"
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={problemName}
           onSelect={setProblemName}
@@ -245,6 +246,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           </Box>
           {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
           <TextField
+            data-tour-id="instance-input"
             error={!instanceParsed.test}
             id="outlined-error"
             label={!instanceParsed.test ? "Incorrect Format" : "Problem Instance"}

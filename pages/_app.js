@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import '../styles/globals.css'
 import '../styles/q.css';
+import 'driver.js/dist/driver.css';
 // import '../styles/reducedStyle.css'
 
 // Site-wide default metadata. Lives here (not _document) so it is emitted in the

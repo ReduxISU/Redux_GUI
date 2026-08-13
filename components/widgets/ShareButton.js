@@ -48,9 +48,10 @@ const handleShare = async (problem, solver, verifier, reducer) => {
 };
 
 const ShareButton = ({ problem, solver, verifier, reducer }) => (
-    <Button 
-    variant="primary" 
-    className="corner-button" 
+    <Button
+    data-tour-id="share-button"
+    variant="primary"
+    className="corner-button"
     size="large"
     color="white"
     style={{ backgroundColor: THEME.colors.grey }}

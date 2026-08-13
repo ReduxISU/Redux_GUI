@@ -29,6 +29,7 @@ import { useProblemProvider } from "../components/hooks/ProblemProvider";
 import { useEffect, memo, useState } from "react"; // CHANGED: added useState for row order
 import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
+import TourLauncher from "../components/tour/TourLauncher";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
 
 import {
@@ -73,13 +74,25 @@ function SortableRow({ id, children }) {
     opacity: isDragging ? 0.6 : 1,
   };
 
-  // Pass dragHandleProps directly into child component
+  const tourIds = {
+    reduce: "reduce-row",
+    solve: "solve-row",
+    verify: "verify-row",
+  };
+
+  const tourId = tourIds[id];
+
   const childrenWithProps = React.cloneElement(children, {
     dragHandleProps: { attributes, listeners },
   });
 
   return (
-    <div ref={setNodeRef} style={style} className="p-2 col-example">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="p-2 col-example"
+      {...(tourId ? { "data-tour-id": tourId } : {})}
+    >
       {childrenWithProps}
     </div>
   );
@@ -189,13 +202,17 @@ function MainPageContent() {
                 verifier={verifier}
                 reducer={reducer}
               />
+              <TourLauncher />
             </div>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-              <SortableContext items={rowOrder} strategy={verticalListSortingStrategy}>
+              <SortableContext
+                items={rowOrder}
+                strategy={verticalListSortingStrategy}
+              >
                 {rowOrder.map((key) => (
                   <SortableRow key={key} id={key}>
                     {rowMap[key]}
