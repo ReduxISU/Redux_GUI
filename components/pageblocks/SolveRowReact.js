@@ -13,6 +13,8 @@ import { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "@mui/material";
 import { Download as DownloadIcon } from '@mui/icons-material';
+import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
 import { requestSolvedInstance } from "../redux";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
@@ -45,6 +47,7 @@ export default function SolveRowReact({
   solverNameMap,
   problemNameMap,
   chosenReduceTo,
+  dragHandleProps,
 }) {
   const solverInfo = useSolverInfo(url, chosenSolver);
 
@@ -114,6 +117,23 @@ export default function SolveRowReact({
           }}
         />{" "}
         <PopoverTooltipClick toolTip={tip} />
+        {dragHandleProps && (
+                  <IconButton
+                    {...dragHandleProps.attributes}
+                    {...dragHandleProps.listeners}
+                    size="small"
+                    title="Drag to reorder"
+                    sx={{
+                      cursor: 'grab',
+                      color: '#424242',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': { backgroundColor: '#e0e0e0' },
+                      mr: 1,
+                    }}
+                  >
+                    <DragIndicatorIcon />
+                  </IconButton>
+                )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>

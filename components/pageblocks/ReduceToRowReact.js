@@ -15,6 +15,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { Card } from 'react-bootstrap'
 import { Button } from '@mui/material'
 import { Download as DownloadIcon } from '@mui/icons-material';
+import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
 import { requestReducedInstanceFromPath } from '../redux'
 import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
@@ -65,6 +67,7 @@ export default function ReduceToRowReact({
   setChosenReductionType,
   reducedInstance,
   setReducedInstance,
+  dragHandleProps,
 }) {
   const reduceToInfo = useProblemInfo(url, chosenReduceTo);
   const reducerInfo = useReducerInfo(url, chosenReductionType);
@@ -188,6 +191,23 @@ export default function ReduceToRowReact({
               : TOOLTIP2
           }
         ></PopoverTooltipClick>
+        {dragHandleProps && (
+                  <IconButton
+                    {...dragHandleProps.attributes}
+                    {...dragHandleProps.listeners}
+                    size="small"
+                    title="Drag to reorder"
+                    sx={{
+                      cursor: 'grab',
+                      color: '#424242',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': { backgroundColor: '#e0e0e0' },
+                      mr: 1,
+                    }}
+                  >
+                    <DragIndicatorIcon />
+                  </IconButton>
+                )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>

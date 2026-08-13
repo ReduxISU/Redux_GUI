@@ -13,6 +13,8 @@ import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { FormControl } from 'react-bootstrap'
 import { Button } from '@mui/material'
+import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
 import { requestVerifiedInstance, requestIsCertificateValid } from '../redux';
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
@@ -34,6 +36,7 @@ export default function VerifyRowReact({
   setChosenVerifier,
   verifierOptions,
   verifierNameMap,
+  dragHandleProps,
 }) {
   const [certificate, setCertificate] = useState("");
   const [verifyResult, setVerifyResult] = useState("");
@@ -98,6 +101,23 @@ export default function VerifyRowReact({
               : TOOLTIP
           }
         ></PopoverTooltipClick>
+        {dragHandleProps && (
+                          <IconButton
+                            {...dragHandleProps.attributes}
+                            {...dragHandleProps.listeners}
+                            size="small"
+                            title="Drag to reorder"
+                            sx={{
+                              cursor: 'grab',
+                              color: '#424242',
+                              backgroundColor: '#f5f5f5',
+                              '&:hover': { backgroundColor: '#e0e0e0' },
+                              mr: 1,
+                            }}
+                          >
+                            <DragIndicatorIcon />
+                          </IconButton>
+                        )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>

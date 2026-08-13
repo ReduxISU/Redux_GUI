@@ -22,6 +22,7 @@ import {
   FastForward,
 } from "@mui/icons-material";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
 import Link from "next/link"; // <-- IMPORTANT for Quantum button
 
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
@@ -72,6 +73,7 @@ export default function VisualizeRowReact({
   VisualizationOptions,
   defaultVisualizationMap,
   visualizationTypeMap,
+  dragHandleProps,
 }) {
   const visualizationInfo = useVisualizationInfo(url, chosenVisualization);
 
@@ -377,6 +379,23 @@ export default function VisualizeRowReact({
         />
 
         <PopoverTooltipClick toolTip={tip} />
+        {dragHandleProps && (
+                          <IconButton
+                            {...dragHandleProps.attributes}
+                            {...dragHandleProps.listeners}
+                            size="small"
+                            title="Drag to reorder"
+                            sx={{
+                              cursor: 'grab',
+                              color: '#424242',
+                              backgroundColor: '#f5f5f5',
+                              '&:hover': { backgroundColor: '#e0e0e0' },
+                              mr: 1,
+                            }}
+                          >
+                            <DragIndicatorIcon />
+                          </IconButton>
+                        )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>
