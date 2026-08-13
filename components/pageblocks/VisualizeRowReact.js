@@ -216,17 +216,9 @@ export default function VisualizeRowReact({
           ];
         }
 
-        // The DFA table trace is most useful read from its finished state
-        // (full row history, final accept/reject), so default its slider to
-        // the last step instead of the first.
-        const defaultStep =
-          visualizationInfo?.visualizationType === "DFA Table" && processedData.length > 0
-            ? processedData.length - 1
-            : 0;
-
         setProblemData(processedData);
-        setCurrentStep(defaultStep);
-        setCurrentProblemData(processedData?.[defaultStep] ?? null);
+        setCurrentStep(0);
+        setCurrentProblemData(processedData?.[0] ?? null);
       } catch (err) {
         console.error(err);
       }
@@ -244,7 +236,6 @@ export default function VisualizeRowReact({
     showReduction,
     url,
     problemName,
-    visualizationInfo?.visualizationType,
   ]);
 
   // Fetch SAT3

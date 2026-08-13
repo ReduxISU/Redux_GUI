@@ -1,8 +1,6 @@
 import QuantumCircuitVis from "../QuantumCircuitVis";
-import DFATableVisualization from "./DFATableSvgReact";
 import DynamicTableSvgReact from "./DynamicTableSvgReact";
 import LaTeXGraphSvgReact from "./LaTeXGraphSvgReact";
-import NFATableVisualization from "./NFATableSvgReact";
 import PumpSchedulingSvgReact from "./PumpSchedulingSvgReact";
 import StandardCircuitSvgReact from "./StandardCircuitSvgReact";
 import StandardGraphSvgReact from "./StandardGraphSvgReact";
@@ -89,14 +87,6 @@ const renderDynamicTable = (solve, url, problemData) => {
   return <DynamicTableSvgReact problemData={problemData} solve={solve} url={url} />;
 };
 
-const renderDFATable = (solve, url, problemData) => {
-  return <DFATableVisualization problemData={problemData} solve={solve} url={url} />;
-};
-
-const renderNFATable = (solve, url, problemData) => {
-  return <NFATableVisualization problemData={problemData} solve={solve} url={url} />;
-};
-
 /**
  * Registry of visualization renderers, keyed by `visualizationType`.
  *
@@ -111,12 +101,6 @@ const renderNFATable = (solve, url, problemData) => {
  * aliases are scheduled for deletion once the rename has been deployed for one full release --
  * see the implementation plan, section 2.10. Do not register a new renderer under a
  * legacy-style key.
- *
- * "DFA Table"/"NFA Table" are a separate case from the legacy aliases above: there is no
- * current backend `VisualizationType` for either (old-style or renamed) -- no DFA/NFA problem's
- * `visualizationType` is wired to emit these keys yet. Kept registered because the renderer
- * components already exist; see NOT_YET_BACKEND_WIRED in Tools/check-visualization-coverage.mjs
- * for the matching CI exemption.
  *
  * "Unimplemented" is a sentinel meaning "no renderer is claimed" and is deliberately NOT a
  * registry key -- see isRenderable() in ./renderability.js.
@@ -141,10 +125,6 @@ const Visualizations = new Map([
   ["Quantum Circuit Q.js", renderQuantumCircuitQjs],
   ["pump", renderPumpSchedule],
   ["Dynamic Table", renderDynamicTable],
-
-  // -- not yet backend-wired (no matching VisualizationType exists yet) --
-  ["DFA Table", renderDFATable],
-  ["NFA Table", renderNFATable],
 ]);
 
 export default Visualizations;

@@ -40,18 +40,9 @@ const LEGACY_ALIASES = new Set([
   "Dynamic Table",
 ]);
 
-// Registered renderers with no current backend VisualizationType at all -- not a rename like
-// LEGACY_ALIASES above (there is no "DFATable"/"NFATable" manifest entry, old or new style). No
-// DFA/NFA problem's visualizationType is wired to emit these keys yet; kept registered because
-// the renderer components (DFATableSvgReact/NFATableSvgReact) already exist. Move an entry to
-// LEGACY_ALIASES instead if the API ever adds then renames a matching VisualizationType, or
-// remove it here once a real manifest entry supersedes it.
-const NOT_YET_BACKEND_WIRED = new Set(["DFA Table", "NFA Table"]);
-
 // Structural guard: below this many extracted keys, assume the regex broke rather than that the
 // registry actually shrank this much. Current registry has 8 current-name keys + 8 legacy
-// aliases + 2 not-yet-backend-wired keys = 18; set well below that but above zero so a broken
-// extractor can't sneak by.
+// aliases = 16; set well below that but above zero so a broken extractor can't sneak by.
 const MIN_EXTRACTED_KEYS = 9;
 
 const errors = [];
@@ -139,14 +130,12 @@ if (missingFromRegistry.length > 0) {
   );
 }
 
-// (b) every non-alias, non-not-yet-wired registry key is in the manifest.
-const unknownKeys = registryKeys.filter(
-  (key) => !manifestSet.has(key) && !LEGACY_ALIASES.has(key) && !NOT_YET_BACKEND_WIRED.has(key),
-);
+// (b) every non-alias registry key is in the manifest.
+const unknownKeys = registryKeys.filter((key) => !manifestSet.has(key) && !LEGACY_ALIASES.has(key));
 if (unknownKeys.length > 0) {
   fail(
-    `${relPath(VISUALIZATIONS_PATH)} registers key(s) that are neither in the vendored manifest, ` +
-      "a recognized legacy alias, nor a recognized not-yet-backend-wired key: " +
+    `${relPath(VISUALIZATIONS_PATH)} registers key(s) that are neither in the vendored manifest ` +
+      `nor a recognized legacy alias: ` +
       `${unknownKeys.join(", ")}. This usually means a typo, a dead renderer that should be ` +
       "removed, or a manifest that has drifted from the API " +
       `(re-vendor ${relPath(MANIFEST_PATH)} from Redux's Documentation/visualization-types.json).`,
@@ -158,5 +147,5 @@ reportAndExit();
 console.log(
   "check-visualization-coverage: OK " +
     `(${registryKeys.length} registry keys, ${manifest.length} manifest types, ` +
-    `${LEGACY_ALIASES.size} legacy aliases, ${NOT_YET_BACKEND_WIRED.size} not-yet-backend-wired accepted)`,
+    `${LEGACY_ALIASES.size} legacy aliases accepted)`,
 );
