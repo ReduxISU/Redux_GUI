@@ -1,4 +1,6 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import { useEffect, useState } from "react";
+import { requestContributorDirectory, requestContributorProfile } from "../../components/redux";
 
 
 //UI Components
@@ -13,8 +15,17 @@ import {
   Avatar,
   Tooltip,
   CssBaseline,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import isulogo from "../../components/images/ISULogo.png"; //Used for ISU logo at the bottom
+
+const reduxBaseUrl = "/api/redux/";
 
 
 
@@ -90,41 +101,9 @@ const publications = [
 
 
 
-//The only contributors whose github profiles are found along with its avatar and link
-const contributorProfiles = {
-  "Pratham Khanal": {
-    image: "https://github.com/pkprathamkhanal.png",
-    github: "https://github.com/pkprathamkhanal",
-  },
-  "Sansar Kharal": {
-    image: "https://github.com/kharsans.png",
-    github: "https://github.com/kharsans",
-  },
-  "Himanshu Jha": {
-    image: "https://github.com/himanshujha05.png",
-    github: "https://github.com/himanshujha05",
-  },
-  "Andrija Sevaljevic": {
-    image: "https://github.com/Andrija-Sevaljevic.png",
-    github: "https://github.com/Andrija-Sevaljevic",
-  },
-  "Jason Wright": {
-    image: "https://github.com/wrigjl.png",
-    github: "https://github.com/wrigjl",
-  },
-  "Daniel Igbokwe": {
-    image: "https://github.com/igbodani.png",
-    github: "https://github.com/igbodani",
-  },
-  "Sabal Subedi": {
-    image: "https://github.com/sabal_subedi.png",
-    github: "https://github.com/sabal_subedi",
-  },
-  "Alex Svancara": {
-    image: "https://github.com/svanalex.png",
-    github: "https://github.com/svanalex",
-  },
-};
+// Contributor GitHub avatar/link, keyed by name. Populated from the backend's
+// contributor directory (see AboutUsPage) instead of being hardcoded here, so
+// new contributors show up without a frontend change.
 
 
 
@@ -191,15 +170,19 @@ function TitleSection({ children }) {
 }
 
 
-function ItemContributor({ name }) {
-  const profile = contributorProfiles[name];
+function ItemContributor({ name, profile, onSelect }) {
   if (!profile) {
     return (
       <Typography
+        onClick={() => onSelect(name)}
         sx={{
           color: "#e5e7eb",
           fontSize: "0.8rem",
           lineHeight: 0.89,
+          cursor: "pointer",
+          "&:hover": {
+            color: "#d8b4fe",
+          },
         }}
       >
         {name}
@@ -220,6 +203,15 @@ function ItemContributor({ name }) {
               },
             },
           ],
+        },
+        tooltip: {
+          sx: {
+            bgcolor: "#111118",
+            border: "1px solid rgba(168,85,247,0.35)",
+            borderRadius: "12px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            padding: "10px 12px",
+          },
         },
       }}
       title={
@@ -271,20 +263,10 @@ function ItemContributor({ name }) {
           </Link>
         </Box>
       }
-      slotProps={{
-        tooltip: {
-          sx: {
-            bgcolor: "#111118",
-            border: "1px solid rgba(168,85,247,0.35)",
-            borderRadius: "12px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-            padding: "10px 12px",
-          },
-        },
-      }}
     >
       <Box
         component="span"
+        onClick={() => onSelect(name)}
         sx={{
           color: "#e5e7eb",
           fontSize: "0.9rem",
@@ -303,8 +285,85 @@ function ItemContributor({ name }) {
 }
 
 
+function ContributionList({ label, items }) {
+  if (!items || items.length === 0) return null;
+  return (
+    <Box sx={{ mb: 1.5 }}>
+      <Typography sx={{ color: "#e5e7eb", fontSize: "0.87rem" }}>
+        <Box component="span" sx={{ fontWeight: 600 }}>{label}:</Box> {items.length}
+      </Typography>
+      <Box component="ul" sx={{ m: 0, pl: 3, color: "#9ca3af", fontSize: "0.82rem" }}>
+        {items.map((item) => (
+          <Box component="li" key={item}>{item}</Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+
 //Default function
 export default function AboutUsPage() {
+  const [contributors, setContributors] = useState([]);
+  const [contributorProfiles, setContributorProfiles] = useState({});
+  const [contributorsLoading, setContributorsLoading] = useState(true);
+
+  const [selectedContributor, setSelectedContributor] = useState(null);
+  const [profileData, setProfileData] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    requestContributorDirectory(reduxBaseUrl).then((entries) => {
+      if (cancelled) return;
+      setContributorsLoading(false);
+      if (!entries) return;
+
+      const names = [];
+      const profiles = {};
+      for (const entry of entries) {
+        const name = entry.name ?? entry.Name;
+        const githubUsername = entry.githubUsername ?? entry.GithubUsername;
+        if (!name) continue;
+
+        names.push(name);
+        if (githubUsername) {
+          profiles[name] = {
+            image: `https://github.com/${githubUsername}.png`,
+            github: `https://github.com/${githubUsername}`,
+          };
+        }
+      }
+      setContributors(names);
+      setContributorProfiles(profiles);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleContributorClick = (name) => {
+    setSelectedContributor(name);
+    setProfileData(null);
+    setProfileLoading(true);
+    setModalOpen(true);
+
+    requestContributorProfile(reduxBaseUrl, name).then((data) => {
+      setProfileData(data ?? null);
+      setProfileLoading(false);
+    });
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedContributor(null);
+    setProfileData(null);
+    setProfileLoading(false);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -425,59 +484,45 @@ export default function AboutUsPage() {
     Project contributors
   </Typography>
 
-  <Grid container spacing={1.5}>
-    {[
-      "Kaden Marchetti",
-      "Caleb Eardley",
-      "Daniel Igbokwe",
-      "Alex Diviney",
-      "Janita Aamir",
-      "Andrija Sevaljevic",
-      "Garret Stouffer",
-      "Alex Svancara",
-      "Eric Hill",
-      "Porter Glines",
-      "Show Pratoomratana",
-      "Russell Phillips",
-      "Michael Crapse",
-      "Ian Gonzalez",
-      "Sabal Subedi",
-      "Himanshu Jha",
-      "Max Grünwoldt",
-      "Paul Gilbreath",
-      "Sansar Kharal",
-      "Pratham Khanal",
-      "George Lake",
-      "Grant Gardner",
-      "Jason Wright",
-      "Andreas Kramer",
-      "Courtney Bodily",
-      "Rakesh Itani",
-      "David Lindeman",
-    ].map((name) => (
-      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
-        <Box
-          sx={{
-            border: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(255,255,255,0.02)",
-            borderRadius: "10px",
-            px: 1.4,
-            py: 0.6,
-            minHeight: "30px",
-            display: "flex",
-            alignItems: "center",
-            transition: "all 0.2s ease",
-            "&:hover": {
-              borderColor: "rgba(168,85,247,0.28)",
-              background: "rgba(255,255,255,0.04)",
-            },
-          }}
-        >
-          <ItemContributor name={name} />
-        </Box>
-      </Grid>
-    ))}
-  </Grid>
+  {contributorsLoading ? (
+    <Typography sx={{ color: "#9ca3af", fontSize: "0.85rem" }}>
+      Loading contributors...
+    </Typography>
+  ) : contributors.length === 0 ? (
+    <Typography sx={{ color: "#9ca3af", fontSize: "0.85rem" }}>
+      Contributor list unavailable right now.
+    </Typography>
+  ) : (
+    <Grid container spacing={1.5}>
+      {contributors.map((name) => (
+        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
+          <Box
+            sx={{
+              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.02)",
+              borderRadius: "10px",
+              px: 1.4,
+              py: 0.6,
+              minHeight: "30px",
+              display: "flex",
+              alignItems: "center",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                borderColor: "rgba(168,85,247,0.28)",
+                background: "rgba(255,255,255,0.04)",
+              },
+            }}
+          >
+            <ItemContributor
+              name={name}
+              profile={contributorProfiles[name]}
+              onSelect={handleContributorClick}
+            />
+          </Box>
+        </Grid>
+      ))}
+    </Grid>
+  )}
 </Box>
 
             <Box
@@ -549,6 +594,113 @@ export default function AboutUsPage() {
     />
   </Link>
 </Box>
+
+      {/* Contributor Profile Modal */}
+      <Dialog
+        open={modalOpen}
+        onClose={handleCloseModal}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: "#111118",
+              border: "1px solid rgba(168,85,247,0.35)",
+              borderRadius: "16px",
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 2, color: "#ffffff" }}>
+          {contributorProfiles[selectedContributor] && (
+            <Avatar
+              src={contributorProfiles[selectedContributor].image}
+              alt={selectedContributor}
+              sx={{ width: 48, height: 48, border: "2px solid #a855f7" }}
+            />
+          )}
+          {selectedContributor}
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{ position: "absolute", right: 8, top: 8, color: "#9ca3af" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ borderColor: "rgba(255,255,255,0.1)" }}>
+          {profileLoading ? (
+            <Typography sx={{ color: "#9ca3af" }}>Loading...</Typography>
+          ) : profileData ? (
+            <Box sx={{ color: "#d1d5db", fontSize: "0.87rem" }}>
+              <Typography sx={{ color: "#ffffff", fontWeight: 600, mb: 1 }}>
+                Personal Information
+              </Typography>
+              <Typography sx={{ mb: 0.5 }}>
+                <Box component="span" sx={{ fontWeight: 600 }}>Email:</Box>{" "}
+                {profileData.email ?? profileData.Email ?? "Not specified"}
+              </Typography>
+              <Typography sx={{ mb: 0.5 }}>
+                <Box component="span" sx={{ fontWeight: 600 }}>Education:</Box>{" "}
+                {profileData.education ?? profileData.Education ?? "Not specified"}
+              </Typography>
+              <Typography sx={{ mb: 0.5 }}>
+                <Box component="span" sx={{ fontWeight: 600 }}>Major:</Box>{" "}
+                {profileData.major ?? profileData.Major ?? "Not specified"}
+              </Typography>
+              <Typography sx={{ mb: 2 }}>
+                <Box component="span" sx={{ fontWeight: 600 }}>Bio:</Box>{" "}
+                {profileData.bio ?? profileData.Bio ?? "Not specified"}
+              </Typography>
+
+              {contributorProfiles[selectedContributor] && (
+                <Typography sx={{ mb: 2 }}>
+                  <Box component="span" sx={{ fontWeight: 600 }}>GitHub:</Box>{" "}
+                  <Link
+                    href={contributorProfiles[selectedContributor].github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={{ color: "#c084fc" }}
+                  >
+                    {contributorProfiles[selectedContributor].github.replace("https://", "")}
+                  </Link>
+                </Typography>
+              )}
+
+              <Typography sx={{ color: "#ffffff", fontWeight: 600, mb: 1 }}>
+                Contributions
+              </Typography>
+              <Typography sx={{ mb: 1.5 }}>
+                <Box component="span" sx={{ fontWeight: 600 }}>Total:</Box>{" "}
+                {profileData.totalContributions ?? profileData.TotalContributions ?? 0}
+              </Typography>
+
+              <ContributionList
+                label="Problems"
+                items={profileData.problemsContributed ?? profileData.ProblemsContributed}
+              />
+              <ContributionList
+                label="Solvers"
+                items={profileData.solversCreated ?? profileData.SolversCreated}
+              />
+              <ContributionList
+                label="Reductions"
+                items={profileData.reductionsCreated ?? profileData.ReductionsCreated}
+              />
+            </Box>
+          ) : (
+            <Typography sx={{ color: "#9ca3af" }}>No profile data found.</Typography>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseModal} sx={{ color: "#c084fc" }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       </Box>
     </ThemeProvider>
   );
