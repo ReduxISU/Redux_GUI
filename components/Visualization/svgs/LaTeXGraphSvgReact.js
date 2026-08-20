@@ -51,7 +51,7 @@ function LaTeXGraphSvgReact({ problemData }) {
 
       const rand = seededRandom(12345);
 
-      const nodes = problemData.nodes.map((n) => ({
+      const nodes = (problemData.nodes || []).map((n) => ({
         ...n,
         x: rand() * 10,
         y: rand() * 10,
@@ -59,7 +59,7 @@ function LaTeXGraphSvgReact({ problemData }) {
         vy: 0,
       }));
 
-      const links = problemData.links;
+      const links = problemData.links || [];
 
       const iterations = 200;
       const repulsion = 0.4;
