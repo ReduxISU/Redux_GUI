@@ -51,31 +51,6 @@ const contributorProfiles = {
   },
 };
 
-// Links to additional documentation and resources
-const learnMoreHyperlink = [
-  { label: "Github", url: "https://github.com/ReduxISU/" },
-  {
-    label: "Wikipedia: What is NP-Complete?",
-    url: "https://en.wikipedia.org/wiki/NP-completeness",
-  },
-  {
-    label: "Karp&apos;s 21 NP-Complete Problems",
-    url: "https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf",
-  },
-  {
-    label: "Redux GUI Documentation",
-    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
-  },
-  {
-    label: "Redux Backend Documentation",
-    url: "https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md",
-  },
-  {
-    label: "API Swagger Documentation",
-    url: "https://api.redux.portneuf.cose.isu.edu/swagger/index.html",
-  },
-];
-
 const publicationsAndAwards = [
   {
     citation:
@@ -638,40 +613,6 @@ export default function AboutUsPage() {
                   BSD 3-Clause License
                 </Link>.
               </Typography>
-            </Box>
-
-            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-              <TitleSection>LEARN MORE</TitleSection>
-
-              <Typography
-                sx={{
-                  color: "#374151",
-                  fontSize: "0.87rem",
-                  mb: 2,
-                }}
-              >
-                Additional documentation can be found at the following links:
-              </Typography>
-
-              <Box sx={{ display: "grid", gap: 1.2 }}>
-                {learnMoreHyperlink.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="none"
-                    sx={{
-                      color: "#F47C20",
-                      fontSize: "0.8rem",
-                      fontWeight: 600,
-                      "&:hover": { color: "#d9670f" },
-                    }}
-                  >
-                    • {item.label}
-                  </Link>
-                ))}
-              </Box>
             </Box>
           </Box>
         </Container>
