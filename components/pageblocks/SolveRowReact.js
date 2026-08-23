@@ -12,9 +12,11 @@ import React from "react";
 import { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "@mui/material";
-import DownloadIcon from '@mui/icons-material/Download';
+import { Download as DownloadIcon } from '@mui/icons-material';
+import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
-import { requestSolvedInstanceTemporarySat3CliqueSolver } from "../redux";
+import { requestSolvedInstance } from "../redux";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import ProblemSection from "../widgets/ProblemSection";
@@ -27,6 +29,9 @@ const TOOLTIP = {
   header: "Solver Information",
   formalDef: "Choose a type of solver to see information about it",
   info: "",
+  solverType: "",
+  complexity: "",
+  complexityBucket: "",
 };
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
@@ -42,13 +47,14 @@ export default function SolveRowReact({
   solverNameMap,
   problemNameMap,
   chosenReduceTo,
+  dragHandleProps,
 }) {
   const solverInfo = useSolverInfo(url, chosenSolver);
 
   async function handleSolve() {
     setSolvedInstance(
       chosenSolver && problemInstance
-        ? (await requestSolvedInstanceTemporarySat3CliqueSolver(url, chosenSolver, problemInstance)) ?? ""
+        ? (await requestSolvedInstance(url, chosenSolver, problemInstance)) ?? ""
         : ""
     );
   }
@@ -73,7 +79,7 @@ export default function SolveRowReact({
         formalDef: solverInfo.solverDefinition ?? "",
         // Keep description clean
         info: solverInfo.info ?? solverInfo.description ?? "",
-        // Source on its own line 
+        // Source on its own line
         source: solverInfo.source,
         credit:
           Array.isArray(solverInfo.contributors) && solverInfo.contributors.length
@@ -82,6 +88,12 @@ export default function SolveRowReact({
 
         componentLink: solverInfo.solverLink || "",
         sourceLink: solverInfo.sourceLink || "",
+
+        classification: [
+          { label: "Solver type", value: solverInfo.solverType || "Unclassified" },
+          { label: "Complexity bucket", value: solverInfo.complexityBucket || "Unclassified" },
+          { label: "Big-O", value: solverInfo.complexity || "Not yet determined" },
+        ],
       }
       : TOOLTIP;
 
@@ -105,6 +117,23 @@ export default function SolveRowReact({
           }}
         />{" "}
         <PopoverTooltipClick toolTip={tip} />
+        {dragHandleProps && (
+                  <IconButton
+                    {...dragHandleProps.attributes}
+                    {...dragHandleProps.listeners}
+                    size="small"
+                    title="Drag to reorder"
+                    sx={{
+                      cursor: 'grab',
+                      color: '#424242',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': { backgroundColor: '#e0e0e0' },
+                      mr: 1,
+                    }}
+                  >
+                    <DragIndicatorIcon />
+                  </IconButton>
+                )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>

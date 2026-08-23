@@ -15,13 +15,13 @@ import { useVisualization} from "./Visualization";
 
 export function useProblemProvider(url) {
   const problem = useProblem(url);
-  const { problemName, problemType, problemNameMap, problemInfoMap, problemInstance } = problem;
+  const { problemName, problemNameMap, problemInfoMap, problemInstance } = problem;
   return {
     problem: problem,
-    reducer: useReducer(url, problemName, problemType, problemInstance),
-    solver: useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance),
-    verifier: useVerifier(url, problemName, problemType, problemNameMap, problemInfoMap),
-    visualization: useVisualization(url, problemName, problemType, problemNameMap, problemInfoMap),
+    reducer: useReducer(url, problemName, problemInstance),
+    solver: useSolver(url, problemName, problemNameMap, problemInfoMap, problemInstance),
+    verifier: useVerifier(url, problemName, problemNameMap, problemInfoMap),
+    visualization: useVisualization(url, problemName, problemNameMap, problemInfoMap),
   };
 }
 
@@ -32,7 +32,7 @@ export function useGenericInfo(url, info) {
     (async () => {
       setGenericInfo(!info ? {} : (await requestInfo(url, info)) ?? {});
     })();
-  }, [info]);
+  }, [info, url]);
 
   return genericInfo; // There should be no reason to set the information
 }

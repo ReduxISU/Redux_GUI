@@ -11,13 +11,18 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import TextField from '@mui/material/TextField';
+import { TextField } from '@mui/material';
 import { Button, Stack, Box } from "@mui/material";
-import FolderIcon from '@mui/icons-material/Folder';
-import DownloadIcon from '@mui/icons-material/Download';
+import { Folder as FolderIcon } from '@mui/icons-material';
+import { Download as DownloadIcon } from '@mui/icons-material';
+import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
+import ProblemFilterMenu from '../widgets/ProblemFilterMenu';
 import { useProblemInfo } from '../hooks/ProblemProvider'
+import { useProblemIndex } from '../hooks/ProblemFilters/useProblemIndex';
+import { useProblemFilters } from '../hooks/ProblemFilters/useProblemFilters';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
@@ -28,11 +33,30 @@ var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstanc
 const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
+// Display order for the dropdown's complexity-class sections. Unclassified
+// last -- it's the "not yet tagged" bucket, not a real complexity class.
+const COMPLEXITY_CLASS_ORDER = ["P", "NPComplete", "NPHard", "NPIntermediate", "QuantumOracle", "Unclassified"];
+
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
  */
-export default function ProblemRowReact({ url, problemName, setProblemName, problemNameMap, setProblemInstance }) {
+export default function ProblemRowReact({ url, problemName, setProblemName, problemNameMap, setProblemInstance, dragHandleProps }) {
   const problemInfo = useProblemInfo(url, problemName);
+  const { problemIndex, reductionGraph } = useProblemIndex(url);
+  const {
+    selectedComplexityClasses,
+    setSelectedComplexityClasses,
+    selectedSolverComplexityBuckets,
+    setSelectedSolverComplexityBuckets,
+    selectedVisualizationTypes,
+    setSelectedVisualizationTypes,
+    filteredProblems,
+    clearFilters,
+  } = useProblemFilters(problemIndex, reductionGraph);
+  // problemIndex is fetched independently of problemNameMap (a separate hook
+  // chain); intersect so a momentary population lag between the two can't put
+  // an unlabeled option in the dropdown.
+  const filteredProblemOptions = filteredProblems.filter((name) => problemNameMap.has(name));
   const [problemLocalInstance, setProblemLocalInstance] = useState("")
   const defaultInstanceParsed = {
     test: true,
@@ -130,13 +154,10 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     setProblemLocalInstance(problemVal);
     setProblemInstance(problemVal);
 
-  }, [problemInfo])
+  }, [problemInfo, setProblemInstance])
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {
-    try {
-    }
-    catch (error) { console.log("Couldn't clean problem instance: ", error); }
     setProblemLocalInstance(event.target.value)
     if (!instanceParsed.test) {
       defaultInstanceParsed.exampleStr = "";
@@ -149,36 +170,42 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   const tip =
     problemName
       ? {
-          header: problemInfo.problemName ?? "",
-          formalDef: problemInfo.formalDefinition ?? "",
-          // It makes description clean 
-          info: problemInfo.problemDefinition ?? "",
-          // Source shown on its own line here
-          source:
-            problemInfo.source ||
-            (Array.isArray(problemInfo.citations) ? problemInfo.citations.join("; ") : "") ||
-            "",
-          // Contributors
-          credit:
-            Array.isArray(problemInfo.contributors) && problemInfo.contributors.length
-              ? problemInfo.contributors.join(", ")
-              : "",
-          //  Popover builds Wikipedia URL
-          componentLink: problemInfo.problemLink || "",
-          sourceLink: problemInfo.sourceLink || "",
-          isMathDef: true, // only this file adds the flag
-        }
+        header: problemInfo.problemName ?? "",
+        formalDef: problemInfo.formalDefinition ?? "",
+        // It makes description clean
+        info: problemInfo.problemDefinition ?? "",
+        classification: [
+          { label: "Complexity class", value: problemInfo.complexityClass || "Unclassified" },
+        ],
+        // Source shown on its own line here
+        source:
+          problemInfo.source ||
+          (Array.isArray(problemInfo.citations) ? problemInfo.citations.join("; ") : "") ||
+          "",
+        // Contributors
+        credit:
+          Array.isArray(problemInfo.contributors) && problemInfo.contributors.length
+            ? problemInfo.contributors.join(", ")
+            : "",
+        //  Popover builds Wikipedia URL
+        componentLink: problemInfo.problemLink || "",
+        sourceLink: problemInfo.sourceLink || "",
+        isMathDef: true, // only this file adds the flag
+      }
       : TOOLTIP;
 
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText}>
         <SearchBarExtensible
+          data-tour-id="problem-picker"
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={problemName}
           onSelect={setProblemName}
-          options={[...problemNameMap.keys()]}
+          options={filteredProblemOptions}
           optionsMap={problemNameMap}
+          groupBy={(key) => problemIndex.get(key)?.complexityClass || "Unclassified"}
+          groupOrder={COMPLEXITY_CLASS_ORDER}
           extenderButtons={(input) => [
             {
               label: `Add new problem "${input}"`,
@@ -186,7 +213,34 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
             },
           ]}
         />{" "}
-         <PopoverTooltipClick toolTip={tip} />
+        <ProblemFilterMenu
+          problemIndex={problemIndex}
+          selectedComplexityClasses={selectedComplexityClasses}
+          setSelectedComplexityClasses={setSelectedComplexityClasses}
+          selectedSolverComplexityBuckets={selectedSolverComplexityBuckets}
+          setSelectedSolverComplexityBuckets={setSelectedSolverComplexityBuckets}
+          selectedVisualizationTypes={selectedVisualizationTypes}
+          setSelectedVisualizationTypes={setSelectedVisualizationTypes}
+          clearFilters={clearFilters}
+        />{" "}
+        <PopoverTooltipClick toolTip={tip} />
+        {dragHandleProps && (
+          <IconButton
+            {...dragHandleProps.attributes}
+            {...dragHandleProps.listeners}
+            size="small"
+            title="Drag to reorder"
+            sx={{
+              cursor: 'grab',
+              color: '#424242',
+              backgroundColor: '#f5f5f5',
+              '&:hover': { backgroundColor: '#e0e0e0' },
+              mr: 1,
+            }}
+          >
+            <DragIndicatorIcon />
+          </IconButton>
+        )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>
@@ -196,6 +250,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           </Box>
           {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
           <TextField
+            data-tour-id="instance-input"
             error={!instanceParsed.test}
             id="outlined-error"
             label={!instanceParsed.test ? "Incorrect Format" : "Problem Instance"}

@@ -150,6 +150,116 @@ function TitleSection({ children }) {
 
 function getLastName(name) {
   return name.split(" ").slice(-1)[0].toLowerCase();
+
+function ItemContributor({ name }) {
+  const profile = contributorProfiles[name];
+  if (!profile) {
+    return (
+      <Typography
+        sx={{
+          color: "#e5e7eb",
+          fontSize: "0.8rem",
+          lineHeight: 0.89,
+        }}
+      >
+        {name}
+      </Typography>
+    );
+  }
+  return (
+    <Tooltip
+      arrow
+      placement="right"
+      slotProps={{
+        popper: {
+          modifiers: [
+            {
+              name: "offset",
+              options: {
+                offset: [0, 6],
+              },
+            },
+          ],
+        },
+      }}
+      title={
+        <Box sx={{ p: 1, minWidth: 190 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
+            <Avatar
+              src={profile.image}
+              alt={name}
+              sx={{ width: 50, height: 50 }}
+            />
+            <Box>
+              <Typography
+                sx={{
+                  color: "#ffffff",
+                  fontWeight: 600,
+                  fontSize: "0.92rem",
+                }}
+              >
+                {name}
+              </Typography>
+              <Typography
+                sx={{
+                  color: "#cbd5e1",
+                  fontSize: "0.78rem",
+                }}
+              >
+                Contributor
+              </Typography>
+            </Box>
+          </Box>
+
+          <Link
+            href={profile.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            sx={{
+              color: "#e9d5ff",
+              fontSize: "0.9rem",
+              fontWeight: 500,
+              display: "inline-block",
+              mt: 0.25,
+              "&:hover": {
+                color: "#c084fc",
+              },
+            }}
+          >
+            View GitHub Profile
+          </Link>
+        </Box>
+      }
+      slotProps={{
+        tooltip: {
+          sx: {
+            bgcolor: "#111118",
+            border: "1px solid rgba(168,85,247,0.35)",
+            borderRadius: "12px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            padding: "10px 12px",
+          },
+        },
+      }}
+    >
+      <Box
+        component="span"
+        sx={{
+          color: "#e5e7eb",
+          fontSize: "0.9rem",
+          lineHeight: 1.35,
+          cursor: "pointer",
+          width: "100%",
+          "&:hover": {
+            color: "#d8b4fe",
+          },
+        }}
+      >
+        {name}
+      </Box>
+    </Tooltip>
+  );
 }
 
 export default function AboutUsPage() {
@@ -402,8 +512,94 @@ export default function AboutUsPage() {
               </Box>
             </Box>
 
-            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-              <TitleSection>SUPPORT</TitleSection>
+            <Box sx={{ ...theSectionCard, mb: 1 }}>
+  <TitleSection>CONTRIBUTORS</TitleSection>
+
+  <Typography
+    sx={{
+      color: "#d1d5db",
+      fontSize: "0.87rem",
+      lineHeight: 1.8,
+      mb: 2,
+    }}
+  >
+    This project was started by{" "}
+    <Link
+      href="https://www2.cose.isu.edu/~bodipaul/index.php"
+      target="_blank"
+      rel="noopener noreferrer"
+      underline="hover"
+      sx={{ color: "#a78bfa" }}
+    >
+      Dr. Paul Bodily
+    </Link>
+    , who is also the ISU Faculty Sponsor of the project.
+  </Typography>
+
+  <Typography
+    sx={{
+      color: "#9ca3af",
+      fontSize: "0.87rem",
+      mb: 2,
+    }}
+  >
+    Project contributors
+  </Typography>
+
+  <Grid container spacing={1.5}>
+    {[
+      "Kaden Marchetti",
+      "Caleb Eardley",
+      "Daniel Igbokwe",
+      "Alex Diviney",
+      "Janita Aamir",
+      "Andrija Sevaljevic",
+      "Garret Stouffer",
+      "Alex Svancara",
+      "Eric Hill",
+      "Porter Glines",
+      "Show Pratoomratana",
+      "Russell Phillips",
+      "Michael Crapse",
+      "Ian Gonzalez",
+      "Sabal Subedi",
+      "Himanshu Jha",
+      "Max Grünwoldt",
+      "Paul Gilbreath",
+      "Sansar Kharal",
+      "Pratham Khanal",
+      "George Lake",
+      "Grant Gardner",
+      "Jason Wright",
+      "Andreas Kramer",
+      "Courtney Bodily",
+      "Rakesh Itani",
+      "David Lindeman",
+    ].map((name) => (
+      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
+        <Box
+          sx={{
+            border: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(255,255,255,0.02)",
+            borderRadius: "10px",
+            px: 1.4,
+            py: 0.6,
+            minHeight: "30px",
+            display: "flex",
+            alignItems: "center",
+            transition: "all 0.2s ease",
+            "&:hover": {
+              borderColor: "rgba(168,85,247,0.28)",
+              background: "rgba(255,255,255,0.04)",
+            },
+          }}
+        >
+          <ItemContributor name={name} />
+        </Box>
+      </Grid>
+    ))}
+  </Grid>
+</Box>
 
               <Typography
                 sx={{

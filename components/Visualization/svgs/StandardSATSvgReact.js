@@ -183,7 +183,7 @@ class literal {
         this.svg.append("rect")
             .attr("x", this.x)
             .attr("y", this.y - this.size / 2)
-            .attr("fill", getColorByKey(this.color.trim()))
+            .attr("fill", getColorByKey(this.color.trim()) || getColorByKey("Background"))
             .attr("height", this.size)
             .attr("width", this.size * this.name.length - 7)//subtracting 7 since the stroke length is 7.
             .attr("id", this.id)

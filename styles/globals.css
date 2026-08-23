@@ -49,6 +49,17 @@ a {
   /* Ensure it appears above other elements */
 }
 
+.corner-button-left {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+.driver-popover {
+  max-width: 380px;
+}
+
 .centerImage {
   text-align: center;
 }

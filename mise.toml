@@ -1,0 +1,25 @@
+# Shared tasks. Node from the devcontainer feature (no [tools]); bind defaults to loopback, devcontainer sets 0.0.0.0.
+
+[tasks.dev]
+description = "Run the dev server on http://localhost:3000"
+run = "npm run dev -- -H ${DEV_HOST:-127.0.0.1} -p 3000"
+
+[tasks.build]
+description = "Production build"
+run = "npm run build"
+
+[tasks.e2e]
+description = "Integration tests against a running stack (see TESTING.md)"
+run = "npm run test:e2e"
+
+[tasks.lint]
+description = "Lint with ESLint"
+run = "npm run lint"
+
+[tasks.format]
+description = "Format with Biome"
+run = "npm run format"
+
+[tasks."format:check"]
+description = "Check formatting (no writes)"
+run = "npm run format:check"
