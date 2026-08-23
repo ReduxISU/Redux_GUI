@@ -73,6 +73,22 @@ const accessLinks = [
   },
 ];
 
+const learnMoreLinks = [
+  { label: "Github", url: "https://github.com/ReduxISU/" },
+  {
+    label: "Karp's 21 NP-Complete Problems",
+    url: "https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf",
+  },
+  {
+    label: "Redux GUI Documentation",
+    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
+  },
+  {
+    label: "Redux Backend Documentation",
+    url: "https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md",
+  },
+];
+
 const theme = createTheme({
   palette: {
     mode: "light",
@@ -253,6 +269,40 @@ export default function HelpPage() {
                     </Box>
                   </Typography>
                 </Box>
+              </Box>
+            </Box>
+
+            <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
+              <SectionTitle>LEARN MORE</SectionTitle>
+
+              <Typography
+                sx={{
+                  color: "#374151",
+                  fontSize: "0.87rem",
+                  mb: 2,
+                }}
+              >
+                Additional documentation can be found at the following links:
+              </Typography>
+
+              <Box sx={{ display: "grid", gap: 1 }}>
+                {learnMoreLinks.map((link) => (
+                  <Box key={link.label} sx={innerCard}>
+                    <Link
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{
+                        color: "#F47C20",
+                        fontWeight: 600,
+                        fontSize: "0.82rem",
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  </Box>
+                ))}
               </Box>
             </Box>
           </Box>
