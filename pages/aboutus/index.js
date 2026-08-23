@@ -8,10 +8,73 @@ import {
   Typography,
   Link,
   Grid,
+  Avatar,
+  Tooltip,
   CssBaseline,
 } from "@mui/material";
 
 import isulogo from "../../components/images/ISULogo.png";
+
+// The only contributors whose GitHub profiles are known, along with avatar and link
+const contributorProfiles = {
+  "Pratham Khanal": {
+    image: "https://github.com/pkprathamkhanal.png",
+    github: "https://github.com/pkprathamkhanal",
+  },
+  "Sansar Kharal": {
+    image: "https://github.com/kharsans.png",
+    github: "https://github.com/kharsans",
+  },
+  "Himanshu Jha": {
+    image: "https://github.com/himanshujha05.png",
+    github: "https://github.com/himanshujha05",
+  },
+  "Andrija Sevaljevic": {
+    image: "https://github.com/Andrija-Sevaljevic.png",
+    github: "https://github.com/Andrija-Sevaljevic",
+  },
+  "Jason Wright": {
+    image: "https://github.com/wrigjl.png",
+    github: "https://github.com/wrigjl",
+  },
+  "Daniel Igbokwe": {
+    image: "https://github.com/igbodani.png",
+    github: "https://github.com/igbodani",
+  },
+  "Sabal Subedi": {
+    image: "https://github.com/sabal_subedi.png",
+    github: "https://github.com/sabal_subedi",
+  },
+  "Alex Svancara": {
+    image: "https://github.com/svanalex.png",
+    github: "https://github.com/svanalex",
+  },
+};
+
+// Links to additional documentation and resources
+const learnMoreHyperlink = [
+  { label: "Github", url: "https://github.com/ReduxISU/" },
+  {
+    label: "Wikipedia: What is NP-Complete?",
+    url: "https://en.wikipedia.org/wiki/NP-completeness",
+  },
+  {
+    label: "Karp&apos;s 21 NP-Complete Problems",
+    url: "https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf",
+  },
+  {
+    label: "Redux GUI Documentation",
+    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
+  },
+  {
+    label: "Redux Backend Documentation",
+    url: "https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md",
+  },
+  {
+    label: "API Swagger Documentation",
+    url: "https://api.redux.portneuf.cose.isu.edu/swagger/index.html",
+  },
+];
 
 const publicationsAndAwards = [
   {
@@ -150,6 +213,7 @@ function TitleSection({ children }) {
 
 function getLastName(name) {
   return name.split(" ").slice(-1)[0].toLowerCase();
+}
 
 function ItemContributor({ name }) {
   const profile = contributorProfiles[name];
@@ -157,9 +221,9 @@ function ItemContributor({ name }) {
     return (
       <Typography
         sx={{
-          color: "#e5e7eb",
-          fontSize: "0.8rem",
-          lineHeight: 0.89,
+          color: "#374151",
+          fontSize: "0.9rem",
+          lineHeight: 1.35,
         }}
       >
         {name}
@@ -170,18 +234,6 @@ function ItemContributor({ name }) {
     <Tooltip
       arrow
       placement="right"
-      slotProps={{
-        popper: {
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, 6],
-              },
-            },
-          ],
-        },
-      }}
       title={
         <Box sx={{ p: 1, minWidth: 190 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
@@ -193,7 +245,7 @@ function ItemContributor({ name }) {
             <Box>
               <Typography
                 sx={{
-                  color: "#ffffff",
+                  color: "#111827",
                   fontWeight: 600,
                   fontSize: "0.92rem",
                 }}
@@ -202,7 +254,7 @@ function ItemContributor({ name }) {
               </Typography>
               <Typography
                 sx={{
-                  color: "#cbd5e1",
+                  color: "#6b7280",
                   fontSize: "0.78rem",
                 }}
               >
@@ -217,13 +269,13 @@ function ItemContributor({ name }) {
             rel="noopener noreferrer"
             underline="hover"
             sx={{
-              color: "#e9d5ff",
+              color: "#F47C20",
               fontSize: "0.9rem",
               fontWeight: 500,
               display: "inline-block",
               mt: 0.25,
               "&:hover": {
-                color: "#c084fc",
+                color: "#d9670f",
               },
             }}
           >
@@ -232,12 +284,22 @@ function ItemContributor({ name }) {
         </Box>
       }
       slotProps={{
+        popper: {
+          modifiers: [
+            {
+              name: "offset",
+              options: {
+                offset: [0, 6],
+              },
+            },
+          ],
+        },
         tooltip: {
           sx: {
-            bgcolor: "#111118",
-            border: "1px solid rgba(168,85,247,0.35)",
+            bgcolor: "#FFFFFF",
+            border: "1px solid #E5E7EB",
             borderRadius: "12px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
             padding: "10px 12px",
           },
         },
@@ -246,13 +308,13 @@ function ItemContributor({ name }) {
       <Box
         component="span"
         sx={{
-          color: "#e5e7eb",
+          color: "#374151",
           fontSize: "0.9rem",
           lineHeight: 1.35,
           cursor: "pointer",
           width: "100%",
           "&:hover": {
-            color: "#d8b4fe",
+            color: "#F47C20",
           },
         }}
       >
@@ -415,15 +477,7 @@ export default function AboutUsPage() {
                           },
                         }}
                       >
-                        <Typography
-                          sx={{
-                            color: "#374151",
-                            fontSize: "0.9rem",
-                            lineHeight: 1.35,
-                          }}
-                        >
-                          {name}
-                        </Typography>
+                        <ItemContributor name={name} />
                       </Box>
                     </Grid>
                   ))}
@@ -512,94 +566,8 @@ export default function AboutUsPage() {
               </Box>
             </Box>
 
-            <Box sx={{ ...theSectionCard, mb: 1 }}>
-  <TitleSection>CONTRIBUTORS</TitleSection>
-
-  <Typography
-    sx={{
-      color: "#d1d5db",
-      fontSize: "0.87rem",
-      lineHeight: 1.8,
-      mb: 2,
-    }}
-  >
-    This project was started by{" "}
-    <Link
-      href="https://www2.cose.isu.edu/~bodipaul/index.php"
-      target="_blank"
-      rel="noopener noreferrer"
-      underline="hover"
-      sx={{ color: "#a78bfa" }}
-    >
-      Dr. Paul Bodily
-    </Link>
-    , who is also the ISU Faculty Sponsor of the project.
-  </Typography>
-
-  <Typography
-    sx={{
-      color: "#9ca3af",
-      fontSize: "0.87rem",
-      mb: 2,
-    }}
-  >
-    Project contributors
-  </Typography>
-
-  <Grid container spacing={1.5}>
-    {[
-      "Kaden Marchetti",
-      "Caleb Eardley",
-      "Daniel Igbokwe",
-      "Alex Diviney",
-      "Janita Aamir",
-      "Andrija Sevaljevic",
-      "Garret Stouffer",
-      "Alex Svancara",
-      "Eric Hill",
-      "Porter Glines",
-      "Show Pratoomratana",
-      "Russell Phillips",
-      "Michael Crapse",
-      "Ian Gonzalez",
-      "Sabal Subedi",
-      "Himanshu Jha",
-      "Max Grünwoldt",
-      "Paul Gilbreath",
-      "Sansar Kharal",
-      "Pratham Khanal",
-      "George Lake",
-      "Grant Gardner",
-      "Jason Wright",
-      "Andreas Kramer",
-      "Courtney Bodily",
-      "Rakesh Itani",
-      "David Lindeman",
-    ].map((name) => (
-      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
-        <Box
-          sx={{
-            border: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(255,255,255,0.02)",
-            borderRadius: "10px",
-            px: 1.4,
-            py: 0.6,
-            minHeight: "30px",
-            display: "flex",
-            alignItems: "center",
-            transition: "all 0.2s ease",
-            "&:hover": {
-              borderColor: "rgba(168,85,247,0.28)",
-              background: "rgba(255,255,255,0.04)",
-            },
-          }}
-        >
-          <ItemContributor name={name} />
-        </Box>
-      </Grid>
-    ))}
-  </Grid>
-</Box>
+            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+              <TitleSection>SUPPORT</TitleSection>
 
               <Typography
                 sx={{
@@ -670,6 +638,40 @@ export default function AboutUsPage() {
                   BSD 3-Clause License
                 </Link>.
               </Typography>
+            </Box>
+
+            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+              <TitleSection>LEARN MORE</TitleSection>
+
+              <Typography
+                sx={{
+                  color: "#374151",
+                  fontSize: "0.87rem",
+                  mb: 2,
+                }}
+              >
+                Additional documentation can be found at the following links:
+              </Typography>
+
+              <Box sx={{ display: "grid", gap: 1.2 }}>
+                {learnMoreHyperlink.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="none"
+                    sx={{
+                      color: "#F47C20",
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                      "&:hover": { color: "#d9670f" },
+                    }}
+                  >
+                    • {item.label}
+                  </Link>
+                ))}
+              </Box>
             </Box>
           </Box>
         </Container>
