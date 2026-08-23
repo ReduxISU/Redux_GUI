@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { OverlayTrigger, Popover } from "react-bootstrap";
 import {
   Button,
   Switch,
   FormControlLabel,
   IconButton,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import {
   SkipPrevious,
@@ -22,21 +22,25 @@ import {
   FastForward,
 } from "@mui/icons-material";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
 import Link from "next/link"; // <-- IMPORTANT for Quantum button
 
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
+import { visualizationTypeCategory } from "../Visualization/svgs/visualizationCategories";
 
 import {
   requestProblemGenericInstance,
   requestReducedInstance,
   requestVisualization,
   requestReductionVisualization,
+  requestSolvedInstance,
 } from "../redux";
 
 import VisualizationLogic from "../widgets/VisualizationLogic";
 import ProblemSection from "../widgets/ProblemSection";
 import { useVisualizationInfo } from "../hooks/ProblemProvider";
+import { isRenderable } from "../Visualization/svgs/renderability";
 
 const CARD = { cardBodyText: "DEFAULT BODY", cardHeaderText: "Visualize" };
 const SWITCHES = {
@@ -68,8 +72,18 @@ export default function VisualizeRowReact({
   setChosenVisualization,
   VisualizationOptions,
   defaultVisualizationMap,
+  visualizationTypeMap,
+  dragHandleProps,
 }) {
   const visualizationInfo = useVisualizationInfo(url, chosenVisualization);
+
+  const unrenderableOptions = (VisualizationOptions || []).filter(
+    (option) => !isRenderable(visualizationTypeMap?.get(option))
+  );
+  const hasRenderableOption = (VisualizationOptions || []).some(
+    (option) => !unrenderableOptions.includes(option)
+  );
+  const noRenderableOptions = (VisualizationOptions || []).length > 0 && !hasRenderableOption;
 
   const defaultSat3VisualizationArr = [
     ["x1", "!x2", "x3"],
@@ -124,19 +138,50 @@ export default function VisualizeRowReact({
   useEffect(() => {
     setProblemData([]);
     setCurrentProblemData(null);
+    setCurrentStep(0);
   }, [problemName, problemInstance, chosenVisualization]);
+
+  // Visualization selection (stored choice / renderable default / first renderable option /
+  // explicit empty state) is fully resolved inside useChosenVisualization -- see
+  // components/hooks/ProblemProvider/Visualization.js. Do not add a fallback-pick effect here:
+  // calling setChosenVisualization from this component marks the pick as "user selected" and
+  // permanently blocks the hook's own default resolution for that problem.
+
+  // fetch solution when instance or solver changes, since it's needed for some visualizations and reductions
+  const [solution, setSolution] = useState(undefined);
+
+  useEffect(() => {
+    if (!problemInstance || !chosenSolver) return;
+
+    const fetchSolvedInstance = async () => {
+      try {
+        const solved = await requestSolvedInstance(url, chosenSolver, problemInstance);
+        setSolution(solved);
+      } catch (err) {
+        console.error("Failed to solve instance:", err);
+      }
+    };
+
+    fetchSolvedInstance();
+  }, [problemInstance, chosenSolver, url]);
 
   // Fetch reduction visualization
   useEffect(() => {
-    if (!chosenReduceTo || !problemInstance || !showReduction) return;
+    if (
+      !chosenReduceTo ||
+      !problemInstance ||
+      !showReduction ||
+      !solution
+    )
+      return;
 
     const fetch = async () => {
       try {
         const data = await requestReductionVisualization(
           url,
           chosenReductionType,
-          problemInstance,
-          chosenSolver
+          solution,
+          problemInstance
         );
         setProblemReductionData(data ?? []);
       } catch (err) {
@@ -145,7 +190,8 @@ export default function VisualizeRowReact({
     };
 
     fetch();
-  }, [showReduction, problemName, problemInstance]);
+  }, [showReduction, chosenReduceTo, problemInstance, solution, chosenReductionType, url]);
+
 
   // Fetch main visualization data
   useEffect(() => {
@@ -159,7 +205,6 @@ export default function VisualizeRowReact({
           url,
           chosenVisualization,
           problemInstance,
-          chosenSolver
         );
 
         if (!alive) return;
@@ -175,6 +220,7 @@ export default function VisualizeRowReact({
         }
 
         setProblemData(processedData);
+        setCurrentStep(0);
         setCurrentProblemData(processedData?.[0] ?? null);
       } catch (err) {
         console.error(err);
@@ -190,8 +236,9 @@ export default function VisualizeRowReact({
     instanceReady,
     chosenVisualization,
     problemInstance,
-    chosenSolver,
     showReduction,
+    url,
+    problemName,
   ]);
 
   // Fetch SAT3
@@ -222,7 +269,7 @@ export default function VisualizeRowReact({
     };
 
     fetchSAT3();
-  }, [problemInstance, problemName, chosenReductionType]);
+  }, [problemInstance, problemName, chosenReductionType, url]);
 
   useEffect(() => {
     setDisableSolution(!problemName);
@@ -284,18 +331,26 @@ export default function VisualizeRowReact({
 
   const tip = chosenVisualization
     ? {
-        header: visualizationInfo.visualizationName ?? "",
-        formalDef: visualizationInfo.visualizationDefinition ?? "",
-        info: visualizationInfo.info ?? visualizationInfo.description ?? "",
-        source: visualizationInfo.source,
-        credit:
-          Array.isArray(visualizationInfo.contributors) &&
+      header: visualizationInfo.visualizationName ?? "",
+      formalDef: visualizationInfo.visualizationDefinition ?? "",
+      info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+      classification: [
+        {
+          label: "Visualization type",
+          value: visualizationInfo.visualizationType
+            ? visualizationTypeCategory(visualizationInfo.visualizationType)
+            : "Unclassified",
+        },
+      ],
+      source: visualizationInfo.source,
+      credit:
+        Array.isArray(visualizationInfo.contributors) &&
           visualizationInfo.contributors.length
-            ? visualizationInfo.contributors.join(", ")
-            : "",
-        componentLink: visualizationInfo.visualizationLink || "",
-        sourceLink: visualizationInfo.sourceLink || "",
-      }
+          ? visualizationInfo.contributors.join(", ")
+          : "",
+      componentLink: visualizationInfo.visualizationLink || "",
+      sourceLink: visualizationInfo.sourceLink || "",
+    }
     : TOOLTIP;
 
   return (
@@ -307,8 +362,14 @@ export default function VisualizeRowReact({
           onSelect={setChosenVisualization}
           options={VisualizationOptions || []}
           optionsMap={VisualizationNameMap}
-          disabled={!problemName}
-          disabledMessage="No visualization available. Please select a problem."
+          optionsDisabled={unrenderableOptions}
+          disabledOptionHint="no renderer available"
+          disabled={!problemName || noRenderableOptions}
+          disabledMessage={
+            noRenderableOptions
+              ? "No renderable visualization for this problem"
+              : "No visualization available. Please select a problem."
+          }
           extenderButtons={(input) => [
             {
               label: `Add new visualization "${input}"`,
@@ -318,11 +379,29 @@ export default function VisualizeRowReact({
         />
 
         <PopoverTooltipClick toolTip={tip} />
+        {dragHandleProps && (
+                          <IconButton
+                            {...dragHandleProps.attributes}
+                            {...dragHandleProps.listeners}
+                            size="small"
+                            title="Drag to reorder"
+                            sx={{
+                              cursor: 'grab',
+                              color: '#424242',
+                              backgroundColor: '#f5f5f5',
+                              '&:hover': { backgroundColor: '#e0e0e0' },
+                              mr: 1,
+                            }}
+                          >
+                            <DragIndicatorIcon />
+                          </IconButton>
+                        )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>
         {/* Controls */}
         <div
+          data-tour-id="viz-controls"
           style={{
             border: "2px solid #ccc",
             borderRadius: "8px",
@@ -345,19 +424,9 @@ export default function VisualizeRowReact({
               Refresh
             </Button>
 
-            <OverlayTrigger
+            <Tooltip
               placement="bottom"
-              overlay={
-                isDisabled ? (
-                  <Popover>
-                    <Popover.Body>
-                      Navigation disabled during reduction or gadget mode.
-                    </Popover.Body>
-                  </Popover>
-                ) : (
-                  <></>
-                )
-              }
+              title={isDisabled ? "Navigation disabled during reduction or gadget mode." : ""}
             >
               <div
                 style={{ display: "flex", alignItems: "center", gap: "4px" }}
@@ -401,7 +470,7 @@ export default function VisualizeRowReact({
                   <FastForward />
                 </IconButton>
               </div>
-            </OverlayTrigger>
+            </Tooltip>
           </div>
 
           {/* Switches */}

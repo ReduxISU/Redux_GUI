@@ -146,7 +146,6 @@ export function openqasmToQText(qasm) {
         /^(gate_Q_[A-Za-z0-9_]+)\s+((?:q\[\d+\]\s*,\s*)*q\[\d+\]);$/
       ))
     ) {
-      const gateName = m[1];          // eg "gate_Q_4505047632" (not really used)
       const qubits = parseQubitList(m[2]); // [0,1,2,3,...]
 
       const symbol = "Q"; // our custom multi-qubit Grover gate symbol

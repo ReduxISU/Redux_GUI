@@ -4,6 +4,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# RBS files
+.rbs
+cache
+report.md
+
 # Next.js build output
 .next/
 out/
@@ -38,6 +43,20 @@ pids
 .cache/
 .next/cache/
 .eslintcache
+cache/
+
+# Redux Build System output
+.rbs/
+report.md
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# ESLint SARIF output
+eslint-results.sarif
 
 # Local coverage
 coverage/

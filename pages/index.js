@@ -26,10 +26,27 @@ import {
 } from "@mui/material";
 import { Container } from "react-bootstrap";
 import { useProblemProvider } from "../components/hooks/ProblemProvider";
-import { useEffect, memo } from "react";
+import { useEffect, memo, useState } from "react"; // CHANGED: added useState for row order
 import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
+import TourLauncher from "../components/tour/TourLauncher";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
+
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const SHOW_QUANTUM_VIS = false; //Flag to show a quantum circuit visualizer (sandbox feature)
 const ProblemRowMemo = memo(ProblemRowReact);
@@ -38,8 +55,49 @@ const VisualizeRowMemo = memo(VisualizeRowReact);
 const SolveRowMemo = memo(SolveRowReact);
 const VerifyRowMemo = memo(VerifyRowReact);
 
-//const reduxBaseUrl = 'http://redux.aws.cose.isu.edu:27000/';
-const reduxBaseUrl = process.env.NEXT_PUBLIC_REDUX_BASE_URL; //redux url. Note the trailing slash
+const reduxBaseUrl = '/api/redux/';
+
+function SortableRow({ id, children }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    position: "relative",
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  const tourIds = {
+    reduce: "reduce-row",
+    solve: "solve-row",
+    verify: "verify-row",
+  };
+
+  const tourId = tourIds[id];
+
+  const childrenWithProps = React.cloneElement(children, {
+    dragHandleProps: { attributes, listeners },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="p-2 col-example"
+      {...(tourId ? { "data-tour-id": tourId } : {})}
+    >
+      {childrenWithProps}
+    </div>
+  );
+}
+
 /**
  * Generates the actual page contents
  *
@@ -79,7 +137,55 @@ function MainPageContent() {
   const { problem, solver, verifier, reducer, visualization } =
     useProblemProvider(reduxBaseUrl);
 
-  //useUnload(problem, solver, verifier, reducer);
+  const [rowOrder, setRowOrder] = useState([
+    "problem",
+    "reduce",
+    "visualize",
+    "solve",
+    "verify",
+  ]);
+
+  // PointerSensor covers mouse; TouchSensor adds mobile/tablet support 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor)
+  );
+
+  const rowMap = {
+    problem: <ProblemRowMemo url={reduxBaseUrl} {...problem} />,
+    reduce: <ReduceToRowMemo url={reduxBaseUrl} {...problem} {...reducer} />,
+    visualize: (
+      <VisualizeRowMemo
+        url={reduxBaseUrl}
+        {...problem}
+        {...reducer}
+        chosenSolver={solver.chosenSolver}
+        defaultSolverMap={solver.defaultSolverMap}
+        {...visualization}
+      />
+    ),
+    solve: (
+      <SolveRowMemo
+        url={reduxBaseUrl}
+        {...problem}
+        {...solver}
+        chosenReduceTo={reducer.chosenReduceTo}
+      />
+    ),
+    verify: <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />,
+  };
+
+  // Replaces the old handleDragStart/handleDragOver/handleDrop trio.
+  function handleDragEnd(event) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setRowOrder((items) => {
+        const oldIndex = items.indexOf(active.id);
+        const newIndex = items.indexOf(over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  }
 
   return (
     <>
@@ -96,38 +202,24 @@ function MainPageContent() {
                 verifier={verifier}
                 reducer={reducer}
               />
+              <TourLauncher />
             </div>
-
-            <div className="p-2 col-example">
-              <ProblemRowMemo url={reduxBaseUrl} {...problem} />
-            </div>
-            <div className="p-2 col-example">
-              <ReduceToRowMemo url={reduxBaseUrl} {...problem} {...reducer} />
-            </div>
-
-            <div className="p-2 col-example">
-              <VisualizeRowMemo
-                url={reduxBaseUrl}
-                {...problem}
-                {...reducer}
-                chosenSolver={solver.chosenSolver}
-                defaultSolverMap={solver.defaultSolverMap}
-                {...visualization}
-              />
-            </div>
-
-            <div className="p-2 col-example">
-              <SolveRowMemo
-                url={reduxBaseUrl}
-                {...problem}
-                {...solver}
-                chosenReduceTo={reducer.chosenReduceTo}
-              />
-            </div>
-
-            <div className="p-2 col-example">
-              <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />
-            </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={rowOrder}
+                strategy={verticalListSortingStrategy}
+              >
+                {rowOrder.map((key) => (
+                  <SortableRow key={key} id={key}>
+                    {rowMap[key]}
+                  </SortableRow>
+                ))}
+              </SortableContext>
+            </DndContext>
           </div>
         </div>
 
@@ -137,14 +229,15 @@ function MainPageContent() {
         {/* </footer> */}
       </ThemeProvider>
       <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="10vh"
-        // marginTop={'25%'}
-        //Tried to push the logo down with the margin
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "10vh",
+          // marginTop: '25%',
+        }}
       >
-        <Image src={isulogo} height={125} width={500}></Image>
+        <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
       </Box>
     </>
   );

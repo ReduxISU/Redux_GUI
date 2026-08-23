@@ -14,7 +14,9 @@ import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Card } from 'react-bootstrap'
 import { Button } from '@mui/material'
-import DownloadIcon from '@mui/icons-material/Download';
+import { Download as DownloadIcon } from '@mui/icons-material';
+import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
 import { requestReducedInstanceFromPath } from '../redux'
 import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
@@ -28,8 +30,28 @@ const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
 const REDUCE_BUTTON = { buttonText: "Reduce" }
 const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" }
 const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to reduce your original problem to to see information about it", info: "" }
-const TOOLTIP2 = { header: "Reduction Type", formalDef: "Choose a type of reduction to see information about it", info: "" }
+const TOOLTIP2 = {
+  header: "Reduction Type",
+  formalDef: "Choose a type of reduction to see information about it",
+  info: "",
+  reductionType: "",
+  complexity: "",
+  complexityBucket: "",
+}
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } }
+
+// ReductionCost describes output-size blowup relative to input size, a
+// separate axis from ReductionComplexityBucket (runtime, shown below as
+// "Complexity bucket") and the free-text `complexity` Big-O string (issue
+// #376) -- a reduction declares all three independently, see
+// Interfaces/ReductionCost.cs / ReductionComplexityBucket.cs in the API repo.
+const REDUCTION_COST_LABELS = {
+  Linear: "Linear (O(n))",
+  Quadratic: "Quadratic (O(n²))",
+  Cubic: "Cubic (O(n³))",
+  HigherPolynomial: "Higher polynomial (O(n^k), k > 3)",
+  Unclassified: "Unclassified",
+}
 
 export default function ReduceToRowReact({
   url,
@@ -45,6 +67,7 @@ export default function ReduceToRowReact({
   setChosenReductionType,
   reducedInstance,
   setReducedInstance,
+  dragHandleProps,
 }) {
   const reduceToInfo = useProblemInfo(url, chosenReduceTo);
   const reducerInfo = useReducerInfo(url, chosenReductionType);
@@ -95,10 +118,13 @@ export default function ReduceToRowReact({
               ? {
                 header: reduceToInfo.problemName ?? "",
                 formalDef: reduceToInfo.formalDefinition ?? "",
-                // description only 
+                // description only
                 info: reduceToInfo.problemDefinition ?? "",
-                // show source 
-                source: reduceToInfo.source, 
+                classification: [
+                  { label: "Complexity class", value: reduceToInfo.complexityClass || "Unclassified" },
+                ],
+                // show source
+                source: reduceToInfo.source,
                 credit:
                   Array.isArray(reduceToInfo.contributors) &&
                     reduceToInfo.contributors.length
@@ -142,6 +168,15 @@ export default function ReduceToRowReact({
                 formalDef: reducerInfo.reductionDefinition ?? "",
                 // plain description for the reduction
                 info: reducerInfo.info ?? reducerInfo.description ?? "",
+                classification: [
+                  {
+                    label: "Reduction cost",
+                    value: REDUCTION_COST_LABELS[reducerInfo.cost] || reducerInfo.cost || "Unclassified",
+                  },
+                  { label: "Reduction type", value: reducerInfo.reductionType || "Unclassified" },
+                  { label: "Complexity bucket", value: reducerInfo.complexityBucket || "Unclassified" },
+                  { label: "Big-O", value: reducerInfo.complexity || "Not yet determined" },
+                ],
                 // separate Source line
                 source: reducerInfo.source,
                 // contributors if present
@@ -156,6 +191,23 @@ export default function ReduceToRowReact({
               : TOOLTIP2
           }
         ></PopoverTooltipClick>
+        {dragHandleProps && (
+                  <IconButton
+                    {...dragHandleProps.attributes}
+                    {...dragHandleProps.listeners}
+                    size="small"
+                    title="Drag to reorder"
+                    sx={{
+                      cursor: 'grab',
+                      color: '#424242',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': { backgroundColor: '#e0e0e0' },
+                      mr: 1,
+                    }}
+                  >
+                    <DragIndicatorIcon />
+                  </IconButton>
+                )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>
@@ -178,6 +230,7 @@ export default function ReduceToRowReact({
             <DownloadIcon />
           </Button>
           <Button
+            data-tour-id="reduce-button"
             size="large"
             color="white"
             style={{ backgroundColor: THEME.colors.grey }}

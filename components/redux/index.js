@@ -46,13 +46,43 @@ async function fetchPostJson(url, body, failMsg) {
 }
 
 /**
+ * Caches the result of an async request in memory, keyed by `cacheKey`.
+ * Repeated calls with the same key reuse the in-flight or resolved result
+ * instead of re-requesting. Cache is per-page-load only and is cleared on
+ * refresh. Failed (falsy) results are not cached.
+ * @param cacheKey Unique key identifying this request.
+ * @param requestFn Function that performs the request when not cached.
+ * @returns the cached or freshly-fetched result.
+ * @returns `undefined` if the request fails; failed results are not cached.
+ */
+const requestCache = new Map();
+
+async function cachedRequest(cacheKey, requestFn) {
+  if (requestCache.has(cacheKey)) {
+    return requestCache.get(cacheKey);
+  }
+
+  const promise = requestFn();
+  requestCache.set(cacheKey, promise);
+
+  const result = await promise;
+
+  // Don't cache failed requests.
+  if (!result) {
+    requestCache.delete(cacheKey);
+  }
+
+  return result;
+}
+
+/**
  * This function is a temporary solution for validating user input until it is ported to the Redux API.
  * @returns `true` if the specified verifier certificate is valid.
  */
 function isCertificateValid(problem, certificate) {
   var cleanInput = certificate.replace(new RegExp(/[( )]/g), ""); // Strips spaces and ()
   cleanInput = cleanInput.replaceAll(":", "=");
-  var regexFormat = /[^,=:!{}\w]/; // Checks for special characters not including ,=:!{}
+  var regexFormat = /[^-.,=:!{}\w;]/; // Checks for special characters not including -.,=:!{}
   if (regexFormat.test(cleanInput) == true) {
     // Invalid characters found, warn user.
     return false;
@@ -264,16 +294,22 @@ export async function requestReducedInstance(url, reduction, instance) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestReductionInfo(url, apiCall) {
-  return await fetchJson(`${url}${apiCall}/info`, () => `${apiCall} INFO REQUEST FAILED`);
+  // Reductions are served by the same generic ProblemProvider/info?interface=
+  // endpoint as problems/solvers/verifiers (see requestInfo above) -- this used to
+  // request `${apiCall}/info` directly, a route that doesn't exist on the API and
+  // 404s every time, silently leaving reducerInfo as {} (empty) and every reduction
+  // tooltip field (cost/reductionType/complexityBucket/complexity) on its fallback
+  // text no matter what the backend actually has classified.
+  return await requestInfo(url, apiCall);
 }
 
 /**
  * @returns an array of problems that have implemented reductions from `problem`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductionOptions(url, problem, problemType = "NPC") {
+export async function requestReductionOptions(url, problem) {
   return await fetchJson(
-    `${url}Navigation/NPC_NavGraph/availableReductions/?chosenProblem=${problem}&problemType=${problemType}`,
+    `${url}Navigation/NPC_NavGraph/availableReductions/?chosenProblem=${problem}`,
     () => `${problem} REDUCTION OPTIONS REQUEST FAILED`
   );
 }
@@ -282,62 +318,11 @@ export async function requestReductionOptions(url, problem, problemType = "NPC")
  * @returns the graph visualization of the reduced problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductionVisualization(url, reduction, instance, solver) {
+export async function requestReductionVisualization(url, reduction, solution, instance) {
   return await fetchPostJson(
-    `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solver=${solver}`,
+    `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solution=${solution}`,
     instance,
     () => `${reduction} VISUALIZE REQUEST FAILED`
-  );
-}
-
-export async function processReductionVisualizations(url, reductionPath, instance, solver) {
-  const reductions = reductionPath.split("-").map(r => r.trim());
-
-  let currentInstance = instance;
-  let solution = requestSolvedInstance(url, solver, currentInstance)
-  let finalVisualization = null;
-
-  for (const reduction of reductions) {
-    finalVisualization = await requestReductionVisualization(url, reduction, currentInstance, solution);
-    const info = await requestInfo(url, reduction, instance);
-    currentInstance = info.reductionTo.defaultInstance;
-    solution = requestMappedSolution(url, solution, currentInstance);
-  }
-
-  return finalVisualization;
-}
-
-/**
- * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
- */
-export async function requestMappedSolutionTransitive(url, reductionPath, problemInstance, solution) {
-  let problemFrom = problemInstance;
-  let mappedSolution = solution;
-  for (const reduction of reductionPath.split("-")) {
-    const reduced = await requestReducedInstance(url, reduction, problemFrom);
-    if (!reduced) {
-      console.log(`${reductionPath} AT ${reduction} REDUCTION FOR SOLUTION MAPPING REQUEST FAILED`);
-      break;
-    }
-    const problemTo = reduced.reductionTo.instance;
-
-    const solution = await requestMappedSolution(url, reduction, problemFrom, problemTo, mappedSolution);
-    if (!solution) {
-      console.log("SOLUTION MAPPING REQUEST FAILED");
-      break;
-    }
-    mappedSolution = solution;
-
-    problemFrom = problemTo;
-  }
-  return mappedSolution;
-}
-
-export async function requestMappedSolution(url, reduction, problemFrom, problemTo, solution) {
-  return await fetchPostJson(
-    `${url}${reduction}/mapSolution`,
-    { problemFrom: problemFrom, problemTo: problemTo, problemFromSolution: solution },
-    () => `${reduction} MAPPED SOLUTION REQUEST FAILED`
   );
 }
 
@@ -366,9 +351,9 @@ export async function requestProblemGenericInstance(url, problem, instance) {
  * @returns an array of arrays of reductions implemented for reducing a problem to another problem.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductions(url, problemFrom, problemTo, problemType = "NPC") {
+export async function requestReductions(url, problemFrom, problemTo) {
   return await fetchJson(
-    `${url}Navigation/NPC_NavGraph/reductionPath/?reducingFrom=${problemFrom}&reducingTo=${problemTo}&problemType=${problemType}`,
+    `${url}Navigation/NPC_NavGraph/reductionPath/?reducingFrom=${problemFrom}&reducingTo=${problemTo}`,
     () => `${problemFrom} TO ${problemTo} REDUCTIONS REQUEST FAILED`
   );
 }
@@ -386,79 +371,12 @@ export async function requestSolvedInstance(url, solver, instance) {
 }
 
 /**
- * Temporary solution to allow solving 3 SAT with a Clique solver.
- * All calls to this function should eventually be replace with `requestSolvedInstance`.
- * A verbose name was purposefully chosen as a reminder to fix this.
- * @returns the solved `instance` from the specified `solver`.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolvedInstanceTemporarySat3CliqueSolver(url, solver, instance) {
-  // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
-  // remove first if once this functionality is added for all problems, the else code block was the original
-  // functionality
-  if (solver == "CliqueBruteForce - via SipserReduceToCliqueStandard") {
-    const reduction = await requestReducedInstance(url, "SipserReduceToCliqueStandard", instance);
-    if (!reduction) {
-      return undefined;
-    }
-
-    const solution = await requestSolvedInstance(url, "CliqueBruteForce", reduction.reductionTo.instance);
-    if (!solution) {
-      return undefined;
-    }
-
-    const mappedSolution = await fetchPostJson(
-      `${url}SipserReduceToCliqueStandard/reverseMappedSolution`,
-      { problemFrom: instance, problemTo: reduction.reductionTo.instance, problemFromSolution: solution },
-      () => "TRANSITIVE SOLVED REQUEST FAILED"
-    );
-
-    return mappedSolution;
-  } else {
-    return await requestSolvedInstance(url, solver, instance);
-  }
-}
-
-/**
- * @returns the solved graph visualization of the problem instance.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolvedVisualization(url, problem, instance, solution) {
-  // TODO: convert to POST request for problem instance
-  var preparedSolution = solution.replaceAll("&", "%26");
-  var preparedInstance = instance.replaceAll("&", "%26");
-  if (problem == "SipserReduceToCliqueStandard") {
-    return await fetchJson(
-      `${url}${problem}/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  } else {
-    return await fetchJson(
-      `${url}${problem}Generic/solvedVisualization?problemInstance=${preparedInstance}&solution=${preparedSolution}`,
-      () => `${problem} VISUALIZE REQUEST FAILED`
-    );
-  }
-}
-
-/**
- * @returns the `steps` from the specified `solver`.
- * @returns `undefined` on failure and logs the error.
- */
-export async function requestSolverSteps(url, solver, instance) {
-  return await fetchPostJson(
-    `${url}ProlemProvider/steps?solver=${solver}`,
-    instance,
-    () => `${solver} SOLVED INSTANCE REQUEST FAILED`
-  );
-}
-
-/**
  * @returns an array of solvers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestSolvers(url, problem, problemType = "NPC") {
+export async function requestSolvers(url, problem) {
   return await fetchJson(
-    `${url}Navigation/Problem_SolversRefactor/?chosenProblem=${problem}&problemType=${problemType}`,
+    `${url}Navigation/Problem_SolversRefactor/?chosenProblem=${problem}`,
     () => `${problem} SOLVERS REQUEST FAILED`
   );
 }
@@ -467,9 +385,9 @@ export async function requestSolvers(url, problem, problemType = "NPC") {
  * @returns an array of verifiers implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVerifiers(url, problem, problemType = "NPC") {
+export async function requestVerifiers(url, problem) {
   return await fetchJson(
-    `${url}Navigation/Problem_VerifiersRefactor/?chosenProblem=${problem}&problemType=${problemType}`,
+    `${url}Navigation/Problem_VerifiersRefactor/?chosenProblem=${problem}`,
     () => `${problem} VERIFIERS REQUEST FAILED`
   );
 }
@@ -495,9 +413,9 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
  * @returns the graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualization(url, visualization, instance, solver) {
+export async function requestVisualization(url, visualization, instance) {
   return await fetchPostJson(
-    `${url}ProblemProvider/visualize?visualization=${visualization}&solver=${solver}`,
+    `${url}ProblemProvider/visualize?visualization=${visualization}`,
     instance,
     () => `${visualization} VISUALIZE REQUEST FAILED`
   );
@@ -507,9 +425,112 @@ export async function requestVisualization(url, visualization, instance, solver)
  * @returns an array of visualizations implemented for the `problem`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualizations(url, problem, problemType = "NPC") {
+export async function requestVisualizations(url, problem) {
   return await fetchJson(
-    `${url}Navigation/Problem_VisualizationsRefactor/?chosenProblem=${problem}&problemType=${problemType}`,
+    `${url}Navigation/Problem_VisualizationsRefactor/?chosenProblem=${problem}`,
     () => `${problem} VISUALIZATIONS REQUEST FAILED`
   );
+}
+/**
+ * @returns an object mapping problem names for the given `problemType`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllProblems(url) {
+  return cachedRequest(
+    `${url}|allProblems`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allProblems`,
+        () => "ALL PROBLEMS REQUEST FAILED"
+      )
+  );
+}
+/**
+ * @returns an object mapping each problem to its available solvers.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllSolvers(url) {
+  return cachedRequest(
+    `${url}|allSolvers`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allSolvers`,
+        () => "ALL SOLVERS REQUEST FAILED"
+      )
+  );
+}
+/**
+ * @returns an object mapping each problem to its available verifiers.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllVerifiers(url) {
+  return cachedRequest(
+    `${url}|allVerifiers`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allVerifiers`,
+        () => "ALL VERIFIERS REQUEST FAILED"
+      )
+  );
+}
+/**
+ * @returns an object mapping each problem to its available visualizations.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllVisualizations(url) {
+  return cachedRequest(
+    `${url}|allVisualizations`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allVisualizations`,
+        () => "ALL VISUALIZATIONS REQUEST FAILED"
+      )
+  );
+}
+
+/**
+ * @returns an object containing metadata (`info`) for all interfaces (problems, solvers, verifiers, visualizations).
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestAllInfo(url) {
+  return cachedRequest(
+    `${url}|allInfo`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allInfo`,
+        () => "ALL INFO REQUEST FAILED"
+      )
+  );
+}
+
+/**
+ * @returns an object mapping each visualization class name (e.g. "CliqueDefaultVisualization")
+ * to its `visualizationType` wire value (e.g. "GraphD3").
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error, including when the endpoint doesn't exist
+ * yet on the connected API -- callers should fall back to deriving this mapping from
+ * `requestAllInfo` in that case.
+ */
+export function requestAllVisualizationTypes(url) {
+  return cachedRequest(
+    `${url}|allVisualizationTypes`,
+    () =>
+      fetchJson(
+        `${url}Navigation/Batch/allVisualizationTypes`,
+        () => "ALL VISUALIZATION TYPES REQUEST FAILED"
+      )
+  );
+}
+
+/**
+ * @returns the full reduction graph as an adjacency map:
+ * `{ [fromProblemName]: { [toProblemName]: [{className, endpoint, inputType, outputType,
+ * fromComplexity, toComplexity, cost}] } }`.
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestReductionGraph(url) {
+  return cachedRequest(`${url}|reductionGraph`, () =>
+    fetchJson(`${url}Navigation/Reductions`, () => "REDUCTION GRAPH REQUEST FAILED"));
 }

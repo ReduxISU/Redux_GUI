@@ -4,8 +4,9 @@
 import Split from 'react-split'
 import { useEffect, useState } from 'react';
 import { Container } from '@mui/material';
-import { No_Viz_Svg, No_Reduction_Viz_Svg } from '../Visualization/svgs/No_Viz_SVG';
+import { No_Renderable_Viz_Svg, Viz_Render_Error_Svg } from '../Visualization/svgs/No_Viz_SVG';
 import Visualizations from '../Visualization/svgs/Visualizations.js'
+import { isRenderable } from '../Visualization/svgs/renderability';
 import { remapIdsDeep, makeIdsUnique, processReductions } from '../redux';
 
 export default function VisualizationLogic({
@@ -16,14 +17,12 @@ export default function VisualizationLogic({
   reductionName,
   chosenReductionType,
   reductionNameMap,
-  reducedInstance,
   visualizationState,
   loading,
   visualizationType,
   problemData,
   reductionData,
   reductionVisualization,
-  chosenReduceTo,
 }) {
   const [gadgetMap, setGadgetMap] = useState([]);
   let visualization;
@@ -31,35 +30,30 @@ export default function VisualizationLogic({
 
   const solve = visualizationState.solverOn
 
-  const handleBar = (sizes) => { }
+  const handleBar = () => { }
 
-  const [loadingMap, setLoadingMap] = useState(false);
   const [mappedProblemData, setMappedProblemData] = useState(null);
   const [mappedReductionData, setMappedReductionData] = useState(null);
 
   useEffect(() => {
     if (problemInstance && problemData) {
-      setLoadingMap(true);
-      processReductions(url, chosenReductionType, problemInstance) 
+      processReductions(url, chosenReductionType, problemInstance)
         .then(rawGadgetMap => {
           const { gadgets, fromIdMap } = makeIdsUnique(rawGadgetMap);
           setGadgetMap(gadgets);
           setMappedProblemData(remapIdsDeep(problemData, fromIdMap) || problemData);
         })
-        .finally(() => setLoadingMap(false));
     }
-  }, [problemData]);
+  }, [problemData, url, chosenReductionType, problemInstance]);
 
 useEffect(() => {
   if (visualizationState.reductionOn && reductionVisualization && url && problemInstance) {
-    setLoadingMap(true);
     processReductions(url, chosenReductionType, problemInstance)
       .then(rawGadgetMap => {
         const { gadgets, toIdMap } = makeIdsUnique(rawGadgetMap);
         setGadgetMap(gadgets);
         setMappedReductionData(remapIdsDeep(reductionData, toIdMap) || reductionData);
       })
-      .finally(() => setLoadingMap(false));
   }
 }, [
   visualizationState.reductionOn,
@@ -72,25 +66,54 @@ useEffect(() => {
 
 
 if (url && problemInstance && mappedProblemData && Object.keys(mappedProblemData).length > 0) {
-  try {
-      console.log(mappedProblemData)
-    visualization = Visualizations.get(visualizationType)(solve, url, mappedProblemData, gadgetMap, visualizationState.gadgetsOn)
-  } catch {
-    visualization = <No_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />
+  if (!isRenderable(visualizationType)) {
+    visualization = (
+      <No_Renderable_Viz_Svg
+        niceProblemName={problemNameMap.get(problemName)}
+        visualizationType={visualizationType}
+      />
+    )
+  } else {
+    try {
+      visualization = Visualizations.get(visualizationType)(solve, url, mappedProblemData, gadgetMap, visualizationState.gadgetsOn)
+    } catch (err) {
+      console.error("visualization renderer threw", visualizationType, err)
+      visualization = (
+        <Viz_Render_Error_Svg
+          niceProblemName={problemNameMap.get(problemName)}
+          visualizationType={visualizationType}
+        />
+      )
+    }
   }
 
   if (visualizationState.reductionOn) {
-    try {
-      reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, mappedReductionData, gadgetMap, visualizationState.gadgetsOn)
+    if (!isRenderable(reductionVisualization)) {
+      reducedVisualization = (
+        <No_Renderable_Viz_Svg
+          niceReductionName={reductionNameMap.get(chosenReductionType)}
+          visualizationType={reductionVisualization}
+        />
+      )
+    } else {
+      try {
+        reducedVisualization = Visualizations.get(reductionVisualization)(solve, url, mappedReductionData, gadgetMap, visualizationState.gadgetsOn)
 
-      //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance, 
-      // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
-      if (reductionName == "CLIQUE") {
-        //reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
+        //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance,
+        // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
+        if (reductionName == "CLIQUE") {
+          //reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
+        }
+
+      } catch (err) {
+        console.error("reduction visualization renderer threw", reductionVisualization, err)
+        reducedVisualization = (
+          <Viz_Render_Error_Svg
+            niceReductionName={reductionNameMap.get(chosenReductionType)}
+            visualizationType={reductionVisualization}
+          />
+        )
       }
-
-    } catch {
-      reducedVisualization = <No_Reduction_Viz_Svg reducedVisualization={reductionNameMap.get(chosenReductionType)} />
     }
   }
 }
@@ -99,7 +122,7 @@ if (url && problemInstance && mappedProblemData && Object.keys(mappedProblemData
 if (!visualizationState.reductionOn && !loading) {
   return (
     <>
-      <Container>
+      <Container data-tour-id="viz-canvas">
         {visualization}
       </Container>
     </>
@@ -115,7 +138,7 @@ else if (visualizationState.reductionOn && !loading) {
         style={{ height: 'inherit' }}
         onDragStart={handleBar}
       >
-        <Container>
+        <Container data-tour-id="viz-canvas">
           {/* {"Container1"} */}
           {visualization}
         </Container>
