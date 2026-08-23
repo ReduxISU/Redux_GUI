@@ -18,8 +18,7 @@ import {
 } from '@mui/material'; // Grouped all directory imports safely into a named root import
 import { Adb as AdbIcon } from '@mui/icons-material'; // Grouped icons safely
 
-//const pages = ['Home', 'Tutorials', 'About Us', 'Navigation Graph'];
-const pages = ['Home', 'About Us', 'Browse', 'Help','Contribute']
+const pages = ['Home', 'About Us', 'Browse', 'Help', 'Contribute']
 
 const ResponsiveAppBar = () => {
     return (
