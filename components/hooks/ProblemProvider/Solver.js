@@ -1,12 +1,12 @@
 import { useGenericInfo } from "../ProblemProvider";
-import { requestInfo, requestSolvers } from "../../redux";
+import { requestAllSolvers, requestAllInfo } from "../../redux";
 import React, { useEffect, useState, useRef } from "react";
 
-export function useSolver(url, problemName, problemType, problemNameMap, problemInfoMap, problemInstance) {
+export function useSolver(url, problemName, problemNameMap, problemInfoMap, problemInstance) {
   const state = {};
   /// Maps each problem name to its default solver name.
   [state.defaultSolverMap] = useDefaultSolverMap(url, problemInfoMap);
-  [state.solverOptions] = useSolverOptions(url, problemName, problemType);
+  [state.solverOptions] = useSolverOptions(url, problemName);
   [state.chosenSolver, state.setChosenSolver] = useChosenSolver(problemName, state.defaultSolverMap);
   [state.solverNameMap] = useSolverNameMap(url, problemNameMap);
   [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(problemInstance, state.chosenSolver);
@@ -14,13 +14,7 @@ export function useSolver(url, problemName, problemType, problemNameMap, problem
 }
 
 export function useSolverInfo(url, solver) {
-  // NOTE - Caleb - the following is a temporary solution to allow sat3 to be solved using the clique solver
-  // remove first if once this functionality is added for all problems, the false expression was the original
-  // functionality
-  return useGenericInfo(
-    url,
-    solver === "CliqueBruteForce - via SipserReduceToCliqueStandard" ? "CliqueBruteForce" : solver
-  );
+  return useGenericInfo(url, solver);
 }
 
 function useSolvedInstance(problemInstance, chosenSolver) {
@@ -33,31 +27,43 @@ function useSolvedInstance(problemInstance, chosenSolver) {
   return [solvedInstance, setSolvedInstance];
 }
 
+// Builds the label shown for a solver in the dropdown. When the backend has
+// classified the solver (a non-empty, non-"Unclassified" solverType plus a
+// non-empty complexity), append that info; otherwise fall back to the plain
+// solver name so untagged solvers don't render an ugly "(Unclassified · )".
+function formatSolverLabel(info, fallback) {
+  const name = info?.solverName || fallback;
+  const solverType = info?.solverType;
+  const complexity = info?.complexity;
+
+  if (solverType && complexity && solverType !== "Unclassified") {
+    return `${name} (${solverType} · ${complexity})`;
+  }
+
+  return name;
+}
+
 function useSolverNameMap(url, problemNameMap) {
   const [solverNameMap, setSolverNameMap] = useState(new Map());
 
   useEffect(() => {
     const problems = Array.from(problemNameMap.keys());
-    requestSolverNameMap(url, problems).then((solverMap) => {
-      setSolverNameMap(solverMap);
-    });
-  }, [problemNameMap]);
+    (async () => {
+      const allSolvers = (await requestAllSolvers(url)) ?? {};
+      const allInfo = (await requestAllInfo(url)) ?? {};
+      let map = new Map();
 
-  //The following the functions are used to set the solver names
-  async function requestSolverNameMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      const solvers = (await requestSolvers(url, problem)) ?? [];
-      for (const s of solvers) {
-        let solver = s.split(" ")[0];
-        const info = await requestInfo(url, solver);
-        if (info) {
-          map.set(s, info.solverName);
+      for (const problem of problems) {
+        const solvers = allSolvers[problem] ?? [];
+        for (const s of solvers) {
+          const solver = s.split(" ")[0];
+          const info = allInfo[solver];
+          map.set(s, formatSolverLabel(info, s));
         }
       }
-    }
-    return map;
-  }
+      setSolverNameMap(map);
+    })();
+  }, [url, problemNameMap]);
 
   return [solverNameMap, setSolverNameMap];
 }
@@ -66,40 +72,46 @@ function useDefaultSolverMap(url, problemInfoMap) {
   const [defaultSolverMap, setDefaultSolverMap] = useState(new Map());
 
   useEffect(() => {
-    const problems = [...problemInfoMap.keys()];
-    const defaultSolverNames = [...problemInfoMap.values()].map((info) => info.defaultSolver.solverName);
-    requestDefaultSolverFileMap(url, problems, defaultSolverNames).then((defaultSolverFileNames) => {
-      setDefaultSolverMap(defaultSolverFileNames);
-    });
-  }, [problemInfoMap]);
+  const problems = [...problemInfoMap.keys()];
+  const defaultSolverNames = [...problemInfoMap.values()]
+    .map((info) => info?.defaultSolver?.solverName)
+    .filter(Boolean);
 
-  //The requestDefaultSolverFileMap sets the solver names by the file name
-  async function requestDefaultSolverFileMap(url, problems, defaultSolverNames) {
+  (async () => {
+    const allSolvers = (await requestAllSolvers(url)) ?? {};
+    const allInfo = (await requestAllInfo(url)) ?? {};
+
     let map = new Map();
     for (const problem of problems) {
-      const solvers = (await requestSolvers(url, problem)) ?? [];
+      const solvers = allSolvers[problem] ?? [];
       for (const s of solvers) {
-        let solver = s.split(" ")[0];
-        const info = await requestInfo(url, solver);
+        const solver = s.split(" ")[0];
+        const info = allInfo[solver];
         if (info && defaultSolverNames.includes(info.solverName)) {
           map.set(problem, s);
         }
       }
     }
-    return map;
-  }
+    setDefaultSolverMap(map);
+  })();
+}, [url, problemInfoMap]);
 
   return [defaultSolverMap, setDefaultSolverMap];
 }
 
-function useSolverOptions(url, problemName, problemType) {
+function useSolverOptions(url, problemName) {
   const [solverOptions, setSolverOptions] = useState([]);
 
   useEffect(() => {
     (async () => {
-      setSolverOptions(problemName && problemType ? (await requestSolvers(url, problemName, problemType)) ?? [] : []);
+      if (!problemName) {
+        setSolverOptions([]);
+        return;
+      }
+      const allSolvers = (await requestAllSolvers(url)) ?? {};
+      setSolverOptions(allSolvers[problemName] ?? []);
     })();
-  }, [problemName, problemType]);
+  }, [problemName, url]);
 
   return [solverOptions, setSolverOptions];
 }

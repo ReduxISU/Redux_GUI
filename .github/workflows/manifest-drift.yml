@@ -1,0 +1,111 @@
+# Detects drift between the vendored visualization-type manifest and the API's
+# committed copy.
+#
+# The PR gate (main.yml -> npm run check:visualizations) proves the local registry
+# matches the local vendored manifest. It cannot notice that the vendored manifest
+# has itself gone stale, because a new API type ships in the other repo. That is the
+# gap this job closes.
+#
+# Deliberately NOT a PR gate: a network call to another repo inside the critical path
+# of every GUI pull request means unrelated PRs go red for reasons outside their diff.
+# This runs on a schedule instead and opens an issue, bounding staleness at ~24h
+# without ever blocking a contributor.
+name: manifest drift
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    if: github.repository == 'ReduxISU/Redux_GUI'
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch the API's manifest
+        id: fetch
+        run: |
+          URL="https://raw.githubusercontent.com/ReduxISU/Redux/CSharpAPI/Documentation/visualization-types.json"
+          if ! curl -fsSL --retry 3 --retry-delay 5 -o api-manifest.json "$URL"; then
+            echo "Could not fetch $URL"
+            echo "fetch_failed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! jq empty api-manifest.json 2>/dev/null; then
+            echo "Fetched file is not valid JSON."
+            echo "fetch_failed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "fetch_failed=false" >> "$GITHUB_OUTPUT"
+
+      # A fetch failure is infrastructure noise (branch renamed, file moved, GitHub
+      # hiccup), not drift. Warn but never open an issue for it -- a job that cries
+      # wolf gets muted, and then real drift goes unnoticed too.
+      - name: Warn on fetch failure
+        if: steps.fetch.outputs.fetch_failed == 'true'
+        run: |
+          echo "::warning::Could not retrieve the API manifest; skipping drift comparison."
+
+      - name: Compare against the vendored copy
+        id: diff
+        if: steps.fetch.outputs.fetch_failed == 'false'
+        run: |
+          VENDORED="components/Visualization/svgs/visualizationTypes.json"
+          # Compare as sorted sets so formatting/key-order changes are not drift.
+          jq -S 'sort' api-manifest.json > /tmp/api.norm.json
+          jq -S 'sort' "$VENDORED"      > /tmp/vendored.norm.json
+
+          if diff -q /tmp/api.norm.json /tmp/vendored.norm.json >/dev/null; then
+            echo "In sync."
+            echo "drifted=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "drifted=true" >> "$GITHUB_OUTPUT"
+          {
+            echo 'The API repo declares a different set of visualization types than this repo has vendored.'
+            echo
+            echo 'Only in the API (needs a renderer here, or an explicit alias):'
+            jq -r -n --slurpfile a /tmp/api.norm.json --slurpfile v /tmp/vendored.norm.json \
+              '($a[0] - $v[0])[] | "  - " + .'
+            echo
+            echo 'Only in this repo (stale entry, or a type the API removed):'
+            jq -r -n --slurpfile a /tmp/api.norm.json --slurpfile v /tmp/vendored.norm.json \
+              '($v[0] - $a[0])[] | "  - " + .'
+            echo
+            echo 'To resolve: copy the API manifest into'
+            echo "  $VENDORED"
+            echo 'and add a matching renderer key in components/Visualization/svgs/Visualizations.js'
+            echo 'for every new type except Unimplemented. Then `npm run check:visualizations`.'
+          } > drift-report.txt
+
+          cat drift-report.txt
+
+      - name: Open or update the drift issue
+        if: steps.diff.outputs.drifted == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="Visualization type manifest has drifted from the API"
+          BODY="$(cat drift-report.txt)
+
+          _Opened automatically by \`.github/workflows/manifest-drift.yml\`._"
+
+          # Reuse the open issue if one exists, so a persistent drift does not
+          # produce a new issue every single day.
+          EXISTING="$(gh issue list --state open --search "$TITLE in:title" \
+            --json number,title \
+            --jq ".[] | select(.title == \"$TITLE\") | .number" | head -1)"
+
+          if [ -n "$EXISTING" ]; then
+            echo "Updating existing issue #$EXISTING"
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi

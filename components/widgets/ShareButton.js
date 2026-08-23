@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from 'react-bootstrap/Button';
-import ShareIcon from '@mui/icons-material/Share';
+import { Share as ShareIcon } from '@mui/icons-material';
 
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
@@ -48,9 +48,10 @@ const handleShare = async (problem, solver, verifier, reducer) => {
 };
 
 const ShareButton = ({ problem, solver, verifier, reducer }) => (
-    <Button 
-    variant="primary" 
-    className="corner-button" 
+    <Button
+    data-tour-id="share-button"
+    variant="primary"
+    className="corner-button"
     size="large"
     color="white"
     style={{ backgroundColor: THEME.colors.grey }}

@@ -25,5 +25,6 @@ export const useHandleParameters = () => {
     // Remove parameters from the URL
     router.replace(window.location.pathname, undefined, { shallow: true });
     document.title = 'Redux';
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally mount-only: URL params should be read and cleaned exactly once on load.
 };

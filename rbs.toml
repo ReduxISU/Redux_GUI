@@ -1,0 +1,36 @@
+# Redux Build System pipeline config. See github.com/ReduxISU/Redux_Build_System.
+engine = "npm"
+
+[artifact]
+image = "ghcr.io/reduxisu/redux_gui"
+port = 3000
+# Cheaper and less ambiguous than "/": a static route that answers as soon as the server is up,
+# without depending on React rendering — which is what the tests themselves are for.
+health-path = "/api/health"
+
+# `unit-test` reports `skipped` until package.json gains a `test` script — it never passes
+# vacuously. `test:e2e` is deliberately not called `test`: these need a running stack, so `rbs
+# integration-test` owns them and `rbs unit-test` must not try.
+[integration]
+command = "npm run test:e2e"
+# The backend does an assembly scan on its first request; 240s is slack for a cold CI runner.
+timeout = 240
+
+# The GUI is a proxy in front of Redux — without a backend every panel renders empty and the
+# suite would be asserting on nothing. `:latest` rather than a pin so the tests notice when the
+# API changes under us; that is the drift this is meant to catch.
+[[integration.services]]
+name = "redux-api"
+image = "ghcr.io/reduxisu/redux:latest"
+port = 27000
+# Redux has no /health. This route takes no parameters and its first call forces the reflection
+# scan that builds the problem registry, so a 200 means genuinely warm rather than just listening.
+health-path = "/Navigation/Batch/allProblems"
+
+# Injected into the GUI container at run time. Deliberately not baked into the image: the same
+# image is promotable across environments, which is the point of reading this per request.
+[integration.env]
+REDUX_BASE_URL = "http://redux-api:27000/"
+
+[push]
+on-branch = "ReduxAPI_GUI"
