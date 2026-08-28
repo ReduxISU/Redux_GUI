@@ -1,7 +1,10 @@
-import React from "react";
-import Link from "next/link";
+import {
+  CheckCircle as CheckCircleIcon,
+  RemoveCircleOutlined as DashIcon,
+} from "@mui/icons-material";
 import { Box, Chip, Typography } from "@mui/material";
-import { CheckCircle as CheckCircleIcon, RemoveCircleOutlined as DashIcon } from "@mui/icons-material";
+import Link from "next/link";
+import React from "react";
 
 // Same glassmorphism card treatment as pages/aboutus/index.js's theSectionCard,
 // scaled down for a dense grid of many cards.
@@ -24,14 +27,18 @@ const cardSx = {
  * the problem name navigates to `/?problem=<name>`, which the home page
  * reads on mount to auto-select that problem.
  */
-export default function ProblemCard({ name, complexityClass, solverTypes, hasRenderableVisualization }) {
+export default function ProblemCard({
+  name,
+  complexityClass,
+  solverTypes,
+  hasRenderableVisualization,
+}) {
   return (
     <Box sx={cardSx}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
-        <Link
-          href={`/?problem=${encodeURIComponent(name)}`}
-          style={{ textDecoration: "none" }}
-        >
+      <Box
+        sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}
+      >
+        <Link href={`/?problem=${encodeURIComponent(name)}`} style={{ textDecoration: "none" }}>
           <Typography
             sx={{
               color: "#ffffff",
@@ -44,9 +51,15 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
           </Typography>
         </Link>
         {hasRenderableVisualization ? (
-          <CheckCircleIcon titleAccess="Has a renderable visualization" sx={{ color: "#4ade80", fontSize: "1.1rem" }} />
+          <CheckCircleIcon
+            titleAccess="Has a renderable visualization"
+            sx={{ color: "#4ade80", fontSize: "1.1rem" }}
+          />
         ) : (
-          <DashIcon titleAccess="No renderable visualization" sx={{ color: "#4b5563", fontSize: "1.1rem" }} />
+          <DashIcon
+            titleAccess="No renderable visualization"
+            sx={{ color: "#4b5563", fontSize: "1.1rem" }}
+          />
         )}
       </Box>
 

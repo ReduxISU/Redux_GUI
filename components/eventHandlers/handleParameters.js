@@ -1,5 +1,5 @@
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 export const useHandleParameters = () => {
   const router = useRouter();
@@ -7,7 +7,7 @@ export const useHandleParameters = () => {
   useEffect(() => {
     // Capture parameters from the URL
     const params = new URLSearchParams(window.location.search);
-    const allowedKeys = ['problem', 'instance', 'solver', 'reduceTo', 'reductionType', 'verifier'];
+    const allowedKeys = ["problem", "instance", "solver", "reduceTo", "reductionType", "verifier"];
     const data = {};
 
     params.forEach((value, key) => {
@@ -24,7 +24,7 @@ export const useHandleParameters = () => {
 
     // Remove parameters from the URL
     router.replace(window.location.pathname, undefined, { shallow: true });
-    document.title = 'Redux';
+    document.title = "Redux";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally mount-only: URL params should be read and cleaned exactly once on load.
 };

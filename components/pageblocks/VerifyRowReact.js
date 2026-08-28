@@ -1,32 +1,33 @@
 /**
  * VerifyRowReact.js
- * 
+ *
  * This component does the real grunt work of the VerifyRow component. It uses passed in props to style and provide default text for its objects,
  * uses the global state values for the problem name and instance, sets global state values pertaining to reduction, and has a variety of listeners and API calls.
- * 
+ *
  * Essentialy, this is the brains of the VerifyRowReact.js component and deals with the GUI's Reduce "Row"
  * @author Alex Diviney
  */
 
-import React from 'react'
-import { useContext, useEffect, useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { FormControl } from 'react-bootstrap'
-import { Button } from '@mui/material'
-import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import React, { useContext, useEffect, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
+import { Button, IconButton } from "@mui/material";
+import { FormControl } from "react-bootstrap";
+import { useVerifierInfo } from "../hooks/ProblemProvider";
+import { requestIsCertificateValid, requestVerifiedInstance } from "../redux";
+import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
+import ProblemSection from "../widgets/ProblemSection";
+import SearchBarExtensible from "../widgets/SearchBarExtensible";
 
-import { requestVerifiedInstance, requestIsCertificateValid } from '../redux';
-import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
-import { useVerifierInfo } from '../hooks/ProblemProvider';
-import ProblemSection from '../widgets/ProblemSection';
-import SearchBarExtensible from '../widgets/SearchBarExtensible';
-
-const ACCORDION_FORM_ONE = { placeHolder: "Select verifier" }
-const BUTTON = { buttonText: "Verify" }
-const CARD = { cardBodyText: "Enter a certificate:", cardHeaderText: "Verify" }
-const TOOLTIP = { header: "Problem Verifier", formalDef: "Choose a verifier to see information about it", info: "" }
-const THEME = { colors: { grey: "#424242", orange: "#d4441c" } }
+const ACCORDION_FORM_ONE = { placeHolder: "Select verifier" };
+const BUTTON = { buttonText: "Verify" };
+const CARD = { cardBodyText: "Enter a certificate:", cardHeaderText: "Verify" };
+const TOOLTIP = {
+  header: "Problem Verifier",
+  formalDef: "Choose a verifier to see information about it",
+  info: "",
+};
+const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
 export default function VerifyRowReact({
   url,
@@ -56,8 +57,14 @@ export default function VerifyRowReact({
   async function handleVerify() {
     setVerifyResult(
       chosenVerifier
-        ? await requestVerifiedInstance(url, problemName, chosenVerifier, problemInstance, certificate)
-        : "Please select a verifier."
+        ? await requestVerifiedInstance(
+            url,
+            problemName,
+            chosenVerifier,
+            problemInstance,
+            certificate,
+          )
+        : "Please select a verifier.",
     );
   }
 
@@ -83,41 +90,41 @@ export default function VerifyRowReact({
           toolTip={
             chosenVerifier
               ? {
-                header: verifierInfo.verifierName ?? "",
-                formalDef: verifierInfo.verifierDefinition ?? "",
-                // plain description only
-                info: verifierInfo.info ?? verifierInfo.description ?? "",
-                // show source 
-                source: verifierInfo.source,
-                // show contributors 
-                credit:
-                  Array.isArray(verifierInfo.contributors) && verifierInfo.contributors.length
-                    ? verifierInfo.contributors.join(", ")
-                    : "",
-                // hyperlink target 
-                componentLink: verifierInfo.verifierLink || "",
-                sourceLink: verifierInfo.sourceLink || "",
-              }
+                  header: verifierInfo.verifierName ?? "",
+                  formalDef: verifierInfo.verifierDefinition ?? "",
+                  // plain description only
+                  info: verifierInfo.info ?? verifierInfo.description ?? "",
+                  // show source
+                  source: verifierInfo.source,
+                  // show contributors
+                  credit:
+                    Array.isArray(verifierInfo.contributors) && verifierInfo.contributors.length
+                      ? verifierInfo.contributors.join(", ")
+                      : "",
+                  // hyperlink target
+                  componentLink: verifierInfo.verifierLink || "",
+                  sourceLink: verifierInfo.sourceLink || "",
+                }
               : TOOLTIP
           }
         ></PopoverTooltipClick>
         {dragHandleProps && (
-                          <IconButton
-                            {...dragHandleProps.attributes}
-                            {...dragHandleProps.listeners}
-                            size="small"
-                            title="Drag to reorder"
-                            sx={{
-                              cursor: 'grab',
-                              color: '#424242',
-                              backgroundColor: '#f5f5f5',
-                              '&:hover': { backgroundColor: '#e0e0e0' },
-                              mr: 1,
-                            }}
-                          >
-                            <DragIndicatorIcon />
-                          </IconButton>
-                        )}
+          <IconButton
+            {...dragHandleProps.attributes}
+            {...dragHandleProps.listeners}
+            size="small"
+            title="Drag to reorder"
+            sx={{
+              cursor: "grab",
+              color: "#424242",
+              backgroundColor: "#f5f5f5",
+              "&:hover": { backgroundColor: "#e0e0e0" },
+              mr: 1,
+            }}
+          >
+            <DragIndicatorIcon />
+          </IconButton>
+        )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>

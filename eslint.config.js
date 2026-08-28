@@ -37,23 +37,14 @@ const importX = require("eslint-plugin-import-x");
 const prettier = require("eslint-config-prettier");
 
 // eslint-config-next exports an array of flat-config objects; spread it in.
-const nextConfigs = Array.isArray(nextCoreWebVitals)
-  ? nextCoreWebVitals
-  : [nextCoreWebVitals];
+const nextConfigs = Array.isArray(nextCoreWebVitals) ? nextCoreWebVitals : [nextCoreWebVitals];
 
 module.exports = [
   // 1. Ignore what isn't ours. A config object with ONLY `ignores` is global.
   //    public/ holds the vendored Q.js library + static assets — linting it produced 38
   //    spurious no-undef errors, so it's excluded here.
   {
-    ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "public/**",
-      "next-env.d.ts",
-    ],
+    ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "public/**", "next-env.d.ts"],
   },
 
   // 2. Base JavaScript correctness — the previously-missing floor.

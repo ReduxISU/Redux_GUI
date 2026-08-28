@@ -1,46 +1,63 @@
 /**
  * ProblemRowReact.js
- * 
+ *
  * This component does the real grunt work of the ProblemRow component. It uses passed in props to style and provide default text for its objects,
  * uses and updates the global state for the problem and problem instance, and has a variety of listeners and API calls.
- * 
+ *
  * Essentialy, this is the brains of the ProblemRowReact.js component and deals with the GUI's Problem "Row"
  * @author Alex Diviney
  */
 
-import React, { useEffect, useState, useRef } from 'react'
-import { useContext } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { TextField } from '@mui/material';
-import { Button, Stack, Box } from "@mui/material";
-import { Folder as FolderIcon } from '@mui/icons-material';
-import { Download as DownloadIcon } from '@mui/icons-material';
-import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import React, { useContext, useEffect, useRef, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import {
+  Download as DownloadIcon,
+  DragIndicator as DragIndicatorIcon,
+  Folder as FolderIcon,
+} from "@mui/icons-material";
+import { Box, Button, IconButton, Stack, TextField } from "@mui/material";
+import ProblemInstanceParser from "../../Tools/ProblemInstanceParser";
+import { useProblemFilters } from "../hooks/ProblemFilters/useProblemFilters";
+import { useProblemIndex } from "../hooks/ProblemFilters/useProblemIndex";
+import { useProblemInfo } from "../hooks/ProblemProvider";
+import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
+import ProblemFilterMenu from "../widgets/ProblemFilterMenu";
+import ProblemSection from "../widgets/ProblemSection";
+import SearchBarExtensible from "../widgets/SearchBarExtensible";
 
-import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
-import ProblemFilterMenu from '../widgets/ProblemFilterMenu';
-import { useProblemInfo } from '../hooks/ProblemProvider'
-import { useProblemIndex } from '../hooks/ProblemFilters/useProblemIndex';
-import { useProblemFilters } from '../hooks/ProblemFilters/useProblemFilters';
-import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
-import ProblemSection from '../widgets/ProblemSection';
-import SearchBarExtensible from '../widgets/SearchBarExtensible';
-
-const ACCORDION_FORM_ONE = { placeHolder: "Select problem" }
-const ACCORDION_FORM_TWO = { placeHolder: "default instance" }
-var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstance: "" }
-const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
+const ACCORDION_FORM_ONE = { placeHolder: "Select problem" };
+const ACCORDION_FORM_TWO = { placeHolder: "default instance" };
+var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstance: "" };
+const TOOLTIP = {
+  header: "Problem Information",
+  formalDef: "Choose a problem to see information about it",
+  info: "",
+  credit: "",
+};
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
 // Display order for the dropdown's complexity-class sections. Unclassified
 // last -- it's the "not yet tagged" bucket, not a real complexity class.
-const COMPLEXITY_CLASS_ORDER = ["P", "NPComplete", "NPHard", "NPIntermediate", "QuantumOracle", "Unclassified"];
+const COMPLEXITY_CLASS_ORDER = [
+  "P",
+  "NPComplete",
+  "NPHard",
+  "NPIntermediate",
+  "QuantumOracle",
+  "Unclassified",
+];
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
  */
-export default function ProblemRowReact({ url, problemName, setProblemName, problemNameMap, setProblemInstance, dragHandleProps }) {
+export default function ProblemRowReact({
+  url,
+  problemName,
+  setProblemName,
+  problemNameMap,
+  setProblemInstance,
+  dragHandleProps,
+}) {
   const problemInfo = useProblemInfo(url, problemName);
   const { problemIndex, reductionGraph } = useProblemIndex(url);
   const {
@@ -57,16 +74,14 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   // chain); intersect so a momentary population lag between the two can't put
   // an unlabeled option in the dropdown.
   const filteredProblemOptions = filteredProblems.filter((name) => problemNameMap.has(name));
-  const [problemLocalInstance, setProblemLocalInstance] = useState("")
+  const [problemLocalInstance, setProblemLocalInstance] = useState("");
   const defaultInstanceParsed = {
     test: true,
     input: "No Input, Default String",
     regex: "There is no regex string for this problem, parsing is likely not enabled",
     type: "No input, default string",
-    exampleStr: "" // No input, default string
-
-  }
-
+    exampleStr: "", // No input, default string
+  };
 
   const [instanceParsed, setInstanceParsed] = useState(defaultInstanceParsed);
   const [seconds, setSeconds] = useState(1);
@@ -74,9 +89,9 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   const isFirstRender = useRef(true);
 
   function openFileDialog() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.txt';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".txt";
 
     input.onchange = function (event) {
       const file = event.target.files[0];
@@ -94,9 +109,9 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     input.click();
   }
   async function handleDownload() {
-    const blob = new Blob([problemLocalInstance], { type: 'text/plain' });
+    const blob = new Blob([problemLocalInstance], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
 
     link.href = url;
     link.download = "query";
@@ -113,11 +128,12 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
       timer = setInterval(() => {
         setSeconds(seconds + 1);
         if (seconds % 2 === 0) {
-          const cleanedInstance = problemLocalInstance.replaceAll(' ', '')
-          if (!cleanedInstance == '') { //Dont try to parse an empty string because it will fail and we dont want textbox to be red on empty input
+          const cleanedInstance = problemLocalInstance.replaceAll(" ", "");
+          if (!cleanedInstance == "") {
+            //Dont try to parse an empty string because it will fail and we dont want textbox to be red on empty input
             const parser = new ProblemInstanceParser();
-            const parsedOutput = parser.parse(problemName, cleanedInstance)
-            setInstanceParsed(parsedOutput)
+            const parsedOutput = parser.parse(problemName, cleanedInstance);
+            setInstanceParsed(parsedOutput);
             if (parsedOutput.test === true) {
               setProblemInstance(cleanedInstance);
             }
@@ -126,9 +142,8 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           setSeconds(1);
         }
       }, 1000);
-    }
-    else {
-      clearInterval(timer)
+    } else {
+      clearInterval(timer);
     }
     // clearing interval
     return () => clearInterval(timer);
@@ -153,23 +168,21 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
 
     setProblemLocalInstance(problemVal);
     setProblemInstance(problemVal);
-
-  }, [problemInfo, setProblemInstance])
+  }, [problemInfo, setProblemInstance]);
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {
-    setProblemLocalInstance(event.target.value)
+    setProblemLocalInstance(event.target.value);
     if (!instanceParsed.test) {
       defaultInstanceParsed.exampleStr = "";
     }
     if (!timerIsActive) {
       setTimerActive(true);
     }
-  }
+  };
 
-  const tip =
-    problemName
-      ? {
+  const tip = problemName
+    ? {
         header: problemInfo.problemName ?? "",
         formalDef: problemInfo.formalDefinition ?? "",
         // It makes description clean
@@ -192,7 +205,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
         sourceLink: problemInfo.sourceLink || "",
         isMathDef: true, // only this file adds the flag
       }
-      : TOOLTIP;
+    : TOOLTIP;
 
   return (
     <ProblemSection defaultCollapsed={false}>
@@ -231,10 +244,10 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
             size="small"
             title="Drag to reorder"
             sx={{
-              cursor: 'grab',
-              color: '#424242',
-              backgroundColor: '#f5f5f5',
-              '&:hover': { backgroundColor: '#e0e0e0' },
+              cursor: "grab",
+              color: "#424242",
+              backgroundColor: "#f5f5f5",
+              "&:hover": { backgroundColor: "#e0e0e0" },
               mr: 1,
             }}
           >
@@ -257,12 +270,14 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
             sx={{ width: "100%" }}
             value={problemLocalInstance}
             onChange={handleChangeInstance}
-            helperText={!instanceParsed.test ? "Problem failed? Try: " + instanceParsed.exampleStr : ""} // Only displays the "Incorrect format" stuff when the input is activly wrong
+            helperText={
+              !instanceParsed.test ? "Problem failed? Try: " + instanceParsed.exampleStr : ""
+            } // Only displays the "Incorrect format" stuff when the input is activly wrong
             className="hide-scrollbar"
             multiline
             maxRows={5}
           ></TextField>
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
+          <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
             <Button
               size="large"
               color="white"

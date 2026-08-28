@@ -32,8 +32,8 @@ async function fetchPostJson(url, body, failMsg) {
       method: "POST",
       body: JSON.stringify(body),
       headers: {
-        'Content-Type': 'application/json; charset=UTF-8'
-      }
+        "Content-Type": "application/json; charset=UTF-8",
+      },
     });
     if (resp.ok) {
       return await resp.json();
@@ -125,12 +125,12 @@ export async function requestGadgetMap(url, reduction, instance) {
   return await fetchPostJson(
     `${url}ProblemProvider/gadgets?reduction=${reduction}`,
     instance,
-    () => `${reduction} MAP GADGETS REQUEST FAILED`
+    () => `${reduction} MAP GADGETS REQUEST FAILED`,
   );
 }
 
 export async function processReductions(url, reductionPath, instance) {
-  const reductions = reductionPath.split("-").map(r => r.trim());
+  const reductions = reductionPath.split("-").map((r) => r.trim());
 
   let currentInstance = instance;
   let currentMap = null;
@@ -163,7 +163,7 @@ function composeMappings(map1, map2) {
     for (const b of entry1.reductionToIds) {
       for (const entry2 of map2) {
         if (entry2.reductionFromIds.includes(b)) {
-          entry2.reductionToIds.forEach(c => linkedTo.add(c));
+          entry2.reductionToIds.forEach((c) => linkedTo.add(c));
         }
       }
     }
@@ -193,8 +193,8 @@ export function makeIdsUnique(gadgets) {
   let nextToId = 0;
 
   // First pass: map reductionFromIds safely
-  gadgets.forEach(gadget => {
-    (gadget.reductionFromIds || []).forEach(oldId => {
+  gadgets.forEach((gadget) => {
+    (gadget.reductionFromIds || []).forEach((oldId) => {
       const key = String(oldId);
       if (!fromIdMap.has(key)) {
         fromIdMap.set(key, String(nextFromId++));
@@ -204,8 +204,8 @@ export function makeIdsUnique(gadgets) {
 
   // Second pass: map reductionToIds safely
   nextToId = nextFromId;
-  gadgets.forEach(gadget => {
-    (gadget.reductionToIds || []).forEach(oldId => {
+  gadgets.forEach((gadget) => {
+    (gadget.reductionToIds || []).forEach((oldId) => {
       const key = String(oldId);
       if (!toIdMap.has(key)) {
         toIdMap.set(key, String(nextToId++));
@@ -214,15 +214,18 @@ export function makeIdsUnique(gadgets) {
   });
 
   // Third pass: create new gadgets array safely
-  const updatedGadgets = gadgets.map(gadget => ({
+  const updatedGadgets = gadgets.map((gadget) => ({
     ...gadget,
-    reductionFromIds: (gadget.reductionFromIds || []).map(id => fromIdMap.get(String(id)) || String(id)),
-    reductionToIds: (gadget.reductionToIds || []).map(id => toIdMap.get(String(id)) || String(id)),
+    reductionFromIds: (gadget.reductionFromIds || []).map(
+      (id) => fromIdMap.get(String(id)) || String(id),
+    ),
+    reductionToIds: (gadget.reductionToIds || []).map(
+      (id) => toIdMap.get(String(id)) || String(id),
+    ),
   }));
 
   return { gadgets: updatedGadgets, fromIdMap, toIdMap };
 }
-
 
 /**
  * Remap IDs in gadgets, clauses, or literals based on the provided idMap.
@@ -238,10 +241,10 @@ export function remapIdsDeep(obj, idMap) {
     if (key === "id" && idMap.has(String(val))) {
       result[key] = String(idMap.get(String(val)));
     } else if ((key === "reductionFromIds" || key === "reductionToIds") && Array.isArray(val)) {
-      result[key] = val.map(v => String(idMap.get(String(v)) ?? v));
+      result[key] = val.map((v) => String(idMap.get(String(v)) ?? v));
     } else if (Array.isArray(val)) {
       // only recurse for arrays
-      result[key] = val.map(v => remapIdsDeep(v, idMap));
+      result[key] = val.map((v) => remapIdsDeep(v, idMap));
     } else if (val && typeof val === "object") {
       result[key] = remapIdsDeep(val, idMap);
     } else {
@@ -257,7 +260,10 @@ export function remapIdsDeep(obj, idMap) {
  * @returns `undefined` on failure and logs the error.
  */
 export async function requestInfo(url, apiCall) {
-  return await fetchJson(`${url}ProblemProvider/info?interface=${apiCall}`, () => `${apiCall} INFO REQUEST FAILED`);
+  return await fetchJson(
+    `${url}ProblemProvider/info?interface=${apiCall}`,
+    () => `${apiCall} INFO REQUEST FAILED`,
+  );
 }
 
 /**
@@ -285,7 +291,7 @@ export async function requestReducedInstance(url, reduction, instance) {
   return await fetchPostJson(
     `${url}ProblemProvider/reduce?reduction=${reduction}`,
     instance,
-    () => `${reduction}  REDUCED INSTANCE REQUEST FAILED`
+    () => `${reduction}  REDUCED INSTANCE REQUEST FAILED`,
   );
 }
 
@@ -310,7 +316,7 @@ export async function requestReductionInfo(url, apiCall) {
 export async function requestReductionOptions(url, problem) {
   return await fetchJson(
     `${url}Navigation/NPC_NavGraph/availableReductions/?chosenProblem=${problem}`,
-    () => `${problem} REDUCTION OPTIONS REQUEST FAILED`
+    () => `${problem} REDUCTION OPTIONS REQUEST FAILED`,
   );
 }
 
@@ -322,7 +328,7 @@ export async function requestReductionVisualization(url, reduction, solution, in
   return await fetchPostJson(
     `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solution=${solution}`,
     instance,
-    () => `${reduction} VISUALIZE REQUEST FAILED`
+    () => `${reduction} VISUALIZE REQUEST FAILED`,
   );
 }
 
@@ -342,10 +348,9 @@ export async function requestProblemGenericInstance(url, problem, instance) {
   return await fetchPostJson(
     `${url}ProblemProvider/problemInstance?problem=${problem}`,
     instance,
-    () => `${problem} PROBLEM GENERIC INSTANCE REQUEST FAILED`
+    () => `${problem} PROBLEM GENERIC INSTANCE REQUEST FAILED`,
   );
 }
-
 
 /**
  * @returns an array of arrays of reductions implemented for reducing a problem to another problem.
@@ -354,7 +359,7 @@ export async function requestProblemGenericInstance(url, problem, instance) {
 export async function requestReductions(url, problemFrom, problemTo) {
   return await fetchJson(
     `${url}Navigation/NPC_NavGraph/reductionPath/?reducingFrom=${problemFrom}&reducingTo=${problemTo}`,
-    () => `${problemFrom} TO ${problemTo} REDUCTIONS REQUEST FAILED`
+    () => `${problemFrom} TO ${problemTo} REDUCTIONS REQUEST FAILED`,
   );
 }
 
@@ -366,7 +371,7 @@ export async function requestSolvedInstance(url, solver, instance) {
   return await fetchPostJson(
     `${url}ProblemProvider/solve?solver=${solver}`,
     instance,
-    () => `${solver} SOLVED INSTANCE REQUEST FAILED`
+    () => `${solver} SOLVED INSTANCE REQUEST FAILED`,
   );
 }
 
@@ -377,7 +382,7 @@ export async function requestSolvedInstance(url, solver, instance) {
 export async function requestSolvers(url, problem) {
   return await fetchJson(
     `${url}Navigation/Problem_SolversRefactor/?chosenProblem=${problem}`,
-    () => `${problem} SOLVERS REQUEST FAILED`
+    () => `${problem} SOLVERS REQUEST FAILED`,
   );
 }
 
@@ -388,7 +393,7 @@ export async function requestSolvers(url, problem) {
 export async function requestVerifiers(url, problem) {
   return await fetchJson(
     `${url}Navigation/Problem_VerifiersRefactor/?chosenProblem=${problem}`,
-    () => `${problem} VERIFIERS REQUEST FAILED`
+    () => `${problem} VERIFIERS REQUEST FAILED`,
   );
 }
 
@@ -399,13 +404,13 @@ export async function requestVerifiers(url, problem) {
 export async function requestVerifiedInstance(url, problem, verifier, instance, certificate) {
   // Temporary solution until certificate validation is moved to the Redux API
   if (!isCertificateValid(problem, certificate)) {
-    return "Invalid Input"
+    return "Invalid Input";
   }
 
   return await fetchPostJson(
     `${url}ProblemProvider/verify?verifier=${verifier}`,
     { problemInstance: instance, certificate: certificate },
-    () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`
+    () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`,
   );
 }
 
@@ -417,7 +422,7 @@ export async function requestVisualization(url, visualization, instance) {
   return await fetchPostJson(
     `${url}ProblemProvider/visualize?visualization=${visualization}`,
     instance,
-    () => `${visualization} VISUALIZE REQUEST FAILED`
+    () => `${visualization} VISUALIZE REQUEST FAILED`,
   );
 }
 
@@ -428,7 +433,7 @@ export async function requestVisualization(url, visualization, instance) {
 export async function requestVisualizations(url, problem) {
   return await fetchJson(
     `${url}Navigation/Problem_VisualizationsRefactor/?chosenProblem=${problem}`,
-    () => `${problem} VISUALIZATIONS REQUEST FAILED`
+    () => `${problem} VISUALIZATIONS REQUEST FAILED`,
   );
 }
 /**
@@ -436,13 +441,8 @@ export async function requestVisualizations(url, problem) {
  * @returns `undefined` on failure and logs the error.
  */
 export function requestAllProblems(url) {
-  return cachedRequest(
-    `${url}|allProblems`,
-    () =>
-      fetchJson(
-        `${url}Navigation/Batch/allProblems`,
-        () => "ALL PROBLEMS REQUEST FAILED"
-      )
+  return cachedRequest(`${url}|allProblems`, () =>
+    fetchJson(`${url}Navigation/Batch/allProblems`, () => "ALL PROBLEMS REQUEST FAILED"),
   );
 }
 /**
@@ -450,13 +450,8 @@ export function requestAllProblems(url) {
  * @returns `undefined` on failure and logs the error.
  */
 export function requestAllSolvers(url) {
-  return cachedRequest(
-    `${url}|allSolvers`,
-    () =>
-      fetchJson(
-        `${url}Navigation/Batch/allSolvers`,
-        () => "ALL SOLVERS REQUEST FAILED"
-      )
+  return cachedRequest(`${url}|allSolvers`, () =>
+    fetchJson(`${url}Navigation/Batch/allSolvers`, () => "ALL SOLVERS REQUEST FAILED"),
   );
 }
 /**
@@ -464,13 +459,8 @@ export function requestAllSolvers(url) {
  * @returns `undefined` on failure and logs the error.
  */
 export function requestAllVerifiers(url) {
-  return cachedRequest(
-    `${url}|allVerifiers`,
-    () =>
-      fetchJson(
-        `${url}Navigation/Batch/allVerifiers`,
-        () => "ALL VERIFIERS REQUEST FAILED"
-      )
+  return cachedRequest(`${url}|allVerifiers`, () =>
+    fetchJson(`${url}Navigation/Batch/allVerifiers`, () => "ALL VERIFIERS REQUEST FAILED"),
   );
 }
 /**
@@ -478,13 +468,11 @@ export function requestAllVerifiers(url) {
  * @returns `undefined` on failure and logs the error.
  */
 export function requestAllVisualizations(url) {
-  return cachedRequest(
-    `${url}|allVisualizations`,
-    () =>
-      fetchJson(
-        `${url}Navigation/Batch/allVisualizations`,
-        () => "ALL VISUALIZATIONS REQUEST FAILED"
-      )
+  return cachedRequest(`${url}|allVisualizations`, () =>
+    fetchJson(
+      `${url}Navigation/Batch/allVisualizations`,
+      () => "ALL VISUALIZATIONS REQUEST FAILED",
+    ),
   );
 }
 
@@ -494,13 +482,8 @@ export function requestAllVisualizations(url) {
  * @returns `undefined` on failure and logs the error.
  */
 export function requestAllInfo(url) {
-  return cachedRequest(
-    `${url}|allInfo`,
-    () =>
-      fetchJson(
-        `${url}Navigation/Batch/allInfo`,
-        () => "ALL INFO REQUEST FAILED"
-      )
+  return cachedRequest(`${url}|allInfo`, () =>
+    fetchJson(`${url}Navigation/Batch/allInfo`, () => "ALL INFO REQUEST FAILED"),
   );
 }
 
@@ -513,13 +496,11 @@ export function requestAllInfo(url) {
  * `requestAllInfo` in that case.
  */
 export function requestAllVisualizationTypes(url) {
-  return cachedRequest(
-    `${url}|allVisualizationTypes`,
-    () =>
-      fetchJson(
-        `${url}Navigation/Batch/allVisualizationTypes`,
-        () => "ALL VISUALIZATION TYPES REQUEST FAILED"
-      )
+  return cachedRequest(`${url}|allVisualizationTypes`, () =>
+    fetchJson(
+      `${url}Navigation/Batch/allVisualizationTypes`,
+      () => "ALL VISUALIZATION TYPES REQUEST FAILED",
+    ),
   );
 }
 
@@ -532,5 +513,6 @@ export function requestAllVisualizationTypes(url) {
  */
 export function requestReductionGraph(url) {
   return cachedRequest(`${url}|reductionGraph`, () =>
-    fetchJson(`${url}Navigation/Reductions`, () => "REDUCTION GRAPH REQUEST FAILED"));
+    fetchJson(`${url}Navigation/Reductions`, () => "REDUCTION GRAPH REQUEST FAILED"),
+  );
 }

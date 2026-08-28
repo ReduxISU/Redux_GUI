@@ -1,35 +1,37 @@
 /**
  * ReduceToRowReact.js
- * 
+ *
  * This component does the real grunt work of the ReduceToRow component. It uses passed in props to style and provide default text for its objects,
  * uses the global state values for the problem name and instance, sets global state values pertaining to reduction, and has a variety of listeners and API calls.
- * 
+ *
  * Essentialy, this is the brains of the ReduceToRowReact.js component and deals with the GUI's Reduce "Row"
  * @author Alex Diviney
  */
 
+import React, { useContext, useEffect, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Download as DownloadIcon, DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
+import { Button, IconButton } from "@mui/material";
+import { Card } from "react-bootstrap";
+import { useProblemInfo, useReducerInfo } from "../hooks/ProblemProvider";
+import { requestReducedInstanceFromPath } from "../redux";
+import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
+import ProblemSection from "../widgets/ProblemSection";
+import SearchBarExtensible from "../widgets/SearchBarExtensible";
 
-import React from 'react'
-import { useContext, useEffect, useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { Card } from 'react-bootstrap'
-import { Button } from '@mui/material'
-import { Download as DownloadIcon } from '@mui/icons-material';
-import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+const ACCORDION_FORM_ONE = {
+  placeHolder: "Select Problem To Reduce To",
+  problemName: "ACCORDION FORM ONE PROBLEM NAME",
+};
+const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" };
 
-import { requestReducedInstanceFromPath } from '../redux'
-import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
-import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
-import ProblemSection from '../widgets/ProblemSection';
-import SearchBarExtensible from '../widgets/SearchBarExtensible';
-
-const ACCORDION_FORM_ONE = { placeHolder: "Select Problem To Reduce To", problemName: "ACCORDION FORM ONE PROBLEM NAME" }
-const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
-
-const REDUCE_BUTTON = { buttonText: "Reduce" }
-const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" }
-const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to reduce your original problem to to see information about it", info: "" }
+const REDUCE_BUTTON = { buttonText: "Reduce" };
+const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" };
+const TOOLTIP1 = {
+  header: "Reduce To Problem",
+  formalDef: "Choose a problem to reduce your original problem to to see information about it",
+  info: "",
+};
 const TOOLTIP2 = {
   header: "Reduction Type",
   formalDef: "Choose a type of reduction to see information about it",
@@ -37,8 +39,8 @@ const TOOLTIP2 = {
   reductionType: "",
   complexity: "",
   complexityBucket: "",
-}
-const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } }
+};
+const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } };
 
 // ReductionCost describes output-size blowup relative to input size, a
 // separate axis from ReductionComplexityBucket (runtime, shown below as
@@ -51,7 +53,7 @@ const REDUCTION_COST_LABELS = {
   Cubic: "Cubic (O(n³))",
   HigherPolynomial: "Higher polynomial (O(n^k), k > 3)",
   Unclassified: "Unclassified",
-}
+};
 
 export default function ReduceToRowReact({
   url,
@@ -75,15 +77,15 @@ export default function ReduceToRowReact({
   async function reduceRequest() {
     setReducedInstance(
       chosenReductionType && problemInstance
-        ? (await requestReducedInstanceFromPath(url, chosenReductionType, problemInstance)) ?? ""
-        : ""
+        ? ((await requestReducedInstanceFromPath(url, chosenReductionType, problemInstance)) ?? "")
+        : "",
     );
   }
 
   async function handleDownload() {
-    const blob = new Blob([reducedInstance], { type: 'text/plain' });
+    const blob = new Blob([reducedInstance], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
 
     link.href = url;
     link.download = "query";
@@ -101,7 +103,7 @@ export default function ReduceToRowReact({
           selected={chosenReduceTo}
           onSelect={setChosenReduceTo}
           optionsHighlight={reduceToOptions}
-          options={[...problemNameMap.keys()].filter(x => x !== problemName)} // Cannot reduce to current problem
+          options={[...problemNameMap.keys()].filter((x) => x !== problemName)} // Cannot reduce to current problem
           optionsMap={problemNameMap}
           disabled={!problemName}
           disabledMessage={"No reduction method available. Please choose a reduce-to."}
@@ -116,24 +118,26 @@ export default function ReduceToRowReact({
           toolTip={
             chosenReduceTo
               ? {
-                header: reduceToInfo.problemName ?? "",
-                formalDef: reduceToInfo.formalDefinition ?? "",
-                // description only
-                info: reduceToInfo.problemDefinition ?? "",
-                classification: [
-                  { label: "Complexity class", value: reduceToInfo.complexityClass || "Unclassified" },
-                ],
-                // show source
-                source: reduceToInfo.source,
-                credit:
-                  Array.isArray(reduceToInfo.contributors) &&
-                    reduceToInfo.contributors.length
-                    ? reduceToInfo.contributors.join(", ")
-                    : "",
-                // hyperlink
-                componentLink: reduceToInfo.problemLink || "",
-                sourceLink: reduceToInfo.sourceLink || "",
-              }
+                  header: reduceToInfo.problemName ?? "",
+                  formalDef: reduceToInfo.formalDefinition ?? "",
+                  // description only
+                  info: reduceToInfo.problemDefinition ?? "",
+                  classification: [
+                    {
+                      label: "Complexity class",
+                      value: reduceToInfo.complexityClass || "Unclassified",
+                    },
+                  ],
+                  // show source
+                  source: reduceToInfo.source,
+                  credit:
+                    Array.isArray(reduceToInfo.contributors) && reduceToInfo.contributors.length
+                      ? reduceToInfo.contributors.join(", ")
+                      : "",
+                  // hyperlink
+                  componentLink: reduceToInfo.problemLink || "",
+                  sourceLink: reduceToInfo.sourceLink || "",
+                }
               : TOOLTIP1
           }
         ></PopoverTooltipClick>
@@ -148,7 +152,7 @@ export default function ReduceToRowReact({
                 const reductions = option.split("-").map((r) => reductionNameMap.get(r) ?? r);
                 const reductionName = reductions.reduce((name, r) => (name += r + " - "), "");
                 return [option, reductionName.slice(0, reductionName.lastIndexOf(" - "))];
-              })
+              }),
             )
           }
           disabled={!problemName || !chosenReduceTo}
@@ -164,50 +168,55 @@ export default function ReduceToRowReact({
           toolTip={
             chosenReductionType
               ? {
-                header: reducerInfo.reductionName ?? "",
-                formalDef: reducerInfo.reductionDefinition ?? "",
-                // plain description for the reduction
-                info: reducerInfo.info ?? reducerInfo.description ?? "",
-                classification: [
-                  {
-                    label: "Reduction cost",
-                    value: REDUCTION_COST_LABELS[reducerInfo.cost] || reducerInfo.cost || "Unclassified",
-                  },
-                  { label: "Reduction type", value: reducerInfo.reductionType || "Unclassified" },
-                  { label: "Complexity bucket", value: reducerInfo.complexityBucket || "Unclassified" },
-                  { label: "Big-O", value: reducerInfo.complexity || "Not yet determined" },
-                ],
-                // separate Source line
-                source: reducerInfo.source,
-                // contributors if present
-                credit:
-                  Array.isArray(reducerInfo.contributors) &&
-                    reducerInfo.contributors.length
-                    ? reducerInfo.contributors.join(", ")
-                    : "",
-                componentLink: reducerInfo.problemLink || "",
-                sourceLink: reducerInfo.sourceLink || "",
-              }
+                  header: reducerInfo.reductionName ?? "",
+                  formalDef: reducerInfo.reductionDefinition ?? "",
+                  // plain description for the reduction
+                  info: reducerInfo.info ?? reducerInfo.description ?? "",
+                  classification: [
+                    {
+                      label: "Reduction cost",
+                      value:
+                        REDUCTION_COST_LABELS[reducerInfo.cost] ||
+                        reducerInfo.cost ||
+                        "Unclassified",
+                    },
+                    { label: "Reduction type", value: reducerInfo.reductionType || "Unclassified" },
+                    {
+                      label: "Complexity bucket",
+                      value: reducerInfo.complexityBucket || "Unclassified",
+                    },
+                    { label: "Big-O", value: reducerInfo.complexity || "Not yet determined" },
+                  ],
+                  // separate Source line
+                  source: reducerInfo.source,
+                  // contributors if present
+                  credit:
+                    Array.isArray(reducerInfo.contributors) && reducerInfo.contributors.length
+                      ? reducerInfo.contributors.join(", ")
+                      : "",
+                  componentLink: reducerInfo.problemLink || "",
+                  sourceLink: reducerInfo.sourceLink || "",
+                }
               : TOOLTIP2
           }
         ></PopoverTooltipClick>
         {dragHandleProps && (
-                  <IconButton
-                    {...dragHandleProps.attributes}
-                    {...dragHandleProps.listeners}
-                    size="small"
-                    title="Drag to reorder"
-                    sx={{
-                      cursor: 'grab',
-                      color: '#424242',
-                      backgroundColor: '#f5f5f5',
-                      '&:hover': { backgroundColor: '#e0e0e0' },
-                      mr: 1,
-                    }}
-                  >
-                    <DragIndicatorIcon />
-                  </IconButton>
-                )}
+          <IconButton
+            {...dragHandleProps.attributes}
+            {...dragHandleProps.listeners}
+            size="small"
+            title="Drag to reorder"
+            sx={{
+              cursor: "grab",
+              color: "#424242",
+              backgroundColor: "#f5f5f5",
+              "&:hover": { backgroundColor: "#e0e0e0" },
+              mr: 1,
+            }}
+          >
+            <DragIndicatorIcon />
+          </IconButton>
+        )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>
@@ -264,7 +273,13 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
     );
   }
   if (prettyInstance[0] === "BOOLEAN") {
-    return <ReduceInfoBool instance={instance} literals={prettyInstance[1]} clauses={prettyInstance[2]} />;
+    return (
+      <ReduceInfoBool
+        instance={instance}
+        literals={prettyInstance[1]}
+        clauses={prettyInstance[2]}
+      />
+    );
   }
 
   return <Card.Text>{instance}</Card.Text>;
@@ -319,39 +334,44 @@ If any of them match it return both a "pretty" version of the instance in a arra
 In the case of a graph nodes and edges are returned in [1] and [2] respectively.
 SAT or boolean form is only the "pretty" form in [1] and [2] is an empty string.*/
 function checkProblemType(stringInstance, chosenReduceTo) {
-  const spacedInstance = stringInstance.replace(/,/g, ', ');
-  const kValue = stringInstance.match('(\\d+)(?!.*\\d)'); // Gets the K value from the string.
+  const spacedInstance = stringInstance.replace(/,/g, ", ");
+  const kValue = stringInstance.match("(\\d+)(?!.*\\d)"); // Gets the K value from the string.
 
   // Regex for undirected graph
-  const prettyUndirectedNodes = spacedInstance.match('((?<=\\(\\({)[ -~]+)(?=}, {{)');
+  const prettyUndirectedNodes = spacedInstance.match("((?<=\\(\\({)[ -~]+)(?=}, {{)");
   const prettyUndirectedEdges = getEdges(spacedInstance);
   if (prettyUndirectedNodes != null) {
     return ["GRAPH", prettyUndirectedNodes[0], prettyUndirectedEdges[0], kValue[0]];
   }
 
   // Regex for directed graph. Consequently the edge regex is the same for both directed and undirected. Shouldn't be a problem, but good to note.
-  const prettyDirectedNodes = spacedInstance.match('((?<=\\(\\({)[ -~]+)(?=}, {\\()');
+  const prettyDirectedNodes = spacedInstance.match("((?<=\\(\\({)[ -~]+)(?=}, {\\()");
   const prettyDirectedEdges = getEdges(spacedInstance);
   if (prettyDirectedNodes != null && (chosenReduceTo == "ARCSET" || chosenReduceTo == "TSP")) {
     return ["GRAPH", prettyDirectedNodes[0], prettyDirectedEdges[0], kValue[0]];
   }
 
   // Regex for Boolean problems.Getting rid of all the characters we don't need and spliting to get all the literals.
-  const literalArray = stringInstance.replaceAll("(", "")
+  const literalArray = stringInstance
+    .replaceAll("(", "")
     .replaceAll(")", "|") // Replace with a | for splitting
     .replaceAll("&", "")
     .split("|");
   const uniqueLiterals = new Set(literalArray); // Getting rid of duplicate literals
-  var literalString = ""
+  var literalString = "";
   uniqueLiterals.forEach((literal) => {
-    literalString += literal + ", "
-  })
-  literalString = literalString.match('(?:.)+(?=, , )'); // Getting rid of trailing commas.
+    literalString += literal + ", ";
+  });
+  literalString = literalString.match("(?:.)+(?=, , )"); // Getting rid of trailing commas.
 
-  const clauses = stringInstance.replaceAll("|", " | ").replaceAll("&", ", ")
+  const clauses = stringInstance.replaceAll("|", " | ").replaceAll("&", ", ");
 
   // Literals and clauses.
-  if (clauses != "" && literalString != "" && (chosenReduceTo == "SAT" || chosenReduceTo == "3SAT")) {
+  if (
+    clauses != "" &&
+    literalString != "" &&
+    (chosenReduceTo == "SAT" || chosenReduceTo == "3SAT")
+  ) {
     return ["BOOLEAN", literalString, clauses];
   }
 
@@ -361,5 +381,5 @@ function checkProblemType(stringInstance, chosenReduceTo) {
 
 // Parses the edges from the graph
 function getEdges(stringInstance) {
-  return stringInstance.match('((?<=}, {)[ -~]+)(?=}\\), )');
+  return stringInstance.match("((?<=}, {)[ -~]+)(?=}\\), )");
 }

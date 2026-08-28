@@ -7,46 +7,40 @@
  */
 
 import React from "react"; //React is implicitly imported
+import Button from "react-bootstrap/Button";
 import ProblemRowReact from "../components/pageblocks/ProblemRowReact";
 import ReduceToRowReact from "../components/pageblocks/ReduceToRowReact";
-import VisualizeRowReact from "../components/pageblocks/VisualizeRowReact";
 import SolveRowReact from "../components/pageblocks/SolveRowReact";
 import VerifyRowReact from "../components/pageblocks/VerifyRowReact";
-import Button from "react-bootstrap/Button";
+import VisualizeRowReact from "../components/pageblocks/VisualizeRowReact";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Image from "next/image";
-import isulogo from "../components/images/ISULogo.png";
-import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
-import {
-  Box,
-  createTheme,
-  Grid,
-  ThemeProvider,
-  Typograph,
-} from "@mui/material";
-import { Container } from "react-bootstrap";
-import { useProblemProvider } from "../components/hooks/ProblemProvider";
-import { useEffect, memo, useState } from "react"; // CHANGED: added useState for row order
-import { useUnload } from "../components/eventHandlers/handleUnload";
-import ShareButton from "../components/widgets/ShareButton";
-import TourLauncher from "../components/tour/TourLauncher";
-import { useHandleParameters } from "../components/eventHandlers/handleParameters";
 
 import {
-  DndContext,
   closestCenter,
+  DndContext,
   PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
   arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Box, createTheme, Grid, ThemeProvider, Typograph } from "@mui/material";
+import Image from "next/image";
+import { memo, useEffect, useState } from "react"; // CHANGED: added useState for row order
+import { Container } from "react-bootstrap";
+import { useHandleParameters } from "../components/eventHandlers/handleParameters";
+import { useUnload } from "../components/eventHandlers/handleUnload";
+import { useProblemProvider } from "../components/hooks/ProblemProvider";
+import isulogo from "../components/images/ISULogo.png";
+import TourLauncher from "../components/tour/TourLauncher";
+import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
+import ShareButton from "../components/widgets/ShareButton";
 
 const SHOW_QUANTUM_VIS = false; //Flag to show a quantum circuit visualizer (sandbox feature)
 const ProblemRowMemo = memo(ProblemRowReact);
@@ -55,17 +49,12 @@ const VisualizeRowMemo = memo(VisualizeRowReact);
 const SolveRowMemo = memo(SolveRowReact);
 const VerifyRowMemo = memo(VerifyRowReact);
 
-const reduxBaseUrl = '/api/redux/';
+const reduxBaseUrl = "/api/redux/";
 
 function SortableRow({ id, children }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -134,22 +123,12 @@ function MainPageContent() {
 
   //useHandleParameters();
 
-  const { problem, solver, verifier, reducer, visualization } =
-    useProblemProvider(reduxBaseUrl);
+  const { problem, solver, verifier, reducer, visualization } = useProblemProvider(reduxBaseUrl);
 
-  const [rowOrder, setRowOrder] = useState([
-    "problem",
-    "reduce",
-    "visualize",
-    "solve",
-    "verify",
-  ]);
+  const [rowOrder, setRowOrder] = useState(["problem", "reduce", "visualize", "solve", "verify"]);
 
-  // PointerSensor covers mouse; TouchSensor adds mobile/tablet support 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor)
-  );
+  // PointerSensor covers mouse; TouchSensor adds mobile/tablet support
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   const rowMap = {
     problem: <ProblemRowMemo url={reduxBaseUrl} {...problem} />,
@@ -209,10 +188,7 @@ function MainPageContent() {
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-              <SortableContext
-                items={rowOrder}
-                strategy={verticalListSortingStrategy}
-              >
+              <SortableContext items={rowOrder} strategy={verticalListSortingStrategy}>
                 {rowOrder.map((key) => (
                   <SortableRow key={key} id={key}>
                     {rowMap[key]}
@@ -250,7 +226,7 @@ function MainPageContent() {
 export default function MainPage() {
   return (
     <>
-      <MainPageContent></MainPageContent> 
+      <MainPageContent></MainPageContent>
     </>
   );
 }

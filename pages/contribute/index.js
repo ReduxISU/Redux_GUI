@@ -1,15 +1,14 @@
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import isulogo from "../../components/images/ISULogo.png";
-
 import {
-  createTheme,
-  ThemeProvider,
-  Container,
   Box,
-  Typography,
+  Container,
   CssBaseline,
+  createTheme,
   Link,
+  ThemeProvider,
+  Typography,
 } from "@mui/material";
+import isulogo from "../../components/images/ISULogo.png";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 const contributionSteps = [
   "Creating a fork of the appropriate repository, front end or back end",
@@ -131,14 +130,12 @@ export default function ContributePage() {
                   mb: 2.2,
                 }}
               >
-                Our goal from the beginning has not been to build a knowledge
-                base ourselves but to build a framework for crowd-sourced
-                contribution across the world, think Wikipedia. We hope to see
-                contributors add everything from new problems, algorithms,
-                reductions, visualizations, features, bug fixes, and beyond. Our
-                goal is to make the framework easy to understand and even easier
-                to extend. Below are tutorials and helpful information to get
-                you started.
+                Our goal from the beginning has not been to build a knowledge base ourselves but to
+                build a framework for crowd-sourced contribution across the world, think Wikipedia.
+                We hope to see contributors add everything from new problems, algorithms,
+                reductions, visualizations, features, bug fixes, and beyond. Our goal is to make the
+                framework easy to understand and even easier to extend. Below are tutorials and
+                helpful information to get you started.
               </Typography>
 
               <Typography
@@ -214,10 +211,9 @@ export default function ContributePage() {
                   textAlign: "justify",
                 }}
               >
-                Before submitting a pull request, make sure your changes run
-                locally, follow the existing project structure, include clear
-                descriptions of the work completed, and are tested carefully.
-                Additional checklist details will be added as the contribution
+                Before submitting a pull request, make sure your changes run locally, follow the
+                existing project structure, include clear descriptions of the work completed, and
+                are tested carefully. Additional checklist details will be added as the contribution
                 documentation is expanded.
               </Typography>
             </Box>
@@ -257,10 +253,9 @@ export default function ContributePage() {
                   textAlign: "justify",
                 }}
               >
-                Interested in getting more involved? We love collaboration!
-                Whether you are an industry partner, a university research
-                group, or an individual passionate about getting involved, we
-                have lots of project ideas we could use your help with. If
+                Interested in getting more involved? We love collaboration! Whether you are an
+                industry partner, a university research group, or an individual passionate about
+                getting involved, we have lots of project ideas we could use your help with. If
                 interested, please reach out to Dr. Paul Bodily at{" "}
                 <Link
                   href="mailto:bodipaul@isu.edu"
@@ -271,7 +266,8 @@ export default function ContributePage() {
                   }}
                 >
                   bodipaul@isu.edu
-                </Link>.
+                </Link>
+                .
               </Typography>
             </Box>
 
@@ -286,8 +282,8 @@ export default function ContributePage() {
                   textAlign: "justify",
                 }}
               >
-                Terms of Use content will be added here. This section is
-                intended to describe expectations and conditions for using Redux.
+                Terms of Use content will be added here. This section is intended to describe
+                expectations and conditions for using Redux.
               </Typography>
             </Box>
 
@@ -302,43 +298,42 @@ export default function ContributePage() {
                   textAlign: "justify",
                 }}
               >
-                Privacy Policy content will be added here. This section is
-                intended to explain what information is collected, how it is
-                used, and how user privacy is protected.
+                Privacy Policy content will be added here. This section is intended to explain what
+                information is collected, how it is used, and how user privacy is protected.
               </Typography>
             </Box>
           </Box>
         </Container>
         <Box
-  sx={{
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    pt: 2,
-    pb: 3,
-  }}
->
-  <Link
-    href="https://www.isu.edu/cs/"
-    target="_blank"
-    rel="noopener noreferrer"
-    underline="none"
-    sx={{ display: "inline-flex" }}
-  >
-    <Box
-      component="img"
-      src={isulogo.src}
-      alt="Idaho State University Computer Science"
-      sx={{
-        height: 72,
-        width: "auto",
-        display: "block",
-        opacity: 1,
-        filter: "none",
-      }}
-    />
-  </Link>
-</Box>
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            pt: 2,
+            pb: 3,
+          }}
+        >
+          <Link
+            href="https://www.isu.edu/cs/"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="none"
+            sx={{ display: "inline-flex" }}
+          >
+            <Box
+              component="img"
+              src={isulogo.src}
+              alt="Idaho State University Computer Science"
+              sx={{
+                height: 72,
+                width: "auto",
+                display: "block",
+                opacity: 1,
+                filter: "none",
+              }}
+            />
+          </Link>
+        </Box>
       </Box>
     </ThemeProvider>
   );
