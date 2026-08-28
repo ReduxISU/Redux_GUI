@@ -1,19 +1,17 @@
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-
 import {
-  createTheme,
-  ThemeProvider,
-  Container,
-  Box,
-  Typography,
-  Link,
-  Grid,
   Avatar,
-  Tooltip,
+  Box,
+  Container,
   CssBaseline,
+  createTheme,
+  Grid,
+  Link,
+  ThemeProvider,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-
 import isulogo from "../../components/images/ISULogo.png";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 // The only contributors whose GitHub profiles are known, along with avatar and link
 const contributorProfiles = {
@@ -212,11 +210,7 @@ function ItemContributor({ name }) {
       title={
         <Box sx={{ p: 1, minWidth: 190 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
-            <Avatar
-              src={profile.image}
-              alt={name}
-              sx={{ width: 50, height: 50 }}
-            />
+            <Avatar src={profile.image} alt={name} sx={{ width: 50, height: 50 }} />
             <Box>
               <Typography
                 sx={{
@@ -330,10 +324,9 @@ export default function AboutUsPage() {
                 <Box component="span" sx={{ color: "#111827", fontWeight: 700 }}>
                   Redux
                 </Box>
-                , a platform for NP-Complete problems. Input your challenges and
-                gain access to reductions, solutions, verifiers, and
-                visualizations. Join our community of problem solvers and unravel
-                computational complexities using the application library. The
+                , a platform for NP-Complete problems. Input your challenges and gain access to
+                reductions, solutions, verifiers, and visualizations. Join our community of problem
+                solvers and unravel computational complexities using the application library. The
                 project was greatly inspired by Richard Karp&apos;s paper{" "}
                 <Link
                   href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
@@ -367,13 +360,11 @@ export default function AboutUsPage() {
                     lineHeight: 1.7,
                   }}
                 >
-                  Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb
-                  Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and
-                  Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge
-                  Base for Teaching NP-completeness. In Proceedings of the 2024
-                  on Innovation and Technology in Computer Science Education V. 1
-                  (ITiCSE 2024). Association for Computing Machinery, New York,
-                  NY, USA, 255–261.{" "}
+                  Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb Eardley, Russell
+                  Phillips, Rajiv Khadka, Daniel Igbokwe, and Paul Bodily. 2024. Redux: An
+                  Interactive, Dynamic Knowledge Base for Teaching NP-completeness. In Proceedings
+                  of the 2024 on Innovation and Technology in Computer Science Education V. 1
+                  (ITiCSE 2024). Association for Computing Machinery, New York, NY, USA, 255–261.{" "}
                   <Link
                     href="https://dl.acm.org/doi/10.1145/3649217.3653544"
                     target="_blank"
@@ -469,8 +460,8 @@ export default function AboutUsPage() {
                   mb: 3,
                 }}
               >
-                Below are research publications and awards associated with the
-                Redux project and its contributors.
+                Below are research publications and awards associated with the Redux project and its
+                contributors.
               </Typography>
 
               <Box sx={{ display: "grid", gap: 0.8 }}>
@@ -484,7 +475,6 @@ export default function AboutUsPage() {
                       }}
                     >
                       {item.citation}{" "}
-
                       {item.doi && (
                         <Link
                           href={item.doi}
@@ -501,7 +491,6 @@ export default function AboutUsPage() {
                           [DOI]
                         </Link>
                       )}
-
                       {item.pdf && (
                         <Link
                           href={item.pdf}
@@ -518,7 +507,6 @@ export default function AboutUsPage() {
                           [PDF]
                         </Link>
                       )}
-
                       {item.url && (
                         <Link
                           href={item.url}
@@ -585,10 +573,9 @@ export default function AboutUsPage() {
                   textAlign: "justify",
                 }}
               >
-                Any opinions, findings, conclusions, or recommendations
-                expressed in this material are those of the author(s) and do not
-                necessarily reflect the views of the funding agencies who have
-                supported this work.
+                Any opinions, findings, conclusions, or recommendations expressed in this material
+                are those of the author(s) and do not necessarily reflect the views of the funding
+                agencies who have supported this work.
               </Typography>
             </Box>
 
@@ -611,7 +598,8 @@ export default function AboutUsPage() {
                   sx={{ color: "#F47C20", fontWeight: 600 }}
                 >
                   BSD 3-Clause License
-                </Link>.
+                </Link>
+                .
               </Typography>
             </Box>
           </Box>

@@ -6,7 +6,6 @@
 // import 'bootstrap/dist/css/bootstrap.min.css';
 // import { Container, Box, createTheme, ThemeProvider } from '@mui/material';
 
-
 // //OverlayViewF
 
 // /**
@@ -24,9 +23,7 @@
 
 // }
 
-
 // export default function Test(props) {
-
 
 //     const [tool, setToolTip] = useState({});
 //     const [nodeTarget, setTarget] = useState();
@@ -64,14 +61,10 @@
 //                     ellipseArray[0].setAttribute("fill", "none")
 //                 })
 
-
 //             }
 //         }, 2000);
 
-
 //     }, [])
-
-
 
 //     const handleClick = event => {
 //         // 👇️ refers to the div element
@@ -90,8 +83,6 @@
 //                     }
 //                 }).catch(console.log("Problem not defined"));
 
-
-
 //             } else {
 //                 setTarget(null)
 //                 setShow(false);
@@ -99,8 +90,6 @@
 //             }
 //         }
 //     };
-
-
 
 //     return (
 //         <>
@@ -159,19 +148,12 @@
 //             </ThemeProvider>
 //         </>
 
-
-
 //     );
-
-
-
 
 // }
 
-
-
 function HomePage() {
-    return <div>BUILD ISSUE PATCH. TEMPORARY</div>
-  }
-  
-  export default HomePage
+  return <div>BUILD ISSUE PATCH. TEMPORARY</div>;
+}
+
+export default HomePage;

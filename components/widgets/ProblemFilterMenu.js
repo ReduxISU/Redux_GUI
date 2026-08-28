@@ -1,4 +1,4 @@
-import { useState } from "react";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import {
   Badge,
   Box,
@@ -11,7 +11,7 @@ import {
   Popover,
   Typography,
 } from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import { useState } from "react";
 import { buildFacetOptions, buildGroupedFacetOptions } from "../hooks/ProblemFilters/facetOptions";
 import { visualizationTypeCategory } from "../Visualization/svgs/visualizationCategories";
 
@@ -38,7 +38,10 @@ function FacetCheckbox({ optionKey, label, count, selected, onChange }) {
       }
       label={
         <Typography variant="body2">
-          {label} <Box component="span" sx={{ color: "text.secondary" }}>({count})</Box>
+          {label}{" "}
+          <Box component="span" sx={{ color: "text.secondary" }}>
+            ({count})
+          </Box>
         </Typography>
       }
     />

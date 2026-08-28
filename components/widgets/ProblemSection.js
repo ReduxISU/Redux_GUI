@@ -2,11 +2,10 @@
  * A singular section of a problem.
  */
 
-import React from "react";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Accordion, Card, AccordionContext } from "react-bootstrap";
-import { Stack, Button, Box } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
+import { Accordion, AccordionContext, Card } from "react-bootstrap";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 
 /// Default theme.
@@ -60,7 +59,7 @@ ProblemSection.Header = function Header({ children, title, titleWidth }) {
             width: titleWidth ?? "10%",
             display: "flex",
             justifyContent: "center", // horizontal center
-            alignItems: "center",     // vertical center
+            alignItems: "center", // vertical center
           }}
         >
           {title}
@@ -73,7 +72,6 @@ ProblemSection.Header = function Header({ children, title, titleWidth }) {
     </Card.Header>
   );
 };
-
 
 ProblemSection.Body = function Body({ children }) {
   return (

@@ -1,15 +1,14 @@
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import isulogo from "../../components/images/ISULogo.png";
-
 import {
-  createTheme,
-  ThemeProvider,
-  Container,
   Box,
-  Typography,
+  Container,
   CssBaseline,
+  createTheme,
   Link,
+  ThemeProvider,
+  Typography,
 } from "@mui/material";
+import isulogo from "../../components/images/ISULogo.png";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 const backgroundLinks = [
   {
@@ -179,39 +178,38 @@ export default function HelpPage() {
                   mb: 2.2,
                 }}
               >
-                Redux is a dynamic, interactive computer science knowledgebase
-                consisting of canonical computer science problems, solutions,
-                and reduction algorithms. The following pages provide helpful
-                background to the organization of problems, solutions, and
-                reductions in Redux based on the concept of complexity classes:
+                Redux is a dynamic, interactive computer science knowledgebase consisting of
+                canonical computer science problems, solutions, and reduction algorithms. The
+                following pages provide helpful background to the organization of problems,
+                solutions, and reductions in Redux based on the concept of complexity classes:
               </Typography>
 
               <Typography
-  sx={{
-    color: "#374151",
-    fontSize: "0.87rem",
-    lineHeight: 1.9,
-    textAlign: "justify",
-  }}
->
-  {backgroundLinks.map((link, index) => (
-    <span key={link.label}>
-      <Link
-        href={link.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        underline="hover"
-        sx={{
-          color: "#F47C20",
-          fontWeight: 600,
-        }}
-      >
-        {link.label}
-      </Link>
-      {index < backgroundLinks.length - 1 ? ", " : "."}
-    </span>
-  ))}
-</Typography>
+                sx={{
+                  color: "#374151",
+                  fontSize: "0.87rem",
+                  lineHeight: 1.9,
+                  textAlign: "justify",
+                }}
+              >
+                {backgroundLinks.map((link, index) => (
+                  <span key={link.label}>
+                    <Link
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{
+                        color: "#F47C20",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                    {index < backgroundLinks.length - 1 ? ", " : "."}
+                  </span>
+                ))}
+              </Typography>
             </Box>
 
             <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
@@ -226,8 +224,7 @@ export default function HelpPage() {
                   mb: 2,
                 }}
               >
-                All of the content of the Redux knowledge base can be accessed
-                directly via:
+                All of the content of the Redux knowledge base can be accessed directly via:
               </Typography>
 
               <Box sx={{ display: "grid", gap: 1 }}>
@@ -308,35 +305,35 @@ export default function HelpPage() {
           </Box>
         </Container>
         <Box
-  sx={{
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    pt: 2,
-    pb: 3,
-  }}
->
-  <Link
-    href="https://www.isu.edu/cs/"
-    target="_blank"
-    rel="noopener noreferrer"
-    underline="none"
-    sx={{ display: "inline-flex" }}
-  >
-    <Box
-      component="img"
-      src={isulogo.src}
-      alt="Idaho State University Computer Science"
-      sx={{
-        height: 72,
-        width: "auto",
-        display: "block",
-        opacity: 1,
-        filter: "none",
-      }}
-    />
-  </Link>
-</Box>
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            pt: 2,
+            pb: 3,
+          }}
+        >
+          <Link
+            href="https://www.isu.edu/cs/"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="none"
+            sx={{ display: "inline-flex" }}
+          >
+            <Box
+              component="img"
+              src={isulogo.src}
+              alt="Idaho State University Computer Science"
+              sx={{
+                height: 72,
+                width: "auto",
+                display: "block",
+                opacity: 1,
+                filter: "none",
+              }}
+            />
+          </Link>
+        </Box>
       </Box>
     </ThemeProvider>
   );

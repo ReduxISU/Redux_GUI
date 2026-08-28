@@ -1,23 +1,23 @@
-import React, { useMemo } from "react";
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import FacetFilterGroup from "../../components/widgets/FacetFilterGroup";
-import ProblemCard from "../../components/widgets/ProblemCard";
-import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
-import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
-import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
-import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
 import {
-  createTheme,
-  ThemeProvider,
-  CssBaseline,
-  Container,
   Box,
-  Typography,
-  Grid,
   Button,
   Chip,
   CircularProgress,
+  Container,
+  CssBaseline,
+  createTheme,
+  Grid,
+  ThemeProvider,
+  Typography,
 } from "@mui/material";
+import React, { useMemo } from "react";
+import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
+import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
+import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
+import FacetFilterGroup from "../../components/widgets/FacetFilterGroup";
+import ProblemCard from "../../components/widgets/ProblemCard";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
 
 // Same dark palette as pages/aboutus/index.js, for visual consistency across
 // the app's newer MUI-Grid-card pages.
@@ -104,8 +104,8 @@ export default function BrowsePage() {
             Browse Problems
           </Typography>
           <Typography sx={{ color: "#9ca3af", fontSize: "0.87rem", mb: 3 }}>
-            Filter the full problem list by complexity class, solver type, visualization type,
-            or reduction reachability.
+            Filter the full problem list by complexity class, solver type, visualization type, or
+            reduction reachability.
           </Typography>
 
           {loading ? (
@@ -116,7 +116,15 @@ export default function BrowsePage() {
           ) : (
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 3 }}>
-                <Box sx={{ ...theSectionCard, display: "grid", gap: 2.5, position: { md: "sticky" }, top: { md: 16 } }}>
+                <Box
+                  sx={{
+                    ...theSectionCard,
+                    display: "grid",
+                    gap: 2.5,
+                    position: { md: "sticky" },
+                    top: { md: 16 },
+                  }}
+                >
                   <FacetFilterGroup
                     label="Complexity Class"
                     options={complexityClassOptions}

@@ -1,15 +1,21 @@
+import React, { useEffect, useRef, useState } from "react";
+import { requestAllInfo, requestAllSolvers } from "../../redux";
 import { useGenericInfo } from "../ProblemProvider";
-import { requestAllSolvers, requestAllInfo } from "../../redux";
-import React, { useEffect, useState, useRef } from "react";
 
 export function useSolver(url, problemName, problemNameMap, problemInfoMap, problemInstance) {
   const state = {};
   /// Maps each problem name to its default solver name.
   [state.defaultSolverMap] = useDefaultSolverMap(url, problemInfoMap);
   [state.solverOptions] = useSolverOptions(url, problemName);
-  [state.chosenSolver, state.setChosenSolver] = useChosenSolver(problemName, state.defaultSolverMap);
+  [state.chosenSolver, state.setChosenSolver] = useChosenSolver(
+    problemName,
+    state.defaultSolverMap,
+  );
   [state.solverNameMap] = useSolverNameMap(url, problemNameMap);
-  [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(problemInstance, state.chosenSolver);
+  [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(
+    problemInstance,
+    state.chosenSolver,
+  );
   return state;
 }
 
@@ -72,29 +78,29 @@ function useDefaultSolverMap(url, problemInfoMap) {
   const [defaultSolverMap, setDefaultSolverMap] = useState(new Map());
 
   useEffect(() => {
-  const problems = [...problemInfoMap.keys()];
-  const defaultSolverNames = [...problemInfoMap.values()]
-    .map((info) => info?.defaultSolver?.solverName)
-    .filter(Boolean);
+    const problems = [...problemInfoMap.keys()];
+    const defaultSolverNames = [...problemInfoMap.values()]
+      .map((info) => info?.defaultSolver?.solverName)
+      .filter(Boolean);
 
-  (async () => {
-    const allSolvers = (await requestAllSolvers(url)) ?? {};
-    const allInfo = (await requestAllInfo(url)) ?? {};
+    (async () => {
+      const allSolvers = (await requestAllSolvers(url)) ?? {};
+      const allInfo = (await requestAllInfo(url)) ?? {};
 
-    let map = new Map();
-    for (const problem of problems) {
-      const solvers = allSolvers[problem] ?? [];
-      for (const s of solvers) {
-        const solver = s.split(" ")[0];
-        const info = allInfo[solver];
-        if (info && defaultSolverNames.includes(info.solverName)) {
-          map.set(problem, s);
+      let map = new Map();
+      for (const problem of problems) {
+        const solvers = allSolvers[problem] ?? [];
+        for (const s of solvers) {
+          const solver = s.split(" ")[0];
+          const info = allInfo[solver];
+          if (info && defaultSolverNames.includes(info.solverName)) {
+            map.set(problem, s);
+          }
         }
       }
-    }
-    setDefaultSolverMap(map);
-  })();
-}, [url, problemInfoMap]);
+      setDefaultSolverMap(map);
+    })();
+  }, [url, problemInfoMap]);
 
   return [defaultSolverMap, setDefaultSolverMap];
 }
@@ -136,7 +142,6 @@ function useChosenSolver(problemName, defaultSolverMap) {
     }
 
     setChosenSolver(solverVar);
-
   }, [problemName, defaultSolverMap]);
 
   return [chosenSolver, setChosenSolver];
