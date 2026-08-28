@@ -69,7 +69,7 @@ class ProblemInstanceParser {
   parseDirectedGraph(instance) {
     const type = "DirectedGraph";
     const directedGraphFormat =
-      /\(\({(([\w!]+)+(,([\w!]+))*)},{(\(([\w!]+),([\w!]+)\)(,\(([\w!]+),([\w!]+)\))*)*}\),\d+\)$/g;
+      /\(\({(([\w!]+)(,([\w!]+))*)},{(\(([\w!]+),([\w!]+)\)(,\(([\w!]+),([\w!]+)\))*)*}\),\d+\)$/g;
     const graphReg = new RegExp(directedGraphFormat);
     const bool = graphReg.test(instance);
     return {
