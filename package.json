@@ -33,7 +33,7 @@
     "d3-graphviz": "^5.6.0",
     "dotenv": "^17.4.2",
     "driver.js": "^1.8.0",
-    "next": "^16.3.0",
+    "next": "^16.3.1",
     "node-tikzjax": "^1.0.5",
     "react": "^19.2.6",
     "react-bootstrap": "^2.10.10",
@@ -41,10 +41,10 @@
     "react-split": "^2.0.14"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.7",
+    "@biomejs/biome": "^2.5.8",
     "@playwright/test": "^1.62.1",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.3.0",
+    "eslint-config-next": "^16.3.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-x": "^4.17.1"
   }
