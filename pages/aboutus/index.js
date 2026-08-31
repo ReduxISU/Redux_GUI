@@ -54,15 +54,23 @@ const contributorProfiles = {
 const publicationsAndAwards = [
   {
     citation:
-      "K. Marchetti and P. Bodily. 2022. Visualizing the 3SAT to CLIQUE Reduction Process. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
-    doi: "https://ieeexplore.ieee.org/document/9796851",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/Visualizing_the_3SAT_to_CLIQUE_Reduction.pdf",
+      "P. M. Bodily, “LLMs, Computational Theory, and Redux: New Directions for CC in Computational Complexity,” in Proceedings of the Workshop on Theoretical CS and Computational Creativity, 2026.",
   },
   {
     citation:
-      "K. Marchetti and P. Bodily. 2022. KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–4. Best Student Paper Award.",
-    doi: "https://ieeexplore.ieee.org/document/9796945",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/KAMI_Leveraging_Open_Source_to_Solve_Complex_Problems.pdf",
+      "Best Graduate Poster Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
+    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
+  },
+  {
+    citation:
+      "Best Graduate Oral Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
+    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
+  },
+  {
+    citation:
+      "R. Phillips and P. M. Bodily. 2025. SPADE: A library for programmatic parsing and verification of discrete data structures. In 2025 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/11039449",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/SPADE.pdf",
   },
   {
     citation:
@@ -78,19 +86,30 @@ const publicationsAndAwards = [
   },
   {
     citation:
-      "R. Phillips and P. M. Bodily. 2025. SPADE: A library for programmatic parsing and verification of discrete data structures. In 2025 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
-    doi: "https://ieeexplore.ieee.org/document/11039449",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/SPADE.pdf",
+      "K. Marchetti and P. Bodily. 2022. KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–4. Best Student Paper Award.",
+    doi: "https://ieeexplore.ieee.org/document/9796945",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/KAMI_Leveraging_Open_Source_to_Solve_Complex_Problems.pdf",
   },
   {
     citation:
-      "Best Graduate Poster Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
-    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
+      "K. Marchetti and P. Bodily. 2022. Visualizing the 3SAT to CLIQUE Reduction Process. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/9796851",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/Visualizing_the_3SAT_to_CLIQUE_Reduction.pdf",
   },
   {
     citation:
-      "Best Graduate Oral Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
-    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
+      "P. M. Bodily and D. Ventura, “Open computational creativity problems in computational theory,” in Proceedings of the 13th International Conference on Computational Creativity (ICCC), 2022.",
+  },
+];
+
+const thesisAndDissertations = [
+  {
+    citation:
+      "Andrija Sevaljevic, M.S. Thesis, Idaho State University, “Redux: Design and Implementation of a Reusable Web-Based Visualization System for Algorithmic and Logical Problem Solving”",
+  },
+  {
+    citation:
+      "Kaden Marchetti, M.S. Thesis, Idaho State University, “Redux: An Interactive, Dynamic Tool for Learning NP-completeness and Mapping Reductions”",
   },
 ];
 
@@ -533,6 +552,71 @@ export default function AboutUsPage() {
                           }}
                         >
                           [URL]
+                        </Link>
+                      )}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+              <TitleSection>THESIS AND DISSERTATIONS</TitleSection>
+
+              <Typography
+                sx={{
+                  color: "#374151",
+                  fontSize: "0.87rem",
+                  mb: 3,
+                }}
+              >
+                Below are theses and dissertations associated with the Redux
+                project.
+              </Typography>
+
+              <Box sx={{ display: "grid", gap: 0.8 }}>
+                {thesisAndDissertations.map((item, index) => (
+                  <Box key={index} sx={innerCard}>
+                    <Typography
+                      sx={{
+                        color: "#374151",
+                        fontSize: "0.82rem",
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      {item.citation}{" "}
+
+                      {item.url && (
+                        <Link
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [URL]
+                        </Link>
+                      )}
+
+                      {item.pdf && (
+                        <Link
+                          href={item.pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [PDF]
                         </Link>
                       )}
                     </Typography>
