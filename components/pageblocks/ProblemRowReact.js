@@ -31,9 +31,11 @@ var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstanc
 const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
-// Display order for the dropdown's complexity-class sections. Unclassified
-// last -- it's the "not yet tagged" bucket, not a real complexity class.
-const COMPLEXITY_CLASS_ORDER = ["P", "NPComplete", "NPHard", "NPIntermediate", "QuantumOracle", "Unclassified"];
+// Display order for the dropdown's complexity-class sections. QuantumOracle sorts
+// near the bottom -- those problems are incomparable with the classical hierarchy
+// (see Interfaces/ComplexityClass.cs). Unclassified last -- it's the "not yet
+// tagged" bucket, not a real complexity class.
+const COMPLEXITY_CLASS_ORDER = ["P", "NP", "NPComplete", "NPHard", "QuantumOracle", "Unclassified"];
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
@@ -44,10 +46,8 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   const {
     selectedComplexityClasses,
     setSelectedComplexityClasses,
-    selectedSolverComplexityBuckets,
-    setSelectedSolverComplexityBuckets,
-    selectedVisualizationTypes,
-    setSelectedVisualizationTypes,
+    selectedProblemTypes,
+    setSelectedProblemTypes,
     filteredProblems,
     clearFilters,
   } = useProblemFilters(problemIndex, reductionGraph);
@@ -214,10 +214,8 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           problemIndex={problemIndex}
           selectedComplexityClasses={selectedComplexityClasses}
           setSelectedComplexityClasses={setSelectedComplexityClasses}
-          selectedSolverComplexityBuckets={selectedSolverComplexityBuckets}
-          setSelectedSolverComplexityBuckets={setSelectedSolverComplexityBuckets}
-          selectedVisualizationTypes={selectedVisualizationTypes}
-          setSelectedVisualizationTypes={setSelectedVisualizationTypes}
+          selectedProblemTypes={selectedProblemTypes}
+          setSelectedProblemTypes={setSelectedProblemTypes}
           clearFilters={clearFilters}
         />{" "}
          <PopoverTooltipClick toolTip={tip} />
