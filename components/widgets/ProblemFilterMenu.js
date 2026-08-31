@@ -43,6 +43,7 @@ const PROBLEM_TYPE_ORDER = [
   "Logic",
   "AutomataAndLanguages",
   "ProgramOptimization",
+  "ComputationalGeometry",
   "Miscellaneous",
 ];
 const PROBLEM_TYPE_LABELS = {
@@ -57,6 +58,7 @@ const PROBLEM_TYPE_LABELS = {
   Logic: "Logic",
   AutomataAndLanguages: "Automata and Languages",
   ProgramOptimization: "Program Optimization",
+  ComputationalGeometry: "Computational Geometry",
   Miscellaneous: "Miscellaneous",
 };
 
