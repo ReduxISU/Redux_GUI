@@ -561,7 +561,7 @@ export default function AboutUsPage() {
             </Box>
 
             <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-              <TitleSection>THESIS AND DISSERTATIONS</TitleSection>
+              <TitleSection>THESES AND DISSERTATIONS</TitleSection>
 
               <Typography
                 sx={{
