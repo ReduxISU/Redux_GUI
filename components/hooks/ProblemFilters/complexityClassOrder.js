@@ -38,3 +38,33 @@ export function complexityClassRank(complexityClass) {
   const index = COMPLEXITY_CLASS_ORDER.indexOf(complexityClass);
   return index === -1 ? COMPLEXITY_CLASS_ORDER.length : index;
 }
+
+/**
+ * Official display label for each `complexityClass` wire value -- Wikipedia casing
+ * for the classical ladder (P, NP, NP-Complete, NP-Hard; the raw `NPComplete`/
+ * `NPHard` values have no hyphen, the display label does), and the standard acronym
+ * spelling for the quantum classes (`MIPStar` -> "MIP*", since `*` isn't a valid C#/
+ * JS identifier character). Single source of truth for every surface that shows a
+ * complexity class to a user -- the problem-picker dropdown tooltip, the `/browse`
+ * results grid and its Complexity Class filter, and the reduction tooltip's
+ * "Complexity class" field.
+ */
+export const COMPLEXITY_CLASS_LABELS = {
+  Unclassified: "Unclassified",
+  P: "P",
+  NP: "NP",
+  NPComplete: "NP-Complete",
+  NPHard: "NP-Hard",
+  EQP: "EQP",
+  BQP: "BQP",
+  QCMA: "QCMA",
+  QMA: "QMA",
+  QIP: "QIP",
+  MIPStar: "MIP*",
+};
+
+/** `COMPLEXITY_CLASS_LABELS[value]`, falling back to the raw value itself for
+ * anything not in the map so a not-yet-labeled value is never silently dropped. */
+export function complexityClassLabel(complexityClass) {
+  return COMPLEXITY_CLASS_LABELS[complexityClass] ?? complexityClass;
+}

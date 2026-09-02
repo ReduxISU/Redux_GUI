@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { buildFixedOrderFacetOptions } from "../hooks/ProblemFilters/facetOptions";
+import { COMPLEXITY_CLASS_LABELS } from "../hooks/ProblemFilters/complexityClassOrder";
 
 // Fixed display order for the Complexity Class facet -- P/NP/NP-Complete/NP-Hard,
 // the classical hierarchy in containment order. The quantum classes (BQP/EQP/QMA/
@@ -20,13 +21,9 @@ import { buildFixedOrderFacetOptions } from "../hooks/ProblemFilters/facetOption
 // problems are incomparable with this hierarchy (see ComplexityClass's doc comment
 // on Interfaces/ComplexityClass.cs) and sort near the bottom of the problem
 // dropdown instead (ProblemRowReact.js's COMPLEXITY_CLASS_ORDER), filtered or not.
+// Labels come from the shared complexityClassOrder.js map (a superset -- the
+// quantum/Unclassified entries it also has just go unused here).
 const COMPLEXITY_CLASS_ORDER = ["P", "NP", "NPComplete", "NPHard"];
-const COMPLEXITY_CLASS_LABELS = {
-  P: "P",
-  NP: "NP",
-  NPComplete: "NP-Complete",
-  NPHard: "NP-Hard",
-};
 
 // Fixed display order for the Problem Type facet, matching Interfaces/ProblemType.cs
 // (Unclassified excluded -- every problem has a real declared type as of the Problem

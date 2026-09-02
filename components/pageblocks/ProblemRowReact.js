@@ -21,7 +21,7 @@ import ProblemFilterMenu from '../widgets/ProblemFilterMenu';
 import { useProblemInfo } from '../hooks/ProblemProvider'
 import { useProblemIndex } from '../hooks/ProblemFilters/useProblemIndex';
 import { useProblemFilters } from '../hooks/ProblemFilters/useProblemFilters';
-import { COMPLEXITY_CLASS_ORDER } from '../hooks/ProblemFilters/complexityClassOrder';
+import { COMPLEXITY_CLASS_ORDER, complexityClassLabel } from '../hooks/ProblemFilters/complexityClassOrder';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
@@ -175,7 +175,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           // It makes description clean
           info: problemInfo.problemDefinition ?? "",
           classification: [
-            { label: "Complexity class", value: problemInfo.complexityClass || "Unclassified" },
+            { label: "Complexity class", value: complexityClassLabel(problemInfo.complexityClass || "Unclassified") },
           ],
           // Source shown on its own line here
           source:
