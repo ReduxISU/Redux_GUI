@@ -31,11 +31,28 @@ var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstanc
 const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
-// Display order for the dropdown's complexity-class sections. QuantumOracle sorts
-// near the bottom -- those problems are incomparable with the classical hierarchy
-// (see Interfaces/ComplexityClass.cs). Unclassified last -- it's the "not yet
+// Display order for the dropdown's complexity-class sections. The quantum classes
+// (ReduxISU/Redux#396 replaced the single QuantumOracle bucket with BQP/EQP/QMA/
+// QCMA/QIP/MIPStar) sort near the bottom -- those problems are incomparable with
+// the classical hierarchy (see Interfaces/ComplexityClass.cs). Any value not
+// listed here falls to sort index -1 in SearchBarExtensible's groupOrder lookup,
+// i.e. the *top*, not the bottom -- so every declared value must be listed
+// explicitly, not just the ones currently in use, or a future problem taking on
+// an unlisted class would jump above P. Unclassified last -- it's the "not yet
 // tagged" bucket, not a real complexity class.
-const COMPLEXITY_CLASS_ORDER = ["P", "NP", "NPComplete", "NPHard", "QuantumOracle", "Unclassified"];
+const COMPLEXITY_CLASS_ORDER = [
+  "P",
+  "NP",
+  "NPComplete",
+  "NPHard",
+  "BQP",
+  "EQP",
+  "QMA",
+  "QCMA",
+  "QIP",
+  "MIPStar",
+  "Unclassified",
+];
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox

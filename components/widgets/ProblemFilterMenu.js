@@ -15,11 +15,11 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { buildFixedOrderFacetOptions } from "../hooks/ProblemFilters/facetOptions";
 
 // Fixed display order for the Complexity Class facet -- P/NP/NP-Complete/NP-Hard,
-// the classical hierarchy in containment order. QuantumOracle is deliberately not
-// offered here: those 5 problems are incomparable with this hierarchy (see the
-// QuantumOracle doc comment on Interfaces/ComplexityClass.cs) and sort to the
-// bottom of the problem dropdown instead (ProblemRowReact.js's
-// COMPLEXITY_CLASS_ORDER), filtered or not.
+// the classical hierarchy in containment order. The quantum classes (BQP/EQP/QMA/
+// QCMA/QIP/MIPStar, ReduxISU/Redux#396) are deliberately not offered here: those
+// problems are incomparable with this hierarchy (see ComplexityClass's doc comment
+// on Interfaces/ComplexityClass.cs) and sort near the bottom of the problem
+// dropdown instead (ProblemRowReact.js's COMPLEXITY_CLASS_ORDER), filtered or not.
 const COMPLEXITY_CLASS_ORDER = ["P", "NP", "NPComplete", "NPHard"];
 const COMPLEXITY_CLASS_LABELS = {
   P: "P",
