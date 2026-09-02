@@ -48,8 +48,8 @@ function intersects(setA, setB) {
  * matches a facet if its value/values intersect the selected set, or the
  * set is empty meaning "no filter on that facet").
  *
- * @param problemIndex `Map<problemName, {complexityClass, complexityClasses: Set,
- * problemType, solverTypes: Set, visualizationTypes: Set,
+ * @param problemIndex `Map<problemName, {displayName, complexityClass,
+ * complexityClasses: Set, problemType, solverTypes: Set, visualizationTypes: Set,
  * hasRenderableVisualization}>` from `useProblemIndex`.
  * @param reductionGraph Raw reduction graph object from `useProblemIndex`.
  * @returns filter state, setters, the filtered problem-name list (sorted

@@ -23,10 +23,14 @@ import { isRenderable } from "../../Visualization/svgs/renderability";
  * reachability filtering -- see `useProblemFilters`.
  *
  * @param url Base API URL, e.g. `/api/redux/`.
- * @returns `{ problemIndex: Map<problemName, {complexityClass: string,
- * complexityClasses: Set<string>, problemType: string, solverTypes: Set<string>,
- * visualizationTypes: Set<string>, hasRenderableVisualization: boolean}>,
- * reductionGraph: object, loading: boolean }`.
+ * @returns `{ problemIndex: Map<problemName, {displayName: string,
+ * complexityClass: string, complexityClasses: Set<string>, problemType: string,
+ * solverTypes: Set<string>, visualizationTypes: Set<string>,
+ * hasRenderableVisualization: boolean}>, reductionGraph: object, loading: boolean }`.
+ * The Map's key (`problemName`) is the raw class/reflection name (e.g.
+ * "DEUTSCHJOZSA"), matching how the backend keys solvers/visualizations/reductions
+ * by problem -- use `tags.displayName` (e.g. "Deutsch Jozsa") for anything shown to
+ * a user.
  */
 export function useProblemIndex(url) {
   const [problemIndex, setProblemIndex] = useState(new Map());
@@ -71,6 +75,13 @@ export function useProblemIndex(url) {
       const map = new Map();
       for (const problemName of problemNames) {
         const problemInfo = info[problemName];
+        // problemNames/map keys are the raw class/reflection name (e.g.
+        // "DEUTSCHJOZSA"), matching how solversByProblem/visualizationsByProblem are
+        // keyed -- displayName is the human-facing name the backend actually
+        // declares (e.g. "Deutsch Jozsa"), same fallback pattern
+        // useProblemNameMap (components/hooks/ProblemProvider/Problem.js) already
+        // uses for the main page's dropdown/tooltips.
+        const displayName = problemInfo?.problemName || problemInfo?.ProblemName || problemName;
         const complexityClass =
           problemInfo?.complexityClass || problemInfo?.ComplexityClass || "Unclassified";
         // NP-Complete is a subset of NP by definition (Interfaces/ComplexityClass.cs's
@@ -103,6 +114,7 @@ export function useProblemIndex(url) {
         }
 
         map.set(problemName, {
+          displayName,
           complexityClass,
           complexityClasses,
           problemType,
