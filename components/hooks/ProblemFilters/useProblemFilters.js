@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { complexityClassRank } from "./complexityClassOrder";
 
 /**
  * `oneHop`: problems directly reachable from `source` via a single reduction
@@ -51,7 +52,9 @@ function intersects(setA, setB) {
  * problemType, solverTypes: Set, visualizationTypes: Set,
  * hasRenderableVisualization}>` from `useProblemIndex`.
  * @param reductionGraph Raw reduction graph object from `useProblemIndex`.
- * @returns filter state, setters, the filtered problem-name list, and `clearFilters`.
+ * @returns filter state, setters, the filtered problem-name list (sorted
+ * classical-then-quantum, low-to-high by complexityClassRank, alphabetical by name
+ * within a class -- see complexityClassOrder.js), and `clearFilters`.
  */
 export function useProblemFilters(problemIndex, reductionGraph) {
   const [selectedComplexityClasses, setSelectedComplexityClasses] = useState(new Set());
@@ -94,7 +97,14 @@ export function useProblemFilters(problemIndex, reductionGraph) {
       }
       result.push(problemName);
     }
-    return result.sort((a, b) => a.localeCompare(b));
+    // Classical-then-quantum, low-to-high by complexityClassRank (see
+    // complexityClassOrder.js); alphabetical by name as the tiebreak within a class.
+    return result.sort((a, b) => {
+      const rankDiff =
+        complexityClassRank(problemIndex.get(a).complexityClass) -
+        complexityClassRank(problemIndex.get(b).complexityClass);
+      return rankDiff !== 0 ? rankDiff : a.localeCompare(b);
+    });
   }, [
     problemIndex,
     selectedComplexityClasses,
