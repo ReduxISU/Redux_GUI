@@ -135,7 +135,18 @@ function sortOptions(a, b, { groupBy, groupOrder, optionsHighlight }) {
 
 function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
   return (
-    <Paper>
+    <Paper
+      sx={{
+        // A page theme can set background.paper to an intentionally near-transparent
+        // "glass" value for its own backdrop-blurred cards (e.g. /browse's
+        // rgba(255,255,255,0.04)) -- Paper inherits that token by default, which
+        // makes this floating, unblurred dropdown unreadable against whatever
+        // scrolls underneath it. Force a solid background here regardless of what
+        // the ambient theme set for card surfaces.
+        bgcolor: (theme) => (theme.palette.mode === "dark" ? "#15151d" : "#ffffff"),
+        backgroundImage: "none",
+      }}
+    >
       {children}
       {input === "" || insensitiveContains([...optionsMap.values()], input) ? null : (
         <>
