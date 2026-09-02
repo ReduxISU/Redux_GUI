@@ -50,7 +50,11 @@ function intersects(setA, setB) {
  *
  * @param problemIndex `Map<problemName, {displayName, complexityClass,
  * complexityClasses: Set, problemType, solverTypes: Set, visualizationTypes: Set,
- * hasRenderableVisualization}>` from `useProblemIndex`.
+ * visualizationCategories: Set, hasRenderableVisualization}>` from
+ * `useProblemIndex`. selectedVisualizationTypes matches against
+ * visualizationCategories (the deduped conceptual category, e.g. "Graph"), not the
+ * raw per-renderer visualizationTypes -- so selecting "Graph" matches a problem
+ * whose visualizations are GraphD3, GraphLaTeX, or both.
  * @param reductionGraph Raw reduction graph object from `useProblemIndex`.
  * @returns filter state, setters, the filtered problem-name list (sorted
  * classical-then-quantum, low-to-high by complexityClassRank, alphabetical by name
@@ -88,7 +92,7 @@ export function useProblemFilters(problemIndex, reductionGraph) {
       }
       if (
         selectedVisualizationTypes.size > 0 &&
-        !intersects(tags.visualizationTypes, selectedVisualizationTypes)
+        !intersects(tags.visualizationCategories, selectedVisualizationTypes)
       ) {
         continue;
       }

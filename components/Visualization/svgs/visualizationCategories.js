@@ -12,12 +12,12 @@
 const VISUALIZATION_TYPE_CATEGORIES = {
   GraphD3: "Graph",
   GraphLaTeX: "Graph",
-  BooleanSatisfiability: "Boolean",
+  BooleanSatisfiability: "Boolean Satisfiability",
   SetD3: "Set",
-  QuantumCircuitD3: "Circuit",
-  QuantumCircuitQjs: "Circuit",
+  QuantumCircuitD3: "Quantum Circuit",
+  QuantumCircuitQjs: "Quantum Circuit",
   DynamicTable: "Table",
-  PumpSchedule: "Schedule",
+  PumpSchedule: "Pump Schedule",
 };
 
 /**

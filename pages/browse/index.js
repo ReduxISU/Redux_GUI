@@ -90,8 +90,12 @@ export default function BrowsePage() {
     () => buildFacetOptions(problemIndex, (tags) => tags.solverTypes, undefined, solverTypeLabel),
     [problemIndex],
   );
+  // visualizationCategories, not the raw visualizationTypes -- several raw renderer
+  // values collapse to the same category (GraphD3 + GraphLaTeX -> "Graph"), and
+  // building from the raw set would produce two checkboxes both reading "Graph"
+  // instead of one with the combined count. See visualizationCategories.js.
   const visualizationTypeOptions = useMemo(
-    () => buildFacetOptions(problemIndex, (tags) => tags.visualizationTypes),
+    () => buildFacetOptions(problemIndex, (tags) => tags.visualizationCategories),
     [problemIndex],
   );
 
