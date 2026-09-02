@@ -15,6 +15,8 @@ import { TextField } from '@mui/material';
 import { Button, Stack, Box } from "@mui/material";
 import { Folder as FolderIcon } from '@mui/icons-material';
 import { Download as DownloadIcon } from '@mui/icons-material';
+import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import ProblemFilterMenu from '../widgets/ProblemFilterMenu';
@@ -42,7 +44,7 @@ const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
  */
-export default function ProblemRowReact({ url, problemName, setProblemName, problemNameMap, setProblemInstance }) {
+export default function ProblemRowReact({ url, problemName, setProblemName, problemNameMap, setProblemInstance, dragHandleProps }) {
   const problemInfo = useProblemInfo(url, problemName);
   const { problemIndex, reductionGraph } = useProblemIndex(url);
   const {
@@ -170,34 +172,35 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   const tip =
     problemName
       ? {
-          header: problemInfo.problemName ?? "",
-          formalDef: problemInfo.formalDefinition ?? "",
-          // It makes description clean
-          info: problemInfo.problemDefinition ?? "",
-          classification: [
-            { label: "Complexity class", value: complexityClassLabel(problemInfo.complexityClass || "Unclassified") },
-          ],
-          // Source shown on its own line here
-          source:
-            problemInfo.source ||
-            (Array.isArray(problemInfo.citations) ? problemInfo.citations.join("; ") : "") ||
-            "",
-          // Contributors
-          credit:
-            Array.isArray(problemInfo.contributors) && problemInfo.contributors.length
-              ? problemInfo.contributors.join(", ")
-              : "",
-          //  Popover builds Wikipedia URL
-          componentLink: problemInfo.problemLink || "",
-          sourceLink: problemInfo.sourceLink || "",
-          isMathDef: true, // only this file adds the flag
-        }
+        header: problemInfo.problemName ?? "",
+        formalDef: problemInfo.formalDefinition ?? "",
+        // It makes description clean
+        info: problemInfo.problemDefinition ?? "",
+        classification: [
+          { label: "Complexity class", value: complexityClassLabel(problemInfo.complexityClass || "Unclassified") },
+        ],
+        // Source shown on its own line here
+        source:
+          problemInfo.source ||
+          (Array.isArray(problemInfo.citations) ? problemInfo.citations.join("; ") : "") ||
+          "",
+        // Contributors
+        credit:
+          Array.isArray(problemInfo.contributors) && problemInfo.contributors.length
+            ? problemInfo.contributors.join(", ")
+            : "",
+        //  Popover builds Wikipedia URL
+        componentLink: problemInfo.problemLink || "",
+        sourceLink: problemInfo.sourceLink || "",
+        isMathDef: true, // only this file adds the flag
+      }
       : TOOLTIP;
 
   return (
     <ProblemSection defaultCollapsed={false}>
       <ProblemSection.Header title={CARD.cardHeaderText}>
         <SearchBarExtensible
+          data-tour-id="problem-picker"
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={problemName}
           onSelect={setProblemName}
@@ -220,7 +223,24 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           setSelectedProblemTypes={setSelectedProblemTypes}
           clearFilters={clearFilters}
         />{" "}
-         <PopoverTooltipClick toolTip={tip} />
+        <PopoverTooltipClick toolTip={tip} />
+        {dragHandleProps && (
+          <IconButton
+            {...dragHandleProps.attributes}
+            {...dragHandleProps.listeners}
+            size="small"
+            title="Drag to reorder"
+            sx={{
+              cursor: 'grab',
+              color: '#424242',
+              backgroundColor: '#f5f5f5',
+              '&:hover': { backgroundColor: '#e0e0e0' },
+              mr: 1,
+            }}
+          >
+            <DragIndicatorIcon />
+          </IconButton>
+        )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>
@@ -230,6 +250,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           </Box>
           {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
           <TextField
+            data-tour-id="instance-input"
             error={!instanceParsed.test}
             id="outlined-error"
             label={!instanceParsed.test ? "Incorrect Format" : "Problem Instance"}

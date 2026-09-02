@@ -23,6 +23,7 @@ function ContextAwareToggle({ children, eventKey, callback, colors }) {
   const isCurrentEventKey = activeEventKey === eventKey;
   return (
     <Button
+      data-tour-toggle=""
       sx={{ height: 54, width: 64 }}
       color="white"
       className="float-end"
