@@ -2,8 +2,15 @@
 // distinct value, derived from the actual data rather than a hardcoded enum
 // list, so newly-declared tag values show up automatically. Options are
 // alphabetical by key unless `compareKeys` is given (e.g. complexityClassRank-based
-// ordering for the Complexity Class facet).
-export function buildFacetOptions(problemIndex, pickValues, compareKeys = (a, b) => a.localeCompare(b)) {
+// ordering for the Complexity Class facet); the label is the raw key unless
+// `labelFor` is given (e.g. complexityClassLabel/solverTypeLabel for a wire value
+// that isn't meant for direct display, like "NPComplete" or "BruteForce").
+export function buildFacetOptions(
+  problemIndex,
+  pickValues,
+  compareKeys = (a, b) => a.localeCompare(b),
+  labelFor = (key) => key,
+) {
   const counts = new Map();
   for (const tags of problemIndex.values()) {
     const values = pickValues(tags);
@@ -13,7 +20,7 @@ export function buildFacetOptions(problemIndex, pickValues, compareKeys = (a, b)
   }
   return [...counts.entries()]
     .sort((a, b) => compareKeys(a[0], b[0]))
-    .map(([key, count]) => ({ key, label: key, count }));
+    .map(([key, count]) => ({ key, label: labelFor(key), count }));
 }
 
 /**
