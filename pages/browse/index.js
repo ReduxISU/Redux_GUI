@@ -6,6 +6,7 @@ import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
 import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
 import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
 import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
+import { complexityClassRank } from "../../components/hooks/ProblemFilters/complexityClassOrder";
 import {
   createTheme,
   ThemeProvider,
@@ -68,8 +69,16 @@ export default function BrowsePage() {
     clearFilters,
   } = useProblemFilters(problemIndex, reductionGraph);
 
+  // Classical-then-quantum, low-to-high (complexityClassOrder.js) rather than
+  // alphabetical -- same ranking the results grid and the problem-picker dropdown
+  // already sort by.
   const complexityClassOptions = useMemo(
-    () => buildFacetOptions(problemIndex, (tags) => [tags.complexityClass]),
+    () =>
+      buildFacetOptions(
+        problemIndex,
+        (tags) => [tags.complexityClass],
+        (a, b) => complexityClassRank(a) - complexityClassRank(b),
+      ),
     [problemIndex],
   );
   const solverTypeOptions = useMemo(

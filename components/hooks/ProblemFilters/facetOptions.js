@@ -1,7 +1,9 @@
 // Builds `[{key, label, count}]` for a facet: how many problems have each
 // distinct value, derived from the actual data rather than a hardcoded enum
-// list, so newly-declared tag values show up automatically.
-export function buildFacetOptions(problemIndex, pickValues) {
+// list, so newly-declared tag values show up automatically. Options are
+// alphabetical by key unless `compareKeys` is given (e.g. complexityClassRank-based
+// ordering for the Complexity Class facet).
+export function buildFacetOptions(problemIndex, pickValues, compareKeys = (a, b) => a.localeCompare(b)) {
   const counts = new Map();
   for (const tags of problemIndex.values()) {
     const values = pickValues(tags);
@@ -10,7 +12,7 @@ export function buildFacetOptions(problemIndex, pickValues) {
     }
   }
   return [...counts.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
+    .sort((a, b) => compareKeys(a[0], b[0]))
     .map(([key, count]) => ({ key, label: key, count }));
 }
 
