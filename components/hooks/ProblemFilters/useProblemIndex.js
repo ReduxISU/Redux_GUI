@@ -8,6 +8,7 @@ import {
   requestReductionGraph,
 } from "../../redux";
 import { isRenderable } from "../../Visualization/svgs/renderability";
+import { visualizationTypeCategory } from "../../Visualization/svgs/visualizationCategories";
 
 /**
  * Read-only, derived index over every problem's declared metadata tags --
@@ -23,10 +24,19 @@ import { isRenderable } from "../../Visualization/svgs/renderability";
  * reachability filtering -- see `useProblemFilters`.
  *
  * @param url Base API URL, e.g. `/api/redux/`.
- * @returns `{ problemIndex: Map<problemName, {complexityClass: string,
- * complexityClasses: Set<string>, problemType: string, solverTypes: Set<string>,
- * visualizationTypes: Set<string>, hasRenderableVisualization: boolean}>,
- * reductionGraph: object, loading: boolean }`.
+ * @returns `{ problemIndex: Map<problemName, {displayName: string,
+ * complexityClass: string, complexityClasses: Set<string>, problemType: string,
+ * solverTypes: Set<string>, visualizationTypes: Set<string>,
+ * visualizationCategories: Set<string>, hasRenderableVisualization: boolean}>,
+ * reductionGraph: object, loading: boolean }`. visualizationTypes is the raw wire
+ * vocabulary (GraphD3/GraphLaTeX/...); visualizationCategories is the deduped
+ * conceptual-category projection of it (both collapse to "Graph") -- use the latter
+ * for anything user-facing (filters, display), the former only where the specific
+ * renderer technology actually matters (e.g. isRenderable).
+ * The Map's key (`problemName`) is the raw class/reflection name (e.g.
+ * "DEUTSCHJOZSA"), matching how the backend keys solvers/visualizations/reductions
+ * by problem -- use `tags.displayName` (e.g. "Deutsch Jozsa") for anything shown to
+ * a user.
  */
 export function useProblemIndex(url) {
   const [problemIndex, setProblemIndex] = useState(new Map());
@@ -71,6 +81,13 @@ export function useProblemIndex(url) {
       const map = new Map();
       for (const problemName of problemNames) {
         const problemInfo = info[problemName];
+        // problemNames/map keys are the raw class/reflection name (e.g.
+        // "DEUTSCHJOZSA"), matching how solversByProblem/visualizationsByProblem are
+        // keyed -- displayName is the human-facing name the backend actually
+        // declares (e.g. "Deutsch Jozsa"), same fallback pattern
+        // useProblemNameMap (components/hooks/ProblemProvider/Problem.js) already
+        // uses for the main page's dropdown/tooltips.
+        const displayName = problemInfo?.problemName || problemInfo?.ProblemName || problemName;
         const complexityClass =
           problemInfo?.complexityClass || problemInfo?.ComplexityClass || "Unclassified";
         // NP-Complete is a subset of NP by definition (Interfaces/ComplexityClass.cs's
@@ -91,11 +108,18 @@ export function useProblemIndex(url) {
         }
 
         const visualizationTypeSet = new Set();
+        // The conceptual category (e.g. "Graph") several raw renderer-technology
+        // values collapse to (GraphD3/GraphLaTeX both -> "Graph") -- a separate Set
+        // from visualizationTypeSet so a problem with both counts once toward
+        // "Graph", not twice, when a facet is built from this instead of the raw
+        // set (see visualizationCategories.js).
+        const visualizationCategorySet = new Set();
         let hasRenderableVisualization = false;
         for (const visClassName of visualizationsByProblem[problemName] ?? []) {
           const type = resolveVisualizationType(visClassName);
           if (type) {
             visualizationTypeSet.add(type);
+            visualizationCategorySet.add(visualizationTypeCategory(type));
           }
           if (isRenderable(type)) {
             hasRenderableVisualization = true;
@@ -103,11 +127,13 @@ export function useProblemIndex(url) {
         }
 
         map.set(problemName, {
+          displayName,
           complexityClass,
           complexityClasses,
           problemType,
           solverTypes,
           visualizationTypes: visualizationTypeSet,
+          visualizationCategories: visualizationCategorySet,
           hasRenderableVisualization,
         });
       }

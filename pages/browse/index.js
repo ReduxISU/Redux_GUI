@@ -6,6 +6,8 @@ import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
 import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
 import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
 import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
+import { complexityClassRank, complexityClassLabel } from "../../components/hooks/ProblemFilters/complexityClassOrder";
+import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
 import {
   createTheme,
   ThemeProvider,
@@ -68,23 +70,39 @@ export default function BrowsePage() {
     clearFilters,
   } = useProblemFilters(problemIndex, reductionGraph);
 
+  // Classical-then-quantum, low-to-high (complexityClassOrder.js) rather than
+  // alphabetical -- same ranking the results grid and the problem-picker dropdown
+  // already sort by. Labels via complexityClassLabel so the checkboxes read
+  // "NP-Complete"/"NP-Hard" rather than the raw "NPComplete"/"NPHard" wire values.
   const complexityClassOptions = useMemo(
-    () => buildFacetOptions(problemIndex, (tags) => [tags.complexityClass]),
+    () =>
+      buildFacetOptions(
+        problemIndex,
+        (tags) => [tags.complexityClass],
+        (a, b) => complexityClassRank(a) - complexityClassRank(b),
+        complexityClassLabel,
+      ),
     [problemIndex],
   );
+  // Labels via solverTypeLabel so the checkboxes read "Brute Force"/"Breadth First
+  // Search" rather than the raw "BruteForce"/"BreadthFirstSearch" wire values.
   const solverTypeOptions = useMemo(
-    () => buildFacetOptions(problemIndex, (tags) => tags.solverTypes),
+    () => buildFacetOptions(problemIndex, (tags) => tags.solverTypes, undefined, solverTypeLabel),
     [problemIndex],
   );
+  // visualizationCategories, not the raw visualizationTypes -- several raw renderer
+  // values collapse to the same category (GraphD3 + GraphLaTeX -> "Graph"), and
+  // building from the raw set would produce two checkboxes both reading "Graph"
+  // instead of one with the combined count. See visualizationCategories.js.
   const visualizationTypeOptions = useMemo(
-    () => buildFacetOptions(problemIndex, (tags) => tags.visualizationTypes),
+    () => buildFacetOptions(problemIndex, (tags) => tags.visualizationCategories),
     [problemIndex],
   );
 
   const problemNames = useMemo(() => [...problemIndex.keys()].sort(), [problemIndex]);
   const problemNameMap = useMemo(
-    () => new Map(problemNames.map((name) => [name, name])),
-    [problemNames],
+    () => new Map(problemNames.map((name) => [name, problemIndex.get(name)?.displayName ?? name])),
+    [problemNames, problemIndex],
   );
 
   return (
@@ -222,8 +240,9 @@ export default function BrowsePage() {
                         <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
                           <ProblemCard
                             name={name}
-                            complexityClass={tags.complexityClass}
-                            solverTypes={[...tags.solverTypes].sort()}
+                            displayName={tags.displayName}
+                            complexityClass={complexityClassLabel(tags.complexityClass)}
+                            solverTypes={[...tags.solverTypes].map(solverTypeLabel).sort()}
                             hasRenderableVisualization={tags.hasRenderableVisualization}
                           />
                         </Grid>
