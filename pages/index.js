@@ -139,10 +139,10 @@ function MainPageContent() {
 
   const [rowOrder, setRowOrder] = useState([
     "problem",
-    "reduce",
     "visualize",
     "solve",
     "verify",
+    "reduce",
   ]);
 
   // PointerSensor covers mouse; TouchSensor adds mobile/tablet support 
