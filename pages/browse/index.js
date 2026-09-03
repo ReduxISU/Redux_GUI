@@ -7,7 +7,6 @@ import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProble
 import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
 import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
 import {
-  createTheme,
   ThemeProvider,
   CssBaseline,
   Container,
@@ -18,36 +17,12 @@ import {
   Chip,
   CircularProgress,
 } from "@mui/material";
+import { theme, pageBackground, sectionCardSx } from "../../components/theme";
 
-// Same light orange/grey/white palette as pages/aboutus/index.js and the
-// other pages, for visual consistency across the app.
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: "#3F3F46" },
-    secondary: { main: "#F47C20" },
-    background: {
-      default: "#F9FAFB",
-      paper: "#FFFFFF",
-    },
-    text: {
-      primary: "#111827",
-      secondary: "#4B5563",
-    },
-  },
-  typography: {
-    fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  },
-});
-
-const theSectionCard = {
-  background: "#FFFFFF",
-  borderRadius: "16px",
-  border: "1px solid #E5E7EB",
-  padding: { xs: 2, md: 2.5 },
-  boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
-};
+// Browse's sidebar/empty-state card is denser than a full content page's
+// section card, so it overrides padding -- everything else (color, hover)
+// stays shared.
+const theSectionCard = { ...sectionCardSx, padding: { xs: 2, md: 2.5 } };
 
 const reduxBaseUrl = "/api/redux/";
 
@@ -93,8 +68,7 @@ export default function BrowsePage() {
       <Box
         sx={{
           minHeight: "100vh",
-          background:
-            "radial-gradient(circle at top, rgba(139,92,246,0.08), transparent 38%), #F9FAFB",
+          background: pageBackground,
         }}
       >
         <ResponsiveAppBar />

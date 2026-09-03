@@ -20,6 +20,7 @@ import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
 import {
   Box,
   createTheme,
+  CssBaseline,
   Grid,
   ThemeProvider,
   Typograph,
@@ -31,6 +32,7 @@ import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
 import TourLauncher from "../components/tour/TourLauncher";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
+import { FONT_FAMILY, lightPalette, pageBackground } from "../components/theme";
 
 import {
   DndContext,
@@ -106,30 +108,17 @@ function SortableRow({ id, children }) {
 function MainPageContent() {
   const imgStyle = { textAlign: "center" };
 
+  // Shared palette (see components/theme.js), extended with two page-specific
+  // colors: primary.lGray (used by No_Viz_SVG.js's bgcolor="primary.lGray")
+  // and white (used by several pageblocks' color="white" buttons) -- both only
+  // ever rendered on this page, so they don't belong in the shared module.
   const theme = createTheme({
     palette: {
-      mode: "light",
-      primary: {
-        main: "#424242",
-        lGray: "#f3f3f3",
-        contrastText: "#fff", //button text white instead of black
-      },
-      secondary: {
-        main: "#f47920",
-      },
-      white: {
-        main: "#ffffff",
-      },
+      ...lightPalette,
+      primary: { ...lightPalette.primary, lGray: "#f3f3f3" },
+      white: { main: "#ffffff" },
     },
-    // overrides: {
-    //   MuiButton: {
-    //     raisedPrimary: {
-    //       color: 'white',
-    //       contrastText: "#fff" //button text white instead of black
-
-    //     },
-    //   },
-    // }
+    typography: { fontFamily: FONT_FAMILY },
   });
 
   //useHandleParameters();
@@ -188,8 +177,9 @@ function MainPageContent() {
   }
 
   return (
-    <>
-      <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ minHeight: "100vh", background: pageBackground }}>
         <ResponsiveAppBar></ResponsiveAppBar>
 
         <div className="container-fluid">
@@ -227,19 +217,20 @@ function MainPageContent() {
 
         {/* <footer className='fixed-bottom centered'> */}
         {/* </footer> */}
-      </ThemeProvider>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "10vh",
-          // marginTop: '25%',
-        }}
-      >
-        <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "10vh",
+            // marginTop: '25%',
+          }}
+        >
+          <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
+        </Box>
       </Box>
-    </>
+    </ThemeProvider>
   );
 }
 

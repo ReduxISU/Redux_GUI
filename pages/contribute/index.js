@@ -1,15 +1,8 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 import isulogo from "../../components/images/ISULogo.png";
 
-import {
-  createTheme,
-  ThemeProvider,
-  Container,
-  Box,
-  Typography,
-  CssBaseline,
-  Link,
-} from "@mui/material";
+import { ThemeProvider, Container, Box, Typography, CssBaseline, Link } from "@mui/material";
+import { theme, pageBackground, sectionCardSx, innerCardSx } from "../../components/theme";
 
 const contributionSteps = [
   "Creating a fork of the appropriate repository, front end or back end",
@@ -29,51 +22,8 @@ const helpfulLinks = [
   },
 ];
 
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: "#3F3F46" },
-    secondary: { main: "#F47C20" },
-    background: {
-      default: "#F9FAFB",
-      paper: "#FFFFFF",
-    },
-    text: {
-      primary: "#111827",
-      secondary: "#4B5563",
-    },
-  },
-  typography: {
-    fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  },
-});
-
-const sectionCardStyle = {
-  background: "#FFFFFF",
-  borderRadius: "16px",
-  border: "1px solid #E5E7EB",
-  padding: { xs: 3, md: 4 },
-  boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
-  transition: "all 0.25s ease",
-  "&:hover": {
-    borderColor: "#F47C20",
-    boxShadow: "0 12px 30px rgba(0,0,0,0.07)",
-  },
-};
-
-const innerCard = {
-  background: "#F9FAFB",
-  border: "1px solid #E5E7EB",
-  borderRadius: "10px",
-  px: 1.2,
-  py: 1,
-  transition: "all 0.2s ease",
-  "&:hover": {
-    borderColor: "#F47C20",
-    background: "#FFFFFF",
-  },
-};
+const sectionCardStyle = sectionCardSx;
+const innerCard = innerCardSx;
 
 function SectionTitle({ children }) {
   return (
@@ -99,8 +49,7 @@ export default function ContributePage() {
       <Box
         sx={{
           minHeight: "100vh",
-          background:
-            "radial-gradient(circle at top, rgba(139,92,246,0.08), transparent 38%), #F9FAFB",
+          background: pageBackground,
         }}
       >
         <ResponsiveAppBar />
