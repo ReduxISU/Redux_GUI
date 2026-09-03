@@ -534,3 +534,29 @@ export function requestReductionGraph(url) {
   return cachedRequest(`${url}|reductionGraph`, () =>
     fetchJson(`${url}Navigation/Reductions`, () => "REDUCTION GRAPH REQUEST FAILED"));
 }
+
+/**
+ * @returns an array of `{name, githubUsername}` for every contributor listed
+ * in the backend's `contributorInfo.json`.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestContributorDirectory(url) {
+  return cachedRequest(`${url}|contributorDirectory`, () =>
+    fetchJson(
+      `${url}Navigation/ContributorProfile/directory`,
+      () => "CONTRIBUTOR DIRECTORY REQUEST FAILED"
+    ));
+}
+
+/**
+ * @returns one contributor's full profile: personal info plus every problem,
+ * solver, and reduction they've contributed to.
+ * @returns `undefined` on failure and logs the error.
+ */
+export function requestContributorProfile(url, contributorName) {
+  return cachedRequest(`${url}|contributorProfile|${contributorName}`, () =>
+    fetchJson(
+      `${url}Navigation/ContributorProfile/${encodeURIComponent(contributorName)}`,
+      () => `CONTRIBUTOR PROFILE REQUEST FAILED for ${contributorName}`
+    ));
+}

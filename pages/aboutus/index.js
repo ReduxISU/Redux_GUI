@@ -1,4 +1,6 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import { useEffect, useState } from "react";
+import { requestContributorDirectory, requestContributorProfile } from "../../components/redux";
 
 import {
   createTheme,
@@ -7,49 +9,21 @@ import {
   Box,
   Typography,
   Link,
-  Grid,
   Avatar,
   Tooltip,
   CssBaseline,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 import isulogo from "../../components/images/ISULogo.png";
 
-// The only contributors whose GitHub profiles are known, along with avatar and link
-const contributorProfiles = {
-  "Pratham Khanal": {
-    image: "https://github.com/pkprathamkhanal.png",
-    github: "https://github.com/pkprathamkhanal",
-  },
-  "Sansar Kharal": {
-    image: "https://github.com/kharsans.png",
-    github: "https://github.com/kharsans",
-  },
-  "Himanshu Jha": {
-    image: "https://github.com/himanshujha05.png",
-    github: "https://github.com/himanshujha05",
-  },
-  "Andrija Sevaljevic": {
-    image: "https://github.com/Andrija-Sevaljevic.png",
-    github: "https://github.com/Andrija-Sevaljevic",
-  },
-  "Jason Wright": {
-    image: "https://github.com/wrigjl.png",
-    github: "https://github.com/wrigjl",
-  },
-  "Daniel Igbokwe": {
-    image: "https://github.com/igbodani.png",
-    github: "https://github.com/igbodani",
-  },
-  "Sabal Subedi": {
-    image: "https://github.com/sabal_subedi.png",
-    github: "https://github.com/sabal_subedi",
-  },
-  "Alex Svancara": {
-    image: "https://github.com/svanalex.png",
-    github: "https://github.com/svanalex",
-  },
-};
+const reduxBaseUrl = "/api/redux/";
 
 const publicationsAndAwards = [
   {
@@ -92,36 +66,6 @@ const publicationsAndAwards = [
       "Best Graduate Oral Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
     url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
   },
-];
-
-const contributors = [
-  "Kaden Marchetti",
-  "Caleb Eardley",
-  "Daniel Igbokwe",
-  "Alex Diviney",
-  "Janita Aamir",
-  "Andrija Sevaljevic",
-  "Garret Stouffer",
-  "Alex Svancara",
-  "Eric Hill",
-  "Porter Glines",
-  "Show Pratoomratana",
-  "Russell Phillips",
-  "Michael Crapse",
-  "Ian Gonzalez",
-  "Sabal Subedi",
-  "Himanshu Jha",
-  "Max Grünwoldt",
-  "Paul Gilbreath",
-  "Sansar Kharal",
-  "Pratham Khanal",
-  "George Lake",
-  "Grant Gardner",
-  "Jason Wright",
-  "Andreas Kramer",
-  "Courtney Bodily",
-  "Rakesh Itani",
-  "David Lindeman",
 ];
 
 const theme = createTheme({
@@ -190,15 +134,19 @@ function getLastName(name) {
   return name.split(" ").slice(-1)[0].toLowerCase();
 }
 
-function ItemContributor({ name }) {
-  const profile = contributorProfiles[name];
+function ItemContributor({ name, profile, onSelect }) {
   if (!profile) {
     return (
       <Typography
+        onClick={() => onSelect(name)}
         sx={{
           color: "#374151",
           fontSize: "0.9rem",
           lineHeight: 1.35,
+          cursor: "pointer",
+          "&:hover": {
+            color: "#F47C20",
+          },
         }}
       >
         {name}
@@ -209,6 +157,27 @@ function ItemContributor({ name }) {
     <Tooltip
       arrow
       placement="right"
+      slotProps={{
+        popper: {
+          modifiers: [
+            {
+              name: "offset",
+              options: {
+                offset: [0, 6],
+              },
+            },
+          ],
+        },
+        tooltip: {
+          sx: {
+            bgcolor: "#FFFFFF",
+            border: "1px solid #E5E7EB",
+            borderRadius: "12px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+            padding: "10px 12px",
+          },
+        },
+      }}
       title={
         <Box sx={{ p: 1, minWidth: 190 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
@@ -258,30 +227,10 @@ function ItemContributor({ name }) {
           </Link>
         </Box>
       }
-      slotProps={{
-        popper: {
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, 6],
-              },
-            },
-          ],
-        },
-        tooltip: {
-          sx: {
-            bgcolor: "#FFFFFF",
-            border: "1px solid #E5E7EB",
-            borderRadius: "12px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-            padding: "10px 12px",
-          },
-        },
-      }}
     >
       <Box
         component="span"
+        onClick={() => onSelect(name)}
         sx={{
           color: "#374151",
           fontSize: "0.9rem",
@@ -299,7 +248,94 @@ function ItemContributor({ name }) {
   );
 }
 
+// Only renders when there's an actual value -- avoids "Not specified" clutter for
+// fields (bio, education, ...) a contributor hasn't filled in.
+function ProfileField({ label, value }) {
+  if (!value) return null;
+  return (
+    <Typography sx={{ mb: 0.5 }}>
+      <Box component="span" sx={{ fontWeight: 600 }}>{label}:</Box> {value}
+    </Typography>
+  );
+}
+
+function ContributionList({ label, items }) {
+  if (!items || items.length === 0) return null;
+  return (
+    <Box sx={{ mb: 1.5 }}>
+      <Typography sx={{ color: "#111827", fontSize: "0.87rem" }}>
+        <Box component="span" sx={{ fontWeight: 600 }}>{label}:</Box> {items.length}
+      </Typography>
+      <Box component="ul" sx={{ m: 0, pl: 3, color: "#6b7280", fontSize: "0.82rem" }}>
+        {items.map((item) => (
+          <Box component="li" key={item}>{item}</Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
 export default function AboutUsPage() {
+  const [contributors, setContributors] = useState([]);
+  const [contributorProfiles, setContributorProfiles] = useState({});
+  const [contributorsLoading, setContributorsLoading] = useState(true);
+
+  const [selectedContributor, setSelectedContributor] = useState(null);
+  const [profileData, setProfileData] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    requestContributorDirectory(reduxBaseUrl).then((entries) => {
+      if (cancelled) return;
+      setContributorsLoading(false);
+      if (!entries) return;
+
+      const names = [];
+      const profiles = {};
+      for (const entry of entries) {
+        const name = entry.name ?? entry.Name;
+        const githubUsername = entry.githubUsername ?? entry.GithubUsername;
+        if (!name) continue;
+
+        names.push(name);
+        if (githubUsername) {
+          profiles[name] = {
+            image: `https://github.com/${githubUsername}.png`,
+            github: `https://github.com/${githubUsername}`,
+          };
+        }
+      }
+      setContributors(names);
+      setContributorProfiles(profiles);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleContributorClick = (name) => {
+    setSelectedContributor(name);
+    setProfileData(null);
+    setProfileLoading(true);
+    setModalOpen(true);
+
+    requestContributorProfile(reduxBaseUrl, name).then((data) => {
+      setProfileData(data ?? null);
+      setProfileLoading(false);
+    });
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedContributor(null);
+    setProfileData(null);
+    setProfileLoading(false);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -430,18 +466,33 @@ export default function AboutUsPage() {
                 Project contributors
               </Typography>
 
-              <Grid container spacing={1.5}>
-                {[...contributors]
-                  .sort((a, b) => getLastName(a).localeCompare(getLastName(b)))
-                  .map((name) => (
-                    <Grid item xs={12} sm={6} md={4} key={name}>
+              {contributorsLoading ? (
+                <Typography sx={{ color: "#6b7280", fontSize: "0.85rem" }}>
+                  Loading contributors...
+                </Typography>
+              ) : contributors.length === 0 ? (
+                <Typography sx={{ color: "#6b7280", fontSize: "0.85rem" }}>
+                  Contributor list unavailable right now.
+                </Typography>
+              ) : (
+                // CSS multi-column layout (not a Grid) so the alphabetical order reads
+                // top-to-bottom within a column, then wraps to the next column -- a
+                // Grid/flex wrap would instead fill left-to-right row by row, breaking
+                // the alphabetical reading order across the row.
+                <Box sx={{ columns: { xs: 1, sm: 2, md: 3 }, columnGap: "12px" }}>
+                  {[...contributors]
+                    .sort((a, b) => getLastName(a).localeCompare(getLastName(b)))
+                    .map((name) => (
                       <Box
+                        key={name}
                         sx={{
+                          breakInside: "avoid",
                           border: "1px solid #E5E7EB",
                           background: "#F9FAFB",
                           borderRadius: "10px",
                           px: 1.4,
                           py: 0.8,
+                          mb: 1.5,
                           minHeight: "34px",
                           display: "flex",
                           alignItems: "center",
@@ -452,11 +503,15 @@ export default function AboutUsPage() {
                           },
                         }}
                       >
-                        <ItemContributor name={name} />
+                        <ItemContributor
+                          name={name}
+                          profile={contributorProfiles[name]}
+                          onSelect={handleContributorClick}
+                        />
                       </Box>
-                    </Grid>
-                  ))}
-              </Grid>
+                    ))}
+                </Box>
+              )}
             </Box>
 
             <Box sx={{ ...theSectionCard, mb: 1.5 }}>
@@ -647,6 +702,104 @@ export default function AboutUsPage() {
             />
           </Link>
         </Box>
+
+        {/* Contributor Profile Modal */}
+        <Dialog
+        open={modalOpen}
+        onClose={handleCloseModal}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: "#FFFFFF",
+              border: "1px solid #E5E7EB",
+              borderRadius: "16px",
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 2, color: "#111827" }}>
+          {contributorProfiles[selectedContributor] && (
+            <Avatar
+              src={contributorProfiles[selectedContributor].image}
+              alt={selectedContributor}
+              sx={{ width: 48, height: 48, border: "2px solid #F47C20" }}
+            />
+          )}
+          {selectedContributor}
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{ position: "absolute", right: 8, top: 8, color: "#6b7280" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ borderColor: "#E5E7EB" }}>
+          {profileLoading ? (
+            <Typography sx={{ color: "#6b7280" }}>Loading...</Typography>
+          ) : profileData ? (
+            <Box sx={{ color: "#374151", fontSize: "0.87rem" }}>
+              <Typography sx={{ color: "#111827", fontWeight: 600, mb: 1 }}>
+                Personal Information
+              </Typography>
+              <ProfileField label="Email" value={profileData.email ?? profileData.Email} />
+              <ProfileField
+                label="Education"
+                value={profileData.education ?? profileData.Education}
+              />
+              <ProfileField label="Major" value={profileData.major ?? profileData.Major} />
+              <ProfileField label="Bio" value={profileData.bio ?? profileData.Bio} />
+
+              {contributorProfiles[selectedContributor] && (
+                <Typography sx={{ mb: 2 }}>
+                  <Box component="span" sx={{ fontWeight: 600 }}>GitHub:</Box>{" "}
+                  <Link
+                    href={contributorProfiles[selectedContributor].github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={{ color: "#F47C20", fontWeight: 600 }}
+                  >
+                    {contributorProfiles[selectedContributor].github.replace("https://", "")}
+                  </Link>
+                </Typography>
+              )}
+
+              <Typography sx={{ color: "#111827", fontWeight: 600, mb: 1 }}>
+                Contributions
+              </Typography>
+              <Typography sx={{ mb: 1.5 }}>
+                <Box component="span" sx={{ fontWeight: 600 }}>Total:</Box>{" "}
+                {profileData.totalContributions ?? profileData.TotalContributions ?? 0}
+              </Typography>
+
+              <ContributionList
+                label="Problems"
+                items={profileData.problemsContributed ?? profileData.ProblemsContributed}
+              />
+              <ContributionList
+                label="Solvers"
+                items={profileData.solversCreated ?? profileData.SolversCreated}
+              />
+              <ContributionList
+                label="Reductions"
+                items={profileData.reductionsCreated ?? profileData.ReductionsCreated}
+              />
+            </Box>
+          ) : (
+            <Typography sx={{ color: "#6b7280" }}>No profile data found.</Typography>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseModal} sx={{ color: "#F47C20" }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       </Box>
     </ThemeProvider>
   );
