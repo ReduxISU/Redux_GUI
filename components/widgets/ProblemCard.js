@@ -2,22 +2,8 @@ import React from "react";
 import Link from "next/link";
 import { Box, Chip, Typography } from "@mui/material";
 import { CheckCircle as CheckCircleIcon, RemoveCircleOutlined as DashIcon } from "@mui/icons-material";
-
-// Same light card treatment as pages/aboutus/index.js's theSectionCard,
-// scaled down for a dense grid of many cards.
-const cardSx = {
-  background: "#FFFFFF",
-  borderRadius: "16px",
-  border: "1px solid #E5E7EB",
-  padding: 2,
-  height: "100%",
-  boxShadow: "0 4px 14px rgba(0,0,0,0.04)",
-  transition: "all 0.25s ease",
-  "&:hover": {
-    borderColor: "#F47C20",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-  },
-};
+import { sectionCardSx, textColors, surfaceColors } from "../theme";
+import { useThemeMode } from "../ThemeModeContext";
 
 /**
  * Presentational card for one problem in the /browse results grid. Clicking
@@ -25,6 +11,13 @@ const cardSx = {
  * reads on mount to auto-select that problem.
  */
 export default function ProblemCard({ name, complexityClass, solverTypes, hasRenderableVisualization }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  const surface = surfaceColors(mode);
+  // Same card treatment as pages/aboutus/index.js's theSectionCard, scaled
+  // down for a dense grid of many cards.
+  const cardSx = { ...sectionCardSx(mode), padding: 2, height: "100%", borderRadius: "16px" };
+
   return (
     <Box sx={cardSx}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
@@ -34,7 +27,7 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
         >
           <Typography
             sx={{
-              color: "#111827",
+              color: text.heading,
               fontWeight: 600,
               fontSize: "1rem",
               "&:hover": { color: "#F47C20" },
@@ -46,7 +39,7 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
         {hasRenderableVisualization ? (
           <CheckCircleIcon titleAccess="Has a renderable visualization" sx={{ color: "#4ade80", fontSize: "1.1rem" }} />
         ) : (
-          <DashIcon titleAccess="No renderable visualization" sx={{ color: "#4b5563", fontSize: "1.1rem" }} />
+          <DashIcon titleAccess="No renderable visualization" sx={{ color: text.caption, fontSize: "1.1rem" }} />
         )}
       </Box>
 
@@ -64,7 +57,7 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
         {solverTypes.length === 0 ? (
-          <Typography sx={{ color: "#6b7280", fontSize: "0.75rem", fontStyle: "italic" }}>
+          <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
             No solvers
           </Typography>
         ) : (
@@ -74,9 +67,9 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
               label={type}
               size="small"
               sx={{
-                color: "#374151",
-                background: "#F9FAFB",
-                border: "1px solid #E5E7EB",
+                color: text.body,
+                background: surface.surfaceAlt,
+                border: `1px solid ${surface.border}`,
                 fontSize: "0.7rem",
               }}
             />

@@ -7,8 +7,6 @@ import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProble
 import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
 import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
 import {
-  ThemeProvider,
-  CssBaseline,
   Container,
   Box,
   Typography,
@@ -17,16 +15,20 @@ import {
   Chip,
   CircularProgress,
 } from "@mui/material";
-import { theme, pageBackground, sectionCardSx } from "../../components/theme";
-
-// Browse's sidebar/empty-state card is denser than a full content page's
-// section card, so it overrides padding -- everything else (color, hover)
-// stays shared.
-const theSectionCard = { ...sectionCardSx, padding: { xs: 2, md: 2.5 } };
+import { pageBackground, sectionCardSx, textColors, surfaceColors } from "../../components/theme";
+import { useThemeMode } from "../../components/ThemeModeContext";
 
 const reduxBaseUrl = "/api/redux/";
 
 export default function BrowsePage() {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  const surface = surfaceColors(mode);
+  // Browse's sidebar/empty-state card is denser than a full content page's
+  // section card, so it overrides padding -- everything else (color, hover)
+  // stays shared.
+  const theSectionCard = { ...sectionCardSx(mode), padding: { xs: 2, md: 2.5 } };
+
   const { problemIndex, reductionGraph, loading } = useProblemIndex(reduxBaseUrl);
   const {
     selectedComplexityClasses,
@@ -63,147 +65,144 @@ export default function BrowsePage() {
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box
-        sx={{
-          minHeight: "100vh",
-          background: pageBackground,
-        }}
-      >
-        <ResponsiveAppBar />
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: pageBackground(mode),
+      }}
+    >
+      <ResponsiveAppBar />
 
-        <Container maxWidth="lg" sx={{ pt: 3, pb: 6 }}>
-          <Typography sx={{ color: "#111827", fontSize: "1.4rem", fontWeight: 600, mb: 0.5 }}>
-            Browse Problems
-          </Typography>
-          <Typography sx={{ color: "#374151", fontSize: "0.87rem", mb: 3 }}>
-            Filter the full problem list by complexity class, solver type, visualization type,
-            or reduction reachability.
-          </Typography>
+      <Container maxWidth="lg" sx={{ pt: 3, pb: 6 }}>
+        <Typography sx={{ color: text.heading, fontSize: "1.4rem", fontWeight: 600, mb: 0.5 }}>
+          Browse Problems
+        </Typography>
+        <Typography sx={{ color: text.body, fontSize: "0.87rem", mb: 3 }}>
+          Filter the full problem list by complexity class, solver type, visualization type,
+          or reduction reachability.
+        </Typography>
 
-          {loading ? (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 6 }}>
-              <CircularProgress size={22} sx={{ color: "#F47C20" }} />
-              <Typography sx={{ color: "#374151" }}>Loading problem data…</Typography>
-            </Box>
-          ) : (
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 3 }}>
-                <Box sx={{ ...theSectionCard, display: "grid", gap: 2.5, position: { md: "sticky" }, top: { md: 16 } }}>
-                  <FacetFilterGroup
-                    label="Complexity Class"
-                    options={complexityClassOptions}
-                    selected={selectedComplexityClasses}
-                    onChange={setSelectedComplexityClasses}
-                  />
-                  <FacetFilterGroup
-                    label="Solver Type"
-                    options={solverTypeOptions}
-                    selected={selectedSolverTypes}
-                    onChange={setSelectedSolverTypes}
-                  />
-                  <FacetFilterGroup
-                    label="Visualization Type"
-                    options={visualizationTypeOptions}
-                    selected={selectedVisualizationTypes}
-                    onChange={setSelectedVisualizationTypes}
-                  />
+        {loading ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 6 }}>
+            <CircularProgress size={22} sx={{ color: "#F47C20" }} />
+            <Typography sx={{ color: text.body }}>Loading problem data…</Typography>
+          </Box>
+        ) : (
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <Box sx={{ ...theSectionCard, display: "grid", gap: 2.5, position: { md: "sticky" }, top: { md: 16 } }}>
+                <FacetFilterGroup
+                  label="Complexity Class"
+                  options={complexityClassOptions}
+                  selected={selectedComplexityClasses}
+                  onChange={setSelectedComplexityClasses}
+                />
+                <FacetFilterGroup
+                  label="Solver Type"
+                  options={solverTypeOptions}
+                  selected={selectedSolverTypes}
+                  onChange={setSelectedSolverTypes}
+                />
+                <FacetFilterGroup
+                  label="Visualization Type"
+                  options={visualizationTypeOptions}
+                  selected={selectedVisualizationTypes}
+                  onChange={setSelectedVisualizationTypes}
+                />
 
-                  <Box>
-                    <Typography
-                      sx={{
-                        color: "#111827",
-                        fontSize: "0.78rem",
-                        fontWeight: 600,
-                        letterSpacing: "0.14em",
-                        mb: 0.5,
-                      }}
-                    >
-                      REACHABLE FROM
-                    </Typography>
-                    <SearchBarExtensible
-                      selected={reachabilitySource ?? ""}
-                      onSelect={(value) => setReachabilitySource(value || null)}
-                      placeholder="Source problem"
-                      options={problemNames}
-                      optionsMap={problemNameMap}
-                      extenderButtons={() => []}
-                    />
-                    <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-                      <Chip
-                        label="One reduction"
-                        clickable
-                        onClick={() => setReachabilityMode("oneHop")}
-                        sx={{
-                          fontSize: "0.72rem",
-                          color: reachabilityMode === "oneHop" ? "#fff" : "#6b7280",
-                          background: reachabilityMode === "oneHop" ? "#F47C20" : "#F9FAFB",
-                          border: "1px solid #E5E7EB",
-                        }}
-                      />
-                      <Chip
-                        label="Any reductions"
-                        clickable
-                        onClick={() => setReachabilityMode("anyHops")}
-                        sx={{
-                          fontSize: "0.72rem",
-                          color: reachabilityMode === "anyHops" ? "#fff" : "#6b7280",
-                          background: reachabilityMode === "anyHops" ? "#F47C20" : "#F9FAFB",
-                          border: "1px solid #E5E7EB",
-                        }}
-                      />
-                    </Box>
-                  </Box>
-
-                  <Button
-                    onClick={clearFilters}
-                    variant="outlined"
-                    size="small"
+                <Box>
+                  <Typography
                     sx={{
-                      color: "#F47C20",
-                      borderColor: "rgba(244,124,32,0.4)",
-                      "&:hover": { borderColor: "#F47C20", background: "rgba(244,124,32,0.08)" },
+                      color: text.heading,
+                      fontSize: "0.78rem",
+                      fontWeight: 600,
+                      letterSpacing: "0.14em",
+                      mb: 0.5,
                     }}
                   >
-                    Clear filters
-                  </Button>
-                </Box>
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 9 }}>
-                <Typography sx={{ color: "#6b7280", fontSize: "0.82rem", mb: 1.5 }}>
-                  {filteredProblems.length} problem{filteredProblems.length === 1 ? "" : "s"}
-                </Typography>
-
-                {filteredProblems.length === 0 ? (
-                  <Box sx={{ ...theSectionCard, textAlign: "center", py: 5 }}>
-                    <Typography sx={{ color: "#6b7280" }}>
-                      No problems match the current filters.
-                    </Typography>
+                    REACHABLE FROM
+                  </Typography>
+                  <SearchBarExtensible
+                    selected={reachabilitySource ?? ""}
+                    onSelect={(value) => setReachabilitySource(value || null)}
+                    placeholder="Source problem"
+                    options={problemNames}
+                    optionsMap={problemNameMap}
+                    extenderButtons={() => []}
+                  />
+                  <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                    <Chip
+                      label="One reduction"
+                      clickable
+                      onClick={() => setReachabilityMode("oneHop")}
+                      sx={{
+                        fontSize: "0.72rem",
+                        color: reachabilityMode === "oneHop" ? "#fff" : text.caption,
+                        background: reachabilityMode === "oneHop" ? "#F47C20" : surface.surfaceAlt,
+                        border: `1px solid ${surface.border}`,
+                      }}
+                    />
+                    <Chip
+                      label="Any reductions"
+                      clickable
+                      onClick={() => setReachabilityMode("anyHops")}
+                      sx={{
+                        fontSize: "0.72rem",
+                        color: reachabilityMode === "anyHops" ? "#fff" : text.caption,
+                        background: reachabilityMode === "anyHops" ? "#F47C20" : surface.surfaceAlt,
+                        border: `1px solid ${surface.border}`,
+                      }}
+                    />
                   </Box>
-                ) : (
-                  <Grid container spacing={1.5}>
-                    {filteredProblems.map((name) => {
-                      const tags = problemIndex.get(name);
-                      return (
-                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
-                          <ProblemCard
-                            name={name}
-                            complexityClass={tags.complexityClass}
-                            solverTypes={[...tags.solverTypes].sort()}
-                            hasRenderableVisualization={tags.hasRenderableVisualization}
-                          />
-                        </Grid>
-                      );
-                    })}
-                  </Grid>
-                )}
-              </Grid>
+                </Box>
+
+                <Button
+                  onClick={clearFilters}
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    color: "#F47C20",
+                    borderColor: "rgba(244,124,32,0.4)",
+                    "&:hover": { borderColor: "#F47C20", background: "rgba(244,124,32,0.08)" },
+                  }}
+                >
+                  Clear filters
+                </Button>
+              </Box>
             </Grid>
-          )}
-        </Container>
-      </Box>
-    </ThemeProvider>
+
+            <Grid size={{ xs: 12, md: 9 }}>
+              <Typography sx={{ color: text.caption, fontSize: "0.82rem", mb: 1.5 }}>
+                {filteredProblems.length} problem{filteredProblems.length === 1 ? "" : "s"}
+              </Typography>
+
+              {filteredProblems.length === 0 ? (
+                <Box sx={{ ...theSectionCard, textAlign: "center", py: 5 }}>
+                  <Typography sx={{ color: text.caption }}>
+                    No problems match the current filters.
+                  </Typography>
+                </Box>
+              ) : (
+                <Grid container spacing={1.5}>
+                  {filteredProblems.map((name) => {
+                    const tags = problemIndex.get(name);
+                    return (
+                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
+                        <ProblemCard
+                          name={name}
+                          complexityClass={tags.complexityClass}
+                          solverTypes={[...tags.solverTypes].sort()}
+                          hasRenderableVisualization={tags.hasRenderableVisualization}
+                        />
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              )}
+            </Grid>
+          </Grid>
+        )}
+      </Container>
+    </Box>
   );
 }

@@ -19,10 +19,7 @@ import isulogo from "../components/images/ISULogo.png";
 import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
 import {
   Box,
-  createTheme,
-  CssBaseline,
   Grid,
-  ThemeProvider,
   Typograph,
 } from "@mui/material";
 import { Container } from "react-bootstrap";
@@ -32,7 +29,8 @@ import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
 import TourLauncher from "../components/tour/TourLauncher";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
-import { FONT_FAMILY, lightPalette, pageBackground } from "../components/theme";
+import { pageBackground } from "../components/theme";
+import { useThemeMode } from "../components/ThemeModeContext";
 
 import {
   DndContext,
@@ -107,19 +105,7 @@ function SortableRow({ id, children }) {
  */
 function MainPageContent() {
   const imgStyle = { textAlign: "center" };
-
-  // Shared palette (see components/theme.js), extended with two page-specific
-  // colors: primary.lGray (used by No_Viz_SVG.js's bgcolor="primary.lGray")
-  // and white (used by several pageblocks' color="white" buttons) -- both only
-  // ever rendered on this page, so they don't belong in the shared module.
-  const theme = createTheme({
-    palette: {
-      ...lightPalette,
-      primary: { ...lightPalette.primary, lGray: "#f3f3f3" },
-      white: { main: "#ffffff" },
-    },
-    typography: { fontFamily: FONT_FAMILY },
-  });
+  const { mode } = useThemeMode();
 
   //useHandleParameters();
 
@@ -177,10 +163,8 @@ function MainPageContent() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ minHeight: "100vh", background: pageBackground }}>
-        <ResponsiveAppBar></ResponsiveAppBar>
+    <Box sx={{ minHeight: "100vh", background: pageBackground(mode) }}>
+      <ResponsiveAppBar></ResponsiveAppBar>
 
         <div className="container-fluid">
           {/** This is an artifact from the old bootstrap code, may be deprecated */}
@@ -229,8 +213,7 @@ function MainPageContent() {
         >
           <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
         </Box>
-      </Box>
-    </ThemeProvider>
+    </Box>
   );
 }
 
