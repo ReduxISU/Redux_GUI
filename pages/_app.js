@@ -2,6 +2,7 @@ import Head from 'next/head'
 import '../styles/globals.css'
 import '../styles/q.css';
 import 'driver.js/dist/driver.css';
+import { ThemeModeProvider } from '../components/ThemeModeContext';
 // import '../styles/reducedStyle.css'
 
 // Site-wide default metadata. Lives here (not _document) so it is emitted in the
@@ -36,7 +37,9 @@ function MyApp({ Component, pageProps }) {
         <meta name="twitter:description" content={SITE_DESCRIPTION} />
         <meta name="twitter:image" content={OG_IMAGE} />
       </Head>
-      <Component {...pageProps} />
+      <ThemeModeProvider>
+        <Component {...pageProps} />
+      </ThemeModeProvider>
     </>
   )
 }
