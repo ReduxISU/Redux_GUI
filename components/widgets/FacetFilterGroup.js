@@ -28,7 +28,7 @@ export default function FacetFilterGroup({ label, options, selected, onChange })
     <Box>
       <Typography
         sx={{
-          color: "#ffffff",
+          color: "#111827",
           fontSize: "0.78rem",
           fontWeight: 600,
           letterSpacing: "0.14em",
@@ -52,13 +52,13 @@ export default function FacetFilterGroup({ label, options, selected, onChange })
                   checked={selected.has(key)}
                   onChange={() => toggle(key)}
                   sx={{
-                    color: "rgba(255,255,255,0.35)",
-                    "&.Mui-checked": { color: "#a855f7" },
+                    color: "#9ca3af",
+                    "&.Mui-checked": { color: "#F47C20" },
                   }}
                 />
               }
               label={
-                <Typography sx={{ color: "#d1d5db", fontSize: "0.83rem" }}>
+                <Typography sx={{ color: "#374151", fontSize: "0.83rem" }}>
                   {optionLabel} <Box component="span" sx={{ color: "#6b7280" }}>({count})</Box>
                 </Typography>
               }
