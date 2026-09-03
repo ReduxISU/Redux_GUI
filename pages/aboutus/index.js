@@ -55,6 +55,8 @@ const publications = [
   {
     citation:
       "P. M. Bodily, “LLMs, Computational Theory, and Redux: New Directions for CC in Computational Complexity,” in Proceedings of the Workshop on Theoretical CS and Computational Creativity, 2026.",
+    url: "https://computationalcreativity.net/workshops/theorycs-cc-iccc26/",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/bodily_cc_in_computational_complexity.pdf",
   },
   {
     citation:
@@ -89,6 +91,8 @@ const publications = [
   {
     citation:
       "P. M. Bodily and D. Ventura, “Open computational creativity problems in computational theory,” in Proceedings of the 13th International Conference on Computational Creativity (ICCC), 2022.",
+    url: "https://computationalcreativity.net/iccc22/accepted-papers/",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/ICCC-2022_17L_Bodily-and-Ventura.pdf",
   },
 ];
 
@@ -109,10 +113,14 @@ const thesisAndDissertations = [
   {
     citation:
       "Andrija Sevaljevic, M.S. Thesis, Idaho State University, “Redux: Design and Implementation of a Reusable Web-Based Visualization System for Algorithmic and Logical Problem Solving”",
+    url: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2565",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/andrija_thesis.pdf",
   },
   {
     citation:
       "Kaden Marchetti, M.S. Thesis, Idaho State University, “Redux: An Interactive, Dynamic Tool for Learning NP-completeness and Mapping Reductions”",
+    url: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2206",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/kaden_thesis.pdf",
   },
 ];
 
@@ -524,23 +532,6 @@ export default function AboutUsPage() {
                         </Link>
                       )}
 
-                      {item.pdf && (
-                        <Link
-                          href={item.pdf}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          underline="hover"
-                          sx={{
-                            color: "#F47C20",
-                            fontWeight: 600,
-                            fontSize: "0.8rem",
-                            ml: 0.4,
-                          }}
-                        >
-                          [PDF]
-                        </Link>
-                      )}
-
                       {item.url && (
                         <Link
                           href={item.url}
@@ -555,6 +546,23 @@ export default function AboutUsPage() {
                           }}
                         >
                           [URL]
+                        </Link>
+                      )}
+
+                      {item.pdf && (
+                        <Link
+                          href={item.pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [PDF]
                         </Link>
                       )}
                     </Typography>
