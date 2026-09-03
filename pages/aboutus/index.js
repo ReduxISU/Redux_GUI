@@ -51,20 +51,10 @@ const contributorProfiles = {
   },
 };
 
-const publicationsAndAwards = [
+const publications = [
   {
     citation:
       "P. M. Bodily, “LLMs, Computational Theory, and Redux: New Directions for CC in Computational Complexity,” in Proceedings of the Workshop on Theoretical CS and Computational Creativity, 2026.",
-  },
-  {
-    citation:
-      "Best Graduate Poster Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
-    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
-  },
-  {
-    citation:
-      "Best Graduate Oral Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
-    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
   },
   {
     citation:
@@ -99,6 +89,19 @@ const publicationsAndAwards = [
   {
     citation:
       "P. M. Bodily and D. Ventura, “Open computational creativity problems in computational theory,” in Proceedings of the 13th International Conference on Computational Creativity (ICCC), 2022.",
+  },
+];
+
+const awards = [
+  {
+    citation:
+      "Best Graduate Poster Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
+    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
+  },
+  {
+    citation:
+      "Best Graduate Oral Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
+    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
   },
 ];
 
@@ -479,7 +482,7 @@ export default function AboutUsPage() {
             </Box>
 
             <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-              <TitleSection>PUBLICATIONS AND AWARDS</TitleSection>
+              <TitleSection>PUBLICATIONS</TitleSection>
 
               <Typography
                 sx={{
@@ -488,12 +491,94 @@ export default function AboutUsPage() {
                   mb: 3,
                 }}
               >
-                Below are research publications and awards associated with the
-                Redux project and its contributors.
+                Below are research publications associated with the Redux
+                project and its contributors.
               </Typography>
 
               <Box sx={{ display: "grid", gap: 0.8 }}>
-                {publicationsAndAwards.map((item, index) => (
+                {publications.map((item, index) => (
+                  <Box key={index} sx={innerCard}>
+                    <Typography
+                      sx={{
+                        color: "#374151",
+                        fontSize: "0.82rem",
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      {item.citation}{" "}
+
+                      {item.doi && (
+                        <Link
+                          href={item.doi}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [DOI]
+                        </Link>
+                      )}
+
+                      {item.pdf && (
+                        <Link
+                          href={item.pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [PDF]
+                        </Link>
+                      )}
+
+                      {item.url && (
+                        <Link
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [URL]
+                        </Link>
+                      )}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+              <TitleSection>AWARDS</TitleSection>
+
+              <Typography
+                sx={{
+                  color: "#374151",
+                  fontSize: "0.87rem",
+                  mb: 3,
+                }}
+              >
+                Below are awards associated with the Redux project and its
+                contributors.
+              </Typography>
+
+              <Box sx={{ display: "grid", gap: 0.8 }}>
+                {awards.map((item, index) => (
                   <Box key={index} sx={innerCard}>
                     <Typography
                       sx={{
