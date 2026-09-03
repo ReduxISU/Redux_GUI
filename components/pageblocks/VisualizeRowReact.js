@@ -393,9 +393,9 @@ export default function VisualizeRowReact({
                             title="Drag to reorder"
                             sx={{
                               cursor: 'grab',
-                              color: '#424242',
-                              backgroundColor: '#f5f5f5',
-                              '&:hover': { backgroundColor: '#e0e0e0' },
+                              color: text.body,
+                              backgroundColor: surface.surfaceAlt,
+                              '&:hover': { backgroundColor: surface.surfaceAltHover },
                               mr: 1,
                             }}
                           >
