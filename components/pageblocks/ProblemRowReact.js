@@ -37,6 +37,21 @@ const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 // last -- it's the "not yet tagged" bucket, not a real complexity class.
 const COMPLEXITY_CLASS_ORDER = ["P", "NPComplete", "NPHard", "NPIntermediate", "QuantumOracle", "Unclassified"];
 
+// Display labels for the dropdown's complexity-class section headers -- the raw
+// enum values above have no hyphen/spacing ("NPComplete"), but the header should
+// read using standard notation ("NP-Complete").
+const COMPLEXITY_CLASS_LABELS = {
+  P: "P",
+  NPComplete: "NP-Complete",
+  NPHard: "NP-Hard",
+  NPIntermediate: "NP-Intermediate",
+  QuantumOracle: "Quantum Oracle",
+  Unclassified: "Unclassified",
+};
+function complexityClassGroupLabel(complexityClass) {
+  return COMPLEXITY_CLASS_LABELS[complexityClass] ?? complexityClass;
+}
+
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
  */
@@ -206,6 +221,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           optionsMap={problemNameMap}
           groupBy={(key) => problemIndex.get(key)?.complexityClass || "Unclassified"}
           groupOrder={COMPLEXITY_CLASS_ORDER}
+          groupLabel={complexityClassGroupLabel}
           extenderButtons={(input) => [
             {
               label: `Add new problem "${input}"`,
