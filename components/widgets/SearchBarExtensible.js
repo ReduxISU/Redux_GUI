@@ -50,12 +50,18 @@ export default function SearchBarExtensible({
           .map((x) => optionsMap.get(x) ?? x)
         : []}
       groupBy={groupBy ? (option) => groupBy(getKeyByValue(optionsMap, option)) ?? "Unclassified" : undefined}
-      // Bolds the group header so it reads as a section divider, not a selectable option.
+      // Bolds and centers the group header so it reads as a section divider, not a
+      // selectable option. `top: -8px` cancels out the Autocomplete listbox's default
+      // 8px top padding, which the sticky header's default `top: 0` doesn't account
+      // for -- without it, the option that just scrolled past peeks above the header
+      // instead of staying fully hidden behind it.
       renderGroup={
         groupBy
           ? (params) => (
             <li key={params.key}>
-              <ListSubheader sx={{ fontWeight: 700 }}>{params.group}</ListSubheader>
+              <ListSubheader sx={{ top: -8, fontWeight: 700, textAlign: "center" }}>
+                {params.group}
+              </ListSubheader>
               {params.children}
             </li>
           )
