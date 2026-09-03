@@ -56,7 +56,12 @@ export default function ProblemSection({ children, defaultCollapsed = true }) {
   return (
     <div>
       <Accordion className="accordion" defaultActiveKey={defaultCollapsed ? "1" : "0"}>
-        <Card style={{ backgroundColor: surface.surface, borderColor: surface.border }}>
+        <Card
+          style={{
+            backgroundColor: surface.surface,
+            borderColor: mode === "dark" ? "transparent" : surface.border,
+          }}
+        >
           {children}
         </Card>
       </Accordion>
@@ -73,7 +78,7 @@ ProblemSection.Header = function Header({ children, title, titleWidth }) {
     <Card.Header
       style={{
         backgroundColor: surface.surfaceAlt,
-        borderColor: surface.border,
+        borderColor: mode === "dark" ? "transparent" : surface.border,
         color: text.heading,
       }}
     >
