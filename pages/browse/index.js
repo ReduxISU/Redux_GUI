@@ -19,20 +19,20 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-// Same dark palette as pages/aboutus/index.js, for visual consistency across
-// the app's newer MUI-Grid-card pages.
+// Same light orange/grey/white palette as pages/aboutus/index.js and the
+// other pages, for visual consistency across the app.
 const theme = createTheme({
   palette: {
-    mode: "dark",
-    primary: { main: "#8b5cf6" },
-    secondary: { main: "#a855f7" },
+    mode: "light",
+    primary: { main: "#3F3F46" },
+    secondary: { main: "#F47C20" },
     background: {
-      default: "#07070b",
-      paper: "rgba(255,255,255,0.04)",
+      default: "#F9FAFB",
+      paper: "#FFFFFF",
     },
     text: {
-      primary: "#ffffff",
-      secondary: "#b4b4c7",
+      primary: "#111827",
+      secondary: "#4B5563",
     },
   },
   typography: {
@@ -42,11 +42,11 @@ const theme = createTheme({
 });
 
 const theSectionCard = {
-  background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(10px)",
+  background: "#FFFFFF",
   borderRadius: "16px",
-  border: "1px solid rgba(255,255,255,0.10)",
+  border: "1px solid #E5E7EB",
   padding: { xs: 2, md: 2.5 },
+  boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
 };
 
 const reduxBaseUrl = "/api/redux/";
@@ -94,24 +94,24 @@ export default function BrowsePage() {
         sx={{
           minHeight: "100vh",
           background:
-            "radial-gradient(circle at top, rgba(139,92,246,0.16), transparent 32%), linear-gradient(180deg, #09090f 0%, #07070b 100%)",
+            "radial-gradient(circle at top, rgba(139,92,246,0.08), transparent 38%), #F9FAFB",
         }}
       >
         <ResponsiveAppBar />
 
         <Container maxWidth="lg" sx={{ pt: 3, pb: 6 }}>
-          <Typography sx={{ color: "#ffffff", fontSize: "1.4rem", fontWeight: 600, mb: 0.5 }}>
+          <Typography sx={{ color: "#111827", fontSize: "1.4rem", fontWeight: 600, mb: 0.5 }}>
             Browse Problems
           </Typography>
-          <Typography sx={{ color: "#9ca3af", fontSize: "0.87rem", mb: 3 }}>
+          <Typography sx={{ color: "#374151", fontSize: "0.87rem", mb: 3 }}>
             Filter the full problem list by complexity class, solver type, visualization type,
             or reduction reachability.
           </Typography>
 
           {loading ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 6 }}>
-              <CircularProgress size={22} sx={{ color: "#a855f7" }} />
-              <Typography sx={{ color: "#d1d5db" }}>Loading problem data…</Typography>
+              <CircularProgress size={22} sx={{ color: "#F47C20" }} />
+              <Typography sx={{ color: "#374151" }}>Loading problem data…</Typography>
             </Box>
           ) : (
             <Grid container spacing={2}>
@@ -139,7 +139,7 @@ export default function BrowsePage() {
                   <Box>
                     <Typography
                       sx={{
-                        color: "#ffffff",
+                        color: "#111827",
                         fontSize: "0.78rem",
                         fontWeight: 600,
                         letterSpacing: "0.14em",
@@ -163,12 +163,9 @@ export default function BrowsePage() {
                         onClick={() => setReachabilityMode("oneHop")}
                         sx={{
                           fontSize: "0.72rem",
-                          color: reachabilityMode === "oneHop" ? "#fff" : "#9ca3af",
-                          background:
-                            reachabilityMode === "oneHop"
-                              ? "rgba(168,85,247,0.45)"
-                              : "rgba(255,255,255,0.06)",
-                          border: "1px solid rgba(255,255,255,0.10)",
+                          color: reachabilityMode === "oneHop" ? "#fff" : "#6b7280",
+                          background: reachabilityMode === "oneHop" ? "#F47C20" : "#F9FAFB",
+                          border: "1px solid #E5E7EB",
                         }}
                       />
                       <Chip
@@ -177,12 +174,9 @@ export default function BrowsePage() {
                         onClick={() => setReachabilityMode("anyHops")}
                         sx={{
                           fontSize: "0.72rem",
-                          color: reachabilityMode === "anyHops" ? "#fff" : "#9ca3af",
-                          background:
-                            reachabilityMode === "anyHops"
-                              ? "rgba(168,85,247,0.45)"
-                              : "rgba(255,255,255,0.06)",
-                          border: "1px solid rgba(255,255,255,0.10)",
+                          color: reachabilityMode === "anyHops" ? "#fff" : "#6b7280",
+                          background: reachabilityMode === "anyHops" ? "#F47C20" : "#F9FAFB",
+                          border: "1px solid #E5E7EB",
                         }}
                       />
                     </Box>
@@ -193,9 +187,9 @@ export default function BrowsePage() {
                     variant="outlined"
                     size="small"
                     sx={{
-                      color: "#e9d5ff",
-                      borderColor: "rgba(168,85,247,0.4)",
-                      "&:hover": { borderColor: "#a855f7", background: "rgba(168,85,247,0.08)" },
+                      color: "#F47C20",
+                      borderColor: "rgba(244,124,32,0.4)",
+                      "&:hover": { borderColor: "#F47C20", background: "rgba(244,124,32,0.08)" },
                     }}
                   >
                     Clear filters
@@ -204,13 +198,13 @@ export default function BrowsePage() {
               </Grid>
 
               <Grid size={{ xs: 12, md: 9 }}>
-                <Typography sx={{ color: "#9ca3af", fontSize: "0.82rem", mb: 1.5 }}>
+                <Typography sx={{ color: "#6b7280", fontSize: "0.82rem", mb: 1.5 }}>
                   {filteredProblems.length} problem{filteredProblems.length === 1 ? "" : "s"}
                 </Typography>
 
                 {filteredProblems.length === 0 ? (
                   <Box sx={{ ...theSectionCard, textAlign: "center", py: 5 }}>
-                    <Typography sx={{ color: "#9ca3af" }}>
+                    <Typography sx={{ color: "#6b7280" }}>
                       No problems match the current filters.
                     </Typography>
                   </Box>

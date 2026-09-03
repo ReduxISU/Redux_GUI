@@ -3,19 +3,19 @@ import Link from "next/link";
 import { Box, Chip, Typography } from "@mui/material";
 import { CheckCircle as CheckCircleIcon, RemoveCircleOutlined as DashIcon } from "@mui/icons-material";
 
-// Same glassmorphism card treatment as pages/aboutus/index.js's theSectionCard,
+// Same light card treatment as pages/aboutus/index.js's theSectionCard,
 // scaled down for a dense grid of many cards.
 const cardSx = {
-  background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(10px)",
+  background: "#FFFFFF",
   borderRadius: "16px",
-  border: "1px solid rgba(255,255,255,0.10)",
+  border: "1px solid #E5E7EB",
   padding: 2,
   height: "100%",
-  transition: "all 0.3s ease",
+  boxShadow: "0 4px 14px rgba(0,0,0,0.04)",
+  transition: "all 0.25s ease",
   "&:hover": {
-    borderColor: "rgba(168,85,247,0.4)",
-    boxShadow: "0 0 25px rgba(168,85,247,0.15)",
+    borderColor: "#F47C20",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
   },
 };
 
@@ -34,10 +34,10 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
         >
           <Typography
             sx={{
-              color: "#ffffff",
+              color: "#111827",
               fontWeight: 600,
               fontSize: "1rem",
-              "&:hover": { color: "#d8b4fe" },
+              "&:hover": { color: "#F47C20" },
             }}
           >
             {name}
@@ -55,9 +55,9 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
         size="small"
         sx={{
           mb: 1.25,
-          color: "#e9d5ff",
-          background: "rgba(168,85,247,0.15)",
-          border: "1px solid rgba(168,85,247,0.35)",
+          color: "#c2410c",
+          background: "rgba(244,124,32,0.12)",
+          border: "1px solid rgba(244,124,32,0.35)",
           fontSize: "0.72rem",
         }}
       />
@@ -74,9 +74,9 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
               label={type}
               size="small"
               sx={{
-                color: "#d1d5db",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.10)",
+                color: "#374151",
+                background: "#F9FAFB",
+                border: "1px solid #E5E7EB",
                 fontSize: "0.7rem",
               }}
             />
