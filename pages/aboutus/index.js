@@ -49,6 +49,10 @@ const contributorProfiles = {
     image: "https://github.com/svanalex.png",
     github: "https://github.com/svanalex",
   },
+  "Michael Trosper": {
+    image: "https://github.com/Trosper3.png",
+    github: "https://github.com/Trosper3",
+  },
 };
 
 const publicationsAndAwards = [
@@ -122,6 +126,7 @@ const contributors = [
   "Courtney Bodily",
   "Rakesh Itani",
   "David Lindeman",
+  "Michael Trosper",
 ];
 
 const theme = createTheme({
