@@ -44,7 +44,7 @@
     "@biomejs/biome": "^2.5.8",
     "@playwright/test": "^1.62.1",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.3.1",
+    "eslint-config-next": "^16.3.3",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-x": "^4.17.1"
   }
