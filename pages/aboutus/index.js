@@ -735,7 +735,7 @@ export default function AboutUsPage() {
               <Box sx={{ display: "grid", gap: 0.8 }}>
                 {[
                   "Bodily, P.M. (Co-Lead), Bradley, J. (Co-Lead), Romney, A. (Co-PI), Petersen, J. (Co-I), “BengalBot MCP: Building AI-Literate Students at Idaho State University,” U.S. Department of Education (DOE) Fund for Improvement of Post-Secondary Education (FIPSE). $300,000. 2026.",
-                  "“Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” Summer Authentic Research Experience (SARE), Idaho Community-engaged Resilience for Energy-Water Systems (I-CREWS), National Science Foundation (NSF). 2026.",
+                  "Trosper, M.J., “Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” Summer Authentic Research Experience (SARE), Idaho Community-engaged Resilience for Energy-Water Systems (I-CREWS), National Science Foundation (NSF). $6,000. 2026.",
                   "“Crowd-Sourcing and Visualization of Advanced Computational Theory to Facilitate Application of Algorithmic Knowledgebase to Real-World Combinatorial Problems,” Center for Advanced Energy Studies (CAES). 2024.",
                   "“Application of advanced computational theory to facilitate efficient solutions to real-world combinatorial problems”, Center for Advanced Energy Studies (CAES). 2022.",
                   "“Interactive visualization tools for teaching computer science theory”, Idaho State University Office of Research. 2022.",
