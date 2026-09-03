@@ -9,7 +9,6 @@ import {
   Box,
   Typography,
   Link,
-  Grid,
   Avatar,
   Tooltip,
   CssBaseline,
@@ -249,6 +248,17 @@ function ItemContributor({ name, profile, onSelect }) {
   );
 }
 
+// Only renders when there's an actual value -- avoids "Not specified" clutter for
+// fields (bio, education, ...) a contributor hasn't filled in.
+function ProfileField({ label, value }) {
+  if (!value) return null;
+  return (
+    <Typography sx={{ mb: 0.5 }}>
+      <Box component="span" sx={{ fontWeight: 600 }}>{label}:</Box> {value}
+    </Typography>
+  );
+}
+
 function ContributionList({ label, items }) {
   if (!items || items.length === 0) return null;
   return (
@@ -465,37 +475,42 @@ export default function AboutUsPage() {
                   Contributor list unavailable right now.
                 </Typography>
               ) : (
-                <Grid container spacing={1.5}>
+                // CSS multi-column layout (not a Grid) so the alphabetical order reads
+                // top-to-bottom within a column, then wraps to the next column -- a
+                // Grid/flex wrap would instead fill left-to-right row by row, breaking
+                // the alphabetical reading order across the row.
+                <Box sx={{ columns: { xs: 1, sm: 2, md: 3 }, columnGap: "12px" }}>
                   {[...contributors]
                     .sort((a, b) => getLastName(a).localeCompare(getLastName(b)))
                     .map((name) => (
-                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
-                        <Box
-                          sx={{
-                            border: "1px solid #E5E7EB",
-                            background: "#F9FAFB",
-                            borderRadius: "10px",
-                            px: 1.4,
-                            py: 0.8,
-                            minHeight: "34px",
-                            display: "flex",
-                            alignItems: "center",
-                            transition: "all 0.2s ease",
-                            "&:hover": {
-                              borderColor: "#F47C20",
-                              background: "#FFFFFF",
-                            },
-                          }}
-                        >
-                          <ItemContributor
-                            name={name}
-                            profile={contributorProfiles[name]}
-                            onSelect={handleContributorClick}
-                          />
-                        </Box>
-                      </Grid>
+                      <Box
+                        key={name}
+                        sx={{
+                          breakInside: "avoid",
+                          border: "1px solid #E5E7EB",
+                          background: "#F9FAFB",
+                          borderRadius: "10px",
+                          px: 1.4,
+                          py: 0.8,
+                          mb: 1.5,
+                          minHeight: "34px",
+                          display: "flex",
+                          alignItems: "center",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#F47C20",
+                            background: "#FFFFFF",
+                          },
+                        }}
+                      >
+                        <ItemContributor
+                          name={name}
+                          profile={contributorProfiles[name]}
+                          onSelect={handleContributorClick}
+                        />
+                      </Box>
                     ))}
-                </Grid>
+                </Box>
               )}
             </Box>
 
@@ -730,22 +745,13 @@ export default function AboutUsPage() {
               <Typography sx={{ color: "#111827", fontWeight: 600, mb: 1 }}>
                 Personal Information
               </Typography>
-              <Typography sx={{ mb: 0.5 }}>
-                <Box component="span" sx={{ fontWeight: 600 }}>Email:</Box>{" "}
-                {profileData.email ?? profileData.Email ?? "Not specified"}
-              </Typography>
-              <Typography sx={{ mb: 0.5 }}>
-                <Box component="span" sx={{ fontWeight: 600 }}>Education:</Box>{" "}
-                {profileData.education ?? profileData.Education ?? "Not specified"}
-              </Typography>
-              <Typography sx={{ mb: 0.5 }}>
-                <Box component="span" sx={{ fontWeight: 600 }}>Major:</Box>{" "}
-                {profileData.major ?? profileData.Major ?? "Not specified"}
-              </Typography>
-              <Typography sx={{ mb: 2 }}>
-                <Box component="span" sx={{ fontWeight: 600 }}>Bio:</Box>{" "}
-                {profileData.bio ?? profileData.Bio ?? "Not specified"}
-              </Typography>
+              <ProfileField label="Email" value={profileData.email ?? profileData.Email} />
+              <ProfileField
+                label="Education"
+                value={profileData.education ?? profileData.Education}
+              />
+              <ProfileField label="Major" value={profileData.major ?? profileData.Major} />
+              <ProfileField label="Bio" value={profileData.bio ?? profileData.Bio} />
 
               {contributorProfiles[selectedContributor] && (
                 <Typography sx={{ mb: 2 }}>
