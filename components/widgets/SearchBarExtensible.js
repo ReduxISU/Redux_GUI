@@ -20,6 +20,10 @@ export default function SearchBarExtensible({
   // Optional explicit ordering for group labels (e.g. ["P", "NPComplete", ...]).
   // Falls back to alphabetical when omitted.
   groupOrder = null,
+  // Optional display formatter for the group header's text (e.g. "NPComplete" ->
+  // "NP-Complete"). Purely cosmetic -- grouping/sorting still uses groupBy's raw
+  // return value, so this doesn't need to (and shouldn't) match groupOrder's entries.
+  groupLabel = null,
   ...props
 }) {
   const [input, setInput] = useState("");
@@ -50,17 +54,28 @@ export default function SearchBarExtensible({
           .map((x) => optionsMap.get(x) ?? x)
         : []}
       groupBy={groupBy ? (option) => groupBy(getKeyByValue(optionsMap, option)) ?? "Unclassified" : undefined}
-      // Bolds and centers the group header so it reads as a section divider, not a
-      // selectable option. `top: -8px` cancels out the Autocomplete listbox's default
-      // 8px top padding, which the sticky header's default `top: 0` doesn't account
-      // for -- without it, the option that just scrolled past peeks above the header
-      // instead of staying fully hidden behind it.
+      // Bold, centered, and set off with its own background/rule so the header reads
+      // as a section divider, not a selectable option -- larger than the option text
+      // it sits above (MUI's ListSubheader defaults to *smaller* than list items,
+      // which undercuts the "this is a heading" read). `top: -8px` cancels out the
+      // Autocomplete listbox's default 8px top padding, which the sticky header's
+      // default `top: 0` doesn't account for -- without it, the option that just
+      // scrolled past peeks above the header instead of staying fully hidden behind it.
       renderGroup={
         groupBy
           ? (params) => (
             <li key={params.key}>
-              <ListSubheader sx={{ top: -8, fontWeight: 700, textAlign: "center" }}>
-                {params.group}
+              <ListSubheader
+                sx={{
+                  top: -8,
+                  fontWeight: 700,
+                  fontSize: "0.95rem",
+                  textAlign: "center",
+                  bgcolor: (theme) => theme.palette.action.hover,
+                  borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+                }}
+              >
+                {groupLabel ? groupLabel(params.group) : params.group}
               </ListSubheader>
               {params.children}
             </li>
