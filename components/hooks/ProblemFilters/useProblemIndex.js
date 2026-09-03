@@ -11,22 +11,22 @@ import { isRenderable } from "../../Visualization/svgs/renderability";
 
 /**
  * Read-only, derived index over every problem's declared metadata tags --
- * complexity class, the set of solver types it has solvers for, the set of
- * solver complexity buckets (worst-case Big-O class: Polynomial/Exponential/
- * Factorial) those solvers fall into, the set of visualization types it has
- * visualizations for, and whether any of those visualizations are actually
- * renderable by this GUI. Deliberately independent of `useProblemProvider`'s
- * stateful selection-reducer tree: `/browse` needs a read-only index of ALL
- * problems at once, not a single-selection flow.
+ * complexity class (both the raw declared value and the NP-Complete-implies-NP
+ * expanded set), problem type, the set of solver types it has solvers for, the
+ * set of visualization types it has visualizations for, and whether any of
+ * those visualizations are actually renderable by this GUI. Deliberately
+ * independent of `useProblemProvider`'s stateful selection-reducer tree:
+ * `/browse` needs a read-only index of ALL problems at once, not a
+ * single-selection flow.
  *
  * Also returns the raw reduction graph (from `requestReductionGraph`) for
  * reachability filtering -- see `useProblemFilters`.
  *
  * @param url Base API URL, e.g. `/api/redux/`.
- * @returns `{ problemIndex: Map<problemName, {complexityClass, solverTypes:
- * Set<string>, solverComplexityBuckets: Set<string>, visualizationTypes:
- * Set<string>, hasRenderableVisualization: boolean}>, reductionGraph: object,
- * loading: boolean }`.
+ * @returns `{ problemIndex: Map<problemName, {complexityClass: string,
+ * complexityClasses: Set<string>, problemType: string, solverTypes: Set<string>,
+ * visualizationTypes: Set<string>, hasRenderableVisualization: boolean}>,
+ * reductionGraph: object, loading: boolean }`.
  */
 export function useProblemIndex(url) {
   const [problemIndex, setProblemIndex] = useState(new Map());
@@ -73,16 +73,21 @@ export function useProblemIndex(url) {
         const problemInfo = info[problemName];
         const complexityClass =
           problemInfo?.complexityClass || problemInfo?.ComplexityClass || "Unclassified";
+        // NP-Complete is a subset of NP by definition (Interfaces/ComplexityClass.cs's
+        // doc comment on NP) -- the engine expands that implication here rather than
+        // requiring every NP-Complete problem to redundantly declare both, so a problem
+        // counts toward (and can be filtered by) both facet options.
+        const complexityClasses = new Set([complexityClass]);
+        if (complexityClass === "NPComplete") complexityClasses.add("NP");
+
+        const problemType =
+          problemInfo?.problemType || problemInfo?.ProblemType || "Unclassified";
 
         const solverTypes = new Set();
-        const solverComplexityBuckets = new Set();
         for (const solverClassName of solversByProblem[problemName] ?? []) {
           const solverInfo = info[solverClassName];
           const solverType = solverInfo?.solverType || solverInfo?.SolverType || "Unclassified";
           solverTypes.add(solverType);
-          const complexityBucket =
-            solverInfo?.complexityBucket || solverInfo?.ComplexityBucket || "Unclassified";
-          solverComplexityBuckets.add(complexityBucket);
         }
 
         const visualizationTypeSet = new Set();
@@ -99,8 +104,9 @@ export function useProblemIndex(url) {
 
         map.set(problemName, {
           complexityClass,
+          complexityClasses,
+          problemType,
           solverTypes,
-          solverComplexityBuckets,
           visualizationTypes: visualizationTypeSet,
           hasRenderableVisualization,
         });
