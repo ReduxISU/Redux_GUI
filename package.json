@@ -33,7 +33,7 @@
     "d3-graphviz": "^5.6.0",
     "dotenv": "^17.4.2",
     "driver.js": "^1.8.0",
-    "next": "^16.3.1",
+    "next": "^16.3.3",
     "node-tikzjax": "^1.0.5",
     "react": "^19.2.6",
     "react-bootstrap": "^2.10.10",
