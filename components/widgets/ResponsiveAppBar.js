@@ -22,7 +22,14 @@ const pages = ['Home', 'About Us', 'Browse', 'Help', 'Contribute']
 
 const ResponsiveAppBar = () => {
     return (
-        <AppBar position="static">
+        // Fixed color, independent of the page's own theme.palette.primary (which
+        // several pages also reuse for their own accent color elsewhere -- e.g.
+        // /browse's purple -- so pulling the banner's color from theme.primary would
+        // mean changing that theme to fix the banner also recolors unrelated things
+        // on the page). color="inherit" so REDUX/AdbIcon/nav buttons below (all
+        // color: 'inherit') pick up this fixed text color instead of the ambient
+        // theme's primary.contrastText.
+        <AppBar position="static" color="inherit" sx={{ bgcolor: '#424242', color: '#fff' }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
