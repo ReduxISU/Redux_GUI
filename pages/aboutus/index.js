@@ -112,13 +112,13 @@ const awards = [
 const thesisAndDissertations = [
   {
     citation:
-      "Andrija Sevaljevic, M.S. Thesis, Idaho State University, “Redux: Design and Implementation of a Reusable Web-Based Visualization System for Algorithmic and Logical Problem Solving”",
+      "Andrija Sevaljevic, M.S. Thesis, Idaho State University, 2026, “Redux: Design and Implementation of a Reusable Web-Based Visualization System for Algorithmic and Logical Problem Solving”",
     url: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2565",
     pdf: "https://portneuf.cose.isu.edu/research/publications/andrija_thesis.pdf",
   },
   {
     citation:
-      "Kaden Marchetti, M.S. Thesis, Idaho State University, “Redux: An Interactive, Dynamic Tool for Learning NP-completeness and Mapping Reductions”",
+      "Kaden Marchetti, M.S. Thesis, Idaho State University, 2023, “Redux: An Interactive, Dynamic Tool for Learning NP-completeness and Mapping Reductions”",
     url: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2206",
     pdf: "https://portneuf.cose.isu.edu/research/publications/kaden_thesis.pdf",
   },
