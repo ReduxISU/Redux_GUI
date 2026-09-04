@@ -211,7 +211,20 @@ function MainPageContent() {
             // marginTop: '25%',
           }}
         >
-          <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
+          {/* The logo's "Idaho State University"/"Computer Science" text and divider
+              line are baked into the PNG as near-black pixels -- can't recolor them
+              per-mode with CSS without also distorting the orange mark, so in dark
+              mode we give the whole logo a white chip to sit on instead of trying to
+              recolor it. */}
+          <Box
+            sx={
+              mode === "dark"
+                ? { bgcolor: "#FFFFFF", borderRadius: "10px", px: 2, py: 1 }
+                : undefined
+            }
+          >
+            <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
+          </Box>
         </Box>
     </Box>
   );
