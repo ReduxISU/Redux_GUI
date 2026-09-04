@@ -132,6 +132,11 @@ export default function VerifyRowReact({
           as="textarea"
           value={certificate}
           onChange={(event) => setCertificate(event.target.value)}
+          style={{
+            backgroundColor: surface.surface,
+            color: text.body,
+            borderColor: surface.border,
+          }}
         ></FormControl>{" "}
         {/**FORM CONTROL 2 (dropdown) */}
         {"Verifier output: " + verifyResult + ""}
