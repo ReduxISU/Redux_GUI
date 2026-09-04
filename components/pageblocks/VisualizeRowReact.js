@@ -41,6 +41,8 @@ import VisualizationLogic from "../widgets/VisualizationLogic";
 import ProblemSection from "../widgets/ProblemSection";
 import { useVisualizationInfo } from "../hooks/ProblemProvider";
 import { isRenderable } from "../Visualization/svgs/renderability";
+import { surfaceColors, textColors } from "../theme";
+import { useThemeMode } from "../ThemeModeContext";
 
 const CARD = { cardBodyText: "DEFAULT BODY", cardHeaderText: "Visualize" };
 const SWITCHES = {
@@ -75,6 +77,10 @@ export default function VisualizeRowReact({
   visualizationTypeMap,
   dragHandleProps,
 }) {
+  const { mode } = useThemeMode();
+  const surface = surfaceColors(mode);
+  const text = textColors(mode);
+
   const visualizationInfo = useVisualizationInfo(url, chosenVisualization);
 
   const unrenderableOptions = (VisualizationOptions || []).filter(
@@ -387,9 +393,9 @@ export default function VisualizeRowReact({
                             title="Drag to reorder"
                             sx={{
                               cursor: 'grab',
-                              color: '#424242',
-                              backgroundColor: '#f5f5f5',
-                              '&:hover': { backgroundColor: '#e0e0e0' },
+                              color: text.body,
+                              backgroundColor: surface.surfaceAlt,
+                              '&:hover': { backgroundColor: surface.surfaceAltHover },
                               mr: 1,
                             }}
                           >
@@ -403,13 +409,14 @@ export default function VisualizeRowReact({
         <div
           data-tour-id="viz-controls"
           style={{
-            border: "2px solid #ccc",
+            border: mode === "dark" ? "2px solid rgba(255,255,255,0.10)" : "2px solid #ccc",
             borderRadius: "8px",
             padding: "16px",
             marginBottom: "20px",
             display: "flex",
             justifyContent: "space-between",
-            backgroundColor: "#f9f9f9",
+            backgroundColor: surface.surfaceAlt,
+            color: text.body,
             flexWrap: "wrap",
           }}
         >
@@ -475,9 +482,9 @@ export default function VisualizeRowReact({
 
           {/* Switches */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <FormControlLabel disabled={disableReduction} checked={showReduction} control={<Switch />} label={SWITCHES.switch3} onChange={handleSwitch3Change} />
-            <FormControlLabel disabled={disableGadget} checked={showGadgets} control={<Switch id="highlightGadgets" />} label={SWITCHES.switch2} onChange={handleSwitch2Change} />
-            <FormControlLabel disabled={disableSolution} checked={showSolution} control={<Switch id="showSolution" />} label={SWITCHES.switch1} onChange={handleSwitch1Change} />
+            <FormControlLabel sx={{ color: text.body }} disabled={disableReduction} checked={showReduction} control={<Switch />} label={SWITCHES.switch3} onChange={handleSwitch3Change} />
+            <FormControlLabel sx={{ color: text.body }} disabled={disableGadget} checked={showGadgets} control={<Switch id="highlightGadgets" />} label={SWITCHES.switch2} onChange={handleSwitch2Change} />
+            <FormControlLabel sx={{ color: text.body }} disabled={disableSolution} checked={showSolution} control={<Switch id="showSolution" />} label={SWITCHES.switch1} onChange={handleSwitch1Change} />
           </div>
         </div>
 

@@ -23,6 +23,8 @@ import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
+import { surfaceColors, textColors } from '../theme';
+import { useThemeMode } from '../ThemeModeContext';
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select Problem To Reduce To", problemName: "ACCORDION FORM ONE PROBLEM NAME" }
 const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
@@ -69,6 +71,10 @@ export default function ReduceToRowReact({
   setReducedInstance,
   dragHandleProps,
 }) {
+  const { mode } = useThemeMode();
+  const surface = surfaceColors(mode);
+  const text = textColors(mode);
+
   const reduceToInfo = useProblemInfo(url, chosenReduceTo);
   const reducerInfo = useReducerInfo(url, chosenReductionType);
 
@@ -199,9 +205,9 @@ export default function ReduceToRowReact({
                     title="Drag to reorder"
                     sx={{
                       cursor: 'grab',
-                      color: '#424242',
-                      backgroundColor: '#f5f5f5',
-                      '&:hover': { backgroundColor: '#e0e0e0' },
+                      color: text.body,
+                      backgroundColor: surface.surfaceAlt,
+                      '&:hover': { backgroundColor: surface.surfaceAltHover },
                       mr: 1,
                     }}
                   >

@@ -276,6 +276,10 @@ export default function ContributePage() {
           underline="none"
           sx={{ display: "inline-flex" }}
         >
+          {/* Logo's "Idaho State University"/"Computer Science" text and divider
+              line are baked into the PNG as near-black pixels -- can't recolor
+              per-mode with CSS without also distorting the orange mark, so in
+              dark mode it gets a white chip to sit on instead. */}
           <Box
             component="img"
             src={isulogo.src}
@@ -286,6 +290,11 @@ export default function ContributePage() {
               display: "block",
               opacity: 1,
               filter: "none",
+              ...(mode === "dark" && {
+                bgcolor: "#FFFFFF",
+                borderRadius: "8px",
+                p: 1,
+              }),
             }}
           />
         </Link>
