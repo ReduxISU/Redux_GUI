@@ -27,22 +27,6 @@ function useSolvedInstance(problemInstance, chosenSolver) {
   return [solvedInstance, setSolvedInstance];
 }
 
-// Builds the label shown for a solver in the dropdown. When the backend has
-// classified the solver (a non-empty, non-"Unclassified" solverType plus a
-// non-empty complexity), append that info; otherwise fall back to the plain
-// solver name so untagged solvers don't render an ugly "(Unclassified · )".
-function formatSolverLabel(info, fallback) {
-  const name = info?.solverName || fallback;
-  const solverType = info?.solverType;
-  const complexity = info?.complexity;
-
-  if (solverType && complexity && solverType !== "Unclassified") {
-    return `${name} (${solverType} · ${complexity})`;
-  }
-
-  return name;
-}
-
 function useSolverNameMap(url, problemNameMap) {
   const [solverNameMap, setSolverNameMap] = useState(new Map());
 
@@ -58,7 +42,7 @@ function useSolverNameMap(url, problemNameMap) {
         for (const s of solvers) {
           const solver = s.split(" ")[0];
           const info = allInfo[solver];
-          map.set(s, formatSolverLabel(info, s));
+          map.set(s, info?.solverName || s);
         }
       }
       setSolverNameMap(map);
