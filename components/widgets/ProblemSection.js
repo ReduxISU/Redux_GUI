@@ -55,7 +55,11 @@ export default function ProblemSection({ children, defaultCollapsed = true }) {
 
   return (
     <div>
-      <Accordion className="accordion" defaultActiveKey={defaultCollapsed ? "1" : "0"}>
+      <Accordion
+        className="accordion"
+        defaultActiveKey={defaultCollapsed ? "1" : "0"}
+        style={{ borderColor: mode === "dark" ? "transparent" : undefined }}
+      >
         <Card
           style={{
             backgroundColor: surface.surface,
