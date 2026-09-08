@@ -23,6 +23,7 @@ import ProblemFilterMenu from '../widgets/ProblemFilterMenu';
 import { useProblemInfo } from '../hooks/ProblemProvider'
 import { useProblemIndex } from '../hooks/ProblemFilters/useProblemIndex';
 import { useProblemFilters } from '../hooks/ProblemFilters/useProblemFilters';
+import { COMPLEXITY_CLASS_ORDER, complexityClassLabel } from '../hooks/ProblemFilters/complexityClassOrder';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
@@ -33,9 +34,12 @@ var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstanc
 const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
-// Display order for the dropdown's complexity-class sections. Unclassified
-// last -- it's the "not yet tagged" bucket, not a real complexity class.
-const COMPLEXITY_CLASS_ORDER = ["P", "NPComplete", "NPHard", "NPIntermediate", "QuantumOracle", "Unclassified"];
+// Display order for the dropdown's complexity-class sections -- see
+// complexityClassOrder.js for the reasoning. Note SearchBarExtensible's groupOrder
+// lookup resolves a value not in this list to sort index -1, i.e. the *top*, not
+// the bottom -- so every declared value must be in COMPLEXITY_CLASS_ORDER, not just
+// the ones currently in use, or a future problem taking on an unlisted class would
+// jump above P.
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
@@ -46,10 +50,8 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
   const {
     selectedComplexityClasses,
     setSelectedComplexityClasses,
-    selectedSolverComplexityBuckets,
-    setSelectedSolverComplexityBuckets,
-    selectedVisualizationTypes,
-    setSelectedVisualizationTypes,
+    selectedProblemTypes,
+    setSelectedProblemTypes,
     filteredProblems,
     clearFilters,
   } = useProblemFilters(problemIndex, reductionGraph);
@@ -175,7 +177,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
         // It makes description clean
         info: problemInfo.problemDefinition ?? "",
         classification: [
-          { label: "Complexity class", value: problemInfo.complexityClass || "Unclassified" },
+          { label: "Complexity class", value: complexityClassLabel(problemInfo.complexityClass || "Unclassified") },
         ],
         // Source shown on its own line here
         source:
@@ -217,10 +219,8 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           problemIndex={problemIndex}
           selectedComplexityClasses={selectedComplexityClasses}
           setSelectedComplexityClasses={setSelectedComplexityClasses}
-          selectedSolverComplexityBuckets={selectedSolverComplexityBuckets}
-          setSelectedSolverComplexityBuckets={setSelectedSolverComplexityBuckets}
-          selectedVisualizationTypes={selectedVisualizationTypes}
-          setSelectedVisualizationTypes={setSelectedVisualizationTypes}
+          selectedProblemTypes={selectedProblemTypes}
+          setSelectedProblemTypes={setSelectedProblemTypes}
           clearFilters={clearFilters}
         />{" "}
         <PopoverTooltipClick toolTip={tip} />
