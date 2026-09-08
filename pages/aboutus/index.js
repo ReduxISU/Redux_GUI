@@ -51,18 +51,18 @@ const contributorProfiles = {
   },
 };
 
-const publicationsAndAwards = [
+const publications = [
   {
     citation:
-      "K. Marchetti and P. Bodily. 2022. Visualizing the 3SAT to CLIQUE Reduction Process. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
-    doi: "https://ieeexplore.ieee.org/document/9796851",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/Visualizing_the_3SAT_to_CLIQUE_Reduction.pdf",
+      "P. M. Bodily, “LLMs, Computational Theory, and Redux: New Directions for CC in Computational Complexity,” in Proceedings of the Workshop on Theoretical CS and Computational Creativity, 2026.",
+    url: "https://computationalcreativity.net/workshops/theorycs-cc-iccc26/",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/bodily_cc_in_computational_complexity.pdf",
   },
   {
     citation:
-      "K. Marchetti and P. Bodily. 2022. KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–4. Best Student Paper Award.",
-    doi: "https://ieeexplore.ieee.org/document/9796945",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/KAMI_Leveraging_Open_Source_to_Solve_Complex_Problems.pdf",
+      "R. Phillips and P. M. Bodily. 2025. SPADE: A library for programmatic parsing and verification of discrete data structures. In 2025 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/11039449",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/SPADE.pdf",
   },
   {
     citation:
@@ -78,10 +78,25 @@ const publicationsAndAwards = [
   },
   {
     citation:
-      "R. Phillips and P. M. Bodily. 2025. SPADE: A library for programmatic parsing and verification of discrete data structures. In 2025 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
-    doi: "https://ieeexplore.ieee.org/document/11039449",
-    pdf: "https://portneuf.cose.isu.edu/research/publications/SPADE.pdf",
+      "K. Marchetti and P. Bodily. 2022. KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–4. Best Student Paper Award.",
+    doi: "https://ieeexplore.ieee.org/document/9796945",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/KAMI_Leveraging_Open_Source_to_Solve_Complex_Problems.pdf",
   },
+  {
+    citation:
+      "K. Marchetti and P. Bodily. 2022. Visualizing the 3SAT to CLIQUE Reduction Process. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/9796851",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/Visualizing_the_3SAT_to_CLIQUE_Reduction.pdf",
+  },
+  {
+    citation:
+      "P. M. Bodily and D. Ventura, “Open computational creativity problems in computational theory,” in Proceedings of the 13th International Conference on Computational Creativity (ICCC), 2022.",
+    url: "https://computationalcreativity.net/iccc22/accepted-papers/",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/ICCC-2022_17L_Bodily-and-Ventura.pdf",
+  },
+];
+
+const awards = [
   {
     citation:
       "Best Graduate Poster Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
@@ -91,6 +106,21 @@ const publicationsAndAwards = [
     citation:
       "Best Graduate Oral Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
     url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
+  },
+];
+
+const thesisAndDissertations = [
+  {
+    citation:
+      "Andrija Sevaljevic, M.S. Thesis, Idaho State University, 2026, “Redux: Design and Implementation of a Reusable Web-Based Visualization System for Algorithmic and Logical Problem Solving”",
+    url: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2565",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/andrija_thesis.pdf",
+  },
+  {
+    citation:
+      "Kaden Marchetti, M.S. Thesis, Idaho State University, 2023, “Redux: An Interactive, Dynamic Tool for Learning NP-completeness and Mapping Reductions”",
+    url: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2206",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/kaden_thesis.pdf",
   },
 ];
 
@@ -460,7 +490,7 @@ export default function AboutUsPage() {
             </Box>
 
             <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-              <TitleSection>PUBLICATIONS AND AWARDS</TitleSection>
+              <TitleSection>PUBLICATIONS</TitleSection>
 
               <Typography
                 sx={{
@@ -469,12 +499,94 @@ export default function AboutUsPage() {
                   mb: 3,
                 }}
               >
-                Below are research publications and awards associated with the
-                Redux project and its contributors.
+                Below are research publications associated with the Redux
+                project and its contributors.
               </Typography>
 
               <Box sx={{ display: "grid", gap: 0.8 }}>
-                {publicationsAndAwards.map((item, index) => (
+                {publications.map((item, index) => (
+                  <Box key={index} sx={innerCard}>
+                    <Typography
+                      sx={{
+                        color: "#374151",
+                        fontSize: "0.82rem",
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      {item.citation}{" "}
+
+                      {item.doi && (
+                        <Link
+                          href={item.doi}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [DOI]
+                        </Link>
+                      )}
+
+                      {item.url && (
+                        <Link
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [URL]
+                        </Link>
+                      )}
+
+                      {item.pdf && (
+                        <Link
+                          href={item.pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [PDF]
+                        </Link>
+                      )}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+              <TitleSection>AWARDS</TitleSection>
+
+              <Typography
+                sx={{
+                  color: "#374151",
+                  fontSize: "0.87rem",
+                  mb: 3,
+                }}
+              >
+                Below are awards associated with the Redux project and its
+                contributors.
+              </Typography>
+
+              <Box sx={{ display: "grid", gap: 0.8 }}>
+                {awards.map((item, index) => (
                   <Box key={index} sx={innerCard}>
                     <Typography
                       sx={{
@@ -542,6 +654,71 @@ export default function AboutUsPage() {
             </Box>
 
             <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+              <TitleSection>THESES AND DISSERTATIONS</TitleSection>
+
+              <Typography
+                sx={{
+                  color: "#374151",
+                  fontSize: "0.87rem",
+                  mb: 3,
+                }}
+              >
+                Below are theses and dissertations associated with the Redux
+                project.
+              </Typography>
+
+              <Box sx={{ display: "grid", gap: 0.8 }}>
+                {thesisAndDissertations.map((item, index) => (
+                  <Box key={index} sx={innerCard}>
+                    <Typography
+                      sx={{
+                        color: "#374151",
+                        fontSize: "0.82rem",
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      {item.citation}{" "}
+
+                      {item.url && (
+                        <Link
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [URL]
+                        </Link>
+                      )}
+
+                      {item.pdf && (
+                        <Link
+                          href={item.pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            ml: 0.4,
+                          }}
+                        >
+                          [PDF]
+                        </Link>
+                      )}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
               <TitleSection>SUPPORT</TitleSection>
 
               <Typography
@@ -557,7 +734,8 @@ export default function AboutUsPage() {
 
               <Box sx={{ display: "grid", gap: 0.8 }}>
                 {[
-                  "“Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” Summer Authentic Research Experience (SARE), Idaho Community-engaged Resilience for Energy-Water Systems (I-CREWS), National Science Foundation (NSF). 2026.",
+                  "Bodily, P.M. (Co-Lead), Bradley, J. (Co-Lead), Romney, A. (Co-PI), Petersen, J. (Co-I), “BengalBot MCP: Building AI-Literate Students at Idaho State University,” U.S. Department of Education (DOE) Fund for Improvement of Post-Secondary Education (FIPSE). $300,000. 2026.",
+                  "Trosper, M.J., “Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” Summer Authentic Research Experience (SARE), Idaho Community-engaged Resilience for Energy-Water Systems (I-CREWS), National Science Foundation (NSF). $6,000. 2026.",
                   "“Crowd-Sourcing and Visualization of Advanced Computational Theory to Facilitate Application of Algorithmic Knowledgebase to Real-World Combinatorial Problems,” Center for Advanced Energy Studies (CAES). 2024.",
                   "“Application of advanced computational theory to facilitate efficient solutions to real-world combinatorial problems”, Center for Advanced Energy Studies (CAES). 2022.",
                   "“Interactive visualization tools for teaching computer science theory”, Idaho State University Office of Research. 2022.",
