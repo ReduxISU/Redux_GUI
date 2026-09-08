@@ -26,8 +26,14 @@ export function ThemeModeProvider({ children }) {
   const [mode, setMode] = useState("light");
 
   useEffect(() => {
+    // Deliberately read-then-setState here, not moved into a useState lazy initializer:
+    // localStorage isn't available during SSR, so the server always renders "light". Reading
+    // it in the initializer would make the client's first (pre-hydration) render read real
+    // localStorage and could produce "dark" while the server-rendered HTML says "light" --
+    // a hydration mismatch, which is worse than this rule's generic extra-render concern.
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved === "light" || saved === "dark") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMode(saved);
     }
   }, []);
