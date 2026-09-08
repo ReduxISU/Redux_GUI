@@ -19,9 +19,7 @@ import isulogo from "../components/images/ISULogo.png";
 import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
 import {
   Box,
-  createTheme,
   Grid,
-  ThemeProvider,
   Typograph,
 } from "@mui/material";
 import { Container } from "react-bootstrap";
@@ -31,6 +29,8 @@ import { useUnload } from "../components/eventHandlers/handleUnload";
 import ShareButton from "../components/widgets/ShareButton";
 import TourLauncher from "../components/tour/TourLauncher";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
+import { pageBackground } from "../components/theme";
+import { useThemeMode } from "../components/ThemeModeContext";
 
 import {
   DndContext,
@@ -105,32 +105,7 @@ function SortableRow({ id, children }) {
  */
 function MainPageContent() {
   const imgStyle = { textAlign: "center" };
-
-  const theme = createTheme({
-    palette: {
-      mode: "light",
-      primary: {
-        main: "#424242",
-        lGray: "#f3f3f3",
-        contrastText: "#fff", //button text white instead of black
-      },
-      secondary: {
-        main: "#f47920",
-      },
-      white: {
-        main: "#ffffff",
-      },
-    },
-    // overrides: {
-    //   MuiButton: {
-    //     raisedPrimary: {
-    //       color: 'white',
-    //       contrastText: "#fff" //button text white instead of black
-
-    //     },
-    //   },
-    // }
-  });
+  const { mode } = useThemeMode();
 
   //useHandleParameters();
 
@@ -188,9 +163,8 @@ function MainPageContent() {
   }
 
   return (
-    <>
-      <ThemeProvider theme={theme}>
-        <ResponsiveAppBar></ResponsiveAppBar>
+    <Box sx={{ minHeight: "100vh", background: pageBackground(mode) }}>
+      <ResponsiveAppBar></ResponsiveAppBar>
 
         <div className="container-fluid">
           {/** This is an artifact from the old bootstrap code, may be deprecated */}
@@ -227,19 +201,32 @@ function MainPageContent() {
 
         {/* <footer className='fixed-bottom centered'> */}
         {/* </footer> */}
-      </ThemeProvider>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "10vh",
-          // marginTop: '25%',
-        }}
-      >
-        <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
-      </Box>
-    </>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "10vh",
+            // marginTop: '25%',
+          }}
+        >
+          {/* The logo's "Idaho State University"/"Computer Science" text and divider
+              line are baked into the PNG as near-black pixels -- can't recolor them
+              per-mode with CSS without also distorting the orange mark, so in dark
+              mode we give the whole logo a white chip to sit on instead of trying to
+              recolor it. */}
+          <Box
+            sx={
+              mode === "dark"
+                ? { bgcolor: "#FFFFFF", borderRadius: "10px", px: 2, py: 1 }
+                : undefined
+            }
+          >
+            <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
+          </Box>
+        </Box>
+    </Box>
   );
 }
 

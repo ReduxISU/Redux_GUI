@@ -21,6 +21,8 @@ import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import { useVerifierInfo } from '../hooks/ProblemProvider';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
+import { surfaceColors, textColors } from '../theme';
+import { useThemeMode } from '../ThemeModeContext';
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select verifier" }
 const BUTTON = { buttonText: "Verify" }
@@ -38,6 +40,10 @@ export default function VerifyRowReact({
   verifierNameMap,
   dragHandleProps,
 }) {
+  const { mode } = useThemeMode();
+  const surface = surfaceColors(mode);
+  const text = textColors(mode);
+
   const [certificate, setCertificate] = useState("");
   const [verifyResult, setVerifyResult] = useState("");
   const verifierInfo = useVerifierInfo(url, chosenVerifier);
@@ -109,9 +115,9 @@ export default function VerifyRowReact({
                             title="Drag to reorder"
                             sx={{
                               cursor: 'grab',
-                              color: '#424242',
-                              backgroundColor: '#f5f5f5',
-                              '&:hover': { backgroundColor: '#e0e0e0' },
+                              color: text.body,
+                              backgroundColor: surface.surfaceAlt,
+                              '&:hover': { backgroundColor: surface.surfaceAltHover },
                               mr: 1,
                             }}
                           >
@@ -126,6 +132,11 @@ export default function VerifyRowReact({
           as="textarea"
           value={certificate}
           onChange={(event) => setCertificate(event.target.value)}
+          style={{
+            backgroundColor: surface.surface,
+            color: text.body,
+            borderColor: surface.border,
+          }}
         ></FormControl>{" "}
         {/**FORM CONTROL 2 (dropdown) */}
         {"Verifier output: " + verifyResult + ""}
