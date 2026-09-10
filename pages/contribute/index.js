@@ -1,9 +1,13 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import ProblemSection from "../../components/widgets/ProblemSection";
 import isulogo from "../../components/images/ISULogo.png";
 
 import { Container, Box, Typography, Link } from "@mui/material";
-import { pageBackground, sectionCardSx, innerCardSx, textColors } from "../../components/theme";
+import { pageBackground, innerCardSx, textColors } from "../../components/theme";
 import { useThemeMode } from "../../components/ThemeModeContext";
+
+// Expanded section bodies scroll instead of growing the page without bound.
+const SCROLLABLE_BODY_SX = { maxHeight: "60vh", overflowY: "auto", pr: 1 };
 
 const contributionSteps = [
   "Creating a fork of the appropriate repository, front end or back end",
@@ -33,7 +37,7 @@ function SectionTitle({ children }) {
         fontSize: "0.85rem",
         fontWeight: 700,
         letterSpacing: "0.22em",
-        mb: 2,
+        whiteSpace: "nowrap",
       }}
     >
       {children}
@@ -44,7 +48,6 @@ function SectionTitle({ children }) {
 export default function ContributePage() {
   const { mode } = useThemeMode();
   const text = textColors(mode);
-  const sectionCardStyle = sectionCardSx(mode);
   const innerCard = innerCardSx(mode);
 
   return (
@@ -58,205 +61,257 @@ export default function ContributePage() {
 
       <Container maxWidth="lg" sx={{ pt: 4, pb: 5 }}>
         <Box sx={{ maxWidth: "980px", mx: "auto" }}>
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>CONTRIBUTE TO REDUX</SectionTitle>
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={false}>
+              <ProblemSection.Header title={<SectionTitle>CONTRIBUTE TO REDUX</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.heading,
+                      fontSize: "1rem",
+                      fontWeight: 700,
+                      lineHeight: 1.8,
+                      mb: 1.5,
+                    }}
+                  >
+                    Redux depends on contributors like you.
+                  </Typography>
 
-            <Typography
-              sx={{
-                color: text.heading,
-                fontSize: "1rem",
-                fontWeight: 700,
-                lineHeight: 1.8,
-                mb: 1.5,
-              }}
-            >
-              Redux depends on contributors like you.
-            </Typography>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-                mb: 2.2,
-              }}
-            >
-              Our goal from the beginning has not been to build a knowledge
-              base ourselves but to build a framework for crowd-sourced
-              contribution across the world, think Wikipedia. We hope to see
-              contributors add everything from new problems, algorithms,
-              reductions, visualizations, features, bug fixes, and beyond. Our
-              goal is to make the framework easy to understand and even easier
-              to extend. Below are tutorials and helpful information to get
-              you started.
-            </Typography>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                mb: 2,
-              }}
-            >
-              Any contribution to Redux requires:
-            </Typography>
-
-            <Box sx={{ display: "grid", gap: 1 }}>
-              {contributionSteps.map((step) => (
-                <Box key={step} sx={innerCard}>
                   <Typography
                     sx={{
                       color: text.body,
-                      fontSize: "0.82rem",
-                      lineHeight: 1.7,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      textAlign: "justify",
+                      mb: 2.2,
                     }}
                   >
-                    • {step}
+                    Our goal from the beginning has not been to build a knowledge
+                    base ourselves but to build a framework for crowd-sourced
+                    contribution across the world, think Wikipedia. We hope to see
+                    contributors add everything from new problems, algorithms,
+                    reductions, visualizations, features, bug fixes, and beyond. Our
+                    goal is to make the framework easy to understand and even easier
+                    to extend. Below are tutorials and helpful information to get
+                    you started.
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      mb: 2,
+                    }}
+                  >
+                    Any contribution to Redux requires:
+                  </Typography>
+
+                  <Box sx={{ display: "grid", gap: 1 }}>
+                    {contributionSteps.map((step) => (
+                      <Box key={step} sx={innerCard}>
+                        <Typography
+                          sx={{
+                            color: text.body,
+                            fontSize: "0.82rem",
+                            lineHeight: 1.7,
+                          }}
+                        >
+                          • {step}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
+          </Box>
+
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>TUTORIAL VIDEOS</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.8,
+                      mb: 2,
+                    }}
+                  >
+                    Here are tutorial videos for each of these steps:
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      width: "100%",
+                      borderRadius: "12px",
+                      overflow: "hidden",
+                      border: mode === "dark" ? "1px solid rgba(255,255,255,0.10)" : "1px solid #E5E7EB",
+                    }}
+                  >
+                    <iframe
+                      width="100%"
+                      height="420"
+                      src="https://www.youtube.com/embed/9vTl522tyhU"
+                      title="Redux Setup Tutorial"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </Box>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
+          </Box>
+
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header
+                title={<SectionTitle>CHECKLIST FOR A SUCCESSFUL PULL REQUEST</SectionTitle>}
+                titleWidth="auto"
+              >
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      textAlign: "justify",
+                    }}
+                  >
+                    Before submitting a pull request, make sure your changes run
+                    locally, follow the existing project structure, include clear
+                    descriptions of the work completed, and are tested carefully.
+                    Additional checklist details will be added as the contribution
+                    documentation is expanded.
                   </Typography>
                 </Box>
-              ))}
-            </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>TUTORIAL VIDEOS</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.8,
-                mb: 2,
-              }}
-            >
-              Here are tutorial videos for each of these steps:
-            </Typography>
-
-            <Box
-              sx={{
-                width: "100%",
-                borderRadius: "12px",
-                overflow: "hidden",
-                border: mode === "dark" ? "1px solid rgba(255,255,255,0.10)" : "1px solid #E5E7EB",
-              }}
-            >
-              <iframe
-                width="100%"
-                height="420"
-                src="https://www.youtube.com/embed/9vTl522tyhU"
-                title="Redux Setup Tutorial"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </Box>
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>HELPFUL LINKS</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Box sx={{ display: "grid", gap: 1 }}>
+                    {helpfulLinks.map((link) => (
+                      <Box key={link.label} sx={innerCard}>
+                        <Link
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.82rem",
+                          }}
+                        >
+                          {link.label}
+                        </Link>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>CHECKLIST FOR A SUCCESSFUL PULL REQUEST</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-              }}
-            >
-              Before submitting a pull request, make sure your changes run
-              locally, follow the existing project structure, include clear
-              descriptions of the work completed, and are tested carefully.
-              Additional checklist details will be added as the contribution
-              documentation is expanded.
-            </Typography>
-          </Box>
-
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>HELPFUL LINKS</SectionTitle>
-
-            <Box sx={{ display: "grid", gap: 1 }}>
-              {helpfulLinks.map((link) => (
-                <Box key={link.label} sx={innerCard}>
-                  <Link
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="hover"
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>GET INVOLVED</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
                     sx={{
-                      color: "#F47C20",
-                      fontWeight: 600,
-                      fontSize: "0.82rem",
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      textAlign: "justify",
                     }}
                   >
-                    {link.label}
-                  </Link>
+                    Interested in getting more involved? We love collaboration!
+                    Whether you are an industry partner, a university research
+                    group, or an individual passionate about getting involved, we
+                    have lots of project ideas we could use your help with. If
+                    interested, please reach out to Dr. Paul Bodily at{" "}
+                    <Link
+                      href="mailto:bodipaul@isu.edu"
+                      underline="hover"
+                      sx={{
+                        color: "#F47C20",
+                        fontWeight: 600,
+                      }}
+                    >
+                      bodipaul@isu.edu
+                    </Link>.
+                  </Typography>
                 </Box>
-              ))}
-            </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>GET INVOLVED</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-              }}
-            >
-              Interested in getting more involved? We love collaboration!
-              Whether you are an industry partner, a university research
-              group, or an individual passionate about getting involved, we
-              have lots of project ideas we could use your help with. If
-              interested, please reach out to Dr. Paul Bodily at{" "}
-              <Link
-                href="mailto:bodipaul@isu.edu"
-                underline="hover"
-                sx={{
-                  color: "#F47C20",
-                  fontWeight: 600,
-                }}
-              >
-                bodipaul@isu.edu
-              </Link>.
-            </Typography>
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>TERMS OF USE</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      textAlign: "justify",
+                    }}
+                  >
+                    Terms of Use content will be added here. This section is
+                    intended to describe expectations and conditions for using Redux.
+                  </Typography>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>TERMS OF USE</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-              }}
-            >
-              Terms of Use content will be added here. This section is
-              intended to describe expectations and conditions for using Redux.
-            </Typography>
-          </Box>
-
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>PRIVACY POLICY</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-              }}
-            >
-              Privacy Policy content will be added here. This section is
-              intended to explain what information is collected, how it is
-              used, and how user privacy is protected.
-            </Typography>
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>PRIVACY POLICY</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      textAlign: "justify",
+                    }}
+                  >
+                    Privacy Policy content will be added here. This section is
+                    intended to explain what information is collected, how it is
+                    used, and how user privacy is protected.
+                  </Typography>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
         </Box>
       </Container>

@@ -1,4 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import {
   Avatar,
   Box,
@@ -17,10 +18,16 @@ import { useEffect, useState } from "react";
 import isulogo from "../../components/images/ISULogo.png";
 import { requestContributorDirectory, requestContributorProfile } from "../../components/redux";
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import { pageBackground, sectionCardSx, innerCardSx, textColors, surfaceColors } from "../../components/theme";
+import ProblemSection from "../../components/widgets/ProblemSection";
+import { pageBackground, innerCardSx, textColors, surfaceColors } from "../../components/theme";
 import { useThemeMode } from "../../components/ThemeModeContext";
 
 const reduxBaseUrl = "/api/redux/";
+
+// Expanded section bodies scroll instead of growing the page without bound --
+// matters most for Contributors (long multi-column list) and
+// Publications/Awards (growing lists over time).
+const SCROLLABLE_BODY_SX = { maxHeight: "60vh", overflowY: "auto", pr: 1 };
 
 const publications = [
   {
@@ -95,7 +102,8 @@ const thesisAndDissertations = [
   },
 ];
 
-function TitleSection({ children }) {
+// Section title used inside each accordion header (ProblemSection.Header).
+function SectionTitle({ children }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
   return (
@@ -105,7 +113,7 @@ function TitleSection({ children }) {
         fontSize: "0.85rem",
         fontWeight: 700,
         letterSpacing: "0.22em",
-        mb: 2,
+        whiteSpace: "nowrap",
       }}
     >
       {children}
@@ -168,24 +176,33 @@ function ItemContributor({ name, profile, onSelect }) {
             </Box>
           </Box>
 
-          <Link
-            href={profile.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="hover"
-            sx={{
-              color: "#F47C20",
-              fontSize: "0.9rem",
-              fontWeight: 500,
-              display: "inline-block",
-              mt: 0.25,
-              "&:hover": {
-                color: "#d9670f",
-              },
-            }}
-          >
-            View GitHub Profile
-          </Link>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.25 }}>
+            <Link
+              href={profile.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${name}'s GitHub profile`}
+              sx={{
+                color: "#F47C20",
+                display: "inline-flex",
+                alignItems: "center",
+                "&:hover": {
+                  color: "#d9670f",
+                },
+              }}
+            >
+              <GitHubIcon fontSize="small" />
+            </Link>
+            <Typography
+              sx={{
+                color: text.caption,
+                fontSize: "0.82rem",
+                fontStyle: "italic",
+              }}
+            >
+              Click name for more details
+            </Typography>
+          </Box>
         </Box>
       }
       slotProps={{
@@ -271,7 +288,6 @@ export default function AboutUsPage() {
   const { mode } = useThemeMode();
   const text = textColors(mode);
   const surface = surfaceColors(mode);
-  const theSectionCard = sectionCardSx(mode);
   const innerCard = innerCardSx(mode);
 
   const [contributors, setContributors] = useState([]);
@@ -345,462 +361,515 @@ export default function AboutUsPage() {
 
       <Container maxWidth="lg" sx={{ pt: 4, pb: 5 }}>
         <Box sx={{ maxWidth: "980px", mx: "auto" }}>
-          <Box id="about" sx={{ ...theSectionCard, mb: 1.5 }}>
-            <TitleSection>ABOUT US</TitleSection>
+          <Box id="about" sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={false}>
+              <ProblemSection.Header title={<SectionTitle>ABOUT US</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      textAlign: "justify",
+                    }}
+                  >
+                    Welcome to{" "}
+                    <Box component="span" sx={{ color: text.heading, fontWeight: 700 }}>
+                      Redux
+                    </Box>
+                    , a dynamic, interactive computer science knowledgebase
+                    consisting of canonical computer science problems,
+                    solutions, and reduction algorithms. Join our community of
+                    problem solvers and unravel computational complexities
+                    using the application library. The project was greatly
+                    inspired by Richard Karp&apos;s paper{" "}
+                    <Link
+                      href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{ color: "#F47C20", fontWeight: 600 }}
+                    >
+                      &quot;Reducibility Among Combinatorial Problems&quot;
+                    </Link>{" "}
+                    (Karp, 1972).
+                  </Typography>
 
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-              }}
-            >
-              Welcome to{" "}
-              <Box component="span" sx={{ color: text.heading, fontWeight: 700 }}>
-                Redux
-              </Box>
-              , a platform for NP-Complete problems. Input your challenges and
-              gain access to reductions, solutions, verifiers, and
-              visualizations. Join our community of problem solvers and unravel
-              computational complexities using the application library. The
-              project was greatly inspired by Richard Karp&apos;s paper{" "}
-              <Link
-                href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                sx={{ color: "#F47C20", fontWeight: 600 }}
-              >
-                &quot;Reducibility Among Combinatorial Problems&quot;
-              </Link>{" "}
-              (Karp, 1972).
-            </Typography>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.8,
+                      mt: 2,
+                      textAlign: "justify",
+                    }}
+                  >
+                    When citing Redux, please use the following citation:
+                  </Typography>
 
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.8,
-                mt: 2,
-                textAlign: "justify",
-              }}
-            >
-              When citing Redux, please use the following citation:
-            </Typography>
-
-            <Box sx={{ ...innerCard, mt: 1.2 }}>
-              <Typography
-                sx={{
-                  color: text.body,
-                  fontSize: "0.82rem",
-                  lineHeight: 1.7,
-                }}
-              >
-                Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb
-                Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and
-                Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge
-                Base for Teaching NP-completeness. In Proceedings of the 2024
-                on Innovation and Technology in Computer Science Education V. 1
-                (ITiCSE 2024). Association for Computing Machinery, New York,
-                NY, USA, 255–261.{" "}
-                <Link
-                  href="https://dl.acm.org/doi/10.1145/3649217.3653544"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="hover"
-                  sx={{ color: "#F47C20", fontWeight: 600, ml: 0.4 }}
-                >
-                  [DOI]
-                </Link>
-                <Link
-                  href="https://portneuf.cose.isu.edu/research/publications/ITiSCE_Redux_Submission_2024_WIP.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="hover"
-                  sx={{ color: "#F47C20", fontWeight: 600, ml: 0.4 }}
-                >
-                  [PDF]
-                </Link>
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-            <TitleSection>CONTRIBUTORS</TitleSection>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.6,
-                mb: 2,
-              }}
-            >
-              This project was started by{" "}
-              <Link
-                href="https://www2.cose.isu.edu/~bodipaul/index.php"
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                sx={{ color: "#F47C20", fontWeight: 600 }}
-              >
-                Dr. Paul Bodily
-              </Link>
-              , who is also the ISU Faculty Sponsor of the project.
-            </Typography>
-
-            <Typography
-              sx={{
-                color: text.faint,
-                fontSize: "0.87rem",
-                mb: 2,
-              }}
-            >
-              Project contributors
-            </Typography>
-
-            {contributorsLoading ? (
-              <Typography sx={{ color: text.caption, fontSize: "0.85rem" }}>
-                Loading contributors...
-              </Typography>
-            ) : contributors.length === 0 ? (
-              <Typography sx={{ color: text.caption, fontSize: "0.85rem" }}>
-                Contributor list unavailable right now.
-              </Typography>
-            ) : (
-              // CSS multi-column layout (not a Grid) so the alphabetical order reads
-              // top-to-bottom within a column, then wraps to the next column -- a
-              // Grid/flex wrap would instead fill left-to-right row by row, breaking
-              // the alphabetical reading order across the row.
-              <Box sx={{ columns: { xs: 1, sm: 2, md: 3 }, columnGap: "12px" }}>
-                {[...contributors]
-                  .sort((a, b) => getLastName(a).localeCompare(getLastName(b)))
-                  .map((name) => (
-                    <Box
-                      key={name}
+                  <Box sx={{ ...innerCard, mt: 1.2 }}>
+                    <Typography
                       sx={{
-                        breakInside: "avoid",
-                        border: `1px solid ${surface.border}`,
-                        background: surface.surfaceAlt,
-                        borderRadius: "10px",
-                        px: 1.4,
-                        py: 0.8,
-                        mb: 1.5,
-                        minHeight: "34px",
-                        display: "flex",
-                        alignItems: "center",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          borderColor: "#F47C20",
-                          background: surface.surfaceAltHover,
-                        },
+                        color: text.body,
+                        fontSize: "0.82rem",
+                        lineHeight: 1.7,
                       }}
                     >
-                      <ItemContributor
-                        name={name}
-                        profile={contributorProfiles[name]}
-                        onSelect={handleContributorClick}
-                      />
+                      Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb
+                      Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and
+                      Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge
+                      Base for Teaching NP-completeness. In Proceedings of the 2024
+                      on Innovation and Technology in Computer Science Education V. 1
+                      (ITiCSE 2024). Association for Computing Machinery, New York,
+                      NY, USA, 255–261.{" "}
+                      <Link
+                        href="https://dl.acm.org/doi/10.1145/3649217.3653544"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{ color: "#F47C20", fontWeight: 600, ml: 0.4 }}
+                      >
+                        [DOI]
+                      </Link>
+                      <Link
+                        href="https://portneuf.cose.isu.edu/research/publications/ITiSCE_Redux_Submission_2024_WIP.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{ color: "#F47C20", fontWeight: 600, ml: 0.4 }}
+                      >
+                        [PDF]
+                      </Link>
+                    </Typography>
+                  </Box>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
+          </Box>
+
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>CONTRIBUTORS</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.6,
+                      mb: 2,
+                    }}
+                  >
+                    This project was started by{" "}
+                    <Link
+                      href="https://www2.cose.isu.edu/~bodipaul/index.php"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{ color: "#F47C20", fontWeight: 600 }}
+                    >
+                      Dr. Paul Bodily
+                    </Link>
+                    , who is also the ISU Faculty Sponsor of the project.
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      color: text.faint,
+                      fontSize: "0.87rem",
+                      mb: 2,
+                    }}
+                  >
+                    Project contributors
+                  </Typography>
+
+                  {contributorsLoading ? (
+                    <Typography sx={{ color: text.caption, fontSize: "0.85rem" }}>
+                      Loading contributors...
+                    </Typography>
+                  ) : contributors.length === 0 ? (
+                    <Typography sx={{ color: text.caption, fontSize: "0.85rem" }}>
+                      Contributor list unavailable right now.
+                    </Typography>
+                  ) : (
+                    // CSS multi-column layout (not a Grid) so the alphabetical order reads
+                    // top-to-bottom within a column, then wraps to the next column -- a
+                    // Grid/flex wrap would instead fill left-to-right row by row, breaking
+                    // the alphabetical reading order across the row.
+                    <Box sx={{ columns: { xs: 1, sm: 2, md: 3 }, columnGap: "12px" }}>
+                      {[...contributors]
+                        .sort((a, b) => getLastName(a).localeCompare(getLastName(b)))
+                        .map((name) => (
+                          <Box
+                            key={name}
+                            sx={{
+                              breakInside: "avoid",
+                              border: `1px solid ${surface.border}`,
+                              background: surface.surfaceAlt,
+                              borderRadius: "10px",
+                              px: 1.4,
+                              py: 0.8,
+                              mb: 1.5,
+                              minHeight: "34px",
+                              display: "flex",
+                              alignItems: "center",
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                borderColor: "#F47C20",
+                                background: surface.surfaceAltHover,
+                              },
+                            }}
+                          >
+                            <ItemContributor
+                              name={name}
+                              profile={contributorProfiles[name]}
+                              onSelect={handleContributorClick}
+                            />
+                          </Box>
+                        ))}
                     </Box>
-                  ))}
-              </Box>
-            )}
+                  )}
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
 
-          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-            <TitleSection>PUBLICATIONS</TitleSection>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                mb: 3,
-              }}
-            >
-              Below are research publications associated with the Redux project and its
-              contributors.
-            </Typography>
-
-            <Box sx={{ display: "grid", gap: 0.8 }}>
-              {publications.map((item, index) => (
-                <Box key={index} sx={innerCard}>
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>PUBLICATIONS</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
                   <Typography
                     sx={{
                       color: text.body,
-                      fontSize: "0.82rem",
-                      lineHeight: 1.7,
+                      fontSize: "0.87rem",
+                      mb: 3,
                     }}
                   >
-                    {item.citation}{" "}
-                    {item.doi && (
-                      <Link
-                        href={item.doi}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [DOI]
-                      </Link>
-                    )}
-                    {item.url && (
-                      <Link
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [URL]
-                      </Link>
-                    )}
-                    {item.pdf && (
-                      <Link
-                        href={item.pdf}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [PDF]
-                      </Link>
-                    )}
+                    Below are research publications associated with the Redux project and its
+                    contributors.
                   </Typography>
+
+                  <Box sx={{ display: "grid", gap: 0.8 }}>
+                    {publications.map((item, index) => (
+                      <Box key={index} sx={innerCard}>
+                        <Typography
+                          sx={{
+                            color: text.body,
+                            fontSize: "0.82rem",
+                            lineHeight: 1.7,
+                          }}
+                        >
+                          {item.citation}{" "}
+                          {item.doi && (
+                            <Link
+                              href={item.doi}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              underline="hover"
+                              sx={{
+                                color: "#F47C20",
+                                fontWeight: 600,
+                                fontSize: "0.8rem",
+                                ml: 0.4,
+                              }}
+                            >
+                              [DOI]
+                            </Link>
+                          )}
+                          {item.url && (
+                            <Link
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              underline="hover"
+                              sx={{
+                                color: "#F47C20",
+                                fontWeight: 600,
+                                fontSize: "0.8rem",
+                                ml: 0.4,
+                              }}
+                            >
+                              [URL]
+                            </Link>
+                          )}
+                          {item.pdf && (
+                            <Link
+                              href={item.pdf}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              underline="hover"
+                              sx={{
+                                color: "#F47C20",
+                                fontWeight: 600,
+                                fontSize: "0.8rem",
+                                ml: 0.4,
+                              }}
+                            >
+                              [PDF]
+                            </Link>
+                          )}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
-              ))}
-            </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
 
-          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-            <TitleSection>AWARDS</TitleSection>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                mb: 3,
-              }}
-            >
-              Below are awards associated with the Redux project and its contributors.
-            </Typography>
-
-            <Box sx={{ display: "grid", gap: 0.8 }}>
-              {awards.map((item, index) => (
-                <Box key={index} sx={innerCard}>
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>AWARDS</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
                   <Typography
                     sx={{
                       color: text.body,
-                      fontSize: "0.82rem",
-                      lineHeight: 1.7,
+                      fontSize: "0.87rem",
+                      mb: 3,
                     }}
                   >
-                    {item.citation}{" "}
-                    {item.doi && (
-                      <Link
-                        href={item.doi}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [DOI]
-                      </Link>
-                    )}
-                    {item.pdf && (
-                      <Link
-                        href={item.pdf}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [PDF]
-                      </Link>
-                    )}
-                    {item.url && (
-                      <Link
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [URL]
-                      </Link>
-                    )}
+                    Below are awards associated with the Redux project and its contributors.
                   </Typography>
+
+                  <Box sx={{ display: "grid", gap: 0.8 }}>
+                    {awards.map((item, index) => (
+                      <Box key={index} sx={innerCard}>
+                        <Typography
+                          sx={{
+                            color: text.body,
+                            fontSize: "0.82rem",
+                            lineHeight: 1.7,
+                          }}
+                        >
+                          {item.citation}{" "}
+                          {item.doi && (
+                            <Link
+                              href={item.doi}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              underline="hover"
+                              sx={{
+                                color: "#F47C20",
+                                fontWeight: 600,
+                                fontSize: "0.8rem",
+                                ml: 0.4,
+                              }}
+                            >
+                              [DOI]
+                            </Link>
+                          )}
+                          {item.pdf && (
+                            <Link
+                              href={item.pdf}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              underline="hover"
+                              sx={{
+                                color: "#F47C20",
+                                fontWeight: 600,
+                                fontSize: "0.8rem",
+                                ml: 0.4,
+                              }}
+                            >
+                              [PDF]
+                            </Link>
+                          )}
+                          {item.url && (
+                            <Link
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              underline="hover"
+                              sx={{
+                                color: "#F47C20",
+                                fontWeight: 600,
+                                fontSize: "0.8rem",
+                                ml: 0.4,
+                              }}
+                            >
+                              [URL]
+                            </Link>
+                          )}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
-              ))}
-            </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
 
-          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-            <TitleSection>THESES AND DISSERTATIONS</TitleSection>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                mb: 3,
-              }}
-            >
-              Below are theses and dissertations associated with the Redux project.
-            </Typography>
-
-            <Box sx={{ display: "grid", gap: 0.8 }}>
-              {thesisAndDissertations.map((item, index) => (
-                <Box key={index} sx={innerCard}>
-                  <Typography
-                    sx={{
-                      color: text.body,
-                      fontSize: "0.82rem",
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {item.citation}{" "}
-                    {item.url && (
-                      <Link
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [URL]
-                      </Link>
-                    )}
-                    {item.pdf && (
-                      <Link
-                        href={item.pdf}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        sx={{
-                          color: "#F47C20",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          ml: 0.4,
-                        }}
-                      >
-                        [PDF]
-                      </Link>
-                    )}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-
-          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-            <TitleSection>SUPPORT</TitleSection>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                mb: 2,
-              }}
-            >
-              Redux has been supported by the following grants:
-            </Typography>
-
-            <Box sx={{ display: "grid", gap: 0.8 }}>
-              {[
-                "Bodily, P.M. (Co-Lead), Bradley, J. (Co-Lead), Romney, A. (Co-PI), Petersen, J. (Co-I), “BengalBot MCP: Building AI-Literate Students at Idaho State University,” U.S. Department of Education (DOE) Fund for Improvement of Post-Secondary Education (FIPSE). $300,000. 2026.",
-                "Trosper, M.J., “Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” Summer Authentic Research Experience (SARE), Idaho Community-engaged Resilience for Energy-Water Systems (I-CREWS), National Science Foundation (NSF). $6,000. 2026.",
-                "“Crowd-Sourcing and Visualization of Advanced Computational Theory to Facilitate Application of Algorithmic Knowledgebase to Real-World Combinatorial Problems,” Center for Advanced Energy Studies (CAES). 2024.",
-                "“Application of advanced computational theory to facilitate efficient solutions to real-world combinatorial problems”, Center for Advanced Energy Studies (CAES). 2022.",
-                "“Interactive visualization tools for teaching computer science theory”, Idaho State University Office of Research. 2022.",
-              ].map((grant, index) => (
-                <Box key={index} sx={innerCard}>
-                  <Typography
-                    sx={{
-                      color: text.body,
-                      fontSize: "0.85rem",
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {grant}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.82rem",
-                lineHeight: 1.8,
-                mt: 2.2,
-                textAlign: "justify",
-              }}
-            >
-              Any opinions, findings, conclusions, or recommendations
-              expressed in this material are those of the author(s) and do not
-              necessarily reflect the views of the funding agencies who have
-              supported this work.
-            </Typography>
-          </Box>
-
-          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-            <TitleSection>LICENSE</TitleSection>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.8,
-              }}
-            >
-              This work is licensed under the{" "}
-              <Link
-                href="https://opensource.org/license/bsd-3-clause"
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                sx={{ color: "#F47C20", fontWeight: 600 }}
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header
+                title={<SectionTitle>THESES AND DISSERTATIONS</SectionTitle>}
+                titleWidth="auto"
               >
-                BSD 3-Clause License
-              </Link>
-              .
-            </Typography>
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      mb: 3,
+                    }}
+                  >
+                    Below are theses and dissertations associated with the Redux project.
+                  </Typography>
+
+                  <Box sx={{ display: "grid", gap: 0.8 }}>
+                    {thesisAndDissertations.map((item, index) => (
+                      <Box key={index} sx={innerCard}>
+                        <Typography
+                          sx={{
+                            color: text.body,
+                            fontSize: "0.82rem",
+                            lineHeight: 1.7,
+                          }}
+                        >
+                          {item.citation}{" "}
+                          {item.url && (
+                            <Link
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              underline="hover"
+                              sx={{
+                                color: "#F47C20",
+                                fontWeight: 600,
+                                fontSize: "0.8rem",
+                                ml: 0.4,
+                              }}
+                            >
+                              [URL]
+                            </Link>
+                          )}
+                          {item.pdf && (
+                            <Link
+                              href={item.pdf}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              underline="hover"
+                              sx={{
+                                color: "#F47C20",
+                                fontWeight: 600,
+                                fontSize: "0.8rem",
+                                ml: 0.4,
+                              }}
+                            >
+                              [PDF]
+                            </Link>
+                          )}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
+          </Box>
+
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>SUPPORT</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      mb: 2,
+                    }}
+                  >
+                    Redux has been supported by the following grants:
+                  </Typography>
+
+                  <Box sx={{ display: "grid", gap: 0.8 }}>
+                    {[
+                      "Bodily, P.M. (Co-Lead), Bradley, J. (Co-Lead), Romney, A. (Co-PI), Petersen, J. (Co-I), “BengalBot MCP: Building AI-Literate Students at Idaho State University,” U.S. Department of Education (DOE) Fund for Improvement of Post-Secondary Education (FIPSE). $300,000. 2026.",
+                      "Trosper, M.J., “Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” Summer Authentic Research Experience (SARE), Idaho Community-engaged Resilience for Energy-Water Systems (I-CREWS), National Science Foundation (NSF). $6,000. 2026.",
+                      "“Crowd-Sourcing and Visualization of Advanced Computational Theory to Facilitate Application of Algorithmic Knowledgebase to Real-World Combinatorial Problems,” Center for Advanced Energy Studies (CAES). 2024.",
+                      "“Application of advanced computational theory to facilitate efficient solutions to real-world combinatorial problems”, Center for Advanced Energy Studies (CAES). 2022.",
+                      "“Interactive visualization tools for teaching computer science theory”, Idaho State University Office of Research. 2022.",
+                    ].map((grant, index) => (
+                      <Box key={index} sx={innerCard}>
+                        <Typography
+                          sx={{
+                            color: text.body,
+                            fontSize: "0.85rem",
+                            lineHeight: 1.7,
+                          }}
+                        >
+                          {grant}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.82rem",
+                      lineHeight: 1.8,
+                      mt: 2.2,
+                      textAlign: "justify",
+                    }}
+                  >
+                    Any opinions, findings, conclusions, or recommendations
+                    expressed in this material are those of the author(s) and do not
+                    necessarily reflect the views of the funding agencies who have
+                    supported this work.
+                  </Typography>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
+          </Box>
+
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>LICENSE</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.8,
+                    }}
+                  >
+                    This work is licensed under the{" "}
+                    <Link
+                      href="https://opensource.org/license/bsd-3-clause"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{ color: "#F47C20", fontWeight: 600 }}
+                    >
+                      BSD 3-Clause License
+                    </Link>
+                    .
+                  </Typography>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
         </Box>
       </Container>
