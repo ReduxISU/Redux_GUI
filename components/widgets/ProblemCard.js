@@ -9,8 +9,19 @@ import { useThemeMode } from "../ThemeModeContext";
  * Presentational card for one problem in the /browse results grid. Clicking
  * the problem name navigates to `/?problem=<name>`, which the home page
  * reads on mount to auto-select that problem.
+ *
+ * @param name Raw class/reflection name (e.g. "DEUTSCHJOZSA") -- used only for the
+ * link and the React key, never shown to the user.
+ * @param displayName Human-facing name (e.g. "Deutsch Jozsa") -- what's actually
+ * rendered. Falls back to `name` if not given.
  */
-export default function ProblemCard({ name, complexityClass, solverTypes, hasRenderableVisualization }) {
+export default function ProblemCard({
+  name,
+  displayName = name,
+  complexityClass,
+  solverTypes,
+  hasRenderableVisualization,
+}) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
   const surface = surfaceColors(mode);
@@ -33,7 +44,7 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
               "&:hover": { color: "#F47C20" },
             }}
           >
-            {name}
+            {displayName}
           </Typography>
         </Link>
         {hasRenderableVisualization ? (

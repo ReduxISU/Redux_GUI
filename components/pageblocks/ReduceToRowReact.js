@@ -25,6 +25,8 @@ import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
 import { surfaceColors, textColors } from '../theme';
 import { useThemeMode } from '../ThemeModeContext';
+import { complexityClassLabel } from '../hooks/ProblemFilters/complexityClassOrder';
+import { reductionTypeLabel } from '../hooks/ProblemFilters/tagLabels';
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select Problem To Reduce To", problemName: "ACCORDION FORM ONE PROBLEM NAME" }
 const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
@@ -127,7 +129,7 @@ export default function ReduceToRowReact({
                 // description only
                 info: reduceToInfo.problemDefinition ?? "",
                 classification: [
-                  { label: "Complexity class", value: reduceToInfo.complexityClass || "Unclassified" },
+                  { label: "Complexity class", value: complexityClassLabel(reduceToInfo.complexityClass || "Unclassified") },
                 ],
                 // show source
                 source: reduceToInfo.source,
@@ -179,7 +181,7 @@ export default function ReduceToRowReact({
                     label: "Reduction cost",
                     value: REDUCTION_COST_LABELS[reducerInfo.cost] || reducerInfo.cost || "Unclassified",
                   },
-                  { label: "Reduction type", value: reducerInfo.reductionType || "Unclassified" },
+                  { label: "Reduction type", value: reductionTypeLabel(reducerInfo.reductionType || "Unclassified") },
                   { label: "Complexity bucket", value: reducerInfo.complexityBucket || "Unclassified" },
                   { label: "Big-O", value: reducerInfo.complexity || "Not yet determined" },
                 ],
