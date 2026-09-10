@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Autocomplete, TextField, Paper, Divider, Button, ListSubheader } from "@mui/material";
+import { Autocomplete, TextField, Paper, Divider, Button, Chip, createFilterOptions } from "@mui/material";
 
 export default function SearchBarExtensible({
   selected,
@@ -13,17 +13,22 @@ export default function SearchBarExtensible({
   disabled = false,
   disabledMessage = "",
   extenderButtons = [],
-  // Optional sectioning: (key) => group label, e.g. a problem's complexity
-  // class. Options are sorted by group first (falling back to optionsHighlight/
-  // alphabetical within a group) so MUI Autocomplete can render section headers.
+  // Optional sort key: (key) => group value, e.g. a problem's complexity class.
+  // Options are sorted by this first (falling back to optionsHighlight/alphabetical
+  // within a group), but -- unlike MUI Autocomplete's own `groupBy` -- this never
+  // renders section headers, just a stable sort order.
   groupBy = null,
-  // Optional explicit ordering for group labels (e.g. ["P", "NPComplete", ...]).
+  // Optional explicit ordering for groupBy's values (e.g. ["P", "NPComplete", ...]).
   // Falls back to alphabetical when omitted.
   groupOrder = null,
-  // Optional display formatter for the group header's text (e.g. "NPComplete" ->
-  // "NP-Complete"). Purely cosmetic -- grouping/sorting still uses groupBy's raw
-  // return value, so this doesn't need to (and shouldn't) match groupOrder's entries.
-  groupLabel = null,
+  // Optional per-option tag rendered as a small Chip on the right side of each
+  // dropdown row, e.g. a problem's complexity class. (key) => tag text, or null/
+  // undefined to omit the chip for that option.
+  optionTag = null,
+  // Optional extra searchable text per option, appended to the option's label when
+  // matching the user's input (e.g. a problem's complexity class/solver types) so
+  // search isn't limited to the display name alone. (key) => string.
+  optionSearchText = null,
   ...props
 }) {
   const [input, setInput] = useState("");
@@ -53,33 +58,15 @@ export default function SearchBarExtensible({
           .sort((a, b) => sortOptions(a, b, { groupBy, groupOrder, optionsHighlight }))
           .map((x) => optionsMap.get(x) ?? x)
         : []}
-      groupBy={groupBy ? (option) => groupBy(getKeyByValue(optionsMap, option)) ?? "Unclassified" : undefined}
-      // Bold, centered, and set off with its own background/rule so the header reads
-      // as a section divider, not a selectable option -- larger than the option text
-      // it sits above (MUI's ListSubheader defaults to *smaller* than list items,
-      // which undercuts the "this is a heading" read). `top: -8px` cancels out the
-      // Autocomplete listbox's default 8px top padding, which the sticky header's
-      // default `top: 0` doesn't account for -- without it, the option that just
-      // scrolled past peeks above the header instead of staying fully hidden behind it.
-      renderGroup={
-        groupBy
-          ? (params) => (
-            <li key={params.key}>
-              <ListSubheader
-                sx={{
-                  top: -8,
-                  fontWeight: 700,
-                  fontSize: "0.95rem",
-                  textAlign: "center",
-                  bgcolor: (theme) => theme.palette.action.hover,
-                  borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-                }}
-              >
-                {groupLabel ? groupLabel(params.group) : params.group}
-              </ListSubheader>
-              {params.children}
-            </li>
-          )
+      filterOptions={
+        optionSearchText
+          ? createFilterOptions({
+            stringify: (option) => {
+              const key = getKeyByValue(optionsMap, option);
+              const extra = key != null ? optionSearchText(key) : null;
+              return extra ? `${option} ${extra}` : option;
+            },
+          })
           : undefined
       }
       getOptionDisabled={
@@ -109,18 +96,40 @@ export default function SearchBarExtensible({
         />
       )}
       // Renders de-emphasized (optionsHighlight, still clickable -- ReduceToRowReact's
-      // rank-and-de-emphasize usage) and/or disabled (optionsDisabled, not clickable, e.g.
-      // "no renderer available") options.
+      // rank-and-de-emphasize usage), disabled (optionsDisabled, not clickable, e.g.
+      // "no renderer available"), and/or tagged (optionTag, e.g. a problem's
+      // complexity class shown as a Chip) options.
       renderOption={
-        optionsHighlight || optionsDisabled
+        optionsHighlight || optionsDisabled || optionTag
           ? (props, option) => {
             const key = getKeyByValue(optionsMap, option);
             const isDeemphasized = optionsHighlight ? !optionsHighlight.includes(key) : false;
             const isDisabledOption = optionsDisabled ? optionsDisabled.includes(key) : false;
+            const tag = optionTag && key != null ? optionTag(key) : null;
             return (
-              <li {...props} style={isDeemphasized ? { opacity: 0.5 } : null}>
-                {option}
-                {isDisabledOption && disabledOptionHint ? ` (${disabledOptionHint})` : ""}
+              <li
+                {...props}
+                style={{
+                  ...(isDeemphasized ? { opacity: 0.5 } : null),
+                  ...(tag ? { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 } : null),
+                }}
+              >
+                <span>
+                  {option}
+                  {isDisabledOption && disabledOptionHint ? ` (${disabledOptionHint})` : ""}
+                </span>
+                {tag ? (
+                  <Chip
+                    label={tag}
+                    size="small"
+                    sx={{
+                      color: "#c2410c",
+                      background: "rgba(244,124,32,0.12)",
+                      border: "1px solid rgba(244,124,32,0.35)",
+                      fontSize: "0.72rem",
+                    }}
+                  />
+                ) : null}
               </li>
             );
           }
