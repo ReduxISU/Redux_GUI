@@ -24,6 +24,24 @@ html.dark body {
   color: #f9fafb;
 }
 
+/*
+ * Many components (sectionCardSx/innerCardSx in theme.js, and others) use a
+ * broad `transition: all ...` so their border/shadow/background animate
+ * smoothly on hover. But every one of those same properties also has a
+ * different value per light/dark variant -- so when the theme toggles, that
+ * same transition animates the color change too, over ~0.2-0.25s. On a
+ * hovered element the extra hover-state contrast makes that interpolation
+ * read as a visible "wrong color, then corrects" flash. This class is
+ * toggled on <html> for one frame around a theme switch (see
+ * ThemeModeContext.js's toggleMode) to force every transition off so the
+ * swap snaps instantly instead of animating through it; normal hover
+ * transitions resume immediately after.
+ */
+.theme-transition-off,
+.theme-transition-off * {
+  transition: none !important;
+}
+
 a {
   color: inherit;
   text-decoration: none;

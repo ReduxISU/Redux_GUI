@@ -55,7 +55,28 @@ export function ThemeModeProvider({ children }) {
   const mode = resolvedTheme === "dark" ? "dark" : "light";
 
   const toggleMode = () => {
+    // Many components transition `all` (background/border/shadow) for a
+    // smooth hover effect, but those same properties also differ between
+    // light/dark variants -- so without this, toggling animates through
+    // every in-between color over ~0.2-0.25s, which reads as a "wrong
+    // color, then corrects" flash, most visible on hover-highlighted
+    // elements. Force transitions off for the swap itself (see the
+    // .theme-transition-off rule in globals.css), then let them resume
+    // right after so normal hover animations are unaffected.
+    const root = document.documentElement;
+    root.classList.add("theme-transition-off");
+    // Flush layout so the transition-disabling rule is guaranteed to be in
+    // effect before setTheme below changes any colors -- otherwise both
+    // could land in the same paint and disabling would do nothing.
+    void root.offsetHeight;
     setTheme(mode === "dark" ? "light" : "dark");
+    // Two frames: one for the disabled-transition state to paint, one for
+    // the new theme's colors to paint under it, before re-enabling.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        root.classList.remove("theme-transition-off");
+      });
+    });
   };
 
   const theme = useMemo(() => createAppTheme(mode), [mode]);
