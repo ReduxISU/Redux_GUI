@@ -23,8 +23,19 @@ const cardSx = {
  * Presentational card for one problem in the /browse results grid. Clicking
  * the problem name navigates to `/?problem=<name>`, which the home page
  * reads on mount to auto-select that problem.
+ *
+ * @param name Raw class/reflection name (e.g. "DEUTSCHJOZSA") -- used only for the
+ * link and the React key, never shown to the user.
+ * @param displayName Human-facing name (e.g. "Deutsch Jozsa") -- what's actually
+ * rendered. Falls back to `name` if not given.
  */
-export default function ProblemCard({ name, complexityClass, solverTypes, hasRenderableVisualization }) {
+export default function ProblemCard({
+  name,
+  displayName = name,
+  complexityClass,
+  solverTypes,
+  hasRenderableVisualization,
+}) {
   return (
     <Box sx={cardSx}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
@@ -40,7 +51,7 @@ export default function ProblemCard({ name, complexityClass, solverTypes, hasRen
               "&:hover": { color: "#d8b4fe" },
             }}
           >
-            {name}
+            {displayName}
           </Typography>
         </Link>
         {hasRenderableVisualization ? (

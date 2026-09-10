@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { complexityClassRank } from "./complexityClassOrder";
 
 /**
  * `oneHop`: problems directly reachable from `source` via a single reduction
@@ -47,16 +48,22 @@ function intersects(setA, setB) {
  * matches a facet if its value/values intersect the selected set, or the
  * set is empty meaning "no filter on that facet").
  *
- * @param problemIndex `Map<problemName, {complexityClass, solverTypes: Set,
- * solverComplexityBuckets: Set, visualizationTypes: Set,
- * hasRenderableVisualization}>` from `useProblemIndex`.
+ * @param problemIndex `Map<problemName, {displayName, complexityClass,
+ * complexityClasses: Set, problemType, solverTypes: Set, visualizationTypes: Set,
+ * visualizationCategories: Set, hasRenderableVisualization}>` from
+ * `useProblemIndex`. selectedVisualizationTypes matches against
+ * visualizationCategories (the deduped conceptual category, e.g. "Graph"), not the
+ * raw per-renderer visualizationTypes -- so selecting "Graph" matches a problem
+ * whose visualizations are GraphD3, GraphLaTeX, or both.
  * @param reductionGraph Raw reduction graph object from `useProblemIndex`.
- * @returns filter state, setters, the filtered problem-name list, and `clearFilters`.
+ * @returns filter state, setters, the filtered problem-name list (sorted
+ * classical-then-quantum, low-to-high by complexityClassRank, alphabetical by name
+ * within a class -- see complexityClassOrder.js), and `clearFilters`.
  */
 export function useProblemFilters(problemIndex, reductionGraph) {
   const [selectedComplexityClasses, setSelectedComplexityClasses] = useState(new Set());
   const [selectedSolverTypes, setSelectedSolverTypes] = useState(new Set());
-  const [selectedSolverComplexityBuckets, setSelectedSolverComplexityBuckets] = useState(new Set());
+  const [selectedProblemTypes, setSelectedProblemTypes] = useState(new Set());
   const [selectedVisualizationTypes, setSelectedVisualizationTypes] = useState(new Set());
   const [reachabilitySource, setReachabilitySource] = useState(null);
   const [reachabilityMode, setReachabilityMode] = useState("oneHop"); // "oneHop" | "anyHops"
@@ -73,22 +80,19 @@ export function useProblemFilters(problemIndex, reductionGraph) {
     for (const [problemName, tags] of problemIndex.entries()) {
       if (
         selectedComplexityClasses.size > 0 &&
-        !selectedComplexityClasses.has(tags.complexityClass)
+        !intersects(tags.complexityClasses, selectedComplexityClasses)
       ) {
         continue;
       }
       if (selectedSolverTypes.size > 0 && !intersects(tags.solverTypes, selectedSolverTypes)) {
         continue;
       }
-      if (
-        selectedSolverComplexityBuckets.size > 0 &&
-        !intersects(tags.solverComplexityBuckets, selectedSolverComplexityBuckets)
-      ) {
+      if (selectedProblemTypes.size > 0 && !selectedProblemTypes.has(tags.problemType)) {
         continue;
       }
       if (
         selectedVisualizationTypes.size > 0 &&
-        !intersects(tags.visualizationTypes, selectedVisualizationTypes)
+        !intersects(tags.visualizationCategories, selectedVisualizationTypes)
       ) {
         continue;
       }
@@ -97,12 +101,19 @@ export function useProblemFilters(problemIndex, reductionGraph) {
       }
       result.push(problemName);
     }
-    return result.sort((a, b) => a.localeCompare(b));
+    // Classical-then-quantum, low-to-high by complexityClassRank (see
+    // complexityClassOrder.js); alphabetical by name as the tiebreak within a class.
+    return result.sort((a, b) => {
+      const rankDiff =
+        complexityClassRank(problemIndex.get(a).complexityClass) -
+        complexityClassRank(problemIndex.get(b).complexityClass);
+      return rankDiff !== 0 ? rankDiff : a.localeCompare(b);
+    });
   }, [
     problemIndex,
     selectedComplexityClasses,
     selectedSolverTypes,
-    selectedSolverComplexityBuckets,
+    selectedProblemTypes,
     selectedVisualizationTypes,
     reachableSet,
   ]);
@@ -110,7 +121,7 @@ export function useProblemFilters(problemIndex, reductionGraph) {
   function clearFilters() {
     setSelectedComplexityClasses(new Set());
     setSelectedSolverTypes(new Set());
-    setSelectedSolverComplexityBuckets(new Set());
+    setSelectedProblemTypes(new Set());
     setSelectedVisualizationTypes(new Set());
     setReachabilitySource(null);
     setReachabilityMode("oneHop");
@@ -121,8 +132,8 @@ export function useProblemFilters(problemIndex, reductionGraph) {
     setSelectedComplexityClasses,
     selectedSolverTypes,
     setSelectedSolverTypes,
-    selectedSolverComplexityBuckets,
-    setSelectedSolverComplexityBuckets,
+    selectedProblemTypes,
+    setSelectedProblemTypes,
     selectedVisualizationTypes,
     setSelectedVisualizationTypes,
     reachabilitySource,

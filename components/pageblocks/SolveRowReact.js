@@ -21,6 +21,7 @@ import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
+import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" };
 const SOLVE_BUTTON = { buttonText: "Solve" };
@@ -90,7 +91,7 @@ export default function SolveRowReact({
         sourceLink: solverInfo.sourceLink || "",
 
         classification: [
-          { label: "Solver type", value: solverInfo.solverType || "Unclassified" },
+          { label: "Solver type", value: solverTypeLabel(solverInfo.solverType || "Unclassified") },
           { label: "Complexity bucket", value: solverInfo.complexityBucket || "Unclassified" },
           { label: "Big-O", value: solverInfo.complexity || "Not yet determined" },
         ],
