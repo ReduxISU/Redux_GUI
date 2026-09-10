@@ -76,15 +76,31 @@ export default function BrowsePage() {
     [problemIndex],
   );
 
-  // Clicking a chip on a card adds that value to the matching sidebar facet
-  // selection -- same effect as checking it in FacetFilterGroup. Sets store
-  // raw wire values (e.g. "NPComplete"), so these take the chip's raw value,
-  // not its display label.
-  const addComplexityClassFilter = (value) => {
-    setSelectedComplexityClasses((prev) => (prev.has(value) ? prev : new Set(prev).add(value)));
+  // Clicking a chip on a card toggles that value in the matching sidebar facet
+  // selection -- same effect as checking/unchecking it in FacetFilterGroup.
+  // Sets store raw wire values (e.g. "NPComplete"), so these take the chip's
+  // raw value, not its display label.
+  const toggleComplexityClassFilter = (value) => {
+    setSelectedComplexityClasses((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
   };
-  const addSolverTypeFilter = (value) => {
-    setSelectedSolverTypes((prev) => (prev.has(value) ? prev : new Set(prev).add(value)));
+  const toggleSolverTypeFilter = (value) => {
+    setSelectedSolverTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
   };
 
   const problemNames = useMemo(() => [...problemIndex.keys()].sort(), [problemIndex]);
@@ -226,8 +242,8 @@ export default function BrowsePage() {
                             .map((type) => ({ value: type, label: solverTypeLabel(type) }))
                             .sort((a, b) => a.label.localeCompare(b.label))}
                           hasRenderableVisualization={tags.hasRenderableVisualization}
-                          onComplexityClassClick={addComplexityClassFilter}
-                          onSolverTypeClick={addSolverTypeFilter}
+                          onComplexityClassClick={toggleComplexityClassFilter}
+                          onSolverTypeClick={toggleSolverTypeFilter}
                         />
                       </Grid>
                     );
