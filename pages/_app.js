@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import '../styles/globals.css'
 import '../styles/q.css';
 import 'driver.js/dist/driver.css';
@@ -37,9 +38,19 @@ function MyApp({ Component, pageProps }) {
         <meta name="twitter:description" content={SITE_DESCRIPTION} />
         <meta name="twitter:image" content={OG_IMAGE} />
       </Head>
-      <ThemeModeProvider>
-        <Component {...pageProps} />
-      </ThemeModeProvider>
+      {/*
+        attribute="class" toggles `dark`/no class on <html> via a blocking
+        script injected before hydration -- that's what kills the flash (see
+        components/ThemeModeContext.js and the critical CSS in
+        styles/globals.css). enableSystem + no defaultTheme means a
+        first-ever visitor (nothing in localStorage yet) resolves to their
+        OS-level prefers-color-scheme instead of a hardcoded light default.
+      */}
+      <NextThemesProvider attribute="class" enableSystem>
+        <ThemeModeProvider>
+          <Component {...pageProps} />
+        </ThemeModeProvider>
+      </NextThemesProvider>
     </>
   )
 }
