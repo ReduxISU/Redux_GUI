@@ -1,10 +1,16 @@
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import ProblemSection from "../../components/widgets/ProblemSection";
 import isulogo from "../../components/images/ISULogo.png";
 
 import { Container, Box, Typography, Link } from "@mui/material";
-import { pageBackground, sectionCardSx, innerCardSx, textColors } from "../../components/theme";
+import { pageBackground, innerCardSx, textColors } from "../../components/theme";
 import { useThemeMode } from "../../components/ThemeModeContext";
 
+// Expanded section bodies scroll instead of growing the page without bound.
+const SCROLLABLE_BODY_SX = { maxHeight: "60vh", overflowY: "auto", pr: 1 };
+
+// Nested per the "Complexity class" grouping -- its `children` render as a
+// sub-list indented one level under it.
 const backgroundLinks = [
   {
     label: "Computational problem",
@@ -21,38 +27,36 @@ const backgroundLinks = [
   {
     label: "Complexity class",
     url: "https://en.wikipedia.org/wiki/Complexity_class",
-  },
-  {
-    label: "P (complexity)",
-    url: "https://en.wikipedia.org/wiki/P_(complexity)",
-  },
-  {
-    label: "NP (complexity)",
-    url: "https://en.wikipedia.org/wiki/NP_(complexity)",
-  },
-  {
-    label: "NP-hardness",
-    url: "https://en.wikipedia.org/wiki/NP-hardness",
-  },
-  {
-    label: "NP-completeness",
-    url: "https://en.wikipedia.org/wiki/NP-completeness",
-  },
-  {
-    label: "Karp's 21 NP-complete problems",
-    url: "https://en.wikipedia.org/wiki/Karp%27s_21_NP-complete_problems",
-  },
-  {
-    label: "List of NP-complete problems",
-    url: "https://en.wikipedia.org/wiki/List_of_NP-complete_problems",
+    children: [
+      {
+        label: "P (complexity)",
+        url: "https://en.wikipedia.org/wiki/P_(complexity)",
+      },
+      {
+        label: "NP (complexity)",
+        url: "https://en.wikipedia.org/wiki/NP_(complexity)",
+      },
+      {
+        label: "NP-hardness",
+        url: "https://en.wikipedia.org/wiki/NP-hardness",
+      },
+      {
+        label: "NP-completeness",
+        url: "https://en.wikipedia.org/wiki/NP-completeness",
+      },
+      {
+        label: "Karp's 21 NP-complete problems",
+        url: "https://en.wikipedia.org/wiki/Karp%27s_21_NP-complete_problems",
+      },
+      {
+        label: "List of NP-complete problems",
+        url: "https://en.wikipedia.org/wiki/List_of_NP-complete_problems",
+      },
+    ],
   },
   {
     label: "Many-one reduction",
     url: "https://en.wikipedia.org/wiki/Many-one_reduction",
-  },
-  {
-    label: "Gadget (computer science)",
-    url: "https://en.wikipedia.org/wiki/Gadget_(computer_science)",
   },
   {
     label: "Approximation algorithm",
@@ -93,7 +97,7 @@ function SectionTitle({ children }) {
         fontSize: "0.85rem",
         fontWeight: 700,
         letterSpacing: "0.22em",
-        mb: 2,
+        whiteSpace: "nowrap",
       }}
     >
       {children}
@@ -101,10 +105,54 @@ function SectionTitle({ children }) {
   );
 }
 
+// Renders a (possibly nested, one level deep) bulleted list of links, used
+// for the "background reading" list in the Welcome to Redux section.
+function LinkList({ links, text }) {
+  return (
+    <Box component="ul" sx={{ m: 0, pl: 3, color: text.body, fontSize: "0.87rem", lineHeight: 1.9 }}>
+      {links.map((link) => (
+        <Box component="li" key={link.label} sx={{ mb: 0.5 }}>
+          <Link
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            sx={{
+              color: "#F47C20",
+              fontWeight: 600,
+            }}
+          >
+            {link.label}
+          </Link>
+          {link.children && (
+            <Box component="ul" sx={{ m: 0, mt: 0.5, pl: 3 }}>
+              {link.children.map((child) => (
+                <Box component="li" key={child.label} sx={{ mb: 0.5 }}>
+                  <Link
+                    href={child.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={{
+                      color: "#F47C20",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {child.label}
+                  </Link>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
 export default function HelpPage() {
   const { mode } = useThemeMode();
   const text = textColors(mode);
-  const sectionCardStyle = sectionCardSx(mode);
   const innerCard = innerCardSx(mode);
 
   return (
@@ -118,143 +166,139 @@ export default function HelpPage() {
 
       <Container maxWidth="lg" sx={{ pt: 4, pb: 5 }}>
         <Box sx={{ maxWidth: "980px", mx: "auto" }}>
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>WELCOME TO REDUX</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-                mb: 2.2,
-              }}
-            >
-              Redux is a dynamic, interactive computer science knowledgebase
-              consisting of canonical computer science problems, solutions,
-              and reduction algorithms. The following pages provide helpful
-              background to the organization of problems, solutions, and
-              reductions in Redux based on the concept of complexity classes:
-            </Typography>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-              }}
-            >
-              {backgroundLinks.map((link, index) => (
-                <span key={link.label}>
-                  <Link
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="hover"
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={false}>
+              <ProblemSection.Header title={<SectionTitle>WELCOME TO REDUX</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
                     sx={{
-                      color: "#F47C20",
-                      fontWeight: 600,
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      textAlign: "justify",
+                      mb: 2.2,
                     }}
                   >
-                    {link.label}
-                  </Link>
-                  {index < backgroundLinks.length - 1 ? ", " : "."}
-                </span>
-              ))}
-            </Typography>
+                    Redux is a dynamic, interactive computer science knowledgebase
+                    consisting of canonical computer science problems, solutions,
+                    and reduction algorithms. The following pages provide helpful
+                    background to the organization of problems, solutions, and
+                    reductions in Redux based on the concept of complexity classes:
+                  </Typography>
+
+                  <LinkList links={backgroundLinks} text={text} />
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>ACCESS REDUX CONTENT</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-                mb: 2,
-              }}
-            >
-              All of the content of the Redux knowledge base can be accessed
-              directly via:
-            </Typography>
-
-            <Box sx={{ display: "grid", gap: 1 }}>
-              {accessLinks.map((link) => (
-                <Box key={link.label} sx={innerCard}>
-                  <Link
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="hover"
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>ACCESS REDUX CONTENT</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
                     sx={{
-                      color: "#F47C20",
-                      fontWeight: 600,
-                      fontSize: "0.82rem",
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.9,
+                      textAlign: "justify",
+                      mb: 2,
                     }}
                   >
-                    {link.label}
-                  </Link>
-                </Box>
-              ))}
+                    All of the content of the Redux knowledge base can be accessed
+                    directly via:
+                  </Typography>
 
-              <Box sx={innerCard}>
-                <Typography
-                  sx={{
-                    color: text.body,
-                    fontSize: "0.82rem",
-                    lineHeight: 1.7,
-                  }}
-                >
-                  C# Library import{" "}
-                  <Box
-                    component="span"
-                    sx={{
-                      color: text.caption,
-                      fontStyle: "italic",
-                    }}
-                  >
-                    (instructions coming soon)
+                  <Box sx={{ display: "grid", gap: 1 }}>
+                    {accessLinks.map((link) => (
+                      <Box key={link.label} sx={innerCard}>
+                        <Link
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.82rem",
+                          }}
+                        >
+                          {link.label}
+                        </Link>
+                      </Box>
+                    ))}
+
+                    <Box sx={innerCard}>
+                      <Typography
+                        sx={{
+                          color: text.body,
+                          fontSize: "0.82rem",
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        C# Library import{" "}
+                        <Box
+                          component="span"
+                          sx={{
+                            color: text.caption,
+                            fontStyle: "italic",
+                          }}
+                        >
+                          (instructions coming soon)
+                        </Box>
+                      </Typography>
+                    </Box>
                   </Box>
-                </Typography>
-              </Box>
-            </Box>
+                </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>LEARN MORE</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                mb: 2,
-              }}
-            >
-              Additional documentation can be found at the following links:
-            </Typography>
-
-            <Box sx={{ display: "grid", gap: 1 }}>
-              {learnMoreLinks.map((link) => (
-                <Box key={link.label} sx={innerCard}>
-                  <Link
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="hover"
+          <Box sx={{ mb: 1.5 }}>
+            <ProblemSection defaultCollapsed={true}>
+              <ProblemSection.Header title={<SectionTitle>LEARN MORE</SectionTitle>} titleWidth="auto">
+                <Box sx={{ flexGrow: 1 }} />
+              </ProblemSection.Header>
+              <ProblemSection.Body>
+                <Box sx={SCROLLABLE_BODY_SX}>
+                  <Typography
                     sx={{
-                      color: "#F47C20",
-                      fontWeight: 600,
-                      fontSize: "0.82rem",
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      mb: 2,
                     }}
                   >
-                    {link.label}
-                  </Link>
+                    Additional documentation can be found at the following links:
+                  </Typography>
+
+                  <Box sx={{ display: "grid", gap: 1 }}>
+                    {learnMoreLinks.map((link) => (
+                      <Box key={link.label} sx={innerCard}>
+                        <Link
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            color: "#F47C20",
+                            fontWeight: 600,
+                            fontSize: "0.82rem",
+                          }}
+                        >
+                          {link.label}
+                        </Link>
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
-              ))}
-            </Box>
+              </ProblemSection.Body>
+            </ProblemSection>
           </Box>
         </Box>
       </Container>
