@@ -76,6 +76,17 @@ export default function BrowsePage() {
     [problemIndex],
   );
 
+  // Clicking a chip on a card adds that value to the matching sidebar facet
+  // selection -- same effect as checking it in FacetFilterGroup. Sets store
+  // raw wire values (e.g. "NPComplete"), so these take the chip's raw value,
+  // not its display label.
+  const addComplexityClassFilter = (value) => {
+    setSelectedComplexityClasses((prev) => (prev.has(value) ? prev : new Set(prev).add(value)));
+  };
+  const addSolverTypeFilter = (value) => {
+    setSelectedSolverTypes((prev) => (prev.has(value) ? prev : new Set(prev).add(value)));
+  };
+
   const problemNames = useMemo(() => [...problemIndex.keys()].sort(), [problemIndex]);
   const problemNameMap = useMemo(
     () => new Map(problemNames.map((name) => [name, problemIndex.get(name)?.displayName ?? name])),
@@ -210,8 +221,13 @@ export default function BrowsePage() {
                           name={name}
                           displayName={tags.displayName}
                           complexityClass={complexityClassLabel(tags.complexityClass)}
-                          solverTypes={[...tags.solverTypes].map(solverTypeLabel).sort()}
+                          complexityClassValue={tags.complexityClass}
+                          solverTypes={[...tags.solverTypes]
+                            .map((type) => ({ value: type, label: solverTypeLabel(type) }))
+                            .sort((a, b) => a.label.localeCompare(b.label))}
                           hasRenderableVisualization={tags.hasRenderableVisualization}
+                          onComplexityClassClick={addComplexityClassFilter}
+                          onSolverTypeClick={addSolverTypeFilter}
                         />
                       </Grid>
                     );
