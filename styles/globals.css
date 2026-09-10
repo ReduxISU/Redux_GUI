@@ -4,6 +4,26 @@ body {
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
+/*
+ * Critical (synchronously-loaded, no JS required) dark-mode colors for the
+ * pre-hydration/pre-mount paint window. next-themes' blocking script sets
+ * `class="dark"` on <html> before the browser paints anything, so these
+ * selectors are already correct on the very first frame -- including on a
+ * hard/full page load for a returning dark-mode user, and on a first-ever
+ * visit whose OS is set to dark (next-themes resolves prefers-color-scheme
+ * in that same blocking script). This covers the body background/text for
+ * the brief window before components/ThemeModeContext.js's "mounted" gate
+ * renders the real MUI theme (see that file for why the gate exists) --
+ * without this, that window would paint MUI's light-mode CssBaseline
+ * defaults (an unstyled browser default background) instead of matching
+ * dark mode.
+ */
+html.dark,
+html.dark body {
+  background-color: #0b0b0f;
+  color: #f9fafb;
+}
+
 a {
   color: inherit;
   text-decoration: none;
