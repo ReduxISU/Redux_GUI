@@ -6,7 +6,12 @@ import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
 import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
 import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
 import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
-import { complexityClassRank, complexityClassLabel } from "../../components/hooks/ProblemFilters/complexityClassOrder";
+import {
+  COMPLEXITY_CLASS_ORDER,
+  complexityClassRank,
+  complexityClassLabel,
+} from "../../components/hooks/ProblemFilters/complexityClassOrder";
+import { solverComplexityRank, solverComplexityLabel } from "../../components/hooks/ProblemFilters/solverComplexityOrder";
 import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
 import {
   Container,
@@ -37,6 +42,8 @@ export default function BrowsePage() {
     setSelectedComplexityClasses,
     selectedSolverTypes,
     setSelectedSolverTypes,
+    selectedSolverComplexities,
+    setSelectedSolverComplexities,
     selectedVisualizationTypes,
     setSelectedVisualizationTypes,
     reachabilitySource,
@@ -65,6 +72,18 @@ export default function BrowsePage() {
   // Search" rather than the raw "BruteForce"/"BreadthFirstSearch" wire values.
   const solverTypeOptions = useMemo(
     () => buildFacetOptions(problemIndex, (tags) => tags.solverTypes, undefined, solverTypeLabel),
+    [problemIndex],
+  );
+  // Best-to-worst growth (solverComplexityOrder.js) rather than alphabetical --
+  // same sorted-fixed-vocabulary pattern as complexityClassOptions above.
+  const solverComplexityOptions = useMemo(
+    () =>
+      buildFacetOptions(
+        problemIndex,
+        (tags) => tags.solverComplexities,
+        (a, b) => solverComplexityRank(a) - solverComplexityRank(b),
+        solverComplexityLabel,
+      ),
     [problemIndex],
   );
   // visualizationCategories, not the raw visualizationTypes -- several raw renderer
@@ -96,8 +115,8 @@ export default function BrowsePage() {
           Browse Problems
         </Typography>
         <Typography sx={{ color: text.body, fontSize: "0.87rem", mb: 3 }}>
-          Filter the full problem list by complexity class, solver type, visualization type,
-          or reduction reachability.
+          Filter the full problem list by complexity class, solver type, solver complexity,
+          visualization type, or reduction reachability.
         </Typography>
 
         {loading ? (
@@ -114,18 +133,34 @@ export default function BrowsePage() {
                   options={complexityClassOptions}
                   selected={selectedComplexityClasses}
                   onChange={setSelectedComplexityClasses}
+                  scrollable
+                  groupBy={(key) =>
+                    COMPLEXITY_CLASS_ORDER.indexOf(key) <= COMPLEXITY_CLASS_ORDER.indexOf("NPHard")
+                      ? "Classical"
+                      : key === "Unclassified"
+                        ? null
+                        : "Quantum"
+                  }
                 />
                 <FacetFilterGroup
                   label="Solver Type"
                   options={solverTypeOptions}
                   selected={selectedSolverTypes}
                   onChange={setSelectedSolverTypes}
+                  scrollable
+                />
+                <FacetFilterGroup
+                  label="Solver Complexity"
+                  options={solverComplexityOptions}
+                  selected={selectedSolverComplexities}
+                  onChange={setSelectedSolverComplexities}
                 />
                 <FacetFilterGroup
                   label="Visualization Type"
                   options={visualizationTypeOptions}
                   selected={selectedVisualizationTypes}
                   onChange={setSelectedVisualizationTypes}
+                  scrollable
                 />
 
                 <Box>
