@@ -25,7 +25,7 @@
 
 import { CssBaseline, ThemeProvider as MuiThemeProvider } from "@mui/material";
 import { useTheme as useNextTheme } from "next-themes";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import { createAppTheme } from "./theme";
 
 const ThemeModeContext = createContext({
@@ -33,13 +33,24 @@ const ThemeModeContext = createContext({
   toggleMode: () => {},
 });
 
+// No-op subscribe: "mounted" never changes after the client snapshot below
+// starts returning true, so there's nothing to notify React about.
+function subscribeToMount() {
+  return () => {};
+}
+
 export function ThemeModeProvider({ children }) {
   const { resolvedTheme, setTheme } = useNextTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // useSyncExternalStore (not useState+useEffect) gives us a server/client-
+  // divergent value -- false during SSR and the first client render, true
+  // after -- without ever calling setState, so there's no cascading-render
+  // lint complaint and no extra render pass beyond the one React already
+  // does to reconcile the server/client snapshot mismatch.
+  const mounted = useSyncExternalStore(
+    subscribeToMount,
+    () => true,
+    () => false,
+  );
 
   const mode = resolvedTheme === "dark" ? "dark" : "light";
 
