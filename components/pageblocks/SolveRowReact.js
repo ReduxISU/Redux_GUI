@@ -21,6 +21,8 @@ import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
+import { surfaceColors, textColors } from "../theme";
+import { useThemeMode } from "../ThemeModeContext";
 import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" };
@@ -50,6 +52,10 @@ export default function SolveRowReact({
   chosenReduceTo,
   dragHandleProps,
 }) {
+  const { mode } = useThemeMode();
+  const surface = surfaceColors(mode);
+  const text = textColors(mode);
+
   const solverInfo = useSolverInfo(url, chosenSolver);
 
   async function handleSolve() {
@@ -126,9 +132,9 @@ export default function SolveRowReact({
                     title="Drag to reorder"
                     sx={{
                       cursor: 'grab',
-                      color: '#424242',
-                      backgroundColor: '#f5f5f5',
-                      '&:hover': { backgroundColor: '#e0e0e0' },
+                      color: text.body,
+                      backgroundColor: surface.surfaceAlt,
+                      '&:hover': { backgroundColor: surface.surfaceAltHover },
                       mr: 1,
                     }}
                   >

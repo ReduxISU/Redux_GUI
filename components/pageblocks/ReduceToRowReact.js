@@ -23,6 +23,8 @@ import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
+import { surfaceColors, textColors } from '../theme';
+import { useThemeMode } from '../ThemeModeContext';
 import { complexityClassLabel } from '../hooks/ProblemFilters/complexityClassOrder';
 import { reductionTypeLabel } from '../hooks/ProblemFilters/tagLabels';
 
@@ -71,6 +73,10 @@ export default function ReduceToRowReact({
   setReducedInstance,
   dragHandleProps,
 }) {
+  const { mode } = useThemeMode();
+  const surface = surfaceColors(mode);
+  const text = textColors(mode);
+
   const reduceToInfo = useProblemInfo(url, chosenReduceTo);
   const reducerInfo = useReducerInfo(url, chosenReductionType);
 
@@ -201,9 +207,9 @@ export default function ReduceToRowReact({
                     title="Drag to reorder"
                     sx={{
                       cursor: 'grab',
-                      color: '#424242',
-                      backgroundColor: '#f5f5f5',
-                      '&:hover': { backgroundColor: '#e0e0e0' },
+                      color: text.body,
+                      backgroundColor: surface.surfaceAlt,
+                      '&:hover': { backgroundColor: surface.surfaceAltHover },
                       mr: 1,
                     }}
                   >

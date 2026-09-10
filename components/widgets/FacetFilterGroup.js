@@ -1,5 +1,7 @@
 import React from "react";
 import { Checkbox, FormControlLabel, FormGroup, Typography, Box } from "@mui/material";
+import { textColors } from "../theme";
+import { useThemeMode } from "../ThemeModeContext";
 
 /**
  * Generic, reusable multi-select checkbox facet. Not specific to any one
@@ -14,6 +16,9 @@ import { Checkbox, FormControlLabel, FormGroup, Typography, Box } from "@mui/mat
  * @param onChange Called with the next `Set` whenever a checkbox is toggled.
  */
 export default function FacetFilterGroup({ label, options, selected, onChange }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+
   const toggle = (key) => {
     const next = new Set(selected);
     if (next.has(key)) {
@@ -28,7 +33,7 @@ export default function FacetFilterGroup({ label, options, selected, onChange })
     <Box>
       <Typography
         sx={{
-          color: "#ffffff",
+          color: text.heading,
           fontSize: "0.78rem",
           fontWeight: 600,
           letterSpacing: "0.14em",
@@ -39,7 +44,7 @@ export default function FacetFilterGroup({ label, options, selected, onChange })
       </Typography>
       <FormGroup>
         {options.length === 0 ? (
-          <Typography sx={{ color: "#6b7280", fontSize: "0.8rem", fontStyle: "italic" }}>
+          <Typography sx={{ color: text.caption, fontSize: "0.8rem", fontStyle: "italic" }}>
             No values available
           </Typography>
         ) : (
@@ -52,14 +57,14 @@ export default function FacetFilterGroup({ label, options, selected, onChange })
                   checked={selected.has(key)}
                   onChange={() => toggle(key)}
                   sx={{
-                    color: "rgba(255,255,255,0.35)",
-                    "&.Mui-checked": { color: "#a855f7" },
+                    color: text.faint,
+                    "&.Mui-checked": { color: "#F47C20" },
                   }}
                 />
               }
               label={
-                <Typography sx={{ color: "#d1d5db", fontSize: "0.83rem" }}>
-                  {optionLabel} <Box component="span" sx={{ color: "#6b7280" }}>({count})</Box>
+                <Typography sx={{ color: text.body, fontSize: "0.83rem" }}>
+                  {optionLabel} <Box component="span" sx={{ color: text.caption }}>({count})</Box>
                 </Typography>
               }
             />

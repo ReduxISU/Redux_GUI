@@ -27,6 +27,8 @@ import { COMPLEXITY_CLASS_ORDER, complexityClassLabel } from '../hooks/ProblemFi
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
+import { surfaceColors, textColors } from '../theme';
+import { useThemeMode } from '../ThemeModeContext';
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select problem" }
 const ACCORDION_FORM_TWO = { placeHolder: "default instance" }
@@ -60,6 +62,10 @@ function complexityClassGroupLabel(complexityClass) {
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
  */
 export default function ProblemRowReact({ url, problemName, setProblemName, problemNameMap, setProblemInstance, dragHandleProps }) {
+  const { mode } = useThemeMode();
+  const surface = surfaceColors(mode);
+  const text = textColors(mode);
+
   const problemInfo = useProblemInfo(url, problemName);
   const { problemIndex, reductionGraph } = useProblemIndex(url);
   const {
@@ -248,9 +254,9 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
             title="Drag to reorder"
             sx={{
               cursor: 'grab',
-              color: '#424242',
-              backgroundColor: '#f5f5f5',
-              '&:hover': { backgroundColor: '#e0e0e0' },
+              color: text.body,
+              backgroundColor: surface.surfaceAlt,
+              '&:hover': { backgroundColor: surface.surfaceAltHover },
               mr: 1,
             }}
           >
