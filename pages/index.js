@@ -15,7 +15,8 @@ import VerifyRowReact from "../components/pageblocks/VerifyRowReact";
 import Button from "react-bootstrap/Button";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Image from "next/image";
-import isulogo from "../components/images/ISULogo.png";
+import isulogoLight from "../components/images/ISULogo-Light.png";
+import isulogoDark from "../components/images/ISULogo-Dark.png";
 import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
 import {
   Box,
@@ -211,20 +212,12 @@ function MainPageContent() {
             // marginTop: '25%',
           }}
         >
-          {/* The logo's "Idaho State University"/"Computer Science" text and divider
-              line are baked into the PNG as near-black pixels -- can't recolor them
-              per-mode with CSS without also distorting the orange mark, so in dark
-              mode we give the whole logo a white chip to sit on instead of trying to
-              recolor it. */}
-          <Box
-            sx={
-              mode === "dark"
-                ? { bgcolor: "#FFFFFF", borderRadius: "10px", px: 2, py: 1 }
-                : undefined
-            }
-          >
-            <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
-          </Box>
+          <Image
+            src={mode === "dark" ? isulogoDark : isulogoLight}
+            height={125}
+            width={251}
+            alt="ISU logo"
+          ></Image>
         </Box>
     </Box>
   );
