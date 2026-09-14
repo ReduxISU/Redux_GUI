@@ -52,21 +52,15 @@ function PopoverTooltipClick({ toolTip = {} }) {
           )}
 
           <Box sx={{ px: 2, py: 1.5, maxWidth: 480 }}>
-            {t.formalDef && t.isMathDef ? (
-              <Typography
-                variant="body2"
-                sx={{
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                  fontSize: '0.85em',
-                  whiteSpace: 'pre-wrap',
-                  mb: 1.5,
-                }}
-              >
-                {t.formalDef}
+            {t.input ? (
+              <Typography variant="body2" sx={{ lineHeight: 1.35 }}>
+                <strong>Input:</strong> {t.input}
               </Typography>
-            ) : t.formalDef ? (
-              <Typography variant="body2" sx={{ mb: 1.5 }}>
-                {t.formalDef}
+            ) : null}
+
+            {t.output ? (
+              <Typography variant="body2" sx={{ mb: 1.5, lineHeight: 1.35 }}>
+                <strong>Output:</strong> {t.output}
               </Typography>
             ) : null}
 

@@ -194,9 +194,10 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
     problemName
       ? {
         header: problemInfo.problemName ?? "",
-        formalDef: problemInfo.formalDefinition ?? "",
         // It makes description clean
         info: problemInfo.problemDefinition ?? "",
+        input: problemInfo.inputDescription ?? "",
+        output: problemInfo.outputDescription ?? "",
         classification: [
           { label: "Complexity class", value: complexityClassLabel(problemInfo.complexityClass || "Unclassified") },
         ],
@@ -213,7 +214,6 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
         //  Popover builds Wikipedia URL
         componentLink: problemInfo.problemLink || "",
         sourceLink: problemInfo.sourceLink || "",
-        isMathDef: true, // only this file adds the flag
       }
       : TOOLTIP;
 
