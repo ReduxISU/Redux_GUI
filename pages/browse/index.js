@@ -115,6 +115,17 @@ export default function BrowsePage() {
       return next;
     });
   };
+  const toggleVisualizationTypeFilter = (value) => {
+    setSelectedVisualizationTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
 
   const problemNames = useMemo(() => [...problemIndex.keys()].sort(), [problemIndex]);
   const problemNameMap = useMemo(
@@ -256,10 +267,14 @@ export default function BrowsePage() {
                           solverTypes={[...tags.solverTypes]
                             .map((type) => ({ value: type, label: solverTypeLabel(type) }))
                             .sort((a, b) => a.label.localeCompare(b.label))}
+                          visualizationTypes={[...tags.visualizationCategories]
+                            .map((category) => ({ value: category, label: category }))
+                            .sort((a, b) => a.label.localeCompare(b.label))}
                           hasRenderableVisualization={tags.hasRenderableVisualization}
                           onComplexityClassClick={toggleComplexityClassFilter}
                           onProblemTypeClick={toggleProblemTypeFilter}
                           onSolverTypeClick={toggleSolverTypeFilter}
+                          onVisualizationTypeClick={toggleVisualizationTypeFilter}
                         />
                       </Grid>
                     );

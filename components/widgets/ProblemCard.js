@@ -6,6 +6,16 @@ import { sectionCardSx, textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
 import { tagChipSx } from "../hooks/ProblemFilters/tagStyles";
 
+// Small heading above the Solvers/Visualizations chip rows.
+function sectionLabelSx(text) {
+  return {
+    color: text.heading,
+    fontSize: "0.68rem",
+    fontWeight: 600,
+    letterSpacing: "0.06em",
+  };
+}
+
 /**
  * Presentational card for one problem in the /browse results grid. Clicking
  * the problem name navigates to `/?problem=<name>`, which the home page
@@ -26,12 +36,18 @@ import { tagChipSx } from "../hooks/ProblemFilters/tagStyles";
  * @param solverTypes `[{value, label}]` -- raw wire value plus display label for
  * each solver-type chip, so a click can report the raw value while still
  * rendering the human-facing label.
+ * @param visualizationTypes `[{value, label}]` -- each renderable visualization's
+ * simplified display category (e.g. "Graph", "Table") from
+ * `visualizationCategories.js`. Category strings are already display-ready, so
+ * `value` and `label` are the same string here, unlike `solverTypes`.
  * @param onComplexityClassClick Called with `complexityClassValue` when the
  * complexity-class chip is clicked. Omit to render the chip as non-interactive.
  * @param onProblemTypeClick Called with `problemTypeValue` when the problem-type
  * chip is clicked. Omit to render the chip as non-interactive.
  * @param onSolverTypeClick Called with a solver type's raw `value` when its chip
  * is clicked. Omit to render solver chips as non-interactive.
+ * @param onVisualizationTypeClick Called with a visualization category's value
+ * when its chip is clicked. Omit to render visualization chips as non-interactive.
  */
 export default function ProblemCard({
   name,
@@ -41,10 +57,12 @@ export default function ProblemCard({
   problemType,
   problemTypeValue,
   solverTypes,
+  visualizationTypes = [],
   hasRenderableVisualization,
   onComplexityClassClick,
   onProblemTypeClick,
   onSolverTypeClick,
+  onVisualizationTypeClick,
 }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
@@ -108,30 +126,62 @@ export default function ProblemCard({
         ) : null}
       </Box>
 
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-        {solverTypes.length === 0 ? (
-          <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
-            No solvers
-          </Typography>
-        ) : (
-          solverTypes.map(({ value, label }) => (
-            <Chip
-              key={value}
-              label={label}
-              size="small"
-              clickable={!!onSolverTypeClick}
-              onClick={
-                onSolverTypeClick
-                  ? (event) => {
-                      event.stopPropagation();
-                      onSolverTypeClick(value);
-                    }
-                  : undefined
-              }
-              sx={tagChipSx("solverType", { clickable: !!onSolverTypeClick, mode })}
-            />
-          ))
-        )}
+      <Box sx={{ mb: 1.25 }}>
+        <Typography sx={sectionLabelSx(text)}>Solvers:</Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
+          {solverTypes.length === 0 ? (
+            <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
+              No solvers
+            </Typography>
+          ) : (
+            solverTypes.map(({ value, label }) => (
+              <Chip
+                key={value}
+                label={label}
+                size="small"
+                clickable={!!onSolverTypeClick}
+                onClick={
+                  onSolverTypeClick
+                    ? (event) => {
+                        event.stopPropagation();
+                        onSolverTypeClick(value);
+                      }
+                    : undefined
+                }
+                sx={tagChipSx("solverType", { clickable: !!onSolverTypeClick, mode })}
+              />
+            ))
+          )}
+        </Box>
+      </Box>
+
+      <Box>
+        <Typography sx={sectionLabelSx(text)}>Visualizations:</Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
+          {visualizationTypes.length === 0 ? (
+            <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
+              No visualizations
+            </Typography>
+          ) : (
+            visualizationTypes.map(({ value, label }) => (
+              <Chip
+                key={value}
+                label={label}
+                size="small"
+                clickable={!!onVisualizationTypeClick}
+                onClick={
+                  onVisualizationTypeClick
+                    ? (event) => {
+                        event.stopPropagation();
+                        onVisualizationTypeClick(value);
+                      }
+                    : undefined
+                }
+                sx={tagChipSx("visualizationType", { clickable: !!onVisualizationTypeClick, mode })}
+              />
+            ))
+          )}
+        </Box>
       </Box>
     </Box>
   );
