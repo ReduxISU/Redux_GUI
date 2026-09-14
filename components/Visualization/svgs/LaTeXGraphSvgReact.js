@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useThemeMode } from "../../ThemeModeContext";
 
 function escapeLatexText(str) {
-  return String(str).replace(/[\\{}%$&#_^~]/g, (c) => ({
+  const escaped = String(str).replace(/[\\{}%$&#_^~]/g, (c) => ({
     "\\": "\\textbackslash{}",
     "{": "\\{",
     "}": "\\}",
@@ -14,6 +14,13 @@ function escapeLatexText(str) {
     "^": "\\^{}",
     "~": "\\~{}",
   }[c]));
+
+  // node-tikzjax (pdfTeX under the hood) can't typeset a raw Unicode 'ε'
+  // glyph as plain text -- it fails the render outright. $\epsilon$ (LaTeX
+  // math mode) is the one non-ASCII case we actually need to support here,
+  // so swap it in after the generic escaping above (which leaves 'ε'
+  // untouched, since it's not in the escaped character set).
+  return escaped.replace(/ε/g, "$\\epsilon$");
 }
 
 function safeNodeId(id) {
