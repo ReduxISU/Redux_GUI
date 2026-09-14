@@ -244,6 +244,55 @@ function ProfileField({ label, value }) {
   );
 }
 
+const REPO_STAT_FIELDS = [
+  { key: "commits", label: "commits" },
+  { key: "prsOpened", label: "PRs opened" },
+  { key: "prsMerged", label: "PRs merged" },
+  { key: "reviews", label: "reviews" },
+];
+
+// Renders as "100 commits · 14 PRs opened · 79 PRs merged · 31 reviews", dropping any
+// field that's zero or missing -- most contributors only have partial data (see
+// ContributorRepoStats on the backend), especially for pre-PR-workflow-era work.
+function formatRepoStats(stats) {
+  if (!stats) return [];
+  return REPO_STAT_FIELDS.map(({ key, label }) => {
+    const value = stats[key] ?? 0;
+    return value > 0 ? `${value} ${label}` : null;
+  }).filter(Boolean);
+}
+
+// Whole section (including its own header) collapses to nothing when neither repo has
+// any non-zero stats -- covers contributors predating the stats sync as well as stub
+// entries auto-detected from a new GitHub identity that haven't been backfilled yet.
+function GithubActivitySection({ reduxStats, reduxGuiStats }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+
+  const rows = [
+    { label: "Redux", parts: formatRepoStats(reduxStats) },
+    { label: "Redux GUI", parts: formatRepoStats(reduxGuiStats) },
+  ].filter(({ parts }) => parts.length > 0);
+
+  if (rows.length === 0) return null;
+
+  return (
+    <>
+      <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1 }}>
+        GitHub Activity
+      </Typography>
+      {rows.map(({ label, parts }) => (
+        <Typography key={label} sx={{ mb: 0.5 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            {label}:
+          </Box>{" "}
+          {parts.join(" · ")}
+        </Typography>
+      ))}
+    </>
+  );
+}
+
 function ContributionList({ label, items }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
@@ -912,7 +961,12 @@ export default function AboutUsPage() {
                 </Typography>
               )}
 
-              <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1 }}>
+              <GithubActivitySection
+                reduxStats={profileData.reduxStats ?? profileData.ReduxStats}
+                reduxGuiStats={profileData.reduxGuiStats ?? profileData.ReduxGuiStats}
+              />
+
+              <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1, mt: 2 }}>
                 Contributions
               </Typography>
               <Typography sx={{ mb: 1.5 }}>
