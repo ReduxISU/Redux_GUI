@@ -2,8 +2,9 @@ import React from "react";
 import Link from "next/link";
 import { Box, Chip, Typography } from "@mui/material";
 import { Monitor as VisualizationIcon } from "@mui/icons-material";
-import { sectionCardSx, textColors, surfaceColors } from "../theme";
+import { sectionCardSx, textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
+import { tagChipSx } from "../hooks/ProblemFilters/tagStyles";
 
 /**
  * Presentational card for one problem in the /browse results grid. Clicking
@@ -47,7 +48,6 @@ export default function ProblemCard({
 }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
-  const surface = surfaceColors(mode);
   // Same card treatment as pages/aboutus/index.js's theSectionCard, scaled
   // down for a dense grid of many cards.
   const cardSx = { ...sectionCardSx(mode), padding: 2, height: "100%", borderRadius: "16px" };
@@ -88,16 +88,7 @@ export default function ProblemCard({
                 }
               : undefined
           }
-          sx={{
-            color: "#c2410c",
-            background: "rgba(244,124,32,0.12)",
-            border: "1px solid rgba(244,124,32,0.35)",
-            fontSize: "0.72rem",
-            ...(onComplexityClassClick && {
-              cursor: "pointer",
-              "&:hover": { background: "rgba(244,124,32,0.22)" },
-            }),
-          }}
+          sx={tagChipSx("complexityClass", { clickable: !!onComplexityClassClick })}
         />
         {problemType ? (
           <Chip
@@ -112,16 +103,7 @@ export default function ProblemCard({
                   }
                 : undefined
             }
-            sx={{
-              color: "#7c3aed",
-              background: "rgba(124,58,237,0.10)",
-              border: "1px solid rgba(124,58,237,0.32)",
-              fontSize: "0.72rem",
-              ...(onProblemTypeClick && {
-                cursor: "pointer",
-                "&:hover": { background: "rgba(124,58,237,0.20)" },
-              }),
-            }}
+            sx={tagChipSx("problemType", { clickable: !!onProblemTypeClick })}
           />
         ) : null}
       </Box>
@@ -146,16 +128,7 @@ export default function ProblemCard({
                     }
                   : undefined
               }
-              sx={{
-                color: text.body,
-                background: surface.surfaceAlt,
-                border: `1px solid ${surface.border}`,
-                fontSize: "0.7rem",
-                ...(onSolverTypeClick && {
-                  cursor: "pointer",
-                  "&:hover": { background: surface.border },
-                }),
-              }}
+              sx={tagChipSx("solverType", { clickable: !!onSolverTypeClick })}
             />
           ))
         )}
