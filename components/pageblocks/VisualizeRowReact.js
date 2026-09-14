@@ -370,6 +370,10 @@ export default function VisualizeRowReact({
           optionsMap={VisualizationNameMap}
           optionsDisabled={unrenderableOptions}
           disabledOptionHint="no renderer available"
+          optionTag={(key) => ({
+            label: visualizationTypeCategory(visualizationTypeMap?.get(key)),
+            kind: "visualizationType",
+          })}
           disabled={!problemName || noRenderableOptions}
           disabledMessage={
             noRenderableOptions
