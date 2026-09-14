@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Autocomplete, TextField, Paper, Divider, Button, Chip, createFilterOptions } from "@mui/material";
+import { Autocomplete, TextField, Paper, Divider, Button, Chip, Box, createFilterOptions } from "@mui/material";
 
 export default function SearchBarExtensible({
   selected,
@@ -98,37 +98,44 @@ export default function SearchBarExtensible({
       // Renders de-emphasized (optionsHighlight, still clickable -- ReduceToRowReact's
       // rank-and-de-emphasize usage), disabled (optionsDisabled, not clickable, e.g.
       // "no renderer available"), and/or tagged (optionTag, e.g. a problem's
-      // complexity class shown as a Chip) options.
+      // complexity class and problem type shown as Chips) options. optionTag(key) may
+      // return a single string (one Chip) or an array of strings (one Chip each, in
+      // order) -- normalized to an array either way.
       renderOption={
         optionsHighlight || optionsDisabled || optionTag
           ? (props, option) => {
             const key = getKeyByValue(optionsMap, option);
             const isDeemphasized = optionsHighlight ? !optionsHighlight.includes(key) : false;
             const isDisabledOption = optionsDisabled ? optionsDisabled.includes(key) : false;
-            const tag = optionTag && key != null ? optionTag(key) : null;
+            const tags = optionTag && key != null ? [].concat(optionTag(key)).filter(Boolean) : [];
             return (
               <li
                 {...props}
                 style={{
                   ...(isDeemphasized ? { opacity: 0.5 } : null),
-                  ...(tag ? { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 } : null),
+                  ...(tags.length > 0 ? { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 } : null),
                 }}
               >
                 <span>
                   {option}
                   {isDisabledOption && disabledOptionHint ? ` (${disabledOptionHint})` : ""}
                 </span>
-                {tag ? (
-                  <Chip
-                    label={tag}
-                    size="small"
-                    sx={{
-                      color: "#c2410c",
-                      background: "rgba(244,124,32,0.12)",
-                      border: "1px solid rgba(244,124,32,0.35)",
-                      fontSize: "0.72rem",
-                    }}
-                  />
+                {tags.length > 0 ? (
+                  <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
+                    {tags.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        size="small"
+                        sx={{
+                          color: "#c2410c",
+                          background: "rgba(244,124,32,0.12)",
+                          border: "1px solid rgba(244,124,32,0.35)",
+                          fontSize: "0.72rem",
+                        }}
+                      />
+                    ))}
+                  </Box>
                 ) : null}
               </li>
             );

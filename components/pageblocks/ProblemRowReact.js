@@ -24,6 +24,7 @@ import { useProblemInfo } from '../hooks/ProblemProvider'
 import { useProblemIndex } from '../hooks/ProblemFilters/useProblemIndex';
 import { useProblemFilters } from '../hooks/ProblemFilters/useProblemFilters';
 import { COMPLEXITY_CLASS_ORDER, complexityClassLabel } from '../hooks/ProblemFilters/complexityClassOrder';
+import { problemTypeLabel } from '../hooks/ProblemFilters/problemTypeOrder';
 import ProblemInstanceParser from '../../Tools/ProblemInstanceParser';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
@@ -213,7 +214,10 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           optionsMap={problemNameMap}
           groupBy={(key) => problemIndex.get(key)?.complexityClass || "Unclassified"}
           groupOrder={COMPLEXITY_CLASS_ORDER}
-          optionTag={(key) => complexityClassLabel(problemIndex.get(key)?.complexityClass || "Unclassified")}
+          optionTag={(key) => [
+            complexityClassLabel(problemIndex.get(key)?.complexityClass || "Unclassified"),
+            problemTypeLabel(problemIndex.get(key)?.problemType || "Unclassified"),
+          ]}
           optionSearchText={(key) => {
             const tags = problemIndex.get(key);
             if (!tags) return "";
