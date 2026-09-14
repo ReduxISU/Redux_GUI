@@ -1,5 +1,4 @@
 import CloseIcon from "@mui/icons-material/Close";
-import GitHubIcon from "@mui/icons-material/GitHub";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import {
   Avatar,
@@ -126,11 +125,12 @@ function getLastName(name) {
   return name.split(" ").slice(-1)[0].toLowerCase();
 }
 
-// No hover popup -- a GitHub icon (a real link to their profile) or a question
-// mark (for contributors without a linked GitHub profile) sits to the left of
-// the name at all times, and clicking the name itself opens that contributor's
-// details (handled by `onSelect`) -- the icon and the name are separate click
-// targets, same as the old tooltip's "icon links out, name opens details" split.
+// No hover popup -- each contributor's own GitHub avatar (a real link to their
+// profile), or a question mark for contributors without a linked GitHub
+// profile, sits to the left of the name at all times, and clicking the name
+// itself opens that contributor's details (handled by `onSelect`) -- the
+// avatar and the name are separate click targets, same as the old tooltip's
+// "icon links out, name opens details" split.
 function ItemContributor({ name, profile, onSelect }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
@@ -145,14 +145,14 @@ function ItemContributor({ name, profile, onSelect }) {
           aria-label={`${name}'s GitHub profile`}
           sx={{
             display: "inline-flex",
-            color: text.caption,
             flexShrink: 0,
-            "&:hover": {
-              color: "#F47C20",
-            },
           }}
         >
-          <GitHubIcon fontSize="medium" />
+          <Avatar
+            src={profile.image}
+            alt={`${name}'s GitHub avatar`}
+            sx={{ width: 28, height: 28 }}
+          />
         </Link>
       ) : (
         <HelpOutlineOutlinedIcon
