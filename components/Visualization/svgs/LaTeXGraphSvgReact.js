@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useThemeMode } from "../../ThemeModeContext";
 
 function escapeLatexText(str) {
   return String(str).replace(/[\\{}%$&#_^~]/g, (c) => ({
@@ -34,9 +35,17 @@ function safeNumber(n, fallback = 0) {
 function LaTeXGraphSvgReact({ problemData }) {
   const [svgHtml, setSvgHtml] = useState("");
   const [loading, setLoading] = useState(false);
+  const { mode } = useThemeMode();
 
   useEffect(() => {
     if (!problemData) return;
+
+    // Node fill/outline stay white-on-black regardless of theme -- each node is
+    // its own self-contained "chip" that's legible either way. Only elements
+    // drawn directly on the transparent page canvas (edges, arrow tips, and the
+    // unboxed self-loop weight label) need to flip for dark mode, since those
+    // otherwise render as black-on-black against a dark page background.
+    const lineColor = mode === "dark" ? "white" : "black";
 
     function seededRandom(seed) {
       let value = seed;
@@ -121,7 +130,7 @@ function LaTeXGraphSvgReact({ problemData }) {
 
       nodeDefs += "\\end{scope}\n\n";
 
-      let edgeDefs = "\\begin{scope}[>={stealth[black]}]\n";
+      let edgeDefs = `\\begin{scope}[>={stealth[${lineColor}]}]\n`;
 
       // FIX 1: Use a canonical (sorted) key so A->B and B->A are treated as the
       // same pair for bend detection, preventing overlapping parallel edges.
@@ -135,7 +144,7 @@ function LaTeXGraphSvgReact({ problemData }) {
           if (node.initial === "true") {
             const id = safeNodeId(node.id);
             edgeDefs +=
-              `    \\path[draw=black,very thick] ` +
+              `    \\path[draw=${lineColor},very thick] ` +
               `([xshift=-2em]${id}.west) edge[->] (${id}.west);\n`;
           }
         });
@@ -144,7 +153,7 @@ function LaTeXGraphSvgReact({ problemData }) {
       links.forEach((link) => {
         const src = safeNodeId(link.source);
         const tgt = safeNodeId(link.target);
-        const color = safeColor(link.color, "black");
+        const color = safeColor(link.color, lineColor);
 
         const arrow = link.directed === true ? "->" : "-";
         const style = link.dashed === true ? "dashed" : "";
@@ -156,7 +165,7 @@ function LaTeXGraphSvgReact({ problemData }) {
 
         const loopWeight =
           link.weighted === true
-            ? ` node {${escapeLatexText(link.weight)}}`
+            ? ` node[text=${lineColor}] {${escapeLatexText(link.weight)}}`
             : "";
 
         if (src === tgt) {
@@ -186,7 +195,7 @@ function LaTeXGraphSvgReact({ problemData }) {
           const side = Object.entries(counts).sort((a, b) => a[1] - b[1])[0][0];
 
           edgeDefs +=
-            `    \\path[draw=${color},very thick,>={Stealth[black]}] ` +
+            `    \\path[draw=${color},very thick,>={Stealth[${lineColor}]}] ` +
             `(${src}) edge[${arrow},loop ${side}${style ? "," + style : ""}]${loopWeight} (${src});\n`;
           return;
         }
@@ -227,7 +236,7 @@ function LaTeXGraphSvgReact({ problemData }) {
     }
 
     processGraph();
-  }, [problemData]);
+  }, [problemData, mode]);
 
   return (
     <div
