@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Autocomplete, TextField, Paper, Divider, Button, Chip, Box, createFilterOptions } from "@mui/material";
+import { tagChipSx, normalizeTags } from "../hooks/ProblemFilters/tagStyles";
 
 export default function SearchBarExtensible({
   selected,
@@ -21,9 +22,14 @@ export default function SearchBarExtensible({
   // Optional explicit ordering for groupBy's values (e.g. ["P", "NPComplete", ...]).
   // Falls back to alphabetical when omitted.
   groupOrder = null,
-  // Optional per-option tag rendered as a small Chip on the right side of each
-  // dropdown row, e.g. a problem's complexity class. (key) => tag text, or null/
-  // undefined to omit the chip for that option.
+  // Optional per-option tag(s) rendered as small Chips on the right side of each
+  // dropdown row, AND next to the selected value when the dropdown is closed.
+  // (key) => a single {label, kind} object, an array of them (rendered in
+  // order), or null/undefined to omit. `kind` selects the tag's color via
+  // tagChipSx/TAG_KIND_STYLES (tagStyles.js) -- e.g. "complexityClass",
+  // "problemType", "solverType", "visualizationType" -- so the same kind of
+  // tag renders in the same color everywhere it appears. A plain string is
+  // also accepted (kind defaults to the complexityClass palette).
   optionTag = null,
   // Optional extra searchable text per option, appended to the option's label when
   // matching the user's input (e.g. a problem's complexity class/solver types) so
@@ -82,32 +88,54 @@ export default function SearchBarExtensible({
       sx={{ width: 300 }}
       style={{ width: "100%" }}
       freeSolo
-      renderInput={({ slotProps: acSlots, ...params }) => (
-        <TextField
-          {...params}
-          label={placeholder}
-          slotProps={{
-            ...acSlots,
-            input: {
-              ...acSlots?.input,
-              ...(disabled ? { style: { fontSize: 12 } } : {}),
-            },
-          }}
-        />
-      )}
+      renderInput={({ slotProps: acSlots, InputProps, ...params }) => {
+        // Tags for the currently-selected value, shown to the right of the
+        // input's text even while the dropdown list itself is closed --
+        // same tags/colors as the open list's rows (via optionTag + tagChipSx).
+        const selectedTags =
+          !disabled && optionTag && selected ? normalizeTags(optionTag(selected)) : [];
+        return (
+          <TextField
+            {...params}
+            label={placeholder}
+            slotProps={{
+              ...acSlots,
+              input: {
+                ...acSlots?.input,
+                ...(disabled ? { style: { fontSize: 12 } } : {}),
+                endAdornment: (
+                  <>
+                    {selectedTags.length > 0 && (
+                      <Box sx={{ display: "flex", gap: 0.5, mr: 0.5, flexShrink: 0 }}>
+                        {selectedTags.map((tag) => (
+                          <Chip
+                            key={tag.kind ?? tag.label}
+                            label={tag.label}
+                            size="small"
+                            sx={tagChipSx(tag.kind)}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                    {InputProps?.endAdornment}
+                  </>
+                ),
+              },
+            }}
+          />
+        );
+      }}
       // Renders de-emphasized (optionsHighlight, still clickable -- ReduceToRowReact's
       // rank-and-de-emphasize usage), disabled (optionsDisabled, not clickable, e.g.
       // "no renderer available"), and/or tagged (optionTag, e.g. a problem's
-      // complexity class and problem type shown as Chips) options. optionTag(key) may
-      // return a single string (one Chip) or an array of strings (one Chip each, in
-      // order) -- normalized to an array either way.
+      // complexity class and problem type shown as Chips) options.
       renderOption={
         optionsHighlight || optionsDisabled || optionTag
           ? (props, option) => {
             const key = getKeyByValue(optionsMap, option);
             const isDeemphasized = optionsHighlight ? !optionsHighlight.includes(key) : false;
             const isDisabledOption = optionsDisabled ? optionsDisabled.includes(key) : false;
-            const tags = optionTag && key != null ? [].concat(optionTag(key)).filter(Boolean) : [];
+            const tags = optionTag && key != null ? normalizeTags(optionTag(key)) : [];
             return (
               <li
                 {...props}
@@ -124,15 +152,10 @@ export default function SearchBarExtensible({
                   <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
                     {tags.map((tag) => (
                       <Chip
-                        key={tag}
-                        label={tag}
+                        key={tag.kind ?? tag.label}
+                        label={tag.label}
                         size="small"
-                        sx={{
-                          color: "#c2410c",
-                          background: "rgba(244,124,32,0.12)",
-                          border: "1px solid rgba(244,124,32,0.35)",
-                          fontSize: "0.72rem",
-                        }}
+                        sx={tagChipSx(tag.kind)}
                       />
                     ))}
                   </Box>

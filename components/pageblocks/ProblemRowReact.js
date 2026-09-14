@@ -215,8 +215,14 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           groupBy={(key) => problemIndex.get(key)?.complexityClass || "Unclassified"}
           groupOrder={COMPLEXITY_CLASS_ORDER}
           optionTag={(key) => [
-            complexityClassLabel(problemIndex.get(key)?.complexityClass || "Unclassified"),
-            problemTypeLabel(problemIndex.get(key)?.problemType || "Unclassified"),
+            {
+              label: complexityClassLabel(problemIndex.get(key)?.complexityClass || "Unclassified"),
+              kind: "complexityClass",
+            },
+            {
+              label: problemTypeLabel(problemIndex.get(key)?.problemType || "Unclassified"),
+              kind: "problemType",
+            },
           ]}
           optionSearchText={(key) => {
             const tags = problemIndex.get(key);
