@@ -14,6 +14,7 @@ import {
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { buildFixedOrderFacetOptions } from "../hooks/ProblemFilters/facetOptions";
 import { COMPLEXITY_CLASS_LABELS } from "../hooks/ProblemFilters/complexityClassOrder";
+import { PROBLEM_TYPE_ORDER, PROBLEM_TYPE_LABELS } from "../hooks/ProblemFilters/problemTypeOrder";
 
 // Fixed display order for the Complexity Class facet -- P/NP/NP-Complete/NP-Hard,
 // the classical hierarchy in containment order. The quantum classes (BQP/EQP/QMA/
@@ -24,40 +25,6 @@ import { COMPLEXITY_CLASS_LABELS } from "../hooks/ProblemFilters/complexityClass
 // Labels come from the shared complexityClassOrder.js map (a superset -- the
 // quantum/Unclassified entries it also has just go unused here).
 const COMPLEXITY_CLASS_ORDER = ["P", "NP", "NPComplete", "NPHard"];
-
-// Fixed display order for the Problem Type facet, matching Interfaces/ProblemType.cs
-// (Unclassified excluded -- every problem has a real declared type as of the Problem
-// Type filter menu work; ProblemType_Tests.cs's ratchet pair keeps that true).
-const PROBLEM_TYPE_ORDER = [
-  "GraphTheory",
-  "NetworkDesign",
-  "SetsAndPartitions",
-  "StorageAndRetrieval",
-  "SequencingAndScheduling",
-  "MathematicalProgramming",
-  "AlgebraAndNumberTheory",
-  "GamesAndPuzzles",
-  "Logic",
-  "AutomataAndLanguages",
-  "ProgramOptimization",
-  "ComputationalGeometry",
-  "Miscellaneous",
-];
-const PROBLEM_TYPE_LABELS = {
-  GraphTheory: "Graph Theory",
-  NetworkDesign: "Network Design",
-  SetsAndPartitions: "Sets and Partitions",
-  StorageAndRetrieval: "Storage and Retrieval",
-  SequencingAndScheduling: "Sequencing and Scheduling",
-  MathematicalProgramming: "Mathematical Programming",
-  AlgebraAndNumberTheory: "Algebra and Number Theory",
-  GamesAndPuzzles: "Games and Puzzles",
-  Logic: "Logic",
-  AutomataAndLanguages: "Automata and Languages",
-  ProgramOptimization: "Program Optimization",
-  ComputationalGeometry: "Computational Geometry",
-  Miscellaneous: "Miscellaneous",
-};
 
 function toggle(set, key) {
   const next = new Set(set);
