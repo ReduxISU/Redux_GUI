@@ -12,6 +12,7 @@ import {
   complexityClassLabel,
 } from "../../components/hooks/ProblemFilters/complexityClassOrder";
 import { solverComplexityRank, solverComplexityLabel } from "../../components/hooks/ProblemFilters/solverComplexityOrder";
+import { problemTypeLabel } from "../../components/hooks/ProblemFilters/problemTypeOrder";
 import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
 import {
   Container,
@@ -44,6 +45,7 @@ export default function BrowsePage() {
     setSelectedSolverTypes,
     selectedSolverComplexities,
     setSelectedSolverComplexities,
+    setSelectedProblemTypes,
     selectedVisualizationTypes,
     setSelectedVisualizationTypes,
     reachabilitySource,
@@ -112,6 +114,17 @@ export default function BrowsePage() {
   };
   const toggleSolverTypeFilter = (value) => {
     setSelectedSolverTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
+  const toggleProblemTypeFilter = (value) => {
+    setSelectedProblemTypes((prev) => {
       const next = new Set(prev);
       if (next.has(value)) {
         next.delete(value);
@@ -273,11 +286,14 @@ export default function BrowsePage() {
                           displayName={tags.displayName}
                           complexityClass={complexityClassLabel(tags.complexityClass)}
                           complexityClassValue={tags.complexityClass}
+                          problemType={problemTypeLabel(tags.problemType)}
+                          problemTypeValue={tags.problemType}
                           solverTypes={[...tags.solverTypes]
                             .map((type) => ({ value: type, label: solverTypeLabel(type) }))
                             .sort((a, b) => a.label.localeCompare(b.label))}
                           hasRenderableVisualization={tags.hasRenderableVisualization}
                           onComplexityClassClick={toggleComplexityClassFilter}
+                          onProblemTypeClick={toggleProblemTypeFilter}
                           onSolverTypeClick={toggleSolverTypeFilter}
                         />
                       </Grid>
