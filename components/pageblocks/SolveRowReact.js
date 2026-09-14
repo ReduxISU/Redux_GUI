@@ -30,8 +30,7 @@ const SOLVE_BUTTON = { buttonText: "Solve" };
 const CARD = { cardBodyText: "Solution:", cardHeaderText: "Solve" };
 const TOOLTIP = {
   header: "Solver Information",
-  formalDef: "Choose a type of solver to see information about it",
-  info: "",
+  info: "Choose a type of solver to see information about it",
   solverType: "",
   complexity: "",
   complexityBucket: "",
@@ -83,9 +82,10 @@ export default function SolveRowReact({
     chosenSolver
       ? {
         header: solverInfo.solverName ?? "",
-        formalDef: solverInfo.solverDefinition ?? "",
         // Keep description clean
         info: solverInfo.info ?? solverInfo.description ?? "",
+        input: solverInfo.inputDescription ?? "",
+        output: solverInfo.outputDescription ?? "",
         // Source on its own line
         source: solverInfo.source,
         credit:
