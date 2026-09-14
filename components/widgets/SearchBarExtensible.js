@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Autocomplete, TextField, Paper, Divider, Button, Chip, Box, createFilterOptions } from "@mui/material";
 import { tagChipSx, normalizeTags } from "../hooks/ProblemFilters/tagStyles";
+import { useThemeMode } from "../ThemeModeContext";
 
 export default function SearchBarExtensible({
   selected,
@@ -38,6 +39,7 @@ export default function SearchBarExtensible({
   ...props
 }) {
   const [input, setInput] = useState("");
+  const { mode } = useThemeMode();
 
   return (
     <Autocomplete
@@ -112,7 +114,7 @@ export default function SearchBarExtensible({
                             key={tag.kind ?? tag.label}
                             label={tag.label}
                             size="small"
-                            sx={tagChipSx(tag.kind)}
+                            sx={tagChipSx(tag.kind, { mode })}
                           />
                         ))}
                       </Box>
@@ -155,7 +157,7 @@ export default function SearchBarExtensible({
                         key={tag.kind ?? tag.label}
                         label={tag.label}
                         size="small"
-                        sx={tagChipSx(tag.kind)}
+                        sx={tagChipSx(tag.kind, { mode })}
                       />
                     ))}
                   </Box>

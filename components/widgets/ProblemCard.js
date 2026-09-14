@@ -88,7 +88,7 @@ export default function ProblemCard({
                 }
               : undefined
           }
-          sx={tagChipSx("complexityClass", { clickable: !!onComplexityClassClick })}
+          sx={tagChipSx("complexityClass", { clickable: !!onComplexityClassClick, mode })}
         />
         {problemType ? (
           <Chip
@@ -103,7 +103,7 @@ export default function ProblemCard({
                   }
                 : undefined
             }
-            sx={tagChipSx("problemType", { clickable: !!onProblemTypeClick })}
+            sx={tagChipSx("problemType", { clickable: !!onProblemTypeClick, mode })}
           />
         ) : null}
       </Box>
@@ -128,7 +128,7 @@ export default function ProblemCard({
                     }
                   : undefined
               }
-              sx={tagChipSx("solverType", { clickable: !!onSolverTypeClick })}
+              sx={tagChipSx("solverType", { clickable: !!onSolverTypeClick, mode })}
             />
           ))
         )}

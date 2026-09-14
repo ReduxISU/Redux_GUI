@@ -40,11 +40,17 @@ export const TAG_KIND_STYLES = {
  *
  * @param kind One of TAG_KIND_STYLES's keys.
  * @param clickable Adds pointer cursor + hover background when true.
+ * @param mode Current theme mode ("light" | "dark"). When given, the tag's
+ * TEXT is white in dark mode / black in light mode instead of the kind's own
+ * accent color -- the background/border still carry the kind's color, so
+ * tags stay distinguishable by kind while the label itself is always
+ * high-contrast against that background. Omit to keep the older behavior
+ * (text colored the same as the kind's accent).
  */
-export function tagChipSx(kind, { clickable = false } = {}) {
+export function tagChipSx(kind, { clickable = false, mode } = {}) {
   const style = TAG_KIND_STYLES[kind] ?? TAG_KIND_STYLES.complexityClass;
   return {
-    color: style.color,
+    color: mode ? (mode === "dark" ? "#fff" : "#000") : style.color,
     background: style.background,
     border: `1px solid ${style.border}`,
     fontSize: "0.72rem",
