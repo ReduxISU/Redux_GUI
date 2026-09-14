@@ -182,7 +182,7 @@ function ItemContributor({ name, profile, onSelect }) {
 // Only renders when there's an actual value -- avoids "Not specified" clutter for
 // fields (bio, education, ...) a contributor hasn't filled in.
 function ProfileField({ label, value }) {
-  if (!value) return null;
+  if (!value || value === "Not specified") return null;
   return (
     <Typography sx={{ mb: 0.5 }}>
       <Box component="span" sx={{ fontWeight: 600 }}>
@@ -191,6 +191,14 @@ function ProfileField({ label, value }) {
       {value}
     </Typography>
   );
+}
+
+// Renders as a plain description of what the contributor has accomplished, not a
+// labeled "Bio:" field -- their bio is written in prose already, so a bold label in
+// front of it read like metadata rather than the description it actually is.
+function BioField({ value }) {
+  if (!value || value === "Not specified") return null;
+  return <Typography sx={{ mb: 1 }}>{value}</Typography>;
 }
 
 const REPO_STAT_FIELDS = [
@@ -959,7 +967,7 @@ export default function AboutUsPage() {
                 value={profileData.education ?? profileData.Education}
               />
               <ProfileField label="Major" value={profileData.major ?? profileData.Major} />
-              <ProfileField label="Bio" value={profileData.bio ?? profileData.Bio} />
+              <BioField value={profileData.bio ?? profileData.Bio} />
 
               {contributorProfiles[selectedContributor] && (
                 <Typography sx={{ mb: 2 }}>
