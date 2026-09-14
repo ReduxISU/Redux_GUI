@@ -8,10 +8,15 @@ import {
 } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { surfaceColors, textColors } from '../theme';
+import { useThemeMode } from '../ThemeModeContext';
 
 function PopoverTooltipClick({ toolTip = {} }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const { mode } = useThemeMode();
+  const surface = surfaceColors(mode);
+  const text = textColors(mode);
 
   const handleClick = (e) => {
     setAnchorEl(e.currentTarget);
@@ -42,8 +47,8 @@ function PopoverTooltipClick({ toolTip = {} }) {
         <Box sx={{ maxWidth: 520, p: 0 }}>
           {t.header && (
             <>
-              <Box sx={{ px: 2, py: 1, fontWeight: 700, bgcolor: 'grey.100' }}>
-                <Typography variant="subtitle2" fontWeight={700}>
+              <Box sx={{ px: 2, py: 1, fontWeight: 700, bgcolor: surface.surfaceAlt }}>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ color: text.heading }}>
                   {t.header}
                 </Typography>
               </Box>
