@@ -1,5 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import {
   Avatar,
   Box,
@@ -11,7 +12,6 @@ import {
   DialogTitle,
   IconButton,
   Link,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -125,125 +125,50 @@ function getLastName(name) {
   return name.split(" ").slice(-1)[0].toLowerCase();
 }
 
+// No hover popup -- a GitHub icon (or a question mark, for contributors without a
+// linked GitHub profile) sits to the left of the name at all times, and clicking
+// anywhere on the row opens that contributor's details (handled by `onSelect`).
 function ItemContributor({ name, profile, onSelect }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
-  const surface = surfaceColors(mode);
-  if (!profile) {
-    return (
+
+  return (
+    <Box
+      onClick={() => onSelect(name)}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.75,
+        cursor: "pointer",
+        "&:hover .contributor-name": {
+          color: "#F47C20",
+        },
+      }}
+    >
+      {profile ? (
+        <GitHubIcon
+          fontSize="small"
+          titleAccess={`${name} has a linked GitHub profile`}
+          sx={{ color: text.caption, flexShrink: 0 }}
+        />
+      ) : (
+        <HelpOutlineOutlinedIcon
+          fontSize="small"
+          titleAccess={`${name} has no linked GitHub profile`}
+          sx={{ color: text.caption, flexShrink: 0 }}
+        />
+      )}
       <Typography
-        onClick={() => onSelect(name)}
+        className="contributor-name"
         sx={{
           color: text.body,
           fontSize: "0.9rem",
           lineHeight: 1.35,
-          cursor: "pointer",
-          "&:hover": {
-            color: "#F47C20",
-          },
         }}
       >
         {name}
       </Typography>
-    );
-  }
-  return (
-    <Tooltip
-      arrow
-      placement="right"
-      title={
-        <Box sx={{ p: 1, minWidth: 190 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
-            <Avatar src={profile.image} alt={name} sx={{ width: 50, height: 50 }} />
-            <Box>
-              <Typography
-                sx={{
-                  color: text.heading,
-                  fontWeight: 600,
-                  fontSize: "0.92rem",
-                }}
-              >
-                {name}
-              </Typography>
-              <Typography
-                sx={{
-                  color: text.caption,
-                  fontSize: "0.78rem",
-                }}
-              >
-                Contributor
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.25 }}>
-            <Link
-              href={profile.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${name}'s GitHub profile`}
-              sx={{
-                color: "#F47C20",
-                display: "inline-flex",
-                alignItems: "center",
-                "&:hover": {
-                  color: "#d9670f",
-                },
-              }}
-            >
-              <GitHubIcon fontSize="small" />
-            </Link>
-            <Typography
-              sx={{
-                color: text.caption,
-                fontSize: "0.82rem",
-                fontStyle: "italic",
-              }}
-            >
-              Click name for more details
-            </Typography>
-          </Box>
-        </Box>
-      }
-      slotProps={{
-        popper: {
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, 6],
-              },
-            },
-          ],
-        },
-        tooltip: {
-          sx: {
-            bgcolor: surface.surface,
-            border: `1px solid ${surface.border}`,
-            borderRadius: "12px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-            padding: "10px 12px",
-          },
-        },
-      }}
-    >
-      <Box
-        component="span"
-        onClick={() => onSelect(name)}
-        sx={{
-          color: text.body,
-          fontSize: "0.9rem",
-          lineHeight: 1.35,
-          cursor: "pointer",
-          width: "100%",
-          "&:hover": {
-            color: "#F47C20",
-          },
-        }}
-      >
-        {name}
-      </Box>
-    </Tooltip>
+    </Box>
   );
 }
 
