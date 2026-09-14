@@ -212,7 +212,7 @@ function LaTeXGraphSvgReact({ problemData }) {
         const options = [arrow, bend, style].filter(Boolean).join(",");
 
         edgeDefs +=
-          `    \\path[draw=${color},very thick,>={Stealth[black]}] ` +
+          `    \\path[draw=${color},very thick,>={Stealth[${lineColor}]}] ` +
           `(${src}) edge[${options}]${weight} (${tgt});\n`;
       });
 
