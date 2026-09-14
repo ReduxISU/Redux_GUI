@@ -14,7 +14,6 @@ import SolveRowReact from "../components/pageblocks/SolveRowReact";
 import VerifyRowReact from "../components/pageblocks/VerifyRowReact";
 import Button from "react-bootstrap/Button";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Image from "next/image";
 import isulogoLight from "../components/images/ISULogo-Light.png";
 import isulogoDark from "../components/images/ISULogo-Dark.png";
 import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
@@ -212,12 +211,16 @@ function MainPageContent() {
             // marginTop: '25%',
           }}
         >
-          <Image
-            src={mode === "dark" ? isulogoDark : isulogoLight}
-            height={125}
-            width={251}
-            alt="ISU logo"
-          ></Image>
+          <Box
+            component="img"
+            src={mode === "dark" ? isulogoDark.src : isulogoLight.src}
+            alt="Idaho State University Computer Science"
+            sx={{
+              height: 72,
+              width: "auto",
+              display: "block",
+            }}
+          />
         </Box>
     </Box>
   );
