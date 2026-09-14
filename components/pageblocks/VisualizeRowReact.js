@@ -53,7 +53,7 @@ const SWITCHES = {
 const ACCORDION_FORM_ONE = { placeHolder: "Select visualization" };
 const TOOLTIP = {
   header: "Visualization Information",
-  formalDef: "Choose a visualization to see info about it",
+  info: "Choose a visualization to see info about it",
 };
 
 export default function VisualizeRowReact({
