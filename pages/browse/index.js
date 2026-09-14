@@ -12,7 +12,9 @@ import {
   complexityClassLabel,
 } from "../../components/hooks/ProblemFilters/complexityClassOrder";
 import { solverComplexityRank, solverComplexityLabel } from "../../components/hooks/ProblemFilters/solverComplexityOrder";
+import { problemTypeLabel } from "../../components/hooks/ProblemFilters/problemTypeOrder";
 import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
+import { ALL_VISUALIZATIONS_KEY } from "../../components/Visualization/svgs/visualizationCategories";
 import {
   Container,
   Box,
@@ -44,6 +46,7 @@ export default function BrowsePage() {
     setSelectedSolverTypes,
     selectedSolverComplexities,
     setSelectedSolverComplexities,
+    selectedProblemTypes,
     selectedVisualizationTypes,
     setSelectedVisualizationTypes,
     reachabilitySource,
@@ -90,16 +93,50 @@ export default function BrowsePage() {
   // values collapse to the same category (GraphD3 + GraphLaTeX -> "Graph"), and
   // building from the raw set would produce two checkboxes both reading "Graph"
   // instead of one with the combined count. See visualizationCategories.js.
-  const visualizationTypeOptions = useMemo(
-    () => buildFacetOptions(problemIndex, (tags) => tags.visualizationCategories),
-    [problemIndex],
-  );
+  // "All Visualizations" is prepended as a synthetic option (ALL_VISUALIZATIONS_KEY,
+  // handled specially in useProblemFilters) rather than a real category, so it's
+  // built here instead of via buildFacetOptions.
+  const visualizationTypeOptions = useMemo(() => {
+    const categoryOptions = buildFacetOptions(problemIndex, (tags) => tags.visualizationCategories);
+    const renderableCount = [...problemIndex.values()].filter(
+      (tags) => tags.hasRenderableVisualization,
+    ).length;
+    return [
+      { key: ALL_VISUALIZATIONS_KEY, label: "All Visualizations", count: renderableCount },
+      ...categoryOptions,
+    ];
+  }, [problemIndex]);
 
   const problemNames = useMemo(() => [...problemIndex.keys()].sort(), [problemIndex]);
   const problemNameMap = useMemo(
     () => new Map(problemNames.map((name) => [name, problemIndex.get(name)?.displayName ?? name])),
     [problemNames, problemIndex],
   );
+
+  // Every active filter across every facet, counted and labeled for the "Clear
+  // Filters (n)" button and the "Problems Matching:" heading below.
+  const activeFilterTags = useMemo(() => {
+    const visualizationTypeLabel = (value) =>
+      value === ALL_VISUALIZATIONS_KEY ? "All Visualizations" : value;
+    return [
+      ...[...selectedComplexityClasses].map(complexityClassLabel),
+      ...[...selectedSolverTypes].map(solverTypeLabel),
+      ...[...selectedSolverComplexities].map(solverComplexityLabel),
+      ...[...selectedProblemTypes].map(problemTypeLabel),
+      ...[...selectedVisualizationTypes].map(visualizationTypeLabel),
+      ...(reachabilitySource
+        ? [`Reachable from ${problemNameMap.get(reachabilitySource) ?? reachabilitySource}`]
+        : []),
+    ];
+  }, [
+    selectedComplexityClasses,
+    selectedSolverTypes,
+    selectedSolverComplexities,
+    selectedProblemTypes,
+    selectedVisualizationTypes,
+    reachabilitySource,
+    problemNameMap,
+  ]);
 
   return (
     <Box
@@ -128,6 +165,20 @@ export default function BrowsePage() {
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 3 }}>
               <Box sx={{ ...theSectionCard, display: "grid", gap: 2.5, position: { md: "sticky" }, top: { md: 16 } }}>
+                <Button
+                  onClick={clearFilters}
+                  variant="outlined"
+                  size="small"
+                  disabled={activeFilterTags.length === 0}
+                  sx={{
+                    color: "#F47C20",
+                    borderColor: "rgba(244,124,32,0.4)",
+                    "&:hover": { borderColor: "#F47C20", background: "rgba(244,124,32,0.08)" },
+                  }}
+                >
+                  Clear Filters ({activeFilterTags.length})
+                </Button>
+
                 <FacetFilterGroup
                   label="Complexity Class"
                   options={complexityClassOptions}
@@ -208,25 +259,18 @@ export default function BrowsePage() {
                     />
                   </Box>
                 </Box>
-
-                <Button
-                  onClick={clearFilters}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    color: "#F47C20",
-                    borderColor: "rgba(244,124,32,0.4)",
-                    "&:hover": { borderColor: "#F47C20", background: "rgba(244,124,32,0.08)" },
-                  }}
-                >
-                  Clear filters
-                </Button>
               </Box>
             </Grid>
 
             <Grid size={{ xs: 12, md: 9 }}>
               <Typography sx={{ color: text.caption, fontSize: "0.82rem", mb: 1.5 }}>
                 {filteredProblems.length} problem{filteredProblems.length === 1 ? "" : "s"}
+                {activeFilterTags.length > 0 && (
+                  <>
+                    {" "}
+                    Matching: <strong>{activeFilterTags.join(", ")}</strong>
+                  </>
+                )}
               </Typography>
 
               {filteredProblems.length === 0 ? (
