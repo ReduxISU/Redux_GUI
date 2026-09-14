@@ -30,8 +30,7 @@ const SOLVE_BUTTON = { buttonText: "Solve" };
 const CARD = { cardBodyText: "Solution:", cardHeaderText: "Solve" };
 const TOOLTIP = {
   header: "Solver Information",
-  formalDef: "Choose a type of solver to see information about it",
-  info: "",
+  info: "Choose a type of solver to see information about it",
   solverType: "",
   complexity: "",
   complexityBucket: "",

@@ -33,7 +33,7 @@ import { useThemeMode } from '../ThemeModeContext';
 const ACCORDION_FORM_ONE = { placeHolder: "Select problem" }
 const ACCORDION_FORM_TWO = { placeHolder: "default instance" }
 var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstance: "" }
-const TOOLTIP = { header: "Problem Information", formalDef: "Choose a problem to see information about it", info: "", credit: "" }
+const TOOLTIP = { header: "Problem Information", info: "Choose a problem to see information about it", credit: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
 // Display order for the dropdown's complexity-class sections -- see
