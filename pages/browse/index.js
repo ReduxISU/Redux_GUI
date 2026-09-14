@@ -114,7 +114,7 @@ export default function BrowsePage() {
   );
 
   // Every active filter across every facet, counted and labeled for the "Clear
-  // Filters (n)" button and the "Problems Matching:" heading below.
+  // Filters (n)" button and the "problems matching:" heading below.
   const activeFilterTags = useMemo(() => {
     const visualizationTypeLabel = (value) =>
       value === ALL_VISUALIZATIONS_KEY ? "All Visualizations" : value;
@@ -268,7 +268,7 @@ export default function BrowsePage() {
                 {activeFilterTags.length > 0 && (
                   <>
                     {" "}
-                    Matching: <strong>{activeFilterTags.join(", ")}</strong>
+                    matching: <strong>{activeFilterTags.join(", ")}</strong>
                   </>
                 )}
               </Typography>
