@@ -125,9 +125,10 @@ export default function ReduceToRowReact({
             chosenReduceTo
               ? {
                 header: reduceToInfo.problemName ?? "",
-                formalDef: reduceToInfo.formalDefinition ?? "",
                 // description only
                 info: reduceToInfo.problemDefinition ?? "",
+                input: reduceToInfo.inputDescription ?? "",
+                output: reduceToInfo.outputDescription ?? "",
                 classification: [
                   { label: "Complexity class", value: complexityClassLabel(reduceToInfo.complexityClass || "Unclassified") },
                 ],
@@ -173,9 +174,10 @@ export default function ReduceToRowReact({
             chosenReductionType
               ? {
                 header: reducerInfo.reductionName ?? "",
-                formalDef: reducerInfo.reductionDefinition ?? "",
                 // plain description for the reduction
                 info: reducerInfo.info ?? reducerInfo.description ?? "",
+                input: reducerInfo.inputDescription ?? "",
+                output: reducerInfo.outputDescription ?? "",
                 classification: [
                   {
                     label: "Reduction cost",

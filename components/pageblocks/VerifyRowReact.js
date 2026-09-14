@@ -90,10 +90,11 @@ export default function VerifyRowReact({
             chosenVerifier
               ? {
                 header: verifierInfo.verifierName ?? "",
-                formalDef: verifierInfo.verifierDefinition ?? "",
                 // plain description only
                 info: verifierInfo.info ?? verifierInfo.description ?? "",
-                // show source 
+                input: verifierInfo.inputDescription ?? "",
+                output: verifierInfo.outputDescription ?? "",
+                // show source
                 source: verifierInfo.source,
                 // show contributors 
                 credit:

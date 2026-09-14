@@ -338,8 +338,9 @@ export default function VisualizeRowReact({
   const tip = chosenVisualization
     ? {
       header: visualizationInfo.visualizationName ?? "",
-      formalDef: visualizationInfo.visualizationDefinition ?? "",
       info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+      input: visualizationInfo.inputDescription ?? "",
+      output: visualizationInfo.outputDescription ?? "",
       classification: [
         {
           label: "Visualization type",

@@ -83,9 +83,10 @@ export default function SolveRowReact({
     chosenSolver
       ? {
         header: solverInfo.solverName ?? "",
-        formalDef: solverInfo.solverDefinition ?? "",
         // Keep description clean
         info: solverInfo.info ?? solverInfo.description ?? "",
+        input: solverInfo.inputDescription ?? "",
+        output: solverInfo.outputDescription ?? "",
         // Source on its own line
         source: solverInfo.source,
         credit:
