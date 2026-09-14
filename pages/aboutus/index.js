@@ -233,7 +233,7 @@ function ItemContributor({ name, profile, onSelect }) {
 // Only renders when there's an actual value -- avoids "Not specified" clutter for
 // fields (bio, education, ...) a contributor hasn't filled in.
 function ProfileField({ label, value }) {
-  if (!value) return null;
+  if (!value || value === "Not specified") return null;
   return (
     <Typography sx={{ mb: 0.5 }}>
       <Box component="span" sx={{ fontWeight: 600 }}>
@@ -241,6 +241,63 @@ function ProfileField({ label, value }) {
       </Box>{" "}
       {value}
     </Typography>
+  );
+}
+
+// Renders as a plain description of what the contributor has accomplished, not a
+// labeled "Bio:" field -- their bio is written in prose already, so a bold label in
+// front of it read like metadata rather than the description it actually is.
+function BioField({ value }) {
+  if (!value || value === "Not specified") return null;
+  return <Typography sx={{ mb: 1 }}>{value}</Typography>;
+}
+
+const REPO_STAT_FIELDS = [
+  { key: "commits", label: "commits" },
+  { key: "prsOpened", label: "PRs opened" },
+  { key: "prsMerged", label: "PRs merged" },
+  { key: "reviews", label: "reviews" },
+];
+
+// Renders as "100 commits · 14 PRs opened · 79 PRs merged · 31 reviews", dropping any
+// field that's zero or missing -- most contributors only have partial data (see
+// ContributorRepoStats on the backend), especially for pre-PR-workflow-era work.
+function formatRepoStats(stats) {
+  if (!stats) return [];
+  return REPO_STAT_FIELDS.map(({ key, label }) => {
+    const value = stats[key] ?? 0;
+    return value > 0 ? `${value} ${label}` : null;
+  }).filter(Boolean);
+}
+
+// Whole section (including its own header) collapses to nothing when neither repo has
+// any non-zero stats -- covers contributors predating the stats sync as well as stub
+// entries auto-detected from a new GitHub identity that haven't been backfilled yet.
+function GithubActivitySection({ reduxStats, reduxGuiStats }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+
+  const rows = [
+    { label: "Redux", parts: formatRepoStats(reduxStats) },
+    { label: "Redux GUI", parts: formatRepoStats(reduxGuiStats) },
+  ].filter(({ parts }) => parts.length > 0);
+
+  if (rows.length === 0) return null;
+
+  return (
+    <>
+      <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1 }}>
+        GitHub Activity
+      </Typography>
+      {rows.map(({ label, parts }) => (
+        <Typography key={label} sx={{ mb: 0.5 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            {label}:
+          </Box>{" "}
+          {parts.join(" · ")}
+        </Typography>
+      ))}
+    </>
   );
 }
 
@@ -255,6 +312,33 @@ function ContributionList({ label, items }) {
           {label}:
         </Box>{" "}
         {items.length}
+      </Typography>
+      <Box component="ul" sx={{ m: 0, pl: 3, color: text.caption, fontSize: "0.82rem" }}>
+        {items.map((item) => (
+          <Box component="li" key={item}>
+            {item}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+// Unlike ContributionList, these are full freeform sentences (not short names to
+// count) describing real historical work with no live class left to verify against
+// -- e.g. a problem that was later deleted from the codebase. Rendered separately
+// and captioned so it doesn't read as equivalent to the code-verified categories above.
+function LegacyContributionsList({ items }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  if (!items || items.length === 0) return null;
+  return (
+    <Box sx={{ mt: 1.5 }}>
+      <Typography sx={{ color: text.heading, fontSize: "0.87rem", fontWeight: 600 }}>
+        Past Contributions
+      </Typography>
+      <Typography sx={{ color: text.caption, fontSize: "0.78rem", mb: 0.5 }}>
+        Historical work no longer reflected in the current codebase.
       </Typography>
       <Box component="ul" sx={{ m: 0, pl: 3, color: text.caption, fontSize: "0.82rem" }}>
         {items.map((item) => (
@@ -893,7 +977,7 @@ export default function AboutUsPage() {
                 value={profileData.education ?? profileData.Education}
               />
               <ProfileField label="Major" value={profileData.major ?? profileData.Major} />
-              <ProfileField label="Bio" value={profileData.bio ?? profileData.Bio} />
+              <BioField value={profileData.bio ?? profileData.Bio} />
 
               {contributorProfiles[selectedContributor] && (
                 <Typography sx={{ mb: 2 }}>
@@ -912,7 +996,12 @@ export default function AboutUsPage() {
                 </Typography>
               )}
 
-              <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1 }}>
+              <GithubActivitySection
+                reduxStats={profileData.reduxStats ?? profileData.ReduxStats}
+                reduxGuiStats={profileData.reduxGuiStats ?? profileData.ReduxGuiStats}
+              />
+
+              <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1, mt: 2 }}>
                 Contributions
               </Typography>
               <Typography sx={{ mb: 1.5 }}>
@@ -933,6 +1022,18 @@ export default function AboutUsPage() {
               <ContributionList
                 label="Reductions"
                 items={profileData.reductionsCreated ?? profileData.ReductionsCreated}
+              />
+              <ContributionList
+                label="Verifiers"
+                items={profileData.verifiersContributed ?? profileData.VerifiersContributed}
+              />
+              <ContributionList
+                label="Visualizations"
+                items={profileData.visualizationsCreated ?? profileData.VisualizationsCreated}
+              />
+
+              <LegacyContributionsList
+                items={profileData.legacyContributions ?? profileData.LegacyContributions}
               />
             </Box>
           ) : (
