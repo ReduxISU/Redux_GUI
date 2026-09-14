@@ -2,6 +2,8 @@
 import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
 import { getColorByKey } from '../constants/VisColorsArray';
+import { useThemeMode } from '../../ThemeModeContext';
+import { textColors } from '../../theme';
 
 const GRAPH_MARGIN = { top: 200, right: 30, bottom: 30, left: 200 };
 
@@ -9,6 +11,9 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
   const margin = GRAPH_MARGIN,
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
+
+  const { mode } = useThemeMode();
+  const textColor = textColors(mode).heading;
 
   const ref = useRef(null);
 
@@ -215,7 +220,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
       .enter()
       .append("text")
       .attr("class", "link-label")
-      .attr("fill", "black")
+      .attr("fill", textColor)
       .attr("font-size", "11px")
       .attr("text-anchor", "middle")
       .style("pointer-events", "none")
@@ -226,7 +231,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
       .data(data.nodes)
       .enter()
       .append("text")
-      .attr("fill", "black")
+      .attr("fill", textColor)
       .attr("font-size", "12px")
       .attr("text-anchor", "middle")
       .text(d => d.name)
@@ -274,7 +279,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
         .text(d => d.name);
     }
 
-  }, [problemData, charge, gadgetMap, height, width, margin.left, margin.top]);
+  }, [problemData, charge, gadgetMap, height, width, margin.left, margin.top, textColor]);
 
   return (
     <svg

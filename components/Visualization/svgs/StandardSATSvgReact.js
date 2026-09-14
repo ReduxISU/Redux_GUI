@@ -3,6 +3,8 @@ import * as d3 from 'd3'
 import { getColorByKey } from '../constants/VisColorsArray';
 import dynamic from "next/dynamic";
 import { useRef, useState, useEffect, useContext } from 'react';
+import { useThemeMode } from '../../ThemeModeContext';
+import { textColors } from '../../theme';
 
 /// StandardSATSvgReact.js
 /// This is a wrapper for the boolean visualization instance. It allows us to use the visualization as a react component, and also disables
@@ -10,17 +12,19 @@ import { useRef, useState, useEffect, useContext } from 'react';
 
 function StandardSATSvgReact(props) {
     const ref = useRef(null);
+    const { mode } = useThemeMode();
+    const textColor = textColors(mode).heading;
     useEffect(() => {
 
         try {
             if (props.problemData) {
-                getSets(ref.current, props.problemData, props.gadgetMap, props.gadgetsOn);
+                getSets(ref.current, props.problemData, props.gadgetMap, props.gadgetsOn, textColor);
             }
 
         }
         catch (error) { console.log("VISUALIZATION FAILED") };
 
-    }, [props.problemData, props.gadgetMap, props.gadgetsOn])
+    }, [props.problemData, props.gadgetMap, props.gadgetsOn, textColor])
 
 
     return (
@@ -34,7 +38,7 @@ function StandardSATSvgReact(props) {
     )
 }
 
-function getSets(ref, data, gadgetMap, gadgetsOn) {
+function getSets(ref, data, gadgetMap, gadgetsOn, textColor) {
     const margin = { top: 200, right: 30, bottom: 30, left: 200 },
         width = 700 - margin.left - margin.right,
         height = 700 - margin.top - margin.bottom;
@@ -66,6 +70,7 @@ function getSets(ref, data, gadgetMap, gadgetsOn) {
                 .attr("dominant-baseline", "middle")
                 .attr("font-size", "15px")
                 .attr("font-family", "'Courier New', Courier, monospace")
+                .attr("fill", textColor)
                 .text("\u2227");
             x += 16;
         }
