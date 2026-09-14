@@ -125,45 +125,51 @@ function getLastName(name) {
   return name.split(" ").slice(-1)[0].toLowerCase();
 }
 
-// No hover popup -- a GitHub icon (or a question mark, for contributors without a
-// linked GitHub profile) sits to the left of the name at all times, and clicking
-// anywhere on the row opens that contributor's details (handled by `onSelect`).
+// No hover popup -- a GitHub icon (a real link to their profile) or a question
+// mark (for contributors without a linked GitHub profile) sits to the left of
+// the name at all times, and clicking the name itself opens that contributor's
+// details (handled by `onSelect`) -- the icon and the name are separate click
+// targets, same as the old tooltip's "icon links out, name opens details" split.
 function ItemContributor({ name, profile, onSelect }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
 
   return (
-    <Box
-      onClick={() => onSelect(name)}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 0.75,
-        cursor: "pointer",
-        "&:hover .contributor-name": {
-          color: "#F47C20",
-        },
-      }}
-    >
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       {profile ? (
-        <GitHubIcon
-          fontSize="small"
-          titleAccess={`${name} has a linked GitHub profile`}
-          sx={{ color: text.caption, flexShrink: 0 }}
-        />
+        <Link
+          href={profile.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${name}'s GitHub profile`}
+          sx={{
+            display: "inline-flex",
+            color: text.caption,
+            flexShrink: 0,
+            "&:hover": {
+              color: "#F47C20",
+            },
+          }}
+        >
+          <GitHubIcon fontSize="medium" />
+        </Link>
       ) : (
         <HelpOutlineOutlinedIcon
-          fontSize="small"
+          fontSize="medium"
           titleAccess={`${name} has no linked GitHub profile`}
           sx={{ color: text.caption, flexShrink: 0 }}
         />
       )}
       <Typography
-        className="contributor-name"
+        onClick={() => onSelect(name)}
         sx={{
           color: text.body,
-          fontSize: "0.9rem",
+          fontSize: "0.95rem",
           lineHeight: 1.35,
+          cursor: "pointer",
+          "&:hover": {
+            color: "#F47C20",
+          },
         }}
       >
         {name}
@@ -437,10 +443,10 @@ export default function AboutUsPage() {
                               border: `1px solid ${surface.border}`,
                               background: surface.surfaceAlt,
                               borderRadius: "10px",
-                              px: 1.4,
-                              py: 0.8,
+                              px: 1.8,
+                              py: 1.2,
                               mb: 1.5,
-                              minHeight: "34px",
+                              minHeight: "46px",
                               display: "flex",
                               alignItems: "center",
                               transition: "all 0.2s ease",
