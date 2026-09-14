@@ -265,6 +265,33 @@ function ContributionList({ label, items }) {
   );
 }
 
+// Unlike ContributionList, these are full freeform sentences (not short names to
+// count) describing real historical work with no live class left to verify against
+// -- e.g. a problem that was later deleted from the codebase. Rendered separately
+// and captioned so it doesn't read as equivalent to the code-verified categories above.
+function LegacyContributionsList({ items }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  if (!items || items.length === 0) return null;
+  return (
+    <Box sx={{ mt: 1.5 }}>
+      <Typography sx={{ color: text.heading, fontSize: "0.87rem", fontWeight: 600 }}>
+        Past Contributions
+      </Typography>
+      <Typography sx={{ color: text.caption, fontSize: "0.78rem", mb: 0.5 }}>
+        Historical work no longer reflected in the current codebase.
+      </Typography>
+      <Box component="ul" sx={{ m: 0, pl: 3, color: text.caption, fontSize: "0.82rem" }}>
+        {items.map((item) => (
+          <Box component="li" key={item}>
+            {item}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
 export default function AboutUsPage() {
   const { mode } = useThemeMode();
   const text = textColors(mode);
@@ -977,6 +1004,18 @@ export default function AboutUsPage() {
               <ContributionList
                 label="Reductions"
                 items={profileData.reductionsCreated ?? profileData.ReductionsCreated}
+              />
+              <ContributionList
+                label="Verifiers"
+                items={profileData.verifiersContributed ?? profileData.VerifiersContributed}
+              />
+              <ContributionList
+                label="Visualizations"
+                items={profileData.visualizationsCreated ?? profileData.VisualizationsCreated}
+              />
+
+              <LegacyContributionsList
+                items={profileData.legacyContributions ?? profileData.LegacyContributions}
               />
             </Box>
           ) : (
