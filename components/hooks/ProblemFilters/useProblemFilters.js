@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { complexityClassRank } from "./complexityClassOrder";
+import { ALL_VISUALIZATIONS_KEY } from "../../Visualization/svgs/visualizationCategories";
 
 /**
  * `oneHop`: problems directly reachable from `source` via a single reduction
@@ -54,7 +55,10 @@ function intersects(setA, setB) {
  * from `useProblemIndex`. selectedVisualizationTypes matches against
  * visualizationCategories (the deduped conceptual category, e.g. "Graph"), not the
  * raw per-renderer visualizationTypes -- so selecting "Graph" matches a problem
- * whose visualizations are GraphD3, GraphLaTeX, or both.
+ * whose visualizations are GraphD3, GraphLaTeX, or both. `ALL_VISUALIZATIONS_KEY`
+ * is a special-cased sentinel value within that same Set: it matches any problem
+ * with `hasRenderableVisualization`, OR'd with whatever specific categories are
+ * also selected, rather than being looked up in visualizationCategories itself.
  * @param reductionGraph Raw reduction graph object from `useProblemIndex`.
  * @returns filter state, setters, the filtered problem-name list (sorted
  * classical-then-quantum, low-to-high by complexityClassRank, alphabetical by name
@@ -97,11 +101,13 @@ export function useProblemFilters(problemIndex, reductionGraph) {
       if (selectedProblemTypes.size > 0 && !selectedProblemTypes.has(tags.problemType)) {
         continue;
       }
-      if (
-        selectedVisualizationTypes.size > 0 &&
-        !intersects(tags.visualizationCategories, selectedVisualizationTypes)
-      ) {
-        continue;
+      if (selectedVisualizationTypes.size > 0) {
+        const matchesAllVisualizations =
+          selectedVisualizationTypes.has(ALL_VISUALIZATIONS_KEY) && tags.hasRenderableVisualization;
+        const matchesCategory = intersects(tags.visualizationCategories, selectedVisualizationTypes);
+        if (!matchesAllVisualizations && !matchesCategory) {
+          continue;
+        }
       }
       if (reachableSet && !reachableSet.has(problemName)) {
         continue;
