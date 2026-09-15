@@ -26,6 +26,16 @@ function sectionLabelSx(text) {
 // results grid regardless of how many solver/visualization types a problem
 // declares. minWidth: 0 is load-bearing on a flex child -- without it the row
 // grows to fit every chip instead of clipping/scrolling them.
+//
+// The scrollbar itself is hidden (direct project-owner instruction) -- the
+// row still scrolls via wheel/trackpad/touch/drag exactly as before, this
+// only suppresses the browser's own scrollbar chrome, which read as visual
+// noise on a card this small. Three separate properties because no single
+// one covers every engine: scrollbar-width is Firefox's own (not part of any
+// vendor-prefixed rule), -ms-overflow-style is legacy Edge/IE, and
+// ::-webkit-scrollbar is Chrome/Safari/Chromium-Edge's pseudo-element --
+// display: none on it removes the bar without disabling the scrolling it
+// controls.
 const chipScrollRowSx = {
   display: "flex",
   gap: 0.5,
@@ -33,6 +43,11 @@ const chipScrollRowSx = {
   flexWrap: "nowrap",
   minWidth: 0,
   py: 0.25,
+  scrollbarWidth: "none",
+  msOverflowStyle: "none",
+  "&::-webkit-scrollbar": {
+    display: "none",
+  },
 };
 
 /**
