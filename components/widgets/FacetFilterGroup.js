@@ -1,6 +1,6 @@
 import React from "react";
 import { Checkbox, FormControlLabel, FormGroup, Typography, Box } from "@mui/material";
-import { textColors } from "../theme";
+import { textColors, thinScrollbarSx } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
 
 /**
@@ -118,7 +118,9 @@ export default function FacetFilterGroup({
         {label.toUpperCase()}
       </Typography>
       {scrollable ? (
-        <Box sx={{ maxHeight: "200px", overflowY: "auto" }}>{checkboxList}</Box>
+        <Box sx={{ maxHeight: "200px", overflowY: "auto", ...thinScrollbarSx(mode) }}>
+          {checkboxList}
+        </Box>
       ) : (
         checkboxList
       )}
