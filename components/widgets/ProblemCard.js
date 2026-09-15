@@ -1,20 +1,39 @@
 import React from "react";
 import Link from "next/link";
 import { Box, Chip, Typography } from "@mui/material";
-import { Monitor as VisualizationIcon } from "@mui/icons-material";
 import { sectionCardSx, textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
 import { tagChipSx } from "../hooks/ProblemFilters/tagStyles";
 
-// Small heading above the Solvers/Visualizations chip rows.
+// Label to the left of the Solvers/Visualizations chip rows -- fixed width so
+// both rows' chip lists start at the same x position regardless of which
+// label is longer, and never wraps/shrinks even when its row's chip list is
+// scrolling under it.
 function sectionLabelSx(text) {
   return {
     color: text.heading,
     fontSize: "0.68rem",
     fontWeight: 600,
     letterSpacing: "0.06em",
+    flexShrink: 0,
+    width: "5.5rem",
   };
 }
+
+// Direct project-owner instruction: a category row's chip list scrolls
+// horizontally in its own lane next to the label, rather than wrapping onto
+// further lines below it -- keeps each card's height predictable in the
+// results grid regardless of how many solver/visualization types a problem
+// declares. minWidth: 0 is load-bearing on a flex child -- without it the row
+// grows to fit every chip instead of clipping/scrolling them.
+const chipScrollRowSx = {
+  display: "flex",
+  gap: 0.5,
+  overflowX: "auto",
+  flexWrap: "nowrap",
+  minWidth: 0,
+  py: 0.25,
+};
 
 /**
  * Presentational card for one problem in the /browse results grid. Clicking
@@ -39,7 +58,11 @@ function sectionLabelSx(text) {
  * @param visualizationTypes `[{value, label}]` -- each renderable visualization's
  * simplified display category (e.g. "Graph", "Table") from
  * `visualizationCategories.js`. Category strings are already display-ready, so
- * `value` and `label` are the same string here, unlike `solverTypes`.
+ * `value` and `label` are the same string here, unlike `solverTypes`. Never
+ * includes useProblemIndex's "Unimplemented" sentinel -- the caller
+ * (pages/browse/index.js) strips that before this prop is built, so an empty
+ * array here means "genuinely no renderable visualization" and this component
+ * doesn't have to know the sentinel exists.
  * @param onComplexityClassClick Called with `complexityClassValue` when the
  * complexity-class chip is clicked. Omit to render the chip as non-interactive.
  * @param onProblemTypeClick Called with `problemTypeValue` when the problem-type
@@ -58,7 +81,6 @@ export default function ProblemCard({
   problemTypeValue,
   solverTypes,
   visualizationTypes = [],
-  hasRenderableVisualization,
   onComplexityClassClick,
   onProblemTypeClick,
   onSolverTypeClick,
@@ -72,7 +94,7 @@ export default function ProblemCard({
 
   return (
     <Box sx={cardSx}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
+      <Box sx={{ mb: 1 }}>
         <Link
           href={`/?problem=${encodeURIComponent(name)}`}
           style={{ textDecoration: "none" }}
@@ -88,9 +110,6 @@ export default function ProblemCard({
             {displayName}
           </Typography>
         </Link>
-        {hasRenderableVisualization ? (
-          <VisualizationIcon titleAccess="Has a renderable visualization" sx={{ color: text.caption, fontSize: "1.1rem" }} />
-        ) : null}
       </Box>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.25 }}>
@@ -126,15 +145,15 @@ export default function ProblemCard({
         ) : null}
       </Box>
 
-      <Box sx={{ mb: 1.25 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 1.25 }}>
         <Typography sx={sectionLabelSx(text)}>Solvers:</Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
-          {solverTypes.length === 0 ? (
-            <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
-              No solvers
-            </Typography>
-          ) : (
-            solverTypes.map(({ value, label }) => (
+        {solverTypes.length === 0 ? (
+          <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
+            No solvers
+          </Typography>
+        ) : (
+          <Box sx={chipScrollRowSx}>
+            {solverTypes.map(({ value, label }) => (
               <Chip
                 key={value}
                 label={label}
@@ -148,22 +167,22 @@ export default function ProblemCard({
                       }
                     : undefined
                 }
-                sx={tagChipSx("solverType", { clickable: !!onSolverTypeClick, mode })}
+                sx={{ ...tagChipSx("solverType", { clickable: !!onSolverTypeClick, mode }), flexShrink: 0 }}
               />
-            ))
-          )}
-        </Box>
+            ))}
+          </Box>
+        )}
       </Box>
 
-      <Box>
+      <Box sx={{ display: "flex", alignItems: "center" }}>
         <Typography sx={sectionLabelSx(text)}>Visualizations:</Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
-          {visualizationTypes.length === 0 ? (
-            <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
-              No visualizations
-            </Typography>
-          ) : (
-            visualizationTypes.map(({ value, label }) => (
+        {visualizationTypes.length === 0 ? (
+          <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
+            No visualizations
+          </Typography>
+        ) : (
+          <Box sx={chipScrollRowSx}>
+            {visualizationTypes.map(({ value, label }) => (
               <Chip
                 key={value}
                 label={label}
@@ -177,11 +196,14 @@ export default function ProblemCard({
                       }
                     : undefined
                 }
-                sx={tagChipSx("visualizationType", { clickable: !!onVisualizationTypeClick, mode })}
+                sx={{
+                  ...tagChipSx("visualizationType", { clickable: !!onVisualizationTypeClick, mode }),
+                  flexShrink: 0,
+                }}
               />
-            ))
-          )}
-        </Box>
+            ))}
+          </Box>
+        )}
       </Box>
     </Box>
   );

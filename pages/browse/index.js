@@ -73,6 +73,12 @@ export default function BrowsePage() {
   // values collapse to the same category (GraphD3 + GraphLaTeX -> "Graph"), and
   // building from the raw set would produce two checkboxes both reading "Graph"
   // instead of one with the combined count. See visualizationCategories.js.
+  //
+  // Includes useProblemIndex's "Unimplemented" sentinel as an ordinary option here
+  // (unlike the ProblemCard chip list below, which strips it) -- a person filtering
+  // by visualization type still needs a way to find every "No visualizations" card,
+  // and useProblemFilters' selectedVisualizationTypes/tags.visualizationCategories
+  // intersection already matches it correctly with no filter-logic changes needed.
   const visualizationTypeOptions = useMemo(
     () => buildFacetOptions(problemIndex, (tags) => tags.visualizationCategories),
     [problemIndex],
@@ -268,9 +274,14 @@ export default function BrowsePage() {
                             .map((type) => ({ value: type, label: solverTypeLabel(type) }))
                             .sort((a, b) => a.label.localeCompare(b.label))}
                           visualizationTypes={[...tags.visualizationCategories]
+                            // useProblemIndex's "Unimplemented" sentinel is a real facet
+                            // option (so it can still be filtered on below) but never a
+                            // real category -- stripped here so ProblemCard never renders
+                            // it as a chip; its length-0 fallback ("No visualizations")
+                            // fires instead. Direct project-owner instruction.
+                            .filter((category) => category !== "Unimplemented")
                             .map((category) => ({ value: category, label: category }))
                             .sort((a, b) => a.label.localeCompare(b.label))}
-                          hasRenderableVisualization={tags.hasRenderableVisualization}
                           onComplexityClassClick={toggleComplexityClassFilter}
                           onProblemTypeClick={toggleProblemTypeFilter}
                           onSolverTypeClick={toggleSolverTypeFilter}
