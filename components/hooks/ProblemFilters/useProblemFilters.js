@@ -51,14 +51,16 @@ function intersects(setA, setB) {
  *
  * @param problemIndex `Map<problemName, {displayName, complexityClass,
  * complexityClasses: Set, problemType, solverTypes: Set, solverComplexities: Set,
- * visualizationTypes: Set, visualizationCategories: Set, hasRenderableVisualization}>`
+ * visualizationTypes: Set, visualizationCategories: Set}>`
  * from `useProblemIndex`. selectedVisualizationTypes matches against
  * visualizationCategories (the deduped conceptual category, e.g. "Graph"), not the
  * raw per-renderer visualizationTypes -- so selecting "Graph" matches a problem
  * whose visualizations are GraphD3, GraphLaTeX, or both. `ALL_VISUALIZATIONS_KEY`
  * is a special-cased sentinel value within that same Set: it matches any problem
- * with `hasRenderableVisualization`, OR'd with whatever specific categories are
- * also selected, rather than being looked up in visualizationCategories itself.
+ * that has at least one real category -- i.e. visualizationCategories is NOT just
+ * useProblemIndex's own "Unimplemented" sentinel (the two are mutually exclusive
+ * by construction) -- OR'd with whatever specific categories are also selected,
+ * rather than being looked up in visualizationCategories itself.
  * @param reductionGraph Raw reduction graph object from `useProblemIndex`.
  * @returns filter state, setters, the filtered problem-name list (sorted
  * classical-then-quantum, low-to-high by complexityClassRank, alphabetical by name
@@ -103,7 +105,8 @@ export function useProblemFilters(problemIndex, reductionGraph) {
       }
       if (selectedVisualizationTypes.size > 0) {
         const matchesAllVisualizations =
-          selectedVisualizationTypes.has(ALL_VISUALIZATIONS_KEY) && tags.hasRenderableVisualization;
+          selectedVisualizationTypes.has(ALL_VISUALIZATIONS_KEY) &&
+          !tags.visualizationCategories.has("Unimplemented");
         const matchesCategory = intersects(tags.visualizationCategories, selectedVisualizationTypes);
         if (!matchesAllVisualizations && !matchesCategory) {
           continue;
