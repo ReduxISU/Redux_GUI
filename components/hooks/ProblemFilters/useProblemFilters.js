@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { complexityClassRank } from "./complexityClassOrder";
+import { ALL_VISUALIZATIONS_KEY } from "../../Visualization/svgs/visualizationCategories";
 
 /**
  * `oneHop`: problems directly reachable from `source` via a single reduction
@@ -49,12 +50,15 @@ function intersects(setA, setB) {
  * set is empty meaning "no filter on that facet").
  *
  * @param problemIndex `Map<problemName, {displayName, complexityClass,
- * complexityClasses: Set, problemType, solverTypes: Set, visualizationTypes: Set,
- * visualizationCategories: Set, hasRenderableVisualization}>` from
- * `useProblemIndex`. selectedVisualizationTypes matches against
+ * complexityClasses: Set, problemType, solverTypes: Set, solverComplexities: Set,
+ * visualizationTypes: Set, visualizationCategories: Set, hasRenderableVisualization}>`
+ * from `useProblemIndex`. selectedVisualizationTypes matches against
  * visualizationCategories (the deduped conceptual category, e.g. "Graph"), not the
  * raw per-renderer visualizationTypes -- so selecting "Graph" matches a problem
- * whose visualizations are GraphD3, GraphLaTeX, or both.
+ * whose visualizations are GraphD3, GraphLaTeX, or both. `ALL_VISUALIZATIONS_KEY`
+ * is a special-cased sentinel value within that same Set: it matches any problem
+ * with `hasRenderableVisualization`, OR'd with whatever specific categories are
+ * also selected, rather than being looked up in visualizationCategories itself.
  * @param reductionGraph Raw reduction graph object from `useProblemIndex`.
  * @returns filter state, setters, the filtered problem-name list (sorted
  * classical-then-quantum, low-to-high by complexityClassRank, alphabetical by name
@@ -63,6 +67,7 @@ function intersects(setA, setB) {
 export function useProblemFilters(problemIndex, reductionGraph) {
   const [selectedComplexityClasses, setSelectedComplexityClasses] = useState(new Set());
   const [selectedSolverTypes, setSelectedSolverTypes] = useState(new Set());
+  const [selectedSolverComplexities, setSelectedSolverComplexities] = useState(new Set());
   const [selectedProblemTypes, setSelectedProblemTypes] = useState(new Set());
   const [selectedVisualizationTypes, setSelectedVisualizationTypes] = useState(new Set());
   const [reachabilitySource, setReachabilitySource] = useState(null);
@@ -87,14 +92,22 @@ export function useProblemFilters(problemIndex, reductionGraph) {
       if (selectedSolverTypes.size > 0 && !intersects(tags.solverTypes, selectedSolverTypes)) {
         continue;
       }
+      if (
+        selectedSolverComplexities.size > 0 &&
+        !intersects(tags.solverComplexities, selectedSolverComplexities)
+      ) {
+        continue;
+      }
       if (selectedProblemTypes.size > 0 && !selectedProblemTypes.has(tags.problemType)) {
         continue;
       }
-      if (
-        selectedVisualizationTypes.size > 0 &&
-        !intersects(tags.visualizationCategories, selectedVisualizationTypes)
-      ) {
-        continue;
+      if (selectedVisualizationTypes.size > 0) {
+        const matchesAllVisualizations =
+          selectedVisualizationTypes.has(ALL_VISUALIZATIONS_KEY) && tags.hasRenderableVisualization;
+        const matchesCategory = intersects(tags.visualizationCategories, selectedVisualizationTypes);
+        if (!matchesAllVisualizations && !matchesCategory) {
+          continue;
+        }
       }
       if (reachableSet && !reachableSet.has(problemName)) {
         continue;
@@ -113,6 +126,7 @@ export function useProblemFilters(problemIndex, reductionGraph) {
     problemIndex,
     selectedComplexityClasses,
     selectedSolverTypes,
+    selectedSolverComplexities,
     selectedProblemTypes,
     selectedVisualizationTypes,
     reachableSet,
@@ -121,6 +135,7 @@ export function useProblemFilters(problemIndex, reductionGraph) {
   function clearFilters() {
     setSelectedComplexityClasses(new Set());
     setSelectedSolverTypes(new Set());
+    setSelectedSolverComplexities(new Set());
     setSelectedProblemTypes(new Set());
     setSelectedVisualizationTypes(new Set());
     setReachabilitySource(null);
@@ -132,6 +147,8 @@ export function useProblemFilters(problemIndex, reductionGraph) {
     setSelectedComplexityClasses,
     selectedSolverTypes,
     setSelectedSolverTypes,
+    selectedSolverComplexities,
+    setSelectedSolverComplexities,
     selectedProblemTypes,
     setSelectedProblemTypes,
     selectedVisualizationTypes,
