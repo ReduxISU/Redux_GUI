@@ -62,11 +62,19 @@ export default function BrowsePage() {
   // alphabetical -- same ranking the results grid and the problem-picker dropdown
   // already sort by. Labels via complexityClassLabel so the checkboxes read
   // "NP-Complete"/"NP-Hard" rather than the raw "NPComplete"/"NPHard" wire values.
+  //
+  // tags.complexityClasses (the NP-Complete/NP-Hard-implies-NP expanded Set from
+  // useProblemIndex), not tags.complexityClass (the single raw declared value) --
+  // direct project-owner instruction: "NP (n)" should count every problem checking
+  // that box actually returns (NP-Complete and NP-Hard problems included, alongside
+  // anything declared bare "NP"), not just the ones declared bare "NP". Using the
+  // same expanded Set the filter itself already intersects against keeps this count
+  // and the filter's real behavior from silently drifting apart.
   const complexityClassOptions = useMemo(
     () =>
       buildFacetOptions(
         problemIndex,
-        (tags) => [tags.complexityClass],
+        (tags) => tags.complexityClasses,
         (a, b) => complexityClassRank(a) - complexityClassRank(b),
         complexityClassLabel,
       ),
