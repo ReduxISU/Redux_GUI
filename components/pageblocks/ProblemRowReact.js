@@ -37,11 +37,17 @@ var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstanc
 const TOOLTIP = { header: "Problem Information", info: "Choose a problem to see information about it", credit: "" }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
-// Sort order for the dropdown's options -- see complexityClassOrder.js for the
-// reasoning. Note SearchBarExtensible's groupOrder lookup resolves a value not in
-// this list to sort index -1, i.e. the *top*, not the bottom -- so every declared
-// value must be in COMPLEXITY_CLASS_ORDER, not just the ones currently in use, or a
-// future problem taking on an unlisted class would jump above P.
+// Display order for the dropdown's complexity-class sections -- see
+// complexityClassOrder.js for the reasoning. Note SearchBarExtensible's groupOrder
+// lookup resolves a value not in this list to sort index -1, i.e. the *top*, not
+// the bottom -- so every declared value must be in COMPLEXITY_CLASS_ORDER, not just
+// the ones currently in use, or a future problem taking on an unlisted class would
+// jump above P.
+//
+// Section header labels use complexityClassLabel (imported above), the same
+// official-label source used for the tooltip's "Complexity class" field -- keeping
+// a second, independently-maintained label map here previously let this dropdown's
+// headers drift out of sync with newly added complexity classes.
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
@@ -214,6 +220,7 @@ export default function ProblemRowReact({ url, problemName, setProblemName, prob
           optionsMap={problemNameMap}
           groupBy={(key) => problemIndex.get(key)?.complexityClass || "Unclassified"}
           groupOrder={COMPLEXITY_CLASS_ORDER}
+          groupLabel={complexityClassLabel}
           optionTag={(key) => [
             {
               label: complexityClassLabel(problemIndex.get(key)?.complexityClass || "Unclassified"),
