@@ -12,7 +12,6 @@
 import React from 'react'
 import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Card } from 'react-bootstrap'
 import { Box, Button } from '@mui/material'
 import { Download as DownloadIcon } from '@mui/icons-material';
 import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
@@ -44,17 +43,43 @@ const TOOLTIP2 = {
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } }
 
 // Reduced instances/nodes/edges are unbounded-length strings from the API --
-// this caps their displayed height and scrolls instead of pushing the rest
-// of the page down, while wordBreak keeps a single very long token (e.g. an
-// edge list with no spaces) from forcing the pane wider than its container.
+// each section is clipped to this many characters by default so the pane
+// doesn't render thousands of nodes/edges at once, and only scrolls (rather
+// than growing the page) once the viewer opts in via "Show more".
+const TEXT_PREVIEW_LENGTH = 400;
+
+function textWrapSx() {
+  return { whiteSpace: "pre-wrap", wordBreak: "break-word" };
+}
+
 function scrollableTextSx(mode) {
   return {
     maxHeight: 220,
     overflowY: "auto",
-    wordBreak: "break-word",
-    whiteSpace: "pre-wrap",
+    ...textWrapSx(),
     ...thinScrollbarSx(mode),
   };
+}
+
+function TruncatedTextSection({ text, mode }) {
+  const [expanded, setExpanded] = useState(false);
+  const isTruncated = text.length > TEXT_PREVIEW_LENGTH;
+  const displayText = expanded || !isTruncated ? text : text.slice(0, TEXT_PREVIEW_LENGTH) + "…";
+
+  return (
+    <>
+      <Box sx={expanded ? scrollableTextSx(mode) : textWrapSx()}>{displayText}</Box>
+      {isTruncated && (
+        <Button
+          size="small"
+          onClick={() => setExpanded((e) => !e)}
+          sx={{ textTransform: "none", minWidth: 0, px: 0, mb: 1 }}
+        >
+          {expanded ? "Show less" : "Show more"}
+        </Button>
+      )}
+    </>
+  );
 }
 
 // ReductionCost describes output-size blowup relative to input size, a
@@ -274,11 +299,7 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
 
   // Checks if this is actually a node / edge format. If not, show the original form.
   if (!prettyInstance) {
-    return (
-      <Box sx={scrollableTextSx(mode)}>
-        <Card.Text>{instance}</Card.Text>
-      </Box>
-    );
+    return <TruncatedTextSection text={instance} mode={mode} />;
   }
   if (prettyInstance[0] === "GRAPH") {
     return (
@@ -295,11 +316,7 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
     return <ReduceInfoBool instance={instance} literals={prettyInstance[1]} clauses={prettyInstance[2]} />;
   }
 
-  return (
-    <Box sx={scrollableTextSx(mode)}>
-      <Card.Text>{instance}</Card.Text>
-    </Box>
-  );
+  return <TruncatedTextSection text={instance} mode={mode} />;
 }
 
 function ReduceInfoBool({ instance, literals, clauses }) {
@@ -310,15 +327,15 @@ function ReduceInfoBool({ instance, literals, clauses }) {
       <p>
         <b>Literals:</b>
       </p>
-      <Box sx={scrollableTextSx(mode)}>{literals}</Box>
+      <TruncatedTextSection text={literals} mode={mode} />
       <p>
         <b>Clauses:</b>
       </p>
-      <Box sx={scrollableTextSx(mode)}>{clauses}</Box>
+      <TruncatedTextSection text={clauses} mode={mode} />
       <p>
         <b>Original form:</b>
       </p>
-      <Box sx={scrollableTextSx(mode)}>{instance}</Box>
+      <TruncatedTextSection text={instance} mode={mode} />
     </>
   );
 }
@@ -332,17 +349,17 @@ function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
         <b>Reduced {problemName} Instance:</b>
       </p>
 
-      <Box sx={scrollableTextSx(mode)}>{instance}</Box>
+      <TruncatedTextSection text={instance} mode={mode} />
 
       <p>
         <b>Nodes:</b>
       </p>
-      <Box sx={scrollableTextSx(mode)}>{nodes}</Box>
+      <TruncatedTextSection text={nodes} mode={mode} />
 
       <p>
         <b>Edges:</b>
       </p>
-      <Box sx={scrollableTextSx(mode)}>{edges}</Box>
+      <TruncatedTextSection text={edges} mode={mode} />
       <p>
         <b>K value:</b> {k_value}
       </p>
