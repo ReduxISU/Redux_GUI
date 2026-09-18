@@ -13,7 +13,7 @@ import React from 'react'
 import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Card } from 'react-bootstrap'
-import { Button } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { Download as DownloadIcon } from '@mui/icons-material';
 import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
@@ -23,7 +23,7 @@ import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
-import { surfaceColors, textColors } from '../theme';
+import { surfaceColors, textColors, thinScrollbarSx } from '../theme';
 import { useThemeMode } from '../ThemeModeContext';
 import { complexityClassLabel } from '../hooks/ProblemFilters/complexityClassOrder';
 import { reductionTypeLabel } from '../hooks/ProblemFilters/tagLabels';
@@ -43,6 +43,20 @@ const TOOLTIP2 = {
   complexityBucket: "",
 }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } }
+
+// Reduced instances/nodes/edges are unbounded-length strings from the API --
+// this caps their displayed height and scrolls instead of pushing the rest
+// of the page down, while wordBreak keeps a single very long token (e.g. an
+// edge list with no spaces) from forcing the pane wider than its container.
+function scrollableTextSx(mode) {
+  return {
+    maxHeight: 220,
+    overflowY: "auto",
+    wordBreak: "break-word",
+    whiteSpace: "pre-wrap",
+    ...thinScrollbarSx(mode),
+  };
+}
 
 // ReductionCost describes output-size blowup relative to input size, a
 // separate axis from ReductionComplexityBucket (runtime, shown below as
@@ -254,11 +268,16 @@ export default function ReduceToRowReact({
 }
 
 function ReduceInfo({ instance, chosenReduceTo, problemName }) {
+  const { mode } = useThemeMode();
   const prettyInstance = checkProblemType(instance, chosenReduceTo);
 
   // Checks if this is actually a node / edge format. If not, show the original form.
   if (!prettyInstance) {
-    return <Card.Text>{instance}</Card.Text>;
+    return (
+      <Box sx={scrollableTextSx(mode)}>
+        <Card.Text>{instance}</Card.Text>
+      </Box>
+    );
   }
   if (prettyInstance[0] === "GRAPH") {
     return (
@@ -275,46 +294,54 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
     return <ReduceInfoBool instance={instance} literals={prettyInstance[1]} clauses={prettyInstance[2]} />;
   }
 
-  return <Card.Text>{instance}</Card.Text>;
+  return (
+    <Box sx={scrollableTextSx(mode)}>
+      <Card.Text>{instance}</Card.Text>
+    </Box>
+  );
 }
 
 function ReduceInfoBool({ instance, literals, clauses }) {
+  const { mode } = useThemeMode();
+
   return (
     <>
       <p>
         <b>Literals:</b>
       </p>
-      <p>{literals}</p>
+      <Box sx={scrollableTextSx(mode)}>{literals}</Box>
       <p>
         <b>Clauses:</b>
       </p>
-      <p>{clauses}</p>
+      <Box sx={scrollableTextSx(mode)}>{clauses}</Box>
       <p>
         <b>Original form:</b>
       </p>
-      <p>{instance}</p>
+      <Box sx={scrollableTextSx(mode)}>{instance}</Box>
     </>
   );
 }
 
 function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
+  const { mode } = useThemeMode();
+
   return (
     <>
       <p style={{ fontSize: 20 }}>
         <b>Reduced {problemName} Instance:</b>
       </p>
 
-      <p>{instance}</p>
+      <Box sx={scrollableTextSx(mode)}>{instance}</Box>
 
       <p>
         <b>Nodes:</b>
       </p>
-      <p>{nodes}</p>
+      <Box sx={scrollableTextSx(mode)}>{nodes}</Box>
 
       <p>
         <b>Edges:</b>
       </p>
-      <p /*style={{wordBreak: 'breakWord', color: 'red'}}> */>{edges}</p>
+      <Box sx={scrollableTextSx(mode)}>{edges}</Box>
       <p>
         <b>K value:</b> {k_value}
       </p>
