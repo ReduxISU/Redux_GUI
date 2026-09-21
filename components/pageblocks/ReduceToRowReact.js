@@ -45,55 +45,40 @@ const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" }
 
 // Reduced instances/nodes/edges are unbounded-length strings from the API --
 // each section is clipped to this many characters by default so the pane
-// doesn't render thousands of nodes/edges at once, and only scrolls (rather
-// than growing the page) once the viewer opts in via "Show more".
+// doesn't render thousands of nodes/edges at once. "Show more" reveals the
+// rest in full -- no scrollbar (direct project-owner instruction: menus and
+// expanded sections show their full content, never a scrollable sub-box).
 const TEXT_PREVIEW_LENGTH = 400;
+
+// Above this length, even the full (non-scrolling) render is skipped entirely
+// rather than attempted: this is what actually crashed the browser before
+// (a still-scrollable expanded section was, underneath, rendering the whole
+// string into the DOM -- the scrollbar just hid that cost, it didn't remove
+// it). The Reduce panel's existing Download button already gets the visitor
+// the same data without asking the DOM to hold it.
+const TEXT_TOO_LARGE_TO_RENDER_LENGTH = 50_000;
 
 function textWrapSx() {
   return { whiteSpace: "pre-wrap", wordBreak: "break-word" };
 }
 
-// Thin, low-contrast scrollbar so an expanded section doesn't get a heavy
-// boxed-in look from the browser's default scrollbar.
-function thinScrollbarSx(mode) {
-  const thumb = mode === "dark" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.18)";
-  const thumbHover = mode === "dark" ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.28)";
-  return {
-    scrollbarWidth: "thin",
-    scrollbarColor: `${thumb} transparent`,
-    "&::-webkit-scrollbar": {
-      width: "6px",
-    },
-    "&::-webkit-scrollbar-track": {
-      background: "transparent",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      background: thumb,
-      borderRadius: "999px",
-    },
-    "&::-webkit-scrollbar-thumb:hover": {
-      background: thumbHover,
-    },
-  };
-}
-
-function scrollableTextSx(mode) {
-  return {
-    maxHeight: 220,
-    overflowY: "auto",
-    ...textWrapSx(),
-    ...thinScrollbarSx(mode),
-  };
-}
-
-function TruncatedTextSection({ text, mode }) {
+function TruncatedTextSection({ text }) {
   const [expanded, setExpanded] = useState(false);
   const isTruncated = text.length > TEXT_PREVIEW_LENGTH;
+
+  if (expanded && text.length > TEXT_TOO_LARGE_TO_RENDER_LENGTH) {
+    return (
+      <Box sx={{ ...textWrapSx(), fontStyle: "italic", opacity: 0.75 }}>
+        Too large to display. Select Download to get the full reduced instance.
+      </Box>
+    );
+  }
+
   const displayText = expanded || !isTruncated ? text : text.slice(0, TEXT_PREVIEW_LENGTH) + "…";
 
   return (
     <>
-      <Box sx={expanded ? scrollableTextSx(mode) : textWrapSx()}>{displayText}</Box>
+      <Box sx={textWrapSx()}>{displayText}</Box>
       {isTruncated && (
         <Button
           size="small"
@@ -317,12 +302,11 @@ export default function ReduceToRowReact({
 }
 
 function ReduceInfo({ instance, chosenReduceTo, problemName }) {
-  const { mode } = useThemeMode();
   const prettyInstance = checkProblemType(instance, chosenReduceTo);
 
   // Checks if this is actually a node / edge format. If not, show the original form.
   if (!prettyInstance) {
-    return <TruncatedTextSection text={instance} mode={mode} />;
+    return <TruncatedTextSection text={instance} />;
   }
   if (prettyInstance[0] === "GRAPH") {
     return (
@@ -339,50 +323,46 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
     return <ReduceInfoBool instance={instance} literals={prettyInstance[1]} clauses={prettyInstance[2]} />;
   }
 
-  return <TruncatedTextSection text={instance} mode={mode} />;
+  return <TruncatedTextSection text={instance} />;
 }
 
 function ReduceInfoBool({ instance, literals, clauses }) {
-  const { mode } = useThemeMode();
-
   return (
     <>
       <p>
         <b>Literals:</b>
       </p>
-      <TruncatedTextSection text={literals} mode={mode} />
+      <TruncatedTextSection text={literals} />
       <p>
         <b>Clauses:</b>
       </p>
-      <TruncatedTextSection text={clauses} mode={mode} />
+      <TruncatedTextSection text={clauses} />
       <p>
         <b>Original form:</b>
       </p>
-      <TruncatedTextSection text={instance} mode={mode} />
+      <TruncatedTextSection text={instance} />
     </>
   );
 }
 
 function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
-  const { mode } = useThemeMode();
-
   return (
     <>
       <p style={{ fontSize: 20 }}>
         <b>Reduced {problemName} Instance:</b>
       </p>
 
-      <TruncatedTextSection text={instance} mode={mode} />
+      <TruncatedTextSection text={instance} />
 
       <p>
         <b>Nodes:</b>
       </p>
-      <TruncatedTextSection text={nodes} mode={mode} />
+      <TruncatedTextSection text={nodes} />
 
       <p>
         <b>Edges:</b>
       </p>
-      <TruncatedTextSection text={edges} mode={mode} />
+      <TruncatedTextSection text={edges} />
       <p>
         <b>K value:</b> {k_value}
       </p>
