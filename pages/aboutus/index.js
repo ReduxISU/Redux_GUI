@@ -23,23 +23,10 @@ import {
   innerCardSx,
   textColors,
   surfaceColors,
-  thinScrollbarSx,
 } from "../../components/theme";
 import { useThemeMode } from "../../components/ThemeModeContext";
 
 const reduxBaseUrl = "/api/redux/";
-
-// Expanded section bodies scroll instead of growing the page without bound --
-// matters most for Contributors (long multi-column list) and
-// Publications/Awards (growing lists over time). A function, not a plain
-// object, because thinScrollbarSx's thumb color depends on the light/dark
-// mode each call site already has in scope (AboutUsPage's own `mode`).
-const scrollableBodySx = (mode) => ({
-  maxHeight: "60vh",
-  overflowY: "auto",
-  pr: 1,
-  ...thinScrollbarSx(mode),
-});
 
 const publications = [
   {
@@ -311,7 +298,7 @@ export default function AboutUsPage() {
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
-                <Box sx={scrollableBodySx(mode)}>
+                <Box>
                   <Typography
                     sx={{
                       color: text.body,
@@ -400,7 +387,7 @@ export default function AboutUsPage() {
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
-                <Box sx={scrollableBodySx(mode)}>
+                <Box>
                   <Typography
                     sx={{
                       color: text.body,
@@ -489,7 +476,7 @@ export default function AboutUsPage() {
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
-                <Box sx={scrollableBodySx(mode)}>
+                <Box>
                   <Typography
                     sx={{
                       color: text.body,
@@ -575,7 +562,7 @@ export default function AboutUsPage() {
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
-                <Box sx={scrollableBodySx(mode)}>
+                <Box>
                   <Typography
                     sx={{
                       color: text.body,
@@ -663,7 +650,7 @@ export default function AboutUsPage() {
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
-                <Box sx={scrollableBodySx(mode)}>
+                <Box>
                   <Typography
                     sx={{
                       color: text.body,
@@ -732,7 +719,7 @@ export default function AboutUsPage() {
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
-                <Box sx={scrollableBodySx(mode)}>
+                <Box>
                   <Typography
                     sx={{
                       color: text.body,
@@ -791,7 +778,7 @@ export default function AboutUsPage() {
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
-                <Box sx={scrollableBodySx(mode)}>
+                <Box>
                   <Typography
                     sx={{
                       color: text.body,
