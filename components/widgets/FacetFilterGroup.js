@@ -1,6 +1,6 @@
 import React from "react";
 import { Checkbox, FormControlLabel, FormGroup, Typography, Box } from "@mui/material";
-import { textColors, thinScrollbarSx } from "../theme";
+import { textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
 
 /**
@@ -14,12 +14,6 @@ import { useThemeMode } from "../ThemeModeContext";
  * present in the data (not a hardcoded enum list).
  * @param selected `Set` of currently-selected option keys.
  * @param onChange Called with the next `Set` whenever a checkbox is toggled.
- * @param scrollable Opt-in: when true, the checkbox list scrolls within a
- * fixed-height container instead of growing the sidebar as more options
- * exist. Off by default since this component is reused by facets with only a
- * handful of options (e.g. Visualization Type) where scrolling would be
- * pointless chrome -- callers with long/unbounded option lists (Complexity
- * Class, Solver Type) opt in explicitly.
  * @param groupBy Opt-in: `(key) => groupLabel | null`. When given, a small
  * subheading is rendered before each new group's first option as the
  * (already-sorted) `options` array is walked, only when the group differs
@@ -33,7 +27,6 @@ export default function FacetFilterGroup({
   options,
   selected,
   onChange,
-  scrollable = false,
   groupBy = null,
 }) {
   const { mode } = useThemeMode();
@@ -117,13 +110,7 @@ export default function FacetFilterGroup({
       >
         {label.toUpperCase()}
       </Typography>
-      {scrollable ? (
-        <Box sx={{ maxHeight: "200px", overflowY: "auto", ...thinScrollbarSx(mode) }}>
-          {checkboxList}
-        </Box>
-      ) : (
-        checkboxList
-      )}
+      {checkboxList}
     </Box>
   );
 }

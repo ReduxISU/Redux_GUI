@@ -192,7 +192,6 @@ export default function BrowsePage() {
                   options={complexityClassOptions}
                   selected={selectedComplexityClasses}
                   onChange={setSelectedComplexityClasses}
-                  scrollable
                   groupBy={(key) =>
                     COMPLEXITY_CLASS_ORDER.indexOf(key) <= COMPLEXITY_CLASS_ORDER.indexOf("NPHard")
                       ? "Classical"
@@ -206,7 +205,6 @@ export default function BrowsePage() {
                   options={solverTypeOptions}
                   selected={selectedSolverTypes}
                   onChange={setSelectedSolverTypes}
-                  scrollable
                 />
                 <FacetFilterGroup
                   label="Solver Complexity"
@@ -219,7 +217,6 @@ export default function BrowsePage() {
                   options={visualizationTypeOptions}
                   selected={selectedVisualizationTypes}
                   onChange={setSelectedVisualizationTypes}
-                  scrollable
                 />
 
                 <Box>
