@@ -1320,12 +1320,43 @@ dd .maths {
 .Q-circuit p {
 
 	padding: 1rem;
-	color: hsl( 
-		
+	color: hsl(
+
 		var( --Q-color-background-hue ),
 		var( --Q-color-background-saturation ),
 		66%
 	);
+}
+
+
+
+
+/* ------------------------------------------------------------------ */
+/* Dark-mode overrides (Redux GUI light/dark theme toggle).            */
+/*                                                                      */
+/* Most of this file keys colors off --Q-color-background-hue/         */
+/* -saturation with their own hardcoded lightness constant rather than  */
+/* the composed --Q-color-background variable, so redefining that       */
+/* variable alone would not reach them. Gate tiles, hover highlights,   */
+/* and selection patches already carry their own fixed, self-contained  */
+/* background/text pairing (e.g. white text on a solid blue gate, or     */
+/* black text on a deliberately near-white highlight) and stay legible   */
+/* in either theme unmodified. Only the elements below render text or    */
+/* background directly against the board/page surface itself and need    */
+/* an explicit dark value.                                                */
+/* ------------------------------------------------------------------ */
+html.dark .Q-circuit-board-background {
+
+	color: rgba( 255, 255, 255, 0.25 );
+}
+html.dark .Q-circuit-header {
+
+	background-color: hsl( var( --Q-color-background-hue ), var( --Q-color-background-saturation ), 12% );
+}
+html.dark .Q-circuit-input {
+
+	background-color: hsl( var( --Q-color-background-hue ), var( --Q-color-background-saturation ), 12% );
+	color: rgba( 255, 255, 255, 0.85 );
 }
 
 
