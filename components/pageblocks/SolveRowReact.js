@@ -21,9 +21,16 @@ import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
+import TruncatedTextSection from "../widgets/TruncatedTextSection";
 import { surfaceColors, textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
 import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
+
+// Same crash shape TruncatedTextSection was built for on the Reduce pane
+// (ReduceToRowReact.js): solvedInstance is an unbounded-length string from
+// the API, and this pane already has its own Download button right below it.
+const SOLUTION_TOO_LARGE_MESSAGE =
+  "Too large to display. Select Download to get the full solution.";
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" };
 const SOLVE_BUTTON = { buttonText: "Solve" };
@@ -149,7 +156,12 @@ export default function SolveRowReact({
       </ProblemSection.Header>
 
       <ProblemSection.Body>
-        {CARD.cardBodyText + " " + solvedInstance}
+        <p>
+          <b>{CARD.cardBodyText}</b>
+        </p>
+        {solvedInstance ? (
+          <TruncatedTextSection text={solvedInstance} tooLargeMessage={SOLUTION_TOO_LARGE_MESSAGE} />
+        ) : null}
         <div className="submitButton">
           <Button
             size="large"
