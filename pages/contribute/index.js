@@ -14,6 +14,15 @@ const contributionSteps = [
   "Submitting a successful pull request",
 ];
 
+const pullRequestChecklist = [
+  "Runs locally without errors — no console errors or warnings introduced",
+  "Follows existing project structure and conventions — components and pages placed consistently with the rest of the repo, matching existing naming and styling patterns",
+  "Tested before submitting — exercised the change locally, covering the normal case and at least one edge case",
+  "Clear PR description — explains what changed, why, and how to verify it",
+  "Scoped to one thing — no unrelated files, formatting-only diffs, or drive-by changes bundled in",
+  "No secrets or environment-specific values committed — API keys, local paths, .env values, etc.",
+];
+
 const helpfulLinks = [
   {
     label: "GitHub",
@@ -168,20 +177,21 @@ export default function ContributePage() {
                 titleWidth="auto"
               />
               <StaticSection.Body>
-                <Typography
-                  sx={{
-                    color: text.body,
-                    fontSize: "0.87rem",
-                    lineHeight: 1.9,
-                    textAlign: "justify",
-                  }}
-                >
-                  Before submitting a pull request, make sure your changes run
-                  locally, follow the existing project structure, include clear
-                  descriptions of the work completed, and are tested carefully.
-                  Additional checklist details will be added as the contribution
-                  documentation is expanded.
-                </Typography>
+                <Box sx={{ display: "grid", gap: 1 }}>
+                  {pullRequestChecklist.map((item) => (
+                    <Box key={item} sx={innerCard}>
+                      <Typography
+                        sx={{
+                          color: text.body,
+                          fontSize: "0.82rem",
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        • {item}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
               </StaticSection.Body>
             </StaticSection>
           </Box>
