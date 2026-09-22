@@ -286,7 +286,7 @@ function GithubActivitySection({ reduxStats, reduxGuiStats }) {
 
   return (
     <>
-      <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1 }}>
+      <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1, mt: 2 }}>
         GitHub Activity
       </Typography>
       {rows.map(({ label, parts }) => (
@@ -996,11 +996,6 @@ export default function AboutUsPage() {
                 </Typography>
               )}
 
-              <GithubActivitySection
-                reduxStats={profileData.reduxStats ?? profileData.ReduxStats}
-                reduxGuiStats={profileData.reduxGuiStats ?? profileData.ReduxGuiStats}
-              />
-
               <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1, mt: 2 }}>
                 Contributions
               </Typography>
@@ -1034,6 +1029,11 @@ export default function AboutUsPage() {
 
               <LegacyContributionsList
                 items={profileData.legacyContributions ?? profileData.LegacyContributions}
+              />
+
+              <GithubActivitySection
+                reduxStats={profileData.reduxStats ?? profileData.ReduxStats}
+                reduxGuiStats={profileData.reduxGuiStats ?? profileData.ReduxGuiStats}
               />
             </Box>
           ) : (
