@@ -7,6 +7,7 @@ import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProble
 import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
 import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
 import { complexityClassRank, complexityClassLabel } from "../../components/hooks/ProblemFilters/complexityClassOrder";
+import { problemTypeLabel } from "../../components/hooks/ProblemFilters/problemTypeOrder";
 import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
 import {
   Container,
@@ -37,6 +38,7 @@ export default function BrowsePage() {
     setSelectedComplexityClasses,
     selectedSolverTypes,
     setSelectedSolverTypes,
+    setSelectedProblemTypes,
     selectedVisualizationTypes,
     setSelectedVisualizationTypes,
     reachabilitySource,
@@ -75,6 +77,44 @@ export default function BrowsePage() {
     () => buildFacetOptions(problemIndex, (tags) => tags.visualizationCategories),
     [problemIndex],
   );
+
+  // Clicking a chip on a card toggles that value in the matching sidebar facet
+  // selection -- same effect as checking/unchecking it in FacetFilterGroup.
+  // Sets store raw wire values (e.g. "NPComplete"), so these take the chip's
+  // raw value, not its display label.
+  const toggleComplexityClassFilter = (value) => {
+    setSelectedComplexityClasses((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
+  const toggleSolverTypeFilter = (value) => {
+    setSelectedSolverTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
+  const toggleProblemTypeFilter = (value) => {
+    setSelectedProblemTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
 
   const problemNames = useMemo(() => [...problemIndex.keys()].sort(), [problemIndex]);
   const problemNameMap = useMemo(
@@ -210,8 +250,16 @@ export default function BrowsePage() {
                           name={name}
                           displayName={tags.displayName}
                           complexityClass={complexityClassLabel(tags.complexityClass)}
-                          solverTypes={[...tags.solverTypes].map(solverTypeLabel).sort()}
+                          complexityClassValue={tags.complexityClass}
+                          problemType={problemTypeLabel(tags.problemType)}
+                          problemTypeValue={tags.problemType}
+                          solverTypes={[...tags.solverTypes]
+                            .map((type) => ({ value: type, label: solverTypeLabel(type) }))
+                            .sort((a, b) => a.label.localeCompare(b.label))}
                           hasRenderableVisualization={tags.hasRenderableVisualization}
+                          onComplexityClassClick={toggleComplexityClassFilter}
+                          onProblemTypeClick={toggleProblemTypeFilter}
+                          onSolverTypeClick={toggleSolverTypeFilter}
                         />
                       </Grid>
                     );

@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Box, Chip, Typography } from "@mui/material";
-import { CheckCircle as CheckCircleIcon, RemoveCircleOutlined as DashIcon } from "@mui/icons-material";
+import { Monitor as VisualizationIcon } from "@mui/icons-material";
 import { sectionCardSx, textColors, surfaceColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
 
@@ -14,13 +14,36 @@ import { useThemeMode } from "../ThemeModeContext";
  * link and the React key, never shown to the user.
  * @param displayName Human-facing name (e.g. "Deutsch Jozsa") -- what's actually
  * rendered. Falls back to `name` if not given.
+ * @param complexityClass Display label for the complexity-class chip (e.g. "NP-Complete").
+ * @param complexityClassValue Raw wire value behind that label (e.g. "NPComplete") --
+ * what gets passed to `onComplexityClassClick`, since that's what
+ * `useProblemFilters`'s `selectedComplexityClasses` Set is keyed on.
+ * @param problemType Display label for the problem-type chip (e.g. "Graph Theory").
+ * @param problemTypeValue Raw wire value behind that label (e.g. "GraphTheory") --
+ * what gets passed to `onProblemTypeClick`, since that's what
+ * `useProblemFilters`'s `selectedProblemTypes` Set is keyed on.
+ * @param solverTypes `[{value, label}]` -- raw wire value plus display label for
+ * each solver-type chip, so a click can report the raw value while still
+ * rendering the human-facing label.
+ * @param onComplexityClassClick Called with `complexityClassValue` when the
+ * complexity-class chip is clicked. Omit to render the chip as non-interactive.
+ * @param onProblemTypeClick Called with `problemTypeValue` when the problem-type
+ * chip is clicked. Omit to render the chip as non-interactive.
+ * @param onSolverTypeClick Called with a solver type's raw `value` when its chip
+ * is clicked. Omit to render solver chips as non-interactive.
  */
 export default function ProblemCard({
   name,
   displayName = name,
   complexityClass,
+  complexityClassValue,
+  problemType,
+  problemTypeValue,
   solverTypes,
   hasRenderableVisualization,
+  onComplexityClassClick,
+  onProblemTypeClick,
+  onSolverTypeClick,
 }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
@@ -48,23 +71,60 @@ export default function ProblemCard({
           </Typography>
         </Link>
         {hasRenderableVisualization ? (
-          <CheckCircleIcon titleAccess="Has a renderable visualization" sx={{ color: "#4ade80", fontSize: "1.1rem" }} />
-        ) : (
-          <DashIcon titleAccess="No renderable visualization" sx={{ color: text.caption, fontSize: "1.1rem" }} />
-        )}
+          <VisualizationIcon titleAccess="Has a renderable visualization" sx={{ color: text.caption, fontSize: "1.1rem" }} />
+        ) : null}
       </Box>
 
-      <Chip
-        label={complexityClass}
-        size="small"
-        sx={{
-          mb: 1.25,
-          color: "#c2410c",
-          background: "rgba(244,124,32,0.12)",
-          border: "1px solid rgba(244,124,32,0.35)",
-          fontSize: "0.72rem",
-        }}
-      />
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.25 }}>
+        <Chip
+          label={complexityClass}
+          size="small"
+          clickable={!!onComplexityClassClick}
+          onClick={
+            onComplexityClassClick
+              ? (event) => {
+                  event.stopPropagation();
+                  onComplexityClassClick(complexityClassValue);
+                }
+              : undefined
+          }
+          sx={{
+            color: "#c2410c",
+            background: "rgba(244,124,32,0.12)",
+            border: "1px solid rgba(244,124,32,0.35)",
+            fontSize: "0.72rem",
+            ...(onComplexityClassClick && {
+              cursor: "pointer",
+              "&:hover": { background: "rgba(244,124,32,0.22)" },
+            }),
+          }}
+        />
+        {problemType ? (
+          <Chip
+            label={problemType}
+            size="small"
+            clickable={!!onProblemTypeClick}
+            onClick={
+              onProblemTypeClick
+                ? (event) => {
+                    event.stopPropagation();
+                    onProblemTypeClick(problemTypeValue);
+                  }
+                : undefined
+            }
+            sx={{
+              color: "#7c3aed",
+              background: "rgba(124,58,237,0.10)",
+              border: "1px solid rgba(124,58,237,0.32)",
+              fontSize: "0.72rem",
+              ...(onProblemTypeClick && {
+                cursor: "pointer",
+                "&:hover": { background: "rgba(124,58,237,0.20)" },
+              }),
+            }}
+          />
+        ) : null}
+      </Box>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
         {solverTypes.length === 0 ? (
@@ -72,16 +132,29 @@ export default function ProblemCard({
             No solvers
           </Typography>
         ) : (
-          solverTypes.map((type) => (
+          solverTypes.map(({ value, label }) => (
             <Chip
-              key={type}
-              label={type}
+              key={value}
+              label={label}
               size="small"
+              clickable={!!onSolverTypeClick}
+              onClick={
+                onSolverTypeClick
+                  ? (event) => {
+                      event.stopPropagation();
+                      onSolverTypeClick(value);
+                    }
+                  : undefined
+              }
               sx={{
                 color: text.body,
                 background: surface.surfaceAlt,
                 border: `1px solid ${surface.border}`,
                 fontSize: "0.7rem",
+                ...(onSolverTypeClick && {
+                  cursor: "pointer",
+                  "&:hover": { background: surface.border },
+                }),
               }}
             />
           ))
