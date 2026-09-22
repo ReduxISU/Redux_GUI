@@ -10,9 +10,7 @@
 
 
 import React from 'react'
-import { useContext, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Card } from 'react-bootstrap'
 import { Button } from '@mui/material'
 import { Download as DownloadIcon } from '@mui/icons-material';
 import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
@@ -23,6 +21,7 @@ import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
+import TruncatedTextSection from '../widgets/TruncatedTextSection';
 import { surfaceColors, textColors } from '../theme';
 import { useThemeMode } from '../ThemeModeContext';
 import { complexityClassLabel } from '../hooks/ProblemFilters/complexityClassOrder';
@@ -43,6 +42,12 @@ const TOOLTIP2 = {
   complexityBucket: "",
 }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } }
+
+// Reduced-instance-specific wording for TruncatedTextSection's too-large
+// fallback (components/widgets/TruncatedTextSection.js) -- the component
+// itself is shared with the Solve pane's solution output.
+const REDUCED_INSTANCE_TOO_LARGE_MESSAGE =
+  "Too large to display. Select Download to get the full reduced instance.";
 
 // ReductionCost describes output-size blowup relative to input size, a
 // separate axis from ReductionComplexityBucket (runtime, shown below as
@@ -258,7 +263,7 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
 
   // Checks if this is actually a node / edge format. If not, show the original form.
   if (!prettyInstance) {
-    return <Card.Text>{instance}</Card.Text>;
+    return <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />;
   }
   if (prettyInstance[0] === "GRAPH") {
     return (
@@ -275,7 +280,7 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
     return <ReduceInfoBool instance={instance} literals={prettyInstance[1]} clauses={prettyInstance[2]} />;
   }
 
-  return <Card.Text>{instance}</Card.Text>;
+  return <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />;
 }
 
 function ReduceInfoBool({ instance, literals, clauses }) {
@@ -284,15 +289,15 @@ function ReduceInfoBool({ instance, literals, clauses }) {
       <p>
         <b>Literals:</b>
       </p>
-      <p>{literals}</p>
+      <TruncatedTextSection text={literals} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
       <p>
         <b>Clauses:</b>
       </p>
-      <p>{clauses}</p>
+      <TruncatedTextSection text={clauses} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
       <p>
         <b>Original form:</b>
       </p>
-      <p>{instance}</p>
+      <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
     </>
   );
 }
@@ -304,17 +309,17 @@ function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
         <b>Reduced {problemName} Instance:</b>
       </p>
 
-      <p>{instance}</p>
+      <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
 
       <p>
         <b>Nodes:</b>
       </p>
-      <p>{nodes}</p>
+      <TruncatedTextSection text={nodes} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
 
       <p>
         <b>Edges:</b>
       </p>
-      <p /*style={{wordBreak: 'breakWord', color: 'red'}}> */>{edges}</p>
+      <TruncatedTextSection text={edges} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
       <p>
         <b>K value:</b> {k_value}
       </p>
