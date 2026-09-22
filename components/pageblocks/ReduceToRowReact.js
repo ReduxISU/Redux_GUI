@@ -10,9 +10,9 @@
 
 
 import React from 'react'
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Box, Button } from '@mui/material'
+import { Button } from '@mui/material'
 import { Download as DownloadIcon } from '@mui/icons-material';
 import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
@@ -22,6 +22,7 @@ import { useProblemInfo, useReducerInfo } from '../hooks/ProblemProvider'
 import PopoverTooltipClick from '../widgets/PopoverTooltipClick';
 import ProblemSection from '../widgets/ProblemSection';
 import SearchBarExtensible from '../widgets/SearchBarExtensible';
+import TruncatedTextSection from '../widgets/TruncatedTextSection';
 import { surfaceColors, textColors } from '../theme';
 import { useThemeMode } from '../ThemeModeContext';
 import { complexityClassLabel } from '../hooks/ProblemFilters/complexityClassOrder';
@@ -43,54 +44,11 @@ const TOOLTIP2 = {
 }
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } }
 
-// Reduced instances/nodes/edges are unbounded-length strings from the API --
-// each section is clipped to this many characters by default so the pane
-// doesn't render thousands of nodes/edges at once. "Show more" reveals the
-// rest in full -- no scrollbar (direct project-owner instruction: menus and
-// expanded sections show their full content, never a scrollable sub-box).
-const TEXT_PREVIEW_LENGTH = 400;
-
-// Above this length, even the full (non-scrolling) render is skipped entirely
-// rather than attempted: this is what actually crashed the browser before
-// (a still-scrollable expanded section was, underneath, rendering the whole
-// string into the DOM -- the scrollbar just hid that cost, it didn't remove
-// it). The Reduce panel's existing Download button already gets the visitor
-// the same data without asking the DOM to hold it.
-const TEXT_TOO_LARGE_TO_RENDER_LENGTH = 50_000;
-
-function textWrapSx() {
-  return { whiteSpace: "pre-wrap", wordBreak: "break-word" };
-}
-
-function TruncatedTextSection({ text }) {
-  const [expanded, setExpanded] = useState(false);
-  const isTruncated = text.length > TEXT_PREVIEW_LENGTH;
-
-  if (expanded && text.length > TEXT_TOO_LARGE_TO_RENDER_LENGTH) {
-    return (
-      <Box sx={{ ...textWrapSx(), fontStyle: "italic", opacity: 0.75 }}>
-        Too large to display. Select Download to get the full reduced instance.
-      </Box>
-    );
-  }
-
-  const displayText = expanded || !isTruncated ? text : text.slice(0, TEXT_PREVIEW_LENGTH) + "…";
-
-  return (
-    <>
-      <Box sx={textWrapSx()}>{displayText}</Box>
-      {isTruncated && (
-        <Button
-          size="small"
-          onClick={() => setExpanded((e) => !e)}
-          sx={{ textTransform: "none", minWidth: 0, px: 0, mb: 1 }}
-        >
-          {expanded ? "Show less" : "Show more"}
-        </Button>
-      )}
-    </>
-  );
-}
+// Reduced-instance-specific wording for TruncatedTextSection's too-large
+// fallback (components/widgets/TruncatedTextSection.js) -- the component
+// itself is shared with the Solve pane's solution output.
+const REDUCED_INSTANCE_TOO_LARGE_MESSAGE =
+  "Too large to display. Select Download to get the full reduced instance.";
 
 // ReductionCost describes output-size blowup relative to input size, a
 // separate axis from ReductionComplexityBucket (runtime, shown below as
@@ -306,7 +264,7 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
 
   // Checks if this is actually a node / edge format. If not, show the original form.
   if (!prettyInstance) {
-    return <TruncatedTextSection text={instance} />;
+    return <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />;
   }
   if (prettyInstance[0] === "GRAPH") {
     return (
@@ -323,7 +281,7 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
     return <ReduceInfoBool instance={instance} literals={prettyInstance[1]} clauses={prettyInstance[2]} />;
   }
 
-  return <TruncatedTextSection text={instance} />;
+  return <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />;
 }
 
 function ReduceInfoBool({ instance, literals, clauses }) {
@@ -332,15 +290,15 @@ function ReduceInfoBool({ instance, literals, clauses }) {
       <p>
         <b>Literals:</b>
       </p>
-      <TruncatedTextSection text={literals} />
+      <TruncatedTextSection text={literals} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
       <p>
         <b>Clauses:</b>
       </p>
-      <TruncatedTextSection text={clauses} />
+      <TruncatedTextSection text={clauses} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
       <p>
         <b>Original form:</b>
       </p>
-      <TruncatedTextSection text={instance} />
+      <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
     </>
   );
 }
@@ -352,17 +310,17 @@ function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
         <b>Reduced {problemName} Instance:</b>
       </p>
 
-      <TruncatedTextSection text={instance} />
+      <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
 
       <p>
         <b>Nodes:</b>
       </p>
-      <TruncatedTextSection text={nodes} />
+      <TruncatedTextSection text={nodes} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
 
       <p>
         <b>Edges:</b>
       </p>
-      <TruncatedTextSection text={edges} />
+      <TruncatedTextSection text={edges} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
       <p>
         <b>K value:</b> {k_value}
       </p>
