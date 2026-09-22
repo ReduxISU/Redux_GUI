@@ -33,11 +33,10 @@ const ACCORDION_FORM_TWO = { placeHolder: "Select Reduction" }
 
 const REDUCE_BUTTON = { buttonText: "Reduce" }
 const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" }
-const TOOLTIP1 = { header: "Reduce To Problem", formalDef: "Choose a problem to reduce your original problem to to see information about it", info: "" }
+const TOOLTIP1 = { header: "Reduce To Problem", info: "Choose a problem to reduce your original problem to to see information about it" }
 const TOOLTIP2 = {
   header: "Reduction Type",
-  formalDef: "Choose a type of reduction to see information about it",
-  info: "",
+  info: "Choose a type of reduction to see information about it",
   reductionType: "",
   complexity: "",
   complexityBucket: "",
@@ -125,9 +124,10 @@ export default function ReduceToRowReact({
             chosenReduceTo
               ? {
                 header: reduceToInfo.problemName ?? "",
-                formalDef: reduceToInfo.formalDefinition ?? "",
                 // description only
                 info: reduceToInfo.problemDefinition ?? "",
+                input: reduceToInfo.inputDescription ?? "",
+                output: reduceToInfo.outputDescription ?? "",
                 classification: [
                   { label: "Complexity class", value: complexityClassLabel(reduceToInfo.complexityClass || "Unclassified") },
                 ],
@@ -173,9 +173,10 @@ export default function ReduceToRowReact({
             chosenReductionType
               ? {
                 header: reducerInfo.reductionName ?? "",
-                formalDef: reducerInfo.reductionDefinition ?? "",
                 // plain description for the reduction
                 info: reducerInfo.info ?? reducerInfo.description ?? "",
+                input: reducerInfo.inputDescription ?? "",
+                output: reducerInfo.outputDescription ?? "",
                 classification: [
                   {
                     label: "Reduction cost",
