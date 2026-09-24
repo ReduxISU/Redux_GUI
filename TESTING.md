@@ -4,8 +4,8 @@ This repo has **integration tests**: a real browser driving the real app against
 backend. They are the only automated check that the GUI actually works — everything else here
 (`next build`, ESLint, Biome) only proves the code compiles and is tidy.
 
-There are four tests today. That is on purpose: they are **examples to copy**, one per kind of
-thing you might want to test. Adding more is exactly the kind of contribution we want, and the
+There are seven tests today, and they are deliberately few: each is an **example to copy**, one per
+kind of thing you might want to test. Adding more is exactly the kind of contribution we want, and the
 [backlog](#backlog--good-first-contributions) at the bottom lists ones we would like.
 
 > **New here?** Read [Why these tests matter](#why-these-tests-matter) first. This app hides its
@@ -103,7 +103,7 @@ docker run -d --name redux-gui --network redux-it -p 3101:3000 \
 export RBS_BASE_URL=http://localhost:3101
 
 # Now iterate.
-npm run test:e2e                                    # all four
+npm run test:e2e                                    # all of them
 npx playwright test app.spec.js                     # one file
 npx playwright test -g "solving 3SAT"               # one test, by name
 npx playwright test --headed                        # watch it happen in a real window
@@ -161,6 +161,8 @@ Start from the example closest to what you want:
 | A dropdown, a value, a page state | `app.spec.js` › *the problem catalogue loads* | Locating a row, reading a combobox |
 | A visualization drawing | `app.spec.js` › *renders a visualization* | Asserting on drawn SVG, and ruling out error cards |
 | Clicking something and checking the result | `app.spec.js` › *solving 3SAT* | Expanding a row, waiting for enabled, asserting output |
+| Typing input and checking both outcomes | `app.spec.js` › *the 3SAT verifier answers…* | Filling a textbox, asserting a positive and a negative result |
+| A structural contract of the page | `tests/e2e/tour.spec.js` | Counting anchors the tour depends on, no backend data needed |
 
 ### Things that will cost you an afternoon if nobody tells you
 
@@ -186,11 +188,6 @@ about two seconds before the rest of the app sees your change
 (`components/pageblocks/ProblemRowReact.js`), so a test that types and immediately asserts will
 be flaky.
 
-**Stay on 3SAT for visualization tests, for now.** 3SAT has exactly one visualization, so it always
-picks the right one. Problems with two — CLIQUE, for instance — currently pick the *wrong* default
-because of a bug in `components/hooks/ProblemProvider/Visualization.js`. A test for that belongs
-together with the fix (it is on the backlog); written today it would just fail.
-
 ### Before you open a pull request
 
 ```bash
@@ -209,10 +206,11 @@ Each of these is a real gap. Pick one, open an issue if there is not one already
 matching example above as your starting point.
 
 **More flows**
-- The **Reduce** row: 3SAT reduces to Clique by default — assert the reduced instance renders.
-- The **Verify** row: submit the prefilled certificate and assert the verifier's output.
 - One test per visualization type in `components/Visualization/svgs/Visualizations.js`. There are
   many and almost none are covered.
+- The three switches on the Visualize row (*Show reduction*, *Highlight gadgets*, *Highlight
+  solution*) and the frame stepper — none is covered.
+- A smoke test per route: `/browse` and `/aboutus` both call the backend and neither is tested.
 
 **The proxy's error handling** (`pages/api/redux/[...path].js`) — none of these is tested:
 - 500 when `REDUX_BASE_URL` is unset
@@ -223,15 +221,15 @@ These do not need a browser or a backend; call the handler directly with a fake 
 
 **Bugs to fix, each of which unlocks a test**
 - The duplicate `id="search-bar"` across all six dropdowns (accessibility + testability).
-- The wrong-default-visualization bug in `components/hooks/ProblemProvider/Visualization.js` — it
-  reads `.VisualizationName` where the backend sends `visualizationName`. Fix it, then add a test
-  asserting CLIQUE selects its declared default.
+- A test asserting CLIQUE (which has two visualizations) selects its declared default. The bug that
+  once broke this is fixed; the test that would keep it fixed is not written.
 - Anything in `KNOWN_SILENT_FAILURES` in `tests/e2e/fixtures.js`. Fix the request, delete the
   entry, and the guard starts protecting that call. Two are nearly free:
-  `requestReductionInfo` builds `GET <reduction>/info`, which does not exist — the working route is
-  `GET ProblemProvider/info?interface=<reduction>`; and several calls fire with an empty
-  `reduction=` parameter before the reduction has been chosen, which should simply be guarded.
+  several calls fire with an empty `reduction=` parameter before the reduction has been chosen,
+  which should simply be guarded; and the Problem row seeds a placeholder instance that the backend
+  rejects before the real default arrives.
 
 **Later**
-- Tour walkthrough tests, once the tutorial branch merges — see `INTEGRATION_TEST_REQUIREMENTS.md`
-  in the parent directory for what those should assert.
+- A tour walkthrough test (click through every step, assert the popover titles and that Solve and
+  Verify expand and re-collapse) — `tests/e2e/tour.spec.js` covers only the anchors. See
+  `INTEGRATION_TEST_REQUIREMENTS.md` in the parent directory, section 2.
