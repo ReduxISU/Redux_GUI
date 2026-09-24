@@ -2,14 +2,13 @@
  * A singular section of a problem.
  */
 
-import React from "react";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Accordion, Card, AccordionContext } from "react-bootstrap";
-import { Stack, Button, Box } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
+import { Accordion, AccordionContext, Card } from "react-bootstrap";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
-import { surfaceColors, textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
+import { surfaceColors, textColors } from "../theme";
 
 /// Default theme.
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } };
@@ -92,7 +91,7 @@ ProblemSection.Header = function Header({ children, title, titleWidth }) {
             width: titleWidth ?? "10%",
             display: "flex",
             justifyContent: "center", // horizontal center
-            alignItems: "center",     // vertical center
+            alignItems: "center", // vertical center
           }}
         >
           {title}
@@ -105,7 +104,6 @@ ProblemSection.Header = function Header({ children, title, titleWidth }) {
     </Card.Header>
   );
 };
-
 
 ProblemSection.Body = function Body({ children }) {
   const { mode } = useThemeMode();

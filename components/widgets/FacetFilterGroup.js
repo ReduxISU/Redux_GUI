@@ -1,7 +1,7 @@
+import { Box, Checkbox, FormControlLabel, FormGroup, Typography } from "@mui/material";
 import React from "react";
-import { Checkbox, FormControlLabel, FormGroup, Typography, Box } from "@mui/material";
-import { textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
+import { textColors } from "../theme";
 
 /**
  * Generic, reusable multi-select checkbox facet. Not specific to any one
@@ -64,7 +64,10 @@ export default function FacetFilterGroup({ label, options, selected, onChange })
               }
               label={
                 <Typography sx={{ color: text.body, fontSize: "0.83rem" }}>
-                  {optionLabel} <Box component="span" sx={{ color: text.caption }}>({count})</Box>
+                  {optionLabel}{" "}
+                  <Box component="span" sx={{ color: text.caption }}>
+                    ({count})
+                  </Box>
                 </Typography>
               }
             />

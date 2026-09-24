@@ -97,8 +97,7 @@ export function useProblemIndex(url) {
         const complexityClasses = new Set([complexityClass]);
         if (complexityClass === "NPComplete") complexityClasses.add("NP");
 
-        const problemType =
-          problemInfo?.problemType || problemInfo?.ProblemType || "Unclassified";
+        const problemType = problemInfo?.problemType || problemInfo?.ProblemType || "Unclassified";
 
         const solverTypes = new Set();
         for (const solverClassName of solversByProblem[problemName] ?? []) {

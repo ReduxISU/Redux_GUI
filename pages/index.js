@@ -7,46 +7,42 @@
  */
 
 import React from "react"; //React is implicitly imported
+import Button from "react-bootstrap/Button";
 import ProblemRowReact from "../components/pageblocks/ProblemRowReact";
 import ReduceToRowReact from "../components/pageblocks/ReduceToRowReact";
-import VisualizeRowReact from "../components/pageblocks/VisualizeRowReact";
 import SolveRowReact from "../components/pageblocks/SolveRowReact";
 import VerifyRowReact from "../components/pageblocks/VerifyRowReact";
-import Button from "react-bootstrap/Button";
+import VisualizeRowReact from "../components/pageblocks/VisualizeRowReact";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Image from "next/image";
-import isulogo from "../components/images/ISULogo.png";
-import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
-import {
-  Box,
-  Grid,
-  Typograph,
-} from "@mui/material";
-import { Container } from "react-bootstrap";
-import { useProblemProvider } from "../components/hooks/ProblemProvider";
-import { useEffect, memo, useState } from "react"; // CHANGED: added useState for row order
-import { useUnload } from "../components/eventHandlers/handleUnload";
-import ShareButton from "../components/widgets/ShareButton";
-import TourLauncher from "../components/tour/TourLauncher";
-import { useHandleParameters } from "../components/eventHandlers/handleParameters";
-import { pageBackground } from "../components/theme";
-import { useThemeMode } from "../components/ThemeModeContext";
 
 import {
-  DndContext,
   closestCenter,
+  DndContext,
   PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
   arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Box, Grid, Typograph } from "@mui/material";
+import Image from "next/image";
+import { memo, useEffect, useState } from "react"; // CHANGED: added useState for row order
+import { Container } from "react-bootstrap";
+import { useHandleParameters } from "../components/eventHandlers/handleParameters";
+import { useUnload } from "../components/eventHandlers/handleUnload";
+import { useProblemProvider } from "../components/hooks/ProblemProvider";
+import isulogo from "../components/images/ISULogo.png";
+import { useThemeMode } from "../components/ThemeModeContext";
+import { pageBackground } from "../components/theme";
+import TourLauncher from "../components/tour/TourLauncher";
+import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
+import ShareButton from "../components/widgets/ShareButton";
 
 const SHOW_QUANTUM_VIS = false; //Flag to show a quantum circuit visualizer (sandbox feature)
 const ProblemRowMemo = memo(ProblemRowReact);
@@ -55,17 +51,12 @@ const VisualizeRowMemo = memo(VisualizeRowReact);
 const SolveRowMemo = memo(SolveRowReact);
 const VerifyRowMemo = memo(VerifyRowReact);
 
-const reduxBaseUrl = '/api/redux/';
+const reduxBaseUrl = "/api/redux/";
 
 function SortableRow({ id, children }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -109,22 +100,12 @@ function MainPageContent() {
 
   //useHandleParameters();
 
-  const { problem, solver, verifier, reducer, visualization } =
-    useProblemProvider(reduxBaseUrl);
+  const { problem, solver, verifier, reducer, visualization } = useProblemProvider(reduxBaseUrl);
 
-  const [rowOrder, setRowOrder] = useState([
-    "problem",
-    "visualize",
-    "solve",
-    "verify",
-    "reduce",
-  ]);
+  const [rowOrder, setRowOrder] = useState(["problem", "visualize", "solve", "verify", "reduce"]);
 
-  // PointerSensor covers mouse; TouchSensor adds mobile/tablet support 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor)
-  );
+  // PointerSensor covers mouse; TouchSensor adds mobile/tablet support
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   const rowMap = {
     problem: <ProblemRowMemo url={reduxBaseUrl} {...problem} />,
@@ -166,66 +147,56 @@ function MainPageContent() {
     <Box sx={{ minHeight: "100vh", background: pageBackground(mode) }}>
       <ResponsiveAppBar></ResponsiveAppBar>
 
-        <div className="container-fluid">
-          {/** This is an artifact from the old bootstrap code, may be deprecated */}
-          <div className="d-flex flex-column">
-            <div className="p-2 col-example">
-              <ShareButton
-                problem={problem}
-                solver={solver}
-                verifier={verifier}
-                reducer={reducer}
-              />
-              <TourLauncher />
-            </div>
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={rowOrder}
-                strategy={verticalListSortingStrategy}
-              >
-                {rowOrder.map((key) => (
-                  <SortableRow key={key} id={key}>
-                    {rowMap[key]}
-                  </SortableRow>
-                ))}
-              </SortableContext>
-            </DndContext>
+      <div className="container-fluid">
+        {/** This is an artifact from the old bootstrap code, may be deprecated */}
+        <div className="d-flex flex-column">
+          <div className="p-2 col-example">
+            <ShareButton problem={problem} solver={solver} verifier={verifier} reducer={reducer} />
+            <TourLauncher />
           </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={rowOrder} strategy={verticalListSortingStrategy}>
+              {rowOrder.map((key) => (
+                <SortableRow key={key} id={key}>
+                  {rowMap[key]}
+                </SortableRow>
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
+      </div>
 
-        {/*<!-- /Container-->*/}
+      {/*<!-- /Container-->*/}
 
-        {/* <footer className='fixed-bottom centered'> */}
-        {/* </footer> */}
+      {/* <footer className='fixed-bottom centered'> */}
+      {/* </footer> */}
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "10vh",
-            // marginTop: '25%',
-          }}
-        >
-          {/* The logo's "Idaho State University"/"Computer Science" text and divider
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "10vh",
+          // marginTop: '25%',
+        }}
+      >
+        {/* The logo's "Idaho State University"/"Computer Science" text and divider
               line are baked into the PNG as near-black pixels -- can't recolor them
               per-mode with CSS without also distorting the orange mark, so in dark
               mode we give the whole logo a white chip to sit on instead of trying to
               recolor it. */}
-          <Box
-            sx={
-              mode === "dark"
-                ? { bgcolor: "#FFFFFF", borderRadius: "10px", px: 2, py: 1 }
-                : undefined
-            }
-          >
-            <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
-          </Box>
+        <Box
+          sx={
+            mode === "dark" ? { bgcolor: "#FFFFFF", borderRadius: "10px", px: 2, py: 1 } : undefined
+          }
+        >
+          <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
         </Box>
+      </Box>
     </Box>
   );
 }
@@ -237,7 +208,7 @@ function MainPageContent() {
 export default function MainPage() {
   return (
     <>
-      <MainPageContent></MainPageContent> 
+      <MainPageContent></MainPageContent>
     </>
   );
 }
