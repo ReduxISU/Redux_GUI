@@ -1,8 +1,8 @@
 /**
  * EXEMPLARS: how to drive the UI, how to assert a visualization, how to test an interactive flow.
  *
- * These three tests exist to be copied. Each demonstrates a different technique, and between them
- * they cover what you need for almost any test you would want to add. See TESTING.md for the
+ * These tests exist to be copied. Each demonstrates a different technique, and between them they
+ * cover what you need for almost any test you would want to add. See TESTING.md for the
  * backlog of wanted tests and for the traps this app sets.
  *
  * Note the import: `test` comes from ./fixtures, not "@playwright/test", so every test here gets
@@ -44,7 +44,7 @@ test("the problem catalogue loads from the backend", async ({ page }) => {
 test("the default problem renders a visualization", async ({ page }) => {
   const visualizeRow = row(page, "Visualize");
 
-  await expect(visualizeRow.getByRole("combobox")).toHaveValue("3SAT visualization");
+  await expect(visualizeRow.getByRole("combobox")).toHaveValue("3SAT Visualization");
 
   // 3SAT's default visualization declares type "Boolean Satisfiability", which resolves through
   // the registry in components/Visualization/svgs/Visualizations.js to a d3 renderer that draws
@@ -61,6 +61,19 @@ test("the default problem renders a visualization", async ({ page }) => {
 test("solving 3SAT returns a satisfying assignment", async ({ page }) => {
   const solveRow = row(page, "Solve");
 
+  // The button stays disabled until a solver is chosen, so waiting for it to enable is also how
+  // we know the solver list arrived from the backend. Wait for it BEFORE expanding the row: the
+  // ▼ button is painted before React hydrates, and a click that lands in that window is silently
+  // lost. An enabled Solve button proves the page is hydrated and has data. includeHidden is what
+  // lets the locator find it while the row is still collapsed; getByRole skips hidden elements
+  // by default.
+  const solveButton = solveRow.getByRole("button", {
+    name: "Solve",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(solveButton).toBeEnabled();
+
   // Solve and Verify start collapsed (components/widgets/ProblemSection.js). Their bodies are in
   // the DOM but hidden, so expand before asserting on anything inside.
   await solveRow.getByRole("button", { name: "▼" }).click();
@@ -69,10 +82,6 @@ test("solving 3SAT returns a satisfying assignment", async ({ page }) => {
   await expect(body).toBeVisible();
   await expect(body).toContainText("Solution:");
 
-  // The button stays disabled until a solver is chosen, so waiting for it to enable is also how
-  // we know the solver list arrived from the backend.
-  const solveButton = solveRow.getByRole("button", { name: "Solve", exact: true });
-  await expect(solveButton).toBeEnabled();
   await solveButton.click();
 
   // The 3SAT Backtracking Solver answers with a variable assignment, e.g.
@@ -80,4 +89,55 @@ test("solving 3SAT returns a satisfying assignment", async ({ page }) => {
   // matters here: the guard in ./fixtures allows a known boot-time 400 on this same endpoint, so
   // this assertion is what proves the click actually produced an answer.
   await expect(body).toContainText(/Solution:\s*\(x\d+:(True|False)/);
+});
+
+test("reducing 3SAT to Clique renders the reduced instance", async ({ page }) => {
+  const reduceRow = row(page, "Reduce");
+
+  // The Reducer hook picks CLIQUE and Sipser's reduction for 3SAT on boot
+  // (components/hooks/ProblemProvider/Reducer.js), so both dropdowns should already be filled.
+  // The Reduce button only enables once a reduction type is chosen, so waiting on it is also how
+  // we know the reduction options arrived from the backend.
+  const reduceButton = reduceRow.getByRole("button", { name: "Reduce", exact: true });
+  await expect(reduceButton).toBeEnabled();
+  await reduceButton.click();
+
+  // The reduced CLIQUE instance is parsed and shown as a node/edge listing. Assert on the rendered
+  // listing, not the HTTP call: the guard allows a boot-time 400 on this same endpoint, so the
+  // rendered output is what proves the click produced a reduction.
+  const body = reduceRow.locator(".card-body");
+  await expect(body).toContainText("Reduced Clique Instance:");
+  await expect(body).toContainText("Nodes:");
+  await expect(body).toContainText("Edges:");
+});
+
+test("the 3SAT verifier answers True and False correctly", async ({ page }) => {
+  const verifyRow = row(page, "Verify");
+
+  // Same order as the Solve test: wait for the action button to enable (hydrated, data arrived)
+  // before clicking ▼, or the expand click can be lost.
+  const verifyButton = verifyRow.getByRole("button", {
+    name: "Verify",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(verifyButton).toBeEnabled();
+
+  // Verify starts collapsed, like Solve.
+  await verifyRow.getByRole("button", { name: "▼" }).click();
+  const body = verifyRow.locator(".card-body");
+  await expect(body).toBeVisible();
+
+  // The 3SAT verifier ships no default certificate (its info has certificate: ""), so type one.
+  // Fill only after the verifier is chosen: choosing it resets the certificate box.
+  // Both assignments are for the default instance (x1 | !x2 | x3) & (!x1 | x3 | x1) & (x2 | !x3 | !x1).
+  const certificate = body.getByRole("textbox");
+  await certificate.fill("(x1:True,x2:True,x3:False)");
+  await verifyButton.click();
+  await expect(body).toContainText("Verifier output: True");
+
+  // Checking both answers proves the verifier read the certificate, not just that it answered.
+  await certificate.fill("(x1:False,x2:True,x3:False)");
+  await verifyButton.click();
+  await expect(body).toContainText("Verifier output: False");
 });

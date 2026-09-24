@@ -27,7 +27,7 @@ import { test as base, expect } from "@playwright/test";
  * Every entry here is a fault on the GUI side — the API is correctly rejecting a malformed request
  * or a route that does not exist. None of them is a backend bug.
  *
- * Captured 2026-08-05 against ghcr.io/reduxisu/redux:latest. Re-check with a freshly pulled image
+ * Captured 2026-08-05, re-verified 2026-09-23 against ghcr.io/reduxisu/redux:latest. Re-check with a freshly pulled image
  * before adding an entry: `:latest` moves, and a stale local copy will make a route that exists
  * look permanently broken.
  */
@@ -61,12 +61,6 @@ const KNOWN_SILENT_FAILURES = [
     status: 400,
     log: "REDUCED INSTANCE FROM PATH REQUEST FAILED",
     why: "downstream of the empty-reduction call above",
-  },
-  {
-    url: "/info",
-    status: 404,
-    log: "INFO REQUEST FAILED",
-    why: "requestReductionInfo builds GET <reduction>/info, a route that does not exist. GET ProblemProvider/info?interface=<reduction> returns the data — a one-line fix in components/redux/index.js",
   },
 ];
 
