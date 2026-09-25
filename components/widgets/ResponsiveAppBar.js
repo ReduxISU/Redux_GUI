@@ -78,7 +78,7 @@ const ResponsiveAppBar = () => {
                     >
 
                     </Typography>
-                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 0.5 }}>
                         {pages.map((page) => {
 
                             var currentHref = page.toLowerCase();
@@ -93,7 +93,12 @@ const ResponsiveAppBar = () => {
                                 <Button
                                     key={page}
                                     href={"/" + currentHref}
-                                    sx={{ my: 2, color: 'inherit', display: 'block' }}
+                                    // minWidth: 'auto' overrides MUI Button's default 64px floor --
+                                    // without it, a short label like "Home"/"Help" gets padded out to
+                                    // 64px with its text left-anchored inside, leaving a visible dead
+                                    // zone of empty button before the next tab starts. px replaces
+                                    // that floor with real, symmetric padding instead.
+                                    sx={{ my: 2, px: 1.5, minWidth: 'auto', color: 'inherit', display: 'block' }}
                                 >
                                     {page}
                                 </Button>
