@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import { graphviz } from "d3-graphviz";
+import { useEffect, useRef } from "react";
 
 export default function GraphvizWrapper({ dot, options = {} }) {
   const ref = useRef(null);

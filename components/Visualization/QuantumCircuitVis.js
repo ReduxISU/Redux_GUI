@@ -1,11 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { openqasmToQText } from "./openqasmToQText";
 
-const QuantumCircuitVis = ({
-  problemData,
-  useSolutionCircuit = false
-}) => {
+const QuantumCircuitVis = ({ problemData, useSolutionCircuit = false }) => {
   const [qReady, setQReady] = useState(false);
   const containerRef = useRef(null);
 
@@ -20,7 +17,7 @@ const QuantumCircuitVis = ({
           (useSolution && (f?.solution?.openQasm || f?.solution?.qasm)) ||
           f?.openQasm ||
           f?.qasm ||
-          f?.openqasm
+          f?.openqasm,
       );
       if (candidate) data = candidate;
     }
@@ -58,11 +55,7 @@ const QuantumCircuitVis = ({
     // At this point, data is either an object or undefined
     const fromSolution = data?.solution?.openQasm || data?.solution?.qasm;
     const fromMain =
-      data?.openQasm ||
-      data?.qasm ||
-      data?.openqasm ||
-      data?.circuitQasm ||
-      data?.qasmText;
+      data?.openQasm || data?.qasm || data?.openqasm || data?.circuitQasm || data?.qasmText;
 
     if (useSolution && fromSolution) return fromSolution;
     if (fromMain) return fromMain;
@@ -86,12 +79,7 @@ const QuantumCircuitVis = ({
     const getField = (obj) => {
       if (!obj || typeof obj !== "object") return "";
       return (
-        obj.solution ??
-        obj.solutionText ??
-        obj.solution_string ??
-        obj.answer ??
-        obj.result ??
-        ""
+        obj.solution ?? obj.solutionText ?? obj.solution_string ?? obj.answer ?? obj.result ?? ""
       );
     };
 
@@ -209,8 +197,7 @@ const QuantumCircuitVis = ({
       }
     } catch (err) {
       console.error("Error rendering Q.js circuit:", err);
-      containerRef.current.textContent =
-        "Error rendering circuit: " + err.message;
+      containerRef.current.textContent = "Error rendering circuit: " + err.message;
     }
   }, [qReady, qText, openQasm]);
 
@@ -264,11 +251,7 @@ const QuantumCircuitVis = ({
       <h3>Quantum Circuit (Q.js format)</h3>
       <p style={{ marginBottom: "0.5rem" }}>
         You can still copy this text into{" "}
-        <a
-          href="https://quantumjavascript.app/playground.html"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href="https://quantumjavascript.app/playground.html" target="_blank" rel="noreferrer">
           the Q.js playground
         </a>
         , but the live circuit is rendered below.
@@ -297,9 +280,7 @@ const QuantumCircuitVis = ({
           overflowX: "auto",
         }}
       />
-      <p style={{ marginTop: "0.75rem" }}>
-        Solution: {solutionText || "Not provided"}
-      </p>
+      <p style={{ marginTop: "0.75rem" }}>Solution: {solutionText || "Not provided"}</p>
     </div>
   );
 };

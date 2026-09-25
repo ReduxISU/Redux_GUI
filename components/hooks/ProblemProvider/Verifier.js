@@ -1,12 +1,15 @@
+import React, { useEffect, useRef, useState } from "react";
+import { requestAllInfo, requestAllVerifiers } from "../../redux";
 import { useGenericInfo } from "../ProblemProvider";
-import { requestAllVerifiers, requestAllInfo } from "../../redux";
-import React, { useEffect, useState, useRef } from "react";
 
 export function useVerifier(url, problemName, problemNameMap, problemInfoMap) {
   const state = {};
   [state.defaultVerifierMap] = useDefaultVerifierMap(url, problemInfoMap);
   [state.verifierOptions] = useVerifierOptions(url, problemName);
-  [state.chosenVerifier, state.setChosenVerifier] = useChosenVerifier(problemName, state.defaultVerifierMap);
+  [state.chosenVerifier, state.setChosenVerifier] = useChosenVerifier(
+    problemName,
+    state.defaultVerifierMap,
+  );
   [state.verifierNameMap] = useVerifierNameMap(url, problemNameMap);
   return state;
 }
@@ -79,7 +82,6 @@ function useChosenVerifier(problemName, defaultVerifierMap) {
       if (storedData) {
         const allData = JSON.parse(storedData);
         verifierVar = allData.verifier;
-
       }
       isFirstRender.current = false;
     }
