@@ -39,7 +39,12 @@ export function buildFacetOptions(
  * NP-Complete-implies-NP expansion).
  * @param labelFor Optional `(key) => displayLabel`; defaults to the raw key.
  */
-export function buildFixedOrderFacetOptions(problemIndex, orderedKeys, pickValues, labelFor = (key) => key) {
+export function buildFixedOrderFacetOptions(
+  problemIndex,
+  orderedKeys,
+  pickValues,
+  labelFor = (key) => key,
+) {
   const counts = new Map(orderedKeys.map((key) => [key, 0]));
   for (const tags of problemIndex.values()) {
     for (const value of pickValues(tags)) {

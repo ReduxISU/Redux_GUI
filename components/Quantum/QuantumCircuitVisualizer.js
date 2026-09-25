@@ -1,6 +1,7 @@
 // components/Quantum/QuantumCircuitVisualizer.jsx
-import React, { useEffect, useRef, useState } from "react";
+
 import * as d3 from "d3";
+import React, { useEffect, useRef, useState } from "react";
 import { getMaxTime } from "./circuitUtils";
 
 export default function QuantumCircuitVisualizer({ circuit }) {
@@ -68,7 +69,7 @@ export default function QuantumCircuitVisualizer({ circuit }) {
           (g) =>
             g.qubit !== prev.qubits - 1 &&
             g.control !== prev.qubits - 1 &&
-            g.target !== prev.qubits - 1
+            g.target !== prev.qubits - 1,
         ),
       };
     });
@@ -128,7 +129,11 @@ export default function QuantumCircuitVisualizer({ circuit }) {
       [...Array(c.qubits).keys()].forEach((q) => {
         const y = 60 + q * spacingY;
 
-        svg.append("text").attr("x", 20).attr("y", y + 5).text(`q${q}`);
+        svg
+          .append("text")
+          .attr("x", 20)
+          .attr("y", y + 5)
+          .text(`q${q}`);
 
         svg
           .append("line")
@@ -210,9 +215,7 @@ export default function QuantumCircuitVisualizer({ circuit }) {
     <div style={{ width: "100%", padding: "20px" }}>
       <h2>Quantum Circuit Visualizer</h2>
 
-      <button onClick={() => document.getElementById("qc-import").click()}>
-        Import JSON
-      </button>
+      <button onClick={() => document.getElementById("qc-import").click()}>Import JSON</button>
       <input
         id="qc-import"
         type="file"
@@ -245,11 +248,7 @@ export default function QuantumCircuitVisualizer({ circuit }) {
 
           <label>
             Time:{" "}
-            <input
-              type="number"
-              value={gateTime}
-              onChange={(e) => setGateTime(e.target.value)}
-            />
+            <input type="number" value={gateTime} onChange={(e) => setGateTime(e.target.value)} />
           </label>
 
           {gateType !== "cnot" ? (

@@ -1,63 +1,65 @@
-import React from 'react';
-import Button from 'react-bootstrap/Button';
-import { Share as ShareIcon } from '@mui/icons-material';
+import { Share as ShareIcon } from "@mui/icons-material";
+import React from "react";
+import Button from "react-bootstrap/Button";
 
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
 const createShareLink = (baseUrl, data) => {
-    const params = new URLSearchParams(data).toString();
-    return `${baseUrl}?${params}`;
+  const params = new URLSearchParams(data).toString();
+  return `${baseUrl}?${params}`;
 };
 
 const handleShare = async (problem, solver, verifier, reducer) => {
+  const data = {
+    problem: problem.problemName ?? "",
+    instance: problem.problemInstance ?? "",
+    solver: solver.chosenSolver ?? "",
+    reduceTo: reducer.chosenReduceTo ?? "",
+    reductionType: reducer.chosenReductionType ?? "",
+    verifier: verifier.chosenVerifier ?? "",
+  };
 
-    const data = {
-        problem: problem.problemName ?? "",
-        instance: problem.problemInstance ?? "",
-        solver: solver.chosenSolver ?? "",
-        reduceTo: reducer.chosenReduceTo ?? "",
-        reductionType: reducer.chosenReductionType ?? "",
-        verifier: verifier.chosenVerifier ?? "",
-    };
-    
-    localStorage.setItem('problemData', JSON.stringify(data));
-    // Create the share URL with the parameters
-    const shareUrl = createShareLink(window.location.origin + window.location.pathname, data);    
+  localStorage.setItem("problemData", JSON.stringify(data));
+  // Create the share URL with the parameters
+  const shareUrl = createShareLink(window.location.origin + window.location.pathname, data);
 
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: 'Check this out!',
-                text: 'Here is some interesting content.',
-                url: shareUrl
-            });
-            console.log('Content shared successfully');
-        } catch (error) {
-            console.error('Error sharing content:', error);
-        }
-    } else {
-        // Fallback: Copy the URL to the clipboard
-        try {
-            await navigator.clipboard.writeText(shareUrl);
-            alert('Web Share API is not supported in your browser. The share URL has been copied to your clipboard.');
-        } catch (error) {
-            console.error('Error copying URL to clipboard:', error);
-            alert('Failed to copy the share URL to the clipboard.');
-        }
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "Check this out!",
+        text: "Here is some interesting content.",
+        url: shareUrl,
+      });
+      console.log("Content shared successfully");
+    } catch (error) {
+      console.error("Error sharing content:", error);
     }
+  } else {
+    // Fallback: Copy the URL to the clipboard
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      alert(
+        "Web Share API is not supported in your browser. The share URL has been copied to your clipboard.",
+      );
+    } catch (error) {
+      console.error("Error copying URL to clipboard:", error);
+      alert("Failed to copy the share URL to the clipboard.");
+    }
+  }
 };
 
 const ShareButton = ({ problem, solver, verifier, reducer }) => (
-    <Button
+  <Button
     data-tour-id="share-button"
     variant="primary"
     className="corner-button"
     size="large"
     color="white"
     style={{ backgroundColor: THEME.colors.grey }}
-    onClick={() => handleShare(problem, solver, verifier, reducer)}>
-        <ShareIcon />
-    </Button>
+    onClick={() => handleShare(problem, solver, verifier, reducer)}
+  >
+    <ShareIcon />
+  </Button>
 );
 
 export default ShareButton;
