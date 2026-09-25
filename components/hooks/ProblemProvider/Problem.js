@@ -45,17 +45,6 @@ function useProblemInfoMap(url) {
     })();
   }, [url]);
 
-  async function requestProblemInfoMap(url, problems) {
-    let map = new Map();
-    for (const problem of problems) {
-      const info = await requestInfo(url, problem);
-      if (info) {
-        map.set(problem, info);
-      }
-    }
-    return map;
-  }
-
   return [problemInfoMap, setProblemInfoMap];
 }
 

@@ -41,6 +41,13 @@ const TOOLTIP = {
   credit: "",
 };
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
+const DEFAULT_INSTANCE_PARSED = {
+  test: true,
+  input: "No Input, Default String",
+  regex: "There is no regex string for this problem, parsing is likely not enabled",
+  type: "No input, default string",
+  exampleStr: "",
+};
 
 // Display order for the dropdown's complexity-class sections -- see
 // complexityClassOrder.js for the reasoning. Note SearchBarExtensible's groupOrder
@@ -94,15 +101,7 @@ export default function ProblemRowReact({
   // an unlabeled option in the dropdown.
   const filteredProblemOptions = filteredProblems.filter((name) => problemNameMap.has(name));
   const [problemLocalInstance, setProblemLocalInstance] = useState("");
-  const defaultInstanceParsed = {
-    test: true,
-    input: "No Input, Default String",
-    regex: "There is no regex string for this problem, parsing is likely not enabled",
-    type: "No input, default string",
-    exampleStr: "", // No input, default string
-  };
-
-  const [instanceParsed, setInstanceParsed] = useState(defaultInstanceParsed);
+  const [instanceParsed, setInstanceParsed] = useState(DEFAULT_INSTANCE_PARSED);
   const [seconds, setSeconds] = useState(1);
   const [timerIsActive, setTimerActive] = useState(false);
   const isFirstRender = useRef(true);
@@ -192,9 +191,6 @@ export default function ProblemRowReact({
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {
     setProblemLocalInstance(event.target.value);
-    if (!instanceParsed.test) {
-      defaultInstanceParsed.exampleStr = "";
-    }
     if (!timerIsActive) {
       setTimerActive(true);
     }

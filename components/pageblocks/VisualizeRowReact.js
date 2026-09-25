@@ -101,12 +101,11 @@ export default function VisualizeRowReact({
     { name: "x1", cluster: "2" },
   ];
 
-  const [showSolution, setShowSolution] = useState(false);
   const [showGadgets, setShowGadgets] = useState(false);
   const [showReduction, setShowReduction] = useState(false);
   const [disableGadget, setDisableGadget] = useState(false);
-  const [disableSolution, setDisableSolution] = useState(true);
-  const [disableReduction, setDisableReduction] = useState(!chosenReductionType);
+  const disableSolution = !problemName;
+  const disableReduction = !chosenReductionType;
 
   const [problemVisualizationData, setProblemVisualizationData] = useState(
     defaultSat3VisualizationArr,
@@ -114,26 +113,20 @@ export default function VisualizeRowReact({
   const [reducedVisualizationData, setReducedVisualizationData] = useState(
     defaultCLIQUEVisualizationArr,
   );
-  const [currentProblemData, setCurrentProblemData] = useState(null);
-  const [currentReductionData, setCurrentReductionData] = useState(null);
   const [problemData, setProblemData] = useState([]);
   const [problemReductionData, setProblemReductionData] = useState([]);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
-  const [instanceReady, setInstanceReady] = useState(false);
-
+  const instanceReady = !!(problemInstance && problemName);
   const isDisabled = showGadgets || showReduction;
   const totalSteps = problemData.length;
-
-  // Track when instance is ready
-  useEffect(() => {
-    setInstanceReady(!!(problemInstance && problemName));
-  }, [problemInstance, problemName]);
+  const showSolution = currentStep === totalSteps - 1 && totalSteps > 1;
+  const currentProblemData = problemData[currentStep] ?? null;
+  const currentReductionData = problemReductionData[currentStep] ?? null;
 
   useEffect(() => {
     setProblemData([]);
-    setCurrentProblemData(null);
     setCurrentStep(0);
   }, [problemName, problemInstance, chosenVisualization]);
 
@@ -203,7 +196,6 @@ export default function VisualizeRowReact({
 
         setProblemData(processedData);
         setCurrentStep(0);
-        setCurrentProblemData(processedData?.[0] ?? null);
       } catch (err) {
         console.error(err);
       }
@@ -238,35 +230,22 @@ export default function VisualizeRowReact({
   }, [problemInstance, problemName, chosenReductionType, url]);
 
   useEffect(() => {
-    setDisableSolution(!problemName);
-    setDisableReduction(!chosenReduceTo);
     setShowGadgets(false);
   }, [problemName, chosenReduceTo]);
 
   useEffect(() => {
-    setDisableReduction(!chosenReductionType);
     if (!chosenReductionType) setShowReduction(false);
   }, [chosenReductionType]);
 
-  useEffect(() => {
-    setShowSolution(currentStep === totalSteps - 1 && totalSteps > 1);
-  }, [currentStep, totalSteps]);
-
-  useEffect(() => {
-    setCurrentProblemData(problemData[currentStep] ?? null);
-    setCurrentReductionData(problemReductionData[currentStep] ?? null);
-  }, [problemData, currentStep, problemReductionData]);
-
-  // Switch Handlers
+  // Switch Handlers. "Highlight solution" is the last step, so the switch moves the step and
+  // showSolution follows from it.
   function handleSwitch1Change(e) {
-    setShowSolution(e.target.checked);
     setShowGadgets(false);
     setCurrentStep(e.target.checked ? totalSteps - 1 : 0);
   }
 
   function handleSwitch2Change(e) {
     setShowGadgets(e.target.checked);
-    setShowSolution(false);
     setCurrentStep(0);
   }
 
@@ -275,7 +254,6 @@ export default function VisualizeRowReact({
   }
   function handleRefreshButton() {
     setSvgIsLoading(false);
-    setShowSolution(false);
     setShowGadgets(false);
     setShowReduction(false);
     setCurrentStep(0);

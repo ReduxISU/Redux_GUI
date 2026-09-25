@@ -82,13 +82,8 @@ function useReductionVisualization(url, chosenReduceTo) {
   const [reductionVisualization, setReductionVisualization] = useState("");
 
   useEffect(() => {
-    if (!chosenReduceTo) {
-      setReductionVisualization("");
-      return;
-    }
-
     (async () => {
-      const info = await requestInfo(url, chosenReduceTo);
+      const info = chosenReduceTo ? await requestInfo(url, chosenReduceTo) : null;
       setReductionVisualization(info?.defaultVisualization?.visualizationType ?? "");
     })();
   }, [url, chosenReduceTo]);
@@ -225,29 +220,28 @@ function useReductionNameMap(url, problemName, chosenReduceTo) {
   const [reductionNameMap, setReductionNameMap] = useState(new Map());
 
   useEffect(() => {
-    if (chosenReduceTo) {
-      requestReductionNameMap(url, problemName, chosenReduceTo).then((reductionMap) => {
-        setReductionNameMap(reductionMap);
-      });
-    } else {
-      setReductionNameMap(new Map());
-    }
+    (async () => {
+      setReductionNameMap(
+        chosenReduceTo
+          ? await requestReductionNameMap(url, problemName, chosenReduceTo)
+          : new Map(),
+      );
+    })();
   }, [chosenReduceTo, url, problemName]);
 
-  // The following the functions are used to set the reduction names
-  async function requestReductionNameMap(url, problemFrom, problemTo) {
-    let map = new Map();
-    const reductions = (await requestReductions(url, problemFrom, problemTo)) ?? [];
-    for (const r of reductions) {
-      for (const reduction of r) {
-        const info = await requestReductionInfo(url, reduction);
-        if (info) {
-          map.set(reduction, info.reductionName);
-        }
+  return [reductionNameMap, setReductionNameMap];
+}
+
+async function requestReductionNameMap(url, problemFrom, problemTo) {
+  let map = new Map();
+  const reductions = (await requestReductions(url, problemFrom, problemTo)) ?? [];
+  for (const r of reductions) {
+    for (const reduction of r) {
+      const info = await requestReductionInfo(url, reduction);
+      if (info) {
+        map.set(reduction, info.reductionName);
       }
     }
-    return map;
   }
-
-  return [reductionNameMap, setReductionNameMap];
+  return map;
 }
