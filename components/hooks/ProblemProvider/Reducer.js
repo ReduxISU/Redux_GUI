@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   requestInfo,
   requestReducedInstanceFromPath,
@@ -7,12 +7,19 @@ import {
   requestReductions,
 } from "../../redux";
 import { useGenericInfo } from "../ProblemProvider";
+import { useWhenChanged } from "../useWhenChanged";
 
-// For initial startup defaults
-const DEFAULT_SAT3_CHOSEN_REDUCE_TO = "CLIQUE";
-const DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE = "SipserReduceToCliqueStandard";
-const DEFAULT_CLIQUE_CHOSEN_REDUCE_TO = "VERTEXCOVER";
-const DEFAULT_VERTEXCOVER_CHOSEN_REDUCTION_TYPE = "sipserReduceToVC";
+// For initial startup defaults: the target and reduction picked for a problem when its options
+// arrive, falling back to the first option.
+const PREFERRED_REDUCE_TO = { SAT3: "CLIQUE", CLIQUE: "VERTEXCOVER" };
+const PREFERRED_REDUCTION_TYPE = {
+  CLIQUE: "SipserReduceToCliqueStandard",
+  VERTEXCOVER: "sipserReduceToVC",
+};
+
+function pickDefault(preferred, options) {
+  return options.includes(preferred) ? preferred : (options[0] ?? "");
+}
 
 export function useReducer(url, problemName, problemInstance) {
   const state = {};
@@ -58,9 +65,7 @@ export function useReducerInfo(url, reducer) {
 function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductionType) {
   const [reducedInstance, setReducedInstance] = useState("");
 
-  useEffect(() => {
-    setReducedInstance("");
-  }, [chosenReductionType, chosenReduceTo]);
+  useWhenChanged([chosenReductionType, chosenReduceTo], () => setReducedInstance(""));
 
   // Automatically reduces the instance one the reduction type is chosen.
   // This makes it so it's less input from the user but also makes the "Reduce" button effectly useless.
@@ -82,13 +87,8 @@ function useReductionVisualization(url, chosenReduceTo) {
   const [reductionVisualization, setReductionVisualization] = useState("");
 
   useEffect(() => {
-    if (!chosenReduceTo) {
-      setReductionVisualization("");
-      return;
-    }
-
     (async () => {
-      const info = await requestInfo(url, chosenReduceTo);
+      const info = chosenReduceTo ? await requestInfo(url, chosenReduceTo) : null;
       setReductionVisualization(info?.defaultVisualization?.visualizationType ?? "");
     })();
   }, [url, chosenReduceTo]);
@@ -138,85 +138,32 @@ function useReductionTypeOptions(url, problemName, chosenReduceTo) {
 
 function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOptions) {
   const [chosenReductionType, setChosenReductionType] = useState("");
-  const isFirstRender = useRef(true);
 
-  useEffect(() => {
-    setChosenReductionType("");
-  }, [problemName, chosenReduceTo]);
+  useWhenChanged([problemName, chosenReduceTo], () => setChosenReductionType(""));
 
-  useEffect(() => {
+  useWhenChanged([reductionTypeOptions, chosenReduceTo], () => {
     if (reductionTypeOptions.length === 0) return;
-
-    const storedData = null;
-
-    if (isFirstRender.current) {
-      // First render: read from localStorage
-      if (storedData) {
-        const allData = JSON.parse(storedData);
-        setChosenReductionType(allData.reductionType);
-        isFirstRender.current = false;
-        if (allData.reductionType !== "") return;
-      }
-      isFirstRender.current = false;
-    }
-
-    if (
-      chosenReduceTo === "CLIQUE" &&
-      reductionTypeOptions.includes(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE)
-    ) {
-      setChosenReductionType(DEFAULT_CLIQUE_CHOSEN_REDUCTION_TYPE);
-    } else if (
-      chosenReduceTo === "VERTEXCOVER" &&
-      reductionTypeOptions.includes(DEFAULT_VERTEXCOVER_CHOSEN_REDUCTION_TYPE)
-    ) {
-      setChosenReductionType(DEFAULT_VERTEXCOVER_CHOSEN_REDUCTION_TYPE);
-    } else {
-      setChosenReductionType(!reductionTypeOptions.length ? "" : reductionTypeOptions[0]);
-    }
-  }, [reductionTypeOptions, chosenReduceTo]);
+    setChosenReductionType(
+      pickDefault(PREFERRED_REDUCTION_TYPE[chosenReduceTo], reductionTypeOptions),
+    );
+  });
 
   return [chosenReductionType, setChosenReductionType];
 }
 
 function useChosenReduceTo(problemName, reduceToOptions) {
   const [chosenReduceTo, setChosenReduceTo] = useState("");
-  const isFirstRender = useRef(true);
 
-  useEffect(() => {
-    setChosenReduceTo("");
-  }, [problemName]);
+  useWhenChanged([problemName], () => setChosenReduceTo(""));
 
-  useEffect(() => {
+  // problemName is deliberately not a dependency: it is a follower of reduceToOptions. When the
+  // problem changes, reduceToOptions recomputes and this re-runs with the current problemName in
+  // scope. Keying on problemName directly would pick a default from the previous problem's
+  // still-stale options.
+  useWhenChanged([reduceToOptions], () => {
     if (reduceToOptions.length === 0) return;
-    const storedData = null;
-
-    if (isFirstRender.current) {
-      // First render: read from localStorage
-      if (storedData) {
-        const allData = JSON.parse(storedData);
-        setChosenReduceTo(allData.reduceTo);
-        isFirstRender.current = false;
-        if (allData.reduceTo !== "") return;
-      }
-      isFirstRender.current = false;
-    }
-
-    if (problemName === "SAT3" && reduceToOptions.includes(DEFAULT_SAT3_CHOSEN_REDUCE_TO)) {
-      setChosenReduceTo(DEFAULT_SAT3_CHOSEN_REDUCE_TO);
-    } else if (
-      problemName === "CLIQUE" &&
-      reduceToOptions.includes(DEFAULT_CLIQUE_CHOSEN_REDUCE_TO)
-    ) {
-      setChosenReduceTo(DEFAULT_CLIQUE_CHOSEN_REDUCE_TO);
-    } else {
-      setChosenReduceTo(!reduceToOptions.length ? "" : reduceToOptions[0]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduceToOptions]); // problemName intentionally omitted: it's a follower of reduceToOptions.
-  // When problemName changes, reduceToOptions recomputes and re-fires this
-  // effect with the current problemName already in scope. Adding problemName
-  // directly would fire this effect while reduceToOptions still holds stale
-  // values from the previous problem, setting a wrong default.
+    setChosenReduceTo(pickDefault(PREFERRED_REDUCE_TO[problemName], reduceToOptions));
+  });
 
   return [chosenReduceTo, setChosenReduceTo];
 }
@@ -225,29 +172,28 @@ function useReductionNameMap(url, problemName, chosenReduceTo) {
   const [reductionNameMap, setReductionNameMap] = useState(new Map());
 
   useEffect(() => {
-    if (chosenReduceTo) {
-      requestReductionNameMap(url, problemName, chosenReduceTo).then((reductionMap) => {
-        setReductionNameMap(reductionMap);
-      });
-    } else {
-      setReductionNameMap(new Map());
-    }
+    (async () => {
+      setReductionNameMap(
+        chosenReduceTo
+          ? await requestReductionNameMap(url, problemName, chosenReduceTo)
+          : new Map(),
+      );
+    })();
   }, [chosenReduceTo, url, problemName]);
 
-  // The following the functions are used to set the reduction names
-  async function requestReductionNameMap(url, problemFrom, problemTo) {
-    let map = new Map();
-    const reductions = (await requestReductions(url, problemFrom, problemTo)) ?? [];
-    for (const r of reductions) {
-      for (const reduction of r) {
-        const info = await requestReductionInfo(url, reduction);
-        if (info) {
-          map.set(reduction, info.reductionName);
-        }
+  return [reductionNameMap, setReductionNameMap];
+}
+
+async function requestReductionNameMap(url, problemFrom, problemTo) {
+  let map = new Map();
+  const reductions = (await requestReductions(url, problemFrom, problemTo)) ?? [];
+  for (const r of reductions) {
+    for (const reduction of r) {
+      const info = await requestReductionInfo(url, reduction);
+      if (info) {
+        map.set(reduction, info.reductionName);
       }
     }
-    return map;
   }
-
-  return [reductionNameMap, setReductionNameMap];
+  return map;
 }
