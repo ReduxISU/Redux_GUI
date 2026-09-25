@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { requestAllInfo, requestAllSolvers } from "../../redux";
 import { useGenericInfo } from "../ProblemProvider";
+import { useWhenChanged } from "../useWhenChanged";
 
 export function useSolver(url, problemName, problemNameMap, problemInfoMap, problemInstance) {
   const state = {};
@@ -26,9 +27,7 @@ export function useSolverInfo(url, solver) {
 function useSolvedInstance(problemInstance, chosenSolver) {
   const [solvedInstance, setSolvedInstance] = useState("");
 
-  useEffect(() => {
-    setSolvedInstance("");
-  }, [problemInstance, chosenSolver]);
+  useWhenChanged([problemInstance, chosenSolver], () => setSolvedInstance(""));
 
   return [solvedInstance, setSolvedInstance];
 }
@@ -108,25 +107,11 @@ function useSolverOptions(url, problemName) {
 
 function useChosenSolver(problemName, defaultSolverMap) {
   const [chosenSolver, setChosenSolver] = useState("");
-  const isFirstRender = useRef(true);
 
-  useEffect(() => {
+  useWhenChanged([problemName, defaultSolverMap], () => {
     if (!problemName || defaultSolverMap.size === 0) return;
-
-    let solverVar = !problemName ? "" : defaultSolverMap.get(problemName);
-    const storedData = null;
-
-    if (isFirstRender.current) {
-      // First render: read from localStorage
-      if (storedData) {
-        const allData = JSON.parse(storedData);
-        solverVar = allData.solver;
-      }
-      isFirstRender.current = false;
-    }
-
-    setChosenSolver(solverVar);
-  }, [problemName, defaultSolverMap]);
+    setChosenSolver(defaultSolverMap.get(problemName));
+  });
 
   return [chosenSolver, setChosenSolver];
 }

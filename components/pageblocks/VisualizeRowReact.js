@@ -18,6 +18,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import { Button, FormControlLabel, IconButton, Switch, TextField, Tooltip } from "@mui/material";
 import Link from "next/link"; // <-- IMPORTANT for Quantum button
 import { useVisualizationInfo } from "../hooks/ProblemProvider";
+import { useWhenChanged } from "../hooks/useWhenChanged";
 import {
   requestProblemGenericInstance,
   requestReducedInstance,
@@ -125,10 +126,10 @@ export default function VisualizeRowReact({
   const currentProblemData = problemData[currentStep] ?? null;
   const currentReductionData = problemReductionData[currentStep] ?? null;
 
-  useEffect(() => {
+  useWhenChanged([problemName, problemInstance, chosenVisualization], () => {
     setProblemData([]);
     setCurrentStep(0);
-  }, [problemName, problemInstance, chosenVisualization]);
+  });
 
   // Visualization selection (stored choice / renderable default / first renderable option /
   // explicit empty state) is fully resolved inside useChosenVisualization -- see
@@ -229,13 +230,11 @@ export default function VisualizeRowReact({
     fetchSAT3();
   }, [problemInstance, problemName, chosenReductionType, url]);
 
-  useEffect(() => {
-    setShowGadgets(false);
-  }, [problemName, chosenReduceTo]);
+  useWhenChanged([problemName, chosenReduceTo], () => setShowGadgets(false));
 
-  useEffect(() => {
+  useWhenChanged([chosenReductionType], () => {
     if (!chosenReductionType) setShowReduction(false);
-  }, [chosenReductionType]);
+  });
 
   // Switch Handlers. "Highlight solution" is the last step, so the switch moves the step and
   // showSolution follows from it.

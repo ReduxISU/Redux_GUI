@@ -8,7 +8,7 @@
  * @author Alex Diviney
  */
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
   Download as DownloadIcon,
@@ -24,6 +24,7 @@ import {
 import { useProblemFilters } from "../hooks/ProblemFilters/useProblemFilters";
 import { useProblemIndex } from "../hooks/ProblemFilters/useProblemIndex";
 import { useProblemInfo } from "../hooks/ProblemProvider";
+import { useWhenChanged } from "../hooks/useWhenChanged";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
@@ -79,6 +80,7 @@ export default function ProblemRowReact({
   problemName,
   setProblemName,
   problemNameMap,
+  problemInstance,
   setProblemInstance,
   dragHandleProps,
 }) {
@@ -104,7 +106,6 @@ export default function ProblemRowReact({
   const [instanceParsed, setInstanceParsed] = useState(DEFAULT_INSTANCE_PARSED);
   const [seconds, setSeconds] = useState(1);
   const [timerIsActive, setTimerActive] = useState(false);
-  const isFirstRender = useRef(true);
 
   function openFileDialog() {
     const input = document.createElement("input");
@@ -167,26 +168,9 @@ export default function ProblemRowReact({
     return () => clearInterval(timer);
   });
 
-  //Updates the problem instance on problem name change to be the default instance of the new problem.
-  useEffect(() => {
-    const problem = problemInfo ? problemInfo : false;
-    if (!problem.problemName) return;
-
-    let problemVal = problem.defaultInstance ?? "";
-    const storedData = null;
-
-    if (isFirstRender.current) {
-      // First render: read from localStorage
-      if (storedData) {
-        const allData = JSON.parse(storedData);
-        problemVal = allData.instance;
-      }
-      isFirstRender.current = false;
-    }
-
-    setProblemLocalInstance(problemVal);
-    setProblemInstance(problemVal);
-  }, [problemInfo, setProblemInstance]);
+  // A new problem arrives with its default instance already set by useProblem; the text field
+  // follows it. Typing goes the other way, so this is keyed on the problem, not the instance.
+  useWhenChanged([problemName], () => setProblemLocalInstance(problemInstance));
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {

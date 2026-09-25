@@ -8,12 +8,13 @@
  * @author Alex Diviney
  */
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
 import { Button, IconButton } from "@mui/material";
 import { FormControl } from "react-bootstrap";
 import { useVerifierInfo } from "../hooks/ProblemProvider";
+import { useWhenChanged } from "../hooks/useWhenChanged";
 import { requestIsCertificateValid, requestVerifiedInstance } from "../redux";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
@@ -49,16 +50,14 @@ export default function VerifyRowReact({
   const [verifyResult, setVerifyResult] = useState("");
   const verifierInfo = useVerifierInfo(url, chosenVerifier);
 
-  useEffect(() => {
+  useWhenChanged([chosenVerifier, problemInstance], () => {
     setCertificate("");
     setVerifyResult("");
-  }, [chosenVerifier, problemInstance]);
+  });
 
-  useEffect(() => {
-    if (verifierInfo && verifierInfo.certificate) {
-      setCertificate(verifierInfo.certificate);
-    }
-  }, [verifierInfo]);
+  useWhenChanged([verifierInfo], () => {
+    if (verifierInfo?.certificate) setCertificate(verifierInfo.certificate);
+  });
 
   async function handleVerify() {
     setVerifyResult(
