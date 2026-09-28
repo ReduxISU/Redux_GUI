@@ -1,25 +1,20 @@
+import { Box, Button, Chip, CircularProgress, Container, Grid, Typography } from "@mui/material";
 import React, { useMemo } from "react";
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import FacetFilterGroup from "../../components/widgets/FacetFilterGroup";
-import ProblemCard from "../../components/widgets/ProblemCard";
-import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
-import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
-import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
+import {
+  complexityClassLabel,
+  complexityClassRank,
+} from "../../components/hooks/ProblemFilters/complexityClassOrder";
 import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
-import { complexityClassRank, complexityClassLabel } from "../../components/hooks/ProblemFilters/complexityClassOrder";
 import { problemTypeLabel } from "../../components/hooks/ProblemFilters/problemTypeOrder";
 import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
-import {
-  Container,
-  Box,
-  Typography,
-  Grid,
-  Button,
-  Chip,
-  CircularProgress,
-} from "@mui/material";
-import { pageBackground, sectionCardSx, textColors, surfaceColors } from "../../components/theme";
+import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
+import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
 import { useThemeMode } from "../../components/ThemeModeContext";
+import { pageBackground, sectionCardSx, surfaceColors, textColors } from "../../components/theme";
+import FacetFilterGroup from "../../components/widgets/FacetFilterGroup";
+import ProblemCard from "../../components/widgets/ProblemCard";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
 
 const reduxBaseUrl = "/api/redux/";
 
@@ -136,8 +131,8 @@ export default function BrowsePage() {
           Browse Problems
         </Typography>
         <Typography sx={{ color: text.body, fontSize: "0.87rem", mb: 3 }}>
-          Filter the full problem list by complexity class, solver type, visualization type,
-          or reduction reachability.
+          Filter the full problem list by complexity class, solver type, visualization type, or
+          reduction reachability.
         </Typography>
 
         {loading ? (
@@ -148,7 +143,15 @@ export default function BrowsePage() {
         ) : (
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 3 }}>
-              <Box sx={{ ...theSectionCard, display: "grid", gap: 2.5, position: { md: "sticky" }, top: { md: 16 } }}>
+              <Box
+                sx={{
+                  ...theSectionCard,
+                  display: "grid",
+                  gap: 2.5,
+                  position: { md: "sticky" },
+                  top: { md: 16 },
+                }}
+              >
                 <FacetFilterGroup
                   label="Complexity Class"
                   options={complexityClassOptions}

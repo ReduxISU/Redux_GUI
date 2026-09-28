@@ -1,4 +1,4 @@
-import { useState } from "react";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import {
   Badge,
   Box,
@@ -11,10 +11,10 @@ import {
   Popover,
   Typography,
 } from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import { buildFixedOrderFacetOptions } from "../hooks/ProblemFilters/facetOptions";
+import { useState } from "react";
 import { COMPLEXITY_CLASS_LABELS } from "../hooks/ProblemFilters/complexityClassOrder";
-import { PROBLEM_TYPE_ORDER, PROBLEM_TYPE_LABELS } from "../hooks/ProblemFilters/problemTypeOrder";
+import { buildFixedOrderFacetOptions } from "../hooks/ProblemFilters/facetOptions";
+import { PROBLEM_TYPE_LABELS, PROBLEM_TYPE_ORDER } from "../hooks/ProblemFilters/problemTypeOrder";
 
 // Fixed display order for the Complexity Class facet -- P/NP/NP-Complete/NP-Hard,
 // the classical hierarchy in containment order. The quantum classes (BQP/EQP/QMA/
@@ -49,7 +49,10 @@ function FacetCheckbox({ optionKey, label, count, selected, onChange }) {
       }
       label={
         <Typography variant="body2">
-          {label} <Box component="span" sx={{ color: "text.secondary" }}>({count})</Box>
+          {label}{" "}
+          <Box component="span" sx={{ color: "text.secondary" }}>
+            ({count})
+          </Box>
         </Typography>
       }
     />
