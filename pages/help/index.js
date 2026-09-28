@@ -1,10 +1,9 @@
+import { Box, Container, Link, Typography } from "@mui/material";
+import isulogo from "../../components/images/ISULogo.png";
+import { useThemeMode } from "../../components/ThemeModeContext";
+import { innerCardSx, pageBackground, textColors } from "../../components/theme";
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 import StaticSection from "../../components/widgets/StaticSection";
-import isulogo from "../../components/images/ISULogo.png";
-
-import { Container, Box, Typography, Link } from "@mui/material";
-import { pageBackground, innerCardSx, textColors } from "../../components/theme";
-import { useThemeMode } from "../../components/ThemeModeContext";
 
 // Nested per the "Complexity class" grouping -- its `children` render as a
 // sub-list indented one level under it.
@@ -106,7 +105,10 @@ function SectionTitle({ children }) {
 // for the "background reading" list in the Welcome to Redux section.
 function LinkList({ links, text }) {
   return (
-    <Box component="ul" sx={{ m: 0, pl: 3, color: text.body, fontSize: "0.87rem", lineHeight: 1.9 }}>
+    <Box
+      component="ul"
+      sx={{ m: 0, pl: 3, color: text.body, fontSize: "0.87rem", lineHeight: 1.9 }}
+    >
       {links.map((link) => (
         <Box component="li" key={link.label} sx={{ mb: 0.5 }}>
           <Link
@@ -165,7 +167,10 @@ export default function HelpPage() {
         <Box sx={{ maxWidth: "980px", mx: "auto" }}>
           <Box sx={{ mb: 1.5 }}>
             <StaticSection>
-              <StaticSection.Header title={<SectionTitle>WELCOME TO REDUX</SectionTitle>} titleWidth="auto" />
+              <StaticSection.Header
+                title={<SectionTitle>WELCOME TO REDUX</SectionTitle>}
+                titleWidth="auto"
+              />
               <StaticSection.Body>
                 <Typography
                   sx={{
@@ -176,11 +181,10 @@ export default function HelpPage() {
                     mb: 2.2,
                   }}
                 >
-                  Redux is a dynamic, interactive computer science knowledgebase
-                  consisting of canonical computer science problems, solutions,
-                  and reduction algorithms. The following pages provide helpful
-                  background to the organization of problems, solutions, and
-                  reductions in Redux based on the concept of complexity classes:
+                  Redux is a dynamic, interactive computer science knowledgebase consisting of
+                  canonical computer science problems, solutions, and reduction algorithms. The
+                  following pages provide helpful background to the organization of problems,
+                  solutions, and reductions in Redux based on the concept of complexity classes:
                 </Typography>
 
                 <LinkList links={backgroundLinks} text={text} />
@@ -190,7 +194,10 @@ export default function HelpPage() {
 
           <Box sx={{ mb: 1.5 }}>
             <StaticSection>
-              <StaticSection.Header title={<SectionTitle>ACCESS REDUX CONTENT</SectionTitle>} titleWidth="auto" />
+              <StaticSection.Header
+                title={<SectionTitle>ACCESS REDUX CONTENT</SectionTitle>}
+                titleWidth="auto"
+              />
               <StaticSection.Body>
                 <Typography
                   sx={{
@@ -201,8 +208,7 @@ export default function HelpPage() {
                     mb: 2,
                   }}
                 >
-                  All of the content of the Redux knowledge base can be accessed
-                  directly via:
+                  All of the content of the Redux knowledge base can be accessed directly via:
                 </Typography>
 
                 <Box sx={{ display: "grid", gap: 1 }}>
@@ -251,7 +257,10 @@ export default function HelpPage() {
 
           <Box sx={{ mb: 1.5 }}>
             <StaticSection>
-              <StaticSection.Header title={<SectionTitle>LEARN MORE</SectionTitle>} titleWidth="auto" />
+              <StaticSection.Header
+                title={<SectionTitle>LEARN MORE</SectionTitle>}
+                titleWidth="auto"
+              />
               <StaticSection.Body>
                 <Typography
                   sx={{

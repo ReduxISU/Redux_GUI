@@ -6,8 +6,8 @@
  */
 
 import { Box, Stack } from "@mui/material";
-import { surfaceColors, textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
+import { surfaceColors, textColors } from "../theme";
 
 export default function StaticSection({ children }) {
   const { mode } = useThemeMode();
@@ -64,9 +64,5 @@ StaticSection.Body = function Body({ children }) {
   const text = textColors(mode);
   const surface = surfaceColors(mode);
 
-  return (
-    <Box sx={{ backgroundColor: surface.surface, color: text.body, p: 2 }}>
-      {children}
-    </Box>
-  );
+  return <Box sx={{ backgroundColor: surface.surface, color: text.body, p: 2 }}>{children}</Box>;
 };

@@ -16,15 +16,10 @@ import {
 import { useEffect, useState } from "react";
 import isulogo from "../../components/images/ISULogo.png";
 import { requestContributorDirectory, requestContributorProfile } from "../../components/redux";
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import ProblemSection from "../../components/widgets/ProblemSection";
-import {
-  pageBackground,
-  innerCardSx,
-  textColors,
-  surfaceColors,
-} from "../../components/theme";
 import { useThemeMode } from "../../components/ThemeModeContext";
+import { innerCardSx, pageBackground, surfaceColors, textColors } from "../../components/theme";
+import ProblemSection from "../../components/widgets/ProblemSection";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 const reduxBaseUrl = "/api/redux/";
 
@@ -294,7 +289,10 @@ export default function AboutUsPage() {
         <Box sx={{ maxWidth: "980px", mx: "auto" }}>
           <Box id="about" sx={{ mb: 1.5 }}>
             <ProblemSection defaultCollapsed={false}>
-              <ProblemSection.Header title={<SectionTitle>ABOUT US</SectionTitle>} titleWidth="auto">
+              <ProblemSection.Header
+                title={<SectionTitle>ABOUT US</SectionTitle>}
+                titleWidth="auto"
+              >
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
@@ -311,12 +309,11 @@ export default function AboutUsPage() {
                     <Box component="span" sx={{ color: text.heading, fontWeight: 700 }}>
                       Redux
                     </Box>
-                    , a dynamic, interactive computer science knowledgebase
-                    consisting of canonical computer science problems,
-                    solutions, and reduction algorithms. Join our community of
-                    problem solvers and unravel computational complexities
-                    using the application library. The project was greatly
-                    inspired by Richard Karp&apos;s paper{" "}
+                    , a dynamic, interactive computer science knowledgebase consisting of canonical
+                    computer science problems, solutions, and reduction algorithms. Join our
+                    community of problem solvers and unravel computational complexities using the
+                    application library. The project was greatly inspired by Richard Karp&apos;s
+                    paper{" "}
                     <Link
                       href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
                       target="_blank"
@@ -349,12 +346,11 @@ export default function AboutUsPage() {
                         lineHeight: 1.7,
                       }}
                     >
-                      Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb
-                      Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and
-                      Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge
-                      Base for Teaching NP-completeness. In Proceedings of the 2024
-                      on Innovation and Technology in Computer Science Education V. 1
-                      (ITiCSE 2024). Association for Computing Machinery, New York,
+                      Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb Eardley, Russell
+                      Phillips, Rajiv Khadka, Daniel Igbokwe, and Paul Bodily. 2024. Redux: An
+                      Interactive, Dynamic Knowledge Base for Teaching NP-completeness. In
+                      Proceedings of the 2024 on Innovation and Technology in Computer Science
+                      Education V. 1 (ITiCSE 2024). Association for Computing Machinery, New York,
                       NY, USA, 255–261.{" "}
                       <Link
                         href="https://dl.acm.org/doi/10.1145/3649217.3653544"
@@ -383,7 +379,10 @@ export default function AboutUsPage() {
 
           <Box sx={{ mb: 1.5 }}>
             <ProblemSection defaultCollapsed={true}>
-              <ProblemSection.Header title={<SectionTitle>CONTRIBUTORS</SectionTitle>} titleWidth="auto">
+              <ProblemSection.Header
+                title={<SectionTitle>CONTRIBUTORS</SectionTitle>}
+                titleWidth="auto"
+              >
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
@@ -472,7 +471,10 @@ export default function AboutUsPage() {
 
           <Box sx={{ mb: 1.5 }}>
             <ProblemSection defaultCollapsed={true}>
-              <ProblemSection.Header title={<SectionTitle>PUBLICATIONS</SectionTitle>} titleWidth="auto">
+              <ProblemSection.Header
+                title={<SectionTitle>PUBLICATIONS</SectionTitle>}
+                titleWidth="auto"
+              >
                 <Box sx={{ flexGrow: 1 }} />
               </ProblemSection.Header>
               <ProblemSection.Body>
@@ -762,10 +764,9 @@ export default function AboutUsPage() {
                       textAlign: "justify",
                     }}
                   >
-                    Any opinions, findings, conclusions, or recommendations
-                    expressed in this material are those of the author(s) and do not
-                    necessarily reflect the views of the funding agencies who have
-                    supported this work.
+                    Any opinions, findings, conclusions, or recommendations expressed in this
+                    material are those of the author(s) and do not necessarily reflect the views of
+                    the funding agencies who have supported this work.
                   </Typography>
                 </Box>
               </ProblemSection.Body>
