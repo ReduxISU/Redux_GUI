@@ -16,8 +16,8 @@
  * asking the DOM to hold it.
  */
 
-import { Box, Button } from '@mui/material';
-import { useState } from 'react';
+import { Box, Button } from "@mui/material";
+import { useState } from "react";
 
 const TEXT_PREVIEW_LENGTH = 500;
 const TEXT_TOO_LARGE_TO_RENDER_LENGTH = 50_000;
@@ -35,9 +35,7 @@ export default function TruncatedTextSection({
 
   if (expanded && text.length > TEXT_TOO_LARGE_TO_RENDER_LENGTH) {
     return (
-      <Box sx={{ ...textWrapSx(), fontStyle: "italic", opacity: 0.75 }}>
-        {tooLargeMessage}
-      </Box>
+      <Box sx={{ ...textWrapSx(), fontStyle: "italic", opacity: 0.75 }}>{tooLargeMessage}</Box>
     );
   }
 

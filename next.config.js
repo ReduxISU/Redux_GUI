@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  output: 'standalone',
+  output: "standalone",
   reactStrictMode: true,
-  transpilePackages: ['@mui/material', '@mui/icons-material', '@mui/system'],
-}
+  transpilePackages: ["@mui/material", "@mui/icons-material", "@mui/system"],
+};
