@@ -8,10 +8,10 @@ import React, { useEffect, useState } from "react";
 import { requestInfo } from "../../redux";
 
 import { useProblem } from "./Problem";
-import { useVerifier } from "./Verifier";
-import { useSolver } from "./Solver";
 import { useReducer } from "./Reducer";
-import { useVisualization} from "./Visualization";
+import { useSolver } from "./Solver";
+import { useVerifier } from "./Verifier";
+import { useVisualization } from "./Visualization";
 
 export function useProblemProvider(url) {
   const problem = useProblem(url);
@@ -30,7 +30,7 @@ export function useGenericInfo(url, info) {
 
   useEffect(() => {
     (async () => {
-      setGenericInfo(!info ? {} : (await requestInfo(url, info)) ?? {});
+      setGenericInfo(!info ? {} : ((await requestInfo(url, info)) ?? {}));
     })();
   }, [info, url]);
 
