@@ -1,9 +1,8 @@
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import { Box, Container, Link, Typography } from "@mui/material";
 import isulogo from "../../components/images/ISULogo.png";
-
-import { Container, Box, Typography, Link } from "@mui/material";
-import { pageBackground, sectionCardSx, innerCardSx, textColors } from "../../components/theme";
 import { useThemeMode } from "../../components/ThemeModeContext";
+import { innerCardSx, pageBackground, sectionCardSx, textColors } from "../../components/theme";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 const contributionSteps = [
   "Creating a fork of the appropriate repository, front end or back end",
@@ -107,14 +106,12 @@ export default function ContributePage() {
                 mb: 2.2,
               }}
             >
-              Our goal from the beginning has not been to build a knowledge
-              base ourselves but to build a framework for crowd-sourced
-              contribution across the world, think Wikipedia. We hope to see
-              contributors add everything from new problems, algorithms,
-              reductions, visualizations, features, bug fixes, and beyond. Our
-              goal is to make the framework easy to understand and even easier
-              to extend. Below are tutorials and helpful information to get
-              you started.
+              Our goal from the beginning has not been to build a knowledge base ourselves but to
+              build a framework for crowd-sourced contribution across the world, think Wikipedia. We
+              hope to see contributors add everything from new problems, algorithms, reductions,
+              visualizations, features, bug fixes, and beyond. Our goal is to make the framework
+              easy to understand and even easier to extend. Below are tutorials and helpful
+              information to get you started.
             </Typography>
 
             <Typography
@@ -190,10 +187,9 @@ export default function ContributePage() {
                 textAlign: "justify",
               }}
             >
-              Before submitting a pull request, make sure your changes run
-              locally, follow the existing project structure, include clear
-              descriptions of the work completed, and are tested carefully.
-              Additional checklist details will be added as the contribution
+              Before submitting a pull request, make sure your changes run locally, follow the
+              existing project structure, include clear descriptions of the work completed, and are
+              tested carefully. Additional checklist details will be added as the contribution
               documentation is expanded.
             </Typography>
           </Box>
@@ -233,10 +229,9 @@ export default function ContributePage() {
                 textAlign: "justify",
               }}
             >
-              Interested in getting more involved? We love collaboration!
-              Whether you are an industry partner, a university research
-              group, or an individual passionate about getting involved, we
-              have lots of project ideas we could use your help with. If
+              Interested in getting more involved? We love collaboration! Whether you are an
+              industry partner, a university research group, or an individual passionate about
+              getting involved, we have lots of project ideas we could use your help with. If
               interested, please reach out to Dr. Paul Bodily at{" "}
               <Link
                 href="mailto:bodipaul@isu.edu"
@@ -247,7 +242,8 @@ export default function ContributePage() {
                 }}
               >
                 bodipaul@isu.edu
-              </Link>.
+              </Link>
+              .
             </Typography>
           </Box>
 
@@ -255,19 +251,18 @@ export default function ContributePage() {
             <SectionTitle>TERMS OF USE</SectionTitle>
 
             <BodyText>
-              Redux is offered at no cost to the computer science community. It is
-              built and maintained by students and faculty at Idaho State University,
-              and it exists to help people learn about NP-completeness, mapping
-              reductions, and algorithmic problem solving. If you find it useful, we
-              would be glad if you told other students and instructors about it.
+              Redux is offered at no cost to the computer science community. It is built and
+              maintained by students and faculty at Idaho State University, and it exists to help
+              people learn about NP-completeness, mapping reductions, and algorithmic problem
+              solving. If you find it useful, we would be glad if you told other students and
+              instructors about it.
             </BodyText>
 
             <BodyText>
-              Students and instructors are welcome to use this site directly in their
-              classes. If you take screenshots or recordings from Redux and use them
-              in slides, assignments, or publications, please cite this website
-              (https://redux.portneuf.cose.isu.edu/) and, where relevant, the theses
-              listed on our{" "}
+              Students and instructors are welcome to use this site directly in their classes. If
+              you take screenshots or recordings from Redux and use them in slides, assignments, or
+              publications, please cite this website (https://redux.portneuf.cose.isu.edu/) and,
+              where relevant, the theses listed on our{" "}
               <Link href="/aboutus" underline="hover" sx={linkSx}>
                 About Us
               </Link>{" "}
@@ -275,13 +270,12 @@ export default function ContributePage() {
             </BodyText>
 
             <BodyText>
-              Redux is open source and released under the BSD 3-Clause License. You are
-              free to fork either repository, modify it, self-host your own copy, and
-              redistribute it, including for commercial purposes, provided you follow
-              the license: keep the copyright notice and disclaimer intact, and do not
-              use the name of Idaho State University or the names of contributors to
-              endorse your derivative work without permission. The full text lives in
-              the{" "}
+              Redux is open source and released under the BSD 3-Clause License. You are free to fork
+              either repository, modify it, self-host your own copy, and redistribute it, including
+              for commercial purposes, provided you follow the license: keep the copyright notice
+              and disclaimer intact, and do not use the name of Idaho State University or the names
+              of contributors to endorse your derivative work without permission. The full text
+              lives in the{" "}
               <Link
                 href="https://github.com/ReduxISU/"
                 target="_blank"
@@ -291,23 +285,22 @@ export default function ContributePage() {
               >
                 LICENSE file in each repository
               </Link>
-              . If you would like to build on Redux, we would rather you contribute to
-              it, so please get in touch.
+              . If you would like to build on Redux, we would rather you contribute to it, so please
+              get in touch.
             </BodyText>
 
             <BodyText>
-              Redux is provided &quot;as is&quot;, without warranty of any kind, as
-              stated in the license. We make no guarantee that the site will be
-              available, that solvers will finish in reasonable time on large inputs,
-              or that any particular result is correct. It is a research and teaching
-              tool, so please do not rely on it for anything critical without checking
-              the results yourself.
+              Redux is provided &quot;as is&quot;, without warranty of any kind, as stated in the
+              license. We make no guarantee that the site will be available, that solvers will
+              finish in reasonable time on large inputs, or that any particular result is correct.
+              It is a research and teaching tool, so please do not rely on it for anything critical
+              without checking the results yourself.
             </BodyText>
 
             <BodyText>
-              Redux is not a finished project and is still actively being developed. If
-              you hit a bug, or you would like to see a problem, solver, reduction, or
-              visualization that is not there yet, please open an issue on{" "}
+              Redux is not a finished project and is still actively being developed. If you hit a
+              bug, or you would like to see a problem, solver, reduction, or visualization that is
+              not there yet, please open an issue on{" "}
               <Link
                 href="https://github.com/ReduxISU/"
                 target="_blank"
@@ -333,32 +326,31 @@ export default function ContributePage() {
             </BodyText>
 
             <BodyText>
-              Redux does not collect anything about you. There are no user accounts and
-              no way to log in, so there is nothing to sign up for and no password to
-              lose. We do not use Google Analytics or any other analytics, tracking, or
-              advertising service, and the site sets no cookies. There is no
-              cookie-consent banner because there are no cookies to consent to.
+              Redux does not collect anything about you. There are no user accounts and no way to
+              log in, so there is nothing to sign up for and no password to lose. We do not use
+              Google Analytics or any other analytics, tracking, or advertising service, and the
+              site sets no cookies. There is no cookie-consent banner because there are no cookies
+              to consent to.
             </BodyText>
 
             <BodyText>
-              Two small preferences are stored in your own browser, using local storage:
-              whether you prefer light or dark mode, and whether you have already
-              dismissed the guided tour. These never leave your device, are never sent
-              to us, and clearing your browser data removes them.
+              Two small preferences are stored in your own browser, using local storage: whether you
+              prefer light or dark mode, and whether you have already dismissed the guided tour.
+              These never leave your device, are never sent to us, and clearing your browser data
+              removes them.
             </BodyText>
 
             <BodyText>
-              When you solve, verify, or reduce a problem, the instance you entered is
-              sent to the Redux API so it can be worked on, and the answer is sent back
-              to your browser. Redux has no database and does not save your problem
-              instances; they are discarded once the response is returned. Note that the
-              Share button builds a link containing your problem instance, so if you
-              share that link, anyone who has it can see that instance.
+              When you solve, verify, or reduce a problem, the instance you entered is sent to the
+              Redux API so it can be worked on, and the answer is sent back to your browser. Redux
+              has no database and does not save your problem instances; they are discarded once the
+              response is returned. Note that the Share button builds a link containing your problem
+              instance, so if you share that link, anyone who has it can see that instance.
             </BodyText>
 
             <BodyText>
-              This site is hosted by Idaho State University, so your use of it is also
-              covered by the university&apos;s{" "}
+              This site is hosted by Idaho State University, so your use of it is also covered by
+              the university&apos;s{" "}
               <Link
                 href="https://www.isu.edu/ogc/privacy/"
                 target="_blank"
@@ -368,13 +360,12 @@ export default function ContributePage() {
               >
                 privacy statement
               </Link>
-              , which describes how ISU handles information submitted through its
-              websites and applications.
+              , which describes how ISU handles information submitted through its websites and
+              applications.
             </BodyText>
 
             <BodyText>
-              If you have a question about any of this, please contact Dr. Paul Bodily
-              at{" "}
+              If you have a question about any of this, please contact Dr. Paul Bodily at{" "}
               <Link href="mailto:bodipaul@isu.edu" underline="hover" sx={linkSx}>
                 bodipaul@isu.edu
               </Link>
