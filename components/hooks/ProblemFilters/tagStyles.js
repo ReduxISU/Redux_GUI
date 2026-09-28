@@ -70,7 +70,8 @@ export function tagChipSx(kind, { clickable = false, mode } = {}) {
  * `{label, kind}` shape without every call site re-deriving this.
  */
 export function normalizeTags(value) {
-  return [].concat(value ?? []).filter(Boolean).map((tag) =>
-    typeof tag === "string" ? { label: tag, kind: undefined } : tag,
-  );
+  return []
+    .concat(value ?? [])
+    .filter(Boolean)
+    .map((tag) => (typeof tag === "string" ? { label: tag, kind: undefined } : tag));
 }

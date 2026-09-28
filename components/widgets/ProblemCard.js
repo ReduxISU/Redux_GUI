@@ -1,9 +1,9 @@
-import React from "react";
-import Link from "next/link";
 import { Box, Chip, Typography } from "@mui/material";
-import { sectionCardSx, textColors } from "../theme";
-import { useThemeMode } from "../ThemeModeContext";
+import Link from "next/link";
+import React from "react";
 import { tagChipSx } from "../hooks/ProblemFilters/tagStyles";
+import { useThemeMode } from "../ThemeModeContext";
+import { sectionCardSx, textColors } from "../theme";
 
 // Label to the left of the Solvers/Visualizations chip rows -- fixed width so
 // both rows' chip lists start at the same x position regardless of which
@@ -110,10 +110,7 @@ export default function ProblemCard({
   return (
     <Box sx={cardSx}>
       <Box sx={{ mb: 1 }}>
-        <Link
-          href={`/?problem=${encodeURIComponent(name)}`}
-          style={{ textDecoration: "none" }}
-        >
+        <Link href={`/?problem=${encodeURIComponent(name)}`} style={{ textDecoration: "none" }}>
           <Typography
             sx={{
               color: text.heading,
@@ -182,7 +179,10 @@ export default function ProblemCard({
                       }
                     : undefined
                 }
-                sx={{ ...tagChipSx("solverType", { clickable: !!onSolverTypeClick, mode }), flexShrink: 0 }}
+                sx={{
+                  ...tagChipSx("solverType", { clickable: !!onSolverTypeClick, mode }),
+                  flexShrink: 0,
+                }}
               />
             ))}
           </Box>
@@ -212,7 +212,10 @@ export default function ProblemCard({
                     : undefined
                 }
                 sx={{
-                  ...tagChipSx("visualizationType", { clickable: !!onVisualizationTypeClick, mode }),
+                  ...tagChipSx("visualizationType", {
+                    clickable: !!onVisualizationTypeClick,
+                    mode,
+                  }),
                   flexShrink: 0,
                 }}
               />

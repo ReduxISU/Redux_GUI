@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { useEffect, useRef } from "react";
 import { getColorByKey } from "../constants/VisColorsArray";
 
 const CIRCUIT_WIDTH = 700;
@@ -61,19 +61,25 @@ export default function StandardCircuitSvgReact({
 
     const qubits = parsedData.qubits ?? ["q0", "q1"];
     const classical = parsedData.classical ?? [];
-    const chosenCircuit = useSolutionCircuit && Array.isArray(parsedData.solutionCircuit) && parsedData.solutionCircuit.length
-      ? parsedData.solutionCircuit
-      : parsedData.gates ?? [];
+    const chosenCircuit =
+      useSolutionCircuit &&
+      Array.isArray(parsedData.solutionCircuit) &&
+      parsedData.solutionCircuit.length
+        ? parsedData.solutionCircuit
+        : (parsedData.gates ?? []);
     const gates = chosenCircuit;
 
     const timestepsRaw = gates.map((g, idx) => g.time ?? idx);
-    const timesteps = (timestepsRaw.length ? Array.from(new Set(timestepsRaw)) : [0, 1]).sort((a, b) => a - b);
+    const timesteps = (timestepsRaw.length ? Array.from(new Set(timestepsRaw)) : [0, 1]).sort(
+      (a, b) => a - b,
+    );
 
     const qubitSpacing = 64;
     const classicalSpacing = 18;
     const qubitToClassicalGap = classical.length ? 44 : 0;
 
-    const xExtent = margin.left + margin.right + Math.max(timesteps.length - 1, 1) * 80 + GATE_WIDTH * 2;
+    const xExtent =
+      margin.left + margin.right + Math.max(timesteps.length - 1, 1) * 80 + GATE_WIDTH * 2;
     const width = Math.max(CIRCUIT_WIDTH, xExtent);
 
     const qubitBand = Math.max(qubits.length - 1, 0) * qubitSpacing;
@@ -81,7 +87,7 @@ export default function StandardCircuitSvgReact({
     const classicalHeight = classical.length ? (classical.length - 1) * classicalSpacing : 0;
     const height = Math.max(
       CIRCUIT_HEIGHT,
-      classicalStart + classicalHeight + margin.bottom + (classical.length ? 30 : 10)
+      classicalStart + classicalHeight + margin.bottom + (classical.length ? 30 : 10),
     );
 
     const xScale = d3
@@ -242,11 +248,13 @@ export default function StandardCircuitSvgReact({
       const gateType = (g.type || g.label || "").toLowerCase();
       const paletteEntry = gatePalette[gateType];
       if (paletteEntry) gateTypesUsed.add(paletteEntry.label);
-      const targets = Array.isArray(g.targets) ? g.targets : (g.target ? [g.target] : []);
+      const targets = Array.isArray(g.targets) ? g.targets : g.target ? [g.target] : [];
       const x = xScale(g.time ?? i);
       if (x == null) return;
 
-      const targetIndices = targets.map((t) => (typeof t === "number" ? t : qubits.indexOf(String(t))));
+      const targetIndices = targets.map((t) =>
+        typeof t === "number" ? t : qubits.indexOf(String(t)),
+      );
 
       if (gateType === "cx" && targetIndices.length >= 2) {
         const controlIdx = targetIndices[0];
@@ -308,7 +316,7 @@ export default function StandardCircuitSvgReact({
         const yMax = yScale(maxIdx);
         if (yMin != null && yMax != null) {
           const blockGroup = svg.append("g").attr("id", g.id ? `id${g.id}` : null);
-          const blockHeight = (yMax - yMin) + GATE_HEIGHT;
+          const blockHeight = yMax - yMin + GATE_HEIGHT;
           const fill = paletteEntry?.fill || getColorByKey("Background");
           blockGroup
             .append("rect")
@@ -325,14 +333,14 @@ export default function StandardCircuitSvgReact({
           blockGroup
             .append("text")
             .attr("x", x)
-            .attr("y", yMin + (blockHeight / 2))
+            .attr("y", yMin + blockHeight / 2)
             .attr("text-anchor", "middle")
             .attr("font-size", 12)
             .attr("font-weight", "bold")
             .text((paletteEntry?.label || g.label || g.type || "?").toUpperCase());
-        const blockTitle = `${(paletteEntry?.label || g.label || g.type || "?")} on ${targetIndices.map(qubitName).join(", ")}`;
-        const blockSuffix = g.name || g.id ? ` (${g.name || g.id})` : "";
-        addTitle(blockGroup, `${blockTitle}${blockSuffix}`);
+          const blockTitle = `${paletteEntry?.label || g.label || g.type || "?"} on ${targetIndices.map(qubitName).join(", ")}`;
+          const blockSuffix = g.name || g.id ? ` (${g.name || g.id})` : "";
+          addTitle(blockGroup, `${blockTitle}${blockSuffix}`);
 
           targetIndices.forEach((ti) => {
             const yTarget = yScale(ti);
@@ -359,19 +367,29 @@ export default function StandardCircuitSvgReact({
         const group = svg.append("g").attr("id", g.id ? `id${g.id}` : null);
 
         // meter icon at measX
-        group.append("path")
+        group
+          .append("path")
           .attr("d", `M ${measX - 10} ${y - 6} Q ${measX} ${y + 10} ${measX + 10} ${y - 6}`)
-          .attr("fill", "none").attr("stroke", edgeColor).attr("stroke-width", 2);
-        group.append("line")
-          .attr("x1", measX - 10).attr("x2", measX + 10)
-          .attr("y1", y - 6).attr("y2", y - 6)
-          .attr("stroke", edgeColor).attr("stroke-width", 2);
-        group.append("circle")
-          .attr("cx", measX).attr("cy", y).attr("r", 3).attr("fill", edgeColor);
-        group.append("text")
-          .attr("x", measX).attr("y", y - 12)
-          .attr("text-anchor", "middle").attr("font-size", 12)
-          .attr("font-weight", "bold").text("M");
+          .attr("fill", "none")
+          .attr("stroke", edgeColor)
+          .attr("stroke-width", 2);
+        group
+          .append("line")
+          .attr("x1", measX - 10)
+          .attr("x2", measX + 10)
+          .attr("y1", y - 6)
+          .attr("y2", y - 6)
+          .attr("stroke", edgeColor)
+          .attr("stroke-width", 2);
+        group.append("circle").attr("cx", measX).attr("cy", y).attr("r", 3).attr("fill", edgeColor);
+        group
+          .append("text")
+          .attr("x", measX)
+          .attr("y", y - 12)
+          .attr("text-anchor", "middle")
+          .attr("font-size", 12)
+          .attr("font-weight", "bold")
+          .text("M");
 
         if (Array.isArray(g.classical) && g.classical.length && classical.length) {
           const classicalIdx = classical.indexOf(g.classical[0]);
@@ -383,17 +401,25 @@ export default function StandardCircuitSvgReact({
           })();
 
           // dotted stem to the bus
-          group.append("line")
-            .attr("x1", measX).attr("x2", measX)
-            .attr("y1", y).attr("y2", classicalYBase)
-            .attr("stroke", edgeColor).attr("stroke-width", 2.5)
+          group
+            .append("line")
+            .attr("x1", measX)
+            .attr("x2", measX)
+            .attr("y1", y)
+            .attr("y2", classicalYBase)
+            .attr("stroke", edgeColor)
+            .attr("stroke-width", 2.5)
             .attr("stroke-dasharray", "4,3");
 
           // marker at the bus (label handled in bus ticks)
-          group.append("circle")
-            .attr("cx", measX).attr("cy", classicalYBase)
-            .attr("r", 4).attr("fill", edgeColor)
-            .attr("stroke", getColorByKey("Background")).attr("stroke-width", 1);
+          group
+            .append("circle")
+            .attr("cx", measX)
+            .attr("cy", classicalYBase)
+            .attr("r", 4)
+            .attr("fill", edgeColor)
+            .attr("stroke", getColorByKey("Background"))
+            .attr("stroke-width", 1);
 
           if (!measurementAnchors.has(classicalIdx)) {
             measurementAnchors.set(classicalIdx, {
@@ -414,7 +440,12 @@ export default function StandardCircuitSvgReact({
       const label = g.label ?? g.type ?? "?";
       const gateLabel = paletteEntry?.label || label;
       const fill = paletteEntry?.fill || getColorByKey("Background");
-      const rotationParam = Array.isArray(g.params) && g.params.length ? `(${g.params.join(",")})` : (g.theta ? `(${g.theta})` : "");
+      const rotationParam =
+        Array.isArray(g.params) && g.params.length
+          ? `(${g.params.join(",")})`
+          : g.theta
+            ? `(${g.theta})`
+            : "";
       const displayLabel = ["rz", "ry", "rx"].includes(gateType)
         ? `${gateLabel}${rotationParam}`
         : gateLabel;
@@ -441,7 +472,9 @@ export default function StandardCircuitSvgReact({
         .attr("font-weight", "bold")
         .text(displayLabel.toUpperCase());
       const titleName = gateTitleMap[gateType] || gateLabel || displayLabel;
-      const titleWithParams = ["rz", "ry", "rx"].includes(gateType) ? `${titleName}${rotationParam}` : titleName;
+      const titleWithParams = ["rz", "ry", "rx"].includes(gateType)
+        ? `${titleName}${rotationParam}`
+        : titleName;
       const gateTitle = `${titleWithParams} on ${qubitName(targetIdx)}`;
       const gateSuffix = g.name || g.id ? ` (${g.name || g.id})` : "";
       addTitle(gateGroup, `${gateTitle}${gateSuffix}`);
@@ -510,7 +543,16 @@ export default function StandardCircuitSvgReact({
         offsetX += 18 + label.length * 7;
       });
     }
-  }, [parsedData, useSolutionCircuit, gatePalette, gateTitleMap, margin.bottom, margin.left, margin.right, margin.top]);
+  }, [
+    parsedData,
+    useSolutionCircuit,
+    gatePalette,
+    gateTitleMap,
+    margin.bottom,
+    margin.left,
+    margin.right,
+    margin.top,
+  ]);
 
   const oracle = parsedData?.metadata?.oracleType;
   const solution = parsedData?.metadata?.solution;
@@ -520,10 +562,12 @@ export default function StandardCircuitSvgReact({
 
   const additionalMetadata = parsedData?.metadata
     ? Object.entries(parsedData.metadata).filter(
-      ([key]) => !["oracleType", "solution", "solutionBits", "iterations", "secretString"].includes(key)
-    )
+        ([key]) =>
+          !["oracleType", "solution", "solutionBits", "iterations", "secretString"].includes(key),
+      )
     : [];
-  const hasSolutionMetadata = shouldShowSolution && (solution || solutionBits || additionalMetadata.length > 0);
+  const hasSolutionMetadata =
+    shouldShowSolution && (solution || solutionBits || additionalMetadata.length > 0);
   const showMetadataPanel = oracle || typeof iterations !== "undefined" || hasSolutionMetadata;
 
   return (
@@ -543,37 +587,38 @@ export default function StandardCircuitSvgReact({
       >
         <div ref={ref} />
       </div>
-        {showMetadataPanel && (
-          <div
-            style={{
-              marginTop: 8,
-              padding: "12px 16px",
-              fontSize: 16,
-              lineHeight: 1.4,
-              borderLeft: `4px solid ${getColorByKey("Edges")}`,
-              background: getColorByKey("Background"),
-              maxWidth: "100%",
-            }}
-          >
-            {oracle && (
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                Oracle (ground truth): <span style={{ fontWeight: "normal" }}>{oracle}</span>
-              </div>
-            )}
-            {shouldShowSolution && solution && (
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                Solution (measured result): <span style={{ fontWeight: "normal" }}>{solution}</span>
-              </div>
-            )}
-            {shouldShowSolution && solutionBits && <div>Solution bits: {solutionBits}</div>}
-            {typeof iterations !== "undefined" && <div>Iterations: {iterations}</div>}
-            {shouldShowSolution && additionalMetadata.map(([k, v]) => (
+      {showMetadataPanel && (
+        <div
+          style={{
+            marginTop: 8,
+            padding: "12px 16px",
+            fontSize: 16,
+            lineHeight: 1.4,
+            borderLeft: `4px solid ${getColorByKey("Edges")}`,
+            background: getColorByKey("Background"),
+            maxWidth: "100%",
+          }}
+        >
+          {oracle && (
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>
+              Oracle (ground truth): <span style={{ fontWeight: "normal" }}>{oracle}</span>
+            </div>
+          )}
+          {shouldShowSolution && solution && (
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>
+              Solution (measured result): <span style={{ fontWeight: "normal" }}>{solution}</span>
+            </div>
+          )}
+          {shouldShowSolution && solutionBits && <div>Solution bits: {solutionBits}</div>}
+          {typeof iterations !== "undefined" && <div>Iterations: {iterations}</div>}
+          {shouldShowSolution &&
+            additionalMetadata.map(([k, v]) => (
               <div key={k}>
                 {k}: {String(v)}
               </div>
             ))}
-          </div>
-        )}
+        </div>
+      )}
     </>
   );
 }
@@ -582,13 +627,20 @@ function parseCircuitData(data) {
   if (!data) return null;
 
   if (typeof data === "string") {
-    try { data = JSON.parse(data); } catch { return null; }
+    try {
+      data = JSON.parse(data);
+    } catch {
+      return null;
+    }
   }
 
   if (data && typeof data === "object" && typeof data.payload === "string") {
-    try { data = JSON.parse(data.payload); } catch { /* keep original */ }
+    try {
+      data = JSON.parse(data.payload);
+    } catch {
+      /* keep original */
+    }
   }
-
 
   if (data && typeof data === "object" && data.d3 && typeof data.d3 === "object") {
     const d3 = data.d3;
@@ -609,14 +661,18 @@ function parseCircuitData(data) {
     };
   }
 
-    // If the payload is a string, try to parse it as JSON
-    if (data && typeof data === "object" && typeof data.circuit === "string") {
-      const s = data.circuit.trim();
-      if (s.startsWith("{") || s.startsWith("[")) {
-        try { return JSON.parse(s); } catch { /* ignore */ }
+  // If the payload is a string, try to parse it as JSON
+  if (data && typeof data === "object" && typeof data.circuit === "string") {
+    const s = data.circuit.trim();
+    if (s.startsWith("{") || s.startsWith("[")) {
+      try {
+        return JSON.parse(s);
+      } catch {
+        /* ignore */
       }
     }
+  }
 
-    // Already the direct D3 payload shape
-    return data;
+  // Already the direct D3 payload shape
+  return data;
 }
