@@ -14,12 +14,18 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import isulogoLight from "../../components/images/ISULogo-Light.png";
 import isulogoDark from "../../components/images/ISULogo-Dark.png";
+import isulogoLight from "../../components/images/ISULogo-Light.png";
 import { requestContributorDirectory, requestContributorProfile } from "../../components/redux";
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import { pageBackground, sectionCardSx, innerCardSx, textColors, surfaceColors } from "../../components/theme";
 import { useThemeMode } from "../../components/ThemeModeContext";
+import {
+  innerCardSx,
+  pageBackground,
+  sectionCardSx,
+  surfaceColors,
+  textColors,
+} from "../../components/theme";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 const reduxBaseUrl = "/api/redux/";
 
@@ -361,10 +367,9 @@ export default function AboutUsPage() {
               <Box component="span" sx={{ color: text.heading, fontWeight: 700 }}>
                 Redux
               </Box>
-              , a platform for NP-Complete problems. Input your challenges and
-              gain access to reductions, solutions, verifiers, and
-              visualizations. Join our community of problem solvers and unravel
-              computational complexities using the application library. The
+              , a platform for NP-Complete problems. Input your challenges and gain access to
+              reductions, solutions, verifiers, and visualizations. Join our community of problem
+              solvers and unravel computational complexities using the application library. The
               project was greatly inspired by Richard Karp&apos;s paper{" "}
               <Link
                 href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
@@ -398,13 +403,11 @@ export default function AboutUsPage() {
                   lineHeight: 1.7,
                 }}
               >
-                Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb
-                Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and
-                Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge
-                Base for Teaching NP-completeness. In Proceedings of the 2024
-                on Innovation and Technology in Computer Science Education V. 1
-                (ITiCSE 2024). Association for Computing Machinery, New York,
-                NY, USA, 255–261.{" "}
+                Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb Eardley, Russell Phillips,
+                Rajiv Khadka, Daniel Igbokwe, and Paul Bodily. 2024. Redux: An Interactive, Dynamic
+                Knowledge Base for Teaching NP-completeness. In Proceedings of the 2024 on
+                Innovation and Technology in Computer Science Education V. 1 (ITiCSE 2024).
+                Association for Computing Machinery, New York, NY, USA, 255–261.{" "}
                 <Link
                   href="https://dl.acm.org/doi/10.1145/3649217.3653544"
                   target="_blank"
@@ -773,10 +776,9 @@ export default function AboutUsPage() {
                 textAlign: "justify",
               }}
             >
-              Any opinions, findings, conclusions, or recommendations
-              expressed in this material are those of the author(s) and do not
-              necessarily reflect the views of the funding agencies who have
-              supported this work.
+              Any opinions, findings, conclusions, or recommendations expressed in this material are
+              those of the author(s) and do not necessarily reflect the views of the funding
+              agencies who have supported this work.
             </Typography>
           </Box>
 

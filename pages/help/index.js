@@ -1,10 +1,9 @@
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import isulogoLight from "../../components/images/ISULogo-Light.png";
+import { Box, Container, Link, Typography } from "@mui/material";
 import isulogoDark from "../../components/images/ISULogo-Dark.png";
-
-import { Container, Box, Typography, Link } from "@mui/material";
-import { pageBackground, sectionCardSx, innerCardSx, textColors } from "../../components/theme";
+import isulogoLight from "../../components/images/ISULogo-Light.png";
 import { useThemeMode } from "../../components/ThemeModeContext";
+import { innerCardSx, pageBackground, sectionCardSx, textColors } from "../../components/theme";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 const backgroundLinks = [
   {
@@ -131,11 +130,10 @@ export default function HelpPage() {
                 mb: 2.2,
               }}
             >
-              Redux is a dynamic, interactive computer science knowledgebase
-              consisting of canonical computer science problems, solutions,
-              and reduction algorithms. The following pages provide helpful
-              background to the organization of problems, solutions, and
-              reductions in Redux based on the concept of complexity classes:
+              Redux is a dynamic, interactive computer science knowledgebase consisting of canonical
+              computer science problems, solutions, and reduction algorithms. The following pages
+              provide helpful background to the organization of problems, solutions, and reductions
+              in Redux based on the concept of complexity classes:
             </Typography>
 
             <Typography
@@ -178,8 +176,7 @@ export default function HelpPage() {
                 mb: 2,
               }}
             >
-              All of the content of the Redux knowledge base can be accessed
-              directly via:
+              All of the content of the Redux knowledge base can be accessed directly via:
             </Typography>
 
             <Box sx={{ display: "grid", gap: 1 }}>
