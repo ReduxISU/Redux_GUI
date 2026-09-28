@@ -1,10 +1,54 @@
 import React from "react";
 import Link from "next/link";
 import { Box, Chip, Typography } from "@mui/material";
-import { Monitor as VisualizationIcon } from "@mui/icons-material";
 import { sectionCardSx, textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
 import { tagChipSx } from "../hooks/ProblemFilters/tagStyles";
+
+// Label to the left of the Solvers/Visualizations chip rows -- fixed width so
+// both rows' chip lists start at the same x position regardless of which
+// label is longer, and never wraps/shrinks even when its row's chip list is
+// scrolling under it.
+function sectionLabelSx(text) {
+  return {
+    color: text.heading,
+    fontSize: "0.68rem",
+    fontWeight: 600,
+    letterSpacing: "0.06em",
+    flexShrink: 0,
+    width: "5.5rem",
+  };
+}
+
+// Direct project-owner instruction: a category row's chip list scrolls
+// horizontally in its own lane next to the label, rather than wrapping onto
+// further lines below it -- keeps each card's height predictable in the
+// results grid regardless of how many solver/visualization types a problem
+// declares. minWidth: 0 is load-bearing on a flex child -- without it the row
+// grows to fit every chip instead of clipping/scrolling them.
+//
+// The scrollbar itself is hidden (direct project-owner instruction) -- the
+// row still scrolls via wheel/trackpad/touch/drag exactly as before, this
+// only suppresses the browser's own scrollbar chrome, which read as visual
+// noise on a card this small. Three separate properties because no single
+// one covers every engine: scrollbar-width is Firefox's own (not part of any
+// vendor-prefixed rule), -ms-overflow-style is legacy Edge/IE, and
+// ::-webkit-scrollbar is Chrome/Safari/Chromium-Edge's pseudo-element --
+// display: none on it removes the bar without disabling the scrolling it
+// controls.
+const chipScrollRowSx = {
+  display: "flex",
+  gap: 0.5,
+  overflowX: "auto",
+  flexWrap: "nowrap",
+  minWidth: 0,
+  py: 0.25,
+  scrollbarWidth: "none",
+  msOverflowStyle: "none",
+  "&::-webkit-scrollbar": {
+    display: "none",
+  },
+};
 
 /**
  * Presentational card for one problem in the /browse results grid. Clicking
@@ -26,12 +70,22 @@ import { tagChipSx } from "../hooks/ProblemFilters/tagStyles";
  * @param solverTypes `[{value, label}]` -- raw wire value plus display label for
  * each solver-type chip, so a click can report the raw value while still
  * rendering the human-facing label.
+ * @param visualizationTypes `[{value, label}]` -- each renderable visualization's
+ * simplified display category (e.g. "Graph", "Table") from
+ * `visualizationCategories.js`. Category strings are already display-ready, so
+ * `value` and `label` are the same string here, unlike `solverTypes`. Never
+ * includes useProblemIndex's "Unimplemented" sentinel -- the caller
+ * (pages/browse/index.js) strips that before this prop is built, so an empty
+ * array here means "genuinely no renderable visualization" and this component
+ * doesn't have to know the sentinel exists.
  * @param onComplexityClassClick Called with `complexityClassValue` when the
  * complexity-class chip is clicked. Omit to render the chip as non-interactive.
  * @param onProblemTypeClick Called with `problemTypeValue` when the problem-type
  * chip is clicked. Omit to render the chip as non-interactive.
  * @param onSolverTypeClick Called with a solver type's raw `value` when its chip
  * is clicked. Omit to render solver chips as non-interactive.
+ * @param onVisualizationTypeClick Called with a visualization category's value
+ * when its chip is clicked. Omit to render visualization chips as non-interactive.
  */
 export default function ProblemCard({
   name,
@@ -41,10 +95,11 @@ export default function ProblemCard({
   problemType,
   problemTypeValue,
   solverTypes,
-  hasRenderableVisualization,
+  visualizationTypes = [],
   onComplexityClassClick,
   onProblemTypeClick,
   onSolverTypeClick,
+  onVisualizationTypeClick,
 }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
@@ -54,7 +109,7 @@ export default function ProblemCard({
 
   return (
     <Box sx={cardSx}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
+      <Box sx={{ mb: 1 }}>
         <Link
           href={`/?problem=${encodeURIComponent(name)}`}
           style={{ textDecoration: "none" }}
@@ -70,9 +125,6 @@ export default function ProblemCard({
             {displayName}
           </Typography>
         </Link>
-        {hasRenderableVisualization ? (
-          <VisualizationIcon titleAccess="Has a renderable visualization" sx={{ color: text.caption, fontSize: "1.1rem" }} />
-        ) : null}
       </Box>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.25 }}>
@@ -108,29 +160,64 @@ export default function ProblemCard({
         ) : null}
       </Box>
 
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 1.25 }}>
+        <Typography sx={sectionLabelSx(text)}>Solvers:</Typography>
         {solverTypes.length === 0 ? (
           <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
             No solvers
           </Typography>
         ) : (
-          solverTypes.map(({ value, label }) => (
-            <Chip
-              key={value}
-              label={label}
-              size="small"
-              clickable={!!onSolverTypeClick}
-              onClick={
-                onSolverTypeClick
-                  ? (event) => {
-                      event.stopPropagation();
-                      onSolverTypeClick(value);
-                    }
-                  : undefined
-              }
-              sx={tagChipSx("solverType", { clickable: !!onSolverTypeClick, mode })}
-            />
-          ))
+          <Box sx={chipScrollRowSx}>
+            {solverTypes.map(({ value, label }) => (
+              <Chip
+                key={value}
+                label={label}
+                size="small"
+                clickable={!!onSolverTypeClick}
+                onClick={
+                  onSolverTypeClick
+                    ? (event) => {
+                        event.stopPropagation();
+                        onSolverTypeClick(value);
+                      }
+                    : undefined
+                }
+                sx={{ ...tagChipSx("solverType", { clickable: !!onSolverTypeClick, mode }), flexShrink: 0 }}
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
+
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Typography sx={sectionLabelSx(text)}>Visualizations:</Typography>
+        {visualizationTypes.length === 0 ? (
+          <Typography sx={{ color: text.caption, fontSize: "0.75rem", fontStyle: "italic" }}>
+            No visualizations
+          </Typography>
+        ) : (
+          <Box sx={chipScrollRowSx}>
+            {visualizationTypes.map(({ value, label }) => (
+              <Chip
+                key={value}
+                label={label}
+                size="small"
+                clickable={!!onVisualizationTypeClick}
+                onClick={
+                  onVisualizationTypeClick
+                    ? (event) => {
+                        event.stopPropagation();
+                        onVisualizationTypeClick(value);
+                      }
+                    : undefined
+                }
+                sx={{
+                  ...tagChipSx("visualizationType", { clickable: !!onVisualizationTypeClick, mode }),
+                  flexShrink: 0,
+                }}
+              />
+            ))}
+          </Box>
         )}
       </Box>
     </Box>
