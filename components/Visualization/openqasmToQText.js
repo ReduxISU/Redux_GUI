@@ -1,9 +1,7 @@
 // components/Visualization/openqasmToQText.js
 
 // All gate *symbols* that actually exist in Q.Gate.constants
-const QJS_SYMBOLS = new Set([
-  "I", "*", "M", "H", "X", "Y", "Z", "P", "T", "B", "S", "√S", "Q"
-]);
+const QJS_SYMBOLS = new Set(["I", "*", "M", "H", "X", "Y", "Z", "P", "T", "B", "S", "√S", "Q"]);
 
 // Map from OpenQASM gate name -> Q.js gate symbol
 // (multi-qubit vs single-qubit is determined by how many qubits we apply it to)
@@ -24,9 +22,8 @@ const QASM_TO_QJS_SYMBOL = {
   gate_q_4505047632: "Q",
   gate_q_4505045840: "Q",
   gate_q_4505048912: "Q",
-  gate_q_4505050448: "Q"
+  gate_q_4505050448: "Q",
 };
-
 
 // Helper: look up a Q.js symbol for a QASM gate name
 function lookupSymbol(qasmName) {
@@ -91,11 +88,7 @@ export function openqasmToQText(qasm) {
     // ------------------------------------------------------------------
     // Measurement:  measure q[i] -> c[j];
     // ------------------------------------------------------------------
-    if (
-      (m = line.match(
-        /^measure\s+q\[(\d+)\]\s*->\s*[a-zA-Z_]\w*\[(\d+)\];/i
-      ))
-    ) {
+    if ((m = line.match(/^measure\s+q\[(\d+)\]\s*->\s*[a-zA-Z_]\w*\[(\d+)\];/i))) {
       const qIndex = parseInt(m[1], 10);
       time++;
       ensureAllRowsHaveMoment(time);
@@ -107,9 +100,7 @@ export function openqasmToQText(qasm) {
     // Parameterised gates like "p(pi/8) q[0];"
     // Currently we *skip* all of these, but log them.
     // ------------------------------------------------------------------
-    if (
-      /^([a-zA-Z][a-zA-Z0-9_]*)\s*\(.*\)\s+q\[\d+\]/.test(line)
-    ) {
+    if (/^([a-zA-Z][a-zA-Z0-9_]*)\s*\(.*\)\s+q\[\d+\]/.test(line)) {
       console.warn("Skipping parameterised gate (not supported in Q.js text):", line);
       continue;
     }
@@ -117,11 +108,7 @@ export function openqasmToQText(qasm) {
     // ------------------------------------------------------------------
     // 1-qubit gate:   name q[i];
     // ------------------------------------------------------------------
-    if (
-      (m = line.match(
-        /^([a-zA-Z][a-zA-Z0-9_]*)\s+q\[(\d+)\];$/
-      ))
-    ) {
+    if ((m = line.match(/^([a-zA-Z][a-zA-Z0-9_]*)\s+q\[(\d+)\];$/))) {
       const gateName = m[1];
       const qIndex = parseInt(m[2], 10);
       const symbol = lookupSymbol(gateName);
@@ -141,11 +128,7 @@ export function openqasmToQText(qasm) {
     // SPECIAL CASE: auto-generated Grover Q gates
     //    gate_Q_12345678 q[0],q[1],q[2],q[3];
     // ------------------------------------------------------------------
-    if (
-      (m = line.match(
-        /^(gate_Q_[A-Za-z0-9_]+)\s+((?:q\[\d+\]\s*,\s*)*q\[\d+\]);$/
-      ))
-    ) {
+    if ((m = line.match(/^(gate_Q_[A-Za-z0-9_]+)\s+((?:q\[\d+\]\s*,\s*)*q\[\d+\]);$/))) {
       const qubits = parseQubitList(m[2]); // [0,1,2,3,...]
 
       const symbol = "Q"; // our custom multi-qubit Grover gate symbol
@@ -161,16 +144,11 @@ export function openqasmToQText(qasm) {
       continue; // we handled this line, skip to next one
     }
 
-
     // ------------------------------------------------------------------
     // Multi-qubit gate:  name q[a],q[b],q[c],...
     // ------------------------------------------------------------------
     // name q[a],q[b],q[c],...
-    if (
-      (m = line.match(
-        /^([a-zA-Z][a-zA-Z0-9_]*)\s+((?:q\[\d+\]\s*,\s*)*q\[\d+\]);$/
-      ))
-    ) {
+    if ((m = line.match(/^([a-zA-Z][a-zA-Z0-9_]*)\s+((?:q\[\d+\]\s*,\s*)*q\[\d+\]);$/))) {
       const gateName = m[1];
       const qubits = parseQubitList(m[2]);
       const symbol = lookupSymbol(gateName);
@@ -211,7 +189,5 @@ export function openqasmToQText(qasm) {
   }
 
   // Convert table into Q.js text format
-  return rows
-    .map((row) => row.join("-"))
-    .join("\n");
+  return rows.map((row) => row.join("-")).join("\n");
 }

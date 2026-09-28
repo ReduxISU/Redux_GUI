@@ -107,8 +107,7 @@ export function useProblemIndex(url) {
           complexityClasses.add("NP");
         }
 
-        const problemType =
-          problemInfo?.problemType || problemInfo?.ProblemType || "Unclassified";
+        const problemType = problemInfo?.problemType || problemInfo?.ProblemType || "Unclassified";
 
         const solverTypes = new Set();
         const solverComplexities = new Set();

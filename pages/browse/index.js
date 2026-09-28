@@ -1,31 +1,26 @@
+import { Box, Button, Chip, CircularProgress, Container, Grid, Typography } from "@mui/material";
 import React, { useMemo } from "react";
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import FacetFilterGroup from "../../components/widgets/FacetFilterGroup";
-import ProblemCard from "../../components/widgets/ProblemCard";
-import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
-import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
-import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
-import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
 import {
   COMPLEXITY_CLASS_ORDER,
-  complexityClassRank,
   complexityClassLabel,
+  complexityClassRank,
 } from "../../components/hooks/ProblemFilters/complexityClassOrder";
-import { solverComplexityRank, solverComplexityLabel } from "../../components/hooks/ProblemFilters/solverComplexityOrder";
+import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
 import { problemTypeLabel } from "../../components/hooks/ProblemFilters/problemTypeOrder";
-import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
-import { ALL_VISUALIZATIONS_KEY } from "../../components/Visualization/svgs/visualizationCategories";
 import {
-  Container,
-  Box,
-  Typography,
-  Grid,
-  Button,
-  Chip,
-  CircularProgress,
-} from "@mui/material";
-import { pageBackground, sectionCardSx, textColors, surfaceColors } from "../../components/theme";
+  solverComplexityLabel,
+  solverComplexityRank,
+} from "../../components/hooks/ProblemFilters/solverComplexityOrder";
+import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
+import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
+import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
 import { useThemeMode } from "../../components/ThemeModeContext";
+import { pageBackground, sectionCardSx, surfaceColors, textColors } from "../../components/theme";
+import { ALL_VISUALIZATIONS_KEY } from "../../components/Visualization/svgs/visualizationCategories";
+import FacetFilterGroup from "../../components/widgets/FacetFilterGroup";
+import ProblemCard from "../../components/widgets/ProblemCard";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
 
 const reduxBaseUrl = "/api/redux/";
 
@@ -172,7 +167,15 @@ export default function BrowsePage() {
         ) : (
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 3 }}>
-              <Box sx={{ ...theSectionCard, display: "grid", gap: 2.5, position: { md: "sticky" }, top: { md: 16 } }}>
+              <Box
+                sx={{
+                  ...theSectionCard,
+                  display: "grid",
+                  gap: 2.5,
+                  position: { md: "sticky" },
+                  top: { md: 16 },
+                }}
+              >
                 <Button
                   onClick={clearFilters}
                   variant="outlined"

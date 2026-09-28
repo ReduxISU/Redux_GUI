@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { complexityClassRank } from "./complexityClassOrder";
 import { ALL_VISUALIZATIONS_KEY } from "../../Visualization/svgs/visualizationCategories";
+import { complexityClassRank } from "./complexityClassOrder";
 
 /**
  * `oneHop`: problems directly reachable from `source` via a single reduction
@@ -104,7 +104,10 @@ export function useProblemFilters(problemIndex, reductionGraph) {
       if (selectedVisualizationTypes.size > 0) {
         const matchesAllVisualizations =
           selectedVisualizationTypes.has(ALL_VISUALIZATIONS_KEY) && tags.hasRenderableVisualization;
-        const matchesCategory = intersects(tags.visualizationCategories, selectedVisualizationTypes);
+        const matchesCategory = intersects(
+          tags.visualizationCategories,
+          selectedVisualizationTypes,
+        );
         if (!matchesAllVisualizations && !matchesCategory) {
           continue;
         }
