@@ -2,18 +2,22 @@ import React, { useEffect, useState } from "react";
 import { useThemeMode } from "../../ThemeModeContext";
 
 function escapeLatexText(str) {
-  const escaped = String(str).replace(/[\\{}%$&#_^~]/g, (c) => ({
-    "\\": "\\textbackslash{}",
-    "{": "\\{",
-    "}": "\\}",
-    "%": "\\%",
-    "$": "\\$",
-    "&": "\\&",
-    "#": "\\#",
-    "_": "\\_",
-    "^": "\\^{}",
-    "~": "\\~{}",
-  }[c]));
+  const escaped = String(str).replace(
+    /[\\{}%$&#_^~]/g,
+    (c) =>
+      ({
+        "\\": "\\textbackslash{}",
+        "{": "\\{",
+        "}": "\\}",
+        "%": "\\%",
+        $: "\\$",
+        "&": "\\&",
+        "#": "\\#",
+        _: "\\_",
+        "^": "\\^{}",
+        "~": "\\~{}",
+      })[c],
+  );
 
   // node-tikzjax (pdfTeX under the hood) can't typeset a raw Unicode 'ε'
   // glyph as plain text -- it fails the render outright. $\epsilon$ (LaTeX
@@ -117,8 +121,7 @@ function LaTeXGraphSvgReact({ problemData }) {
         }
       }
 
-      let nodeDefs =
-        "\\begin{scope}[every node/.style={circle,draw,line width=1.2pt}]\n";
+      let nodeDefs = "\\begin{scope}[every node/.style={circle,draw,line width=1.2pt}]\n";
 
       nodes.forEach((node) => {
         const id = safeNodeId(node.id);
@@ -179,7 +182,7 @@ function LaTeXGraphSvgReact({ problemData }) {
           const node = nodes.find((n) => n.id === src);
           // FIX 2: Added parentheses to fix operator precedence bug.
           const nearbyEdges = links.filter(
-            (l) => l.source === src || (l.target === src && l.source !== src)
+            (l) => l.source === src || (l.target === src && l.source !== src),
           );
 
           let counts = { right: 0, left: 0, above: 0, below: 0 };
@@ -212,9 +215,7 @@ function LaTeXGraphSvgReact({ problemData }) {
         usedEdges[canonicalKey] = (usedEdges[canonicalKey] || 0) + 1;
 
         const bend =
-          usedEdges[canonicalKey] > 1
-            ? `bend right=${20 * usedEdges[canonicalKey]}`
-            : "";
+          usedEdges[canonicalKey] > 1 ? `bend right=${20 * usedEdges[canonicalKey]}` : "";
 
         const options = [arrow, bend, style].filter(Boolean).join(",");
 
@@ -225,8 +226,7 @@ function LaTeXGraphSvgReact({ problemData }) {
 
       edgeDefs += "\\end{scope}\n";
 
-      const tikz =
-        `\\begin{tikzpicture}\n${nodeDefs}${edgeDefs}\\end{tikzpicture}`;
+      const tikz = `\\begin{tikzpicture}\n${nodeDefs}${edgeDefs}\\end{tikzpicture}`;
 
       try {
         const response = await fetch("/api/render-tikz", {
