@@ -23,6 +23,8 @@ export const SOLVER_TYPE_LABELS = {
   DepthFirstSearch: "Depth First Search",
   Backtracking: "Backtracking",
   Constructive: "Constructive",
+  Stochastic: "Stochastic",
+  Parameterized: "Parameterized",
 };
 
 /** `SOLVER_TYPE_LABELS[value]`, falling back to the raw value itself for anything
