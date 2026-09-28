@@ -1,5 +1,5 @@
+import { Autocomplete, Button, Divider, ListSubheader, Paper, TextField } from "@mui/material";
 import React, { useState } from "react";
-import { Autocomplete, TextField, Paper, Divider, Button, ListSubheader } from "@mui/material";
 
 export default function SearchBarExtensible({
   selected,
@@ -41,19 +41,25 @@ export default function SearchBarExtensible({
       onInputChange={(event, value) => {
         setInput(value ?? "");
       }}
-      value={disabled ? disabledMessage : optionsMap.get(selected) ?? ""}
+      value={disabled ? disabledMessage : (optionsMap.get(selected) ?? "")}
       onChange={(event, value) => {
         value = getKeyByValue(optionsMap, value) ?? "";
         if (value === "" || options.includes(value)) {
           onSelect(value);
         }
       }}
-      options={Array.isArray(options)
-        ? [...options]
-          .sort((a, b) => sortOptions(a, b, { groupBy, groupOrder, optionsHighlight }))
-          .map((x) => optionsMap.get(x) ?? x)
-        : []}
-      groupBy={groupBy ? (option) => groupBy(getKeyByValue(optionsMap, option)) ?? "Unclassified" : undefined}
+      options={
+        Array.isArray(options)
+          ? [...options]
+              .sort((a, b) => sortOptions(a, b, { groupBy, groupOrder, optionsHighlight }))
+              .map((x) => optionsMap.get(x) ?? x)
+          : []
+      }
+      groupBy={
+        groupBy
+          ? (option) => groupBy(getKeyByValue(optionsMap, option)) ?? "Unclassified"
+          : undefined
+      }
       // Bold, centered, and set off with its own background/rule so the header reads
       // as a section divider, not a selectable option -- larger than the option text
       // it sits above (MUI's ListSubheader defaults to *smaller* than list items,
@@ -64,22 +70,22 @@ export default function SearchBarExtensible({
       renderGroup={
         groupBy
           ? (params) => (
-            <li key={params.key}>
-              <ListSubheader
-                sx={{
-                  top: -8,
-                  fontWeight: 700,
-                  fontSize: "0.95rem",
-                  textAlign: "center",
-                  bgcolor: (theme) => theme.palette.action.hover,
-                  borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-                }}
-              >
-                {groupLabel ? groupLabel(params.group) : params.group}
-              </ListSubheader>
-              {params.children}
-            </li>
-          )
+              <li key={params.key}>
+                <ListSubheader
+                  sx={{
+                    top: -8,
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    textAlign: "center",
+                    bgcolor: (theme) => theme.palette.action.hover,
+                    borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+                  }}
+                >
+                  {groupLabel ? groupLabel(params.group) : params.group}
+                </ListSubheader>
+                {params.children}
+              </li>
+            )
           : undefined
       }
       getOptionDisabled={
@@ -114,16 +120,16 @@ export default function SearchBarExtensible({
       renderOption={
         optionsHighlight || optionsDisabled
           ? (props, option) => {
-            const key = getKeyByValue(optionsMap, option);
-            const isDeemphasized = optionsHighlight ? !optionsHighlight.includes(key) : false;
-            const isDisabledOption = optionsDisabled ? optionsDisabled.includes(key) : false;
-            return (
-              <li {...props} style={isDeemphasized ? { opacity: 0.5 } : null}>
-                {option}
-                {isDisabledOption && disabledOptionHint ? ` (${disabledOptionHint})` : ""}
-              </li>
-            );
-          }
+              const key = getKeyByValue(optionsMap, option);
+              const isDeemphasized = optionsHighlight ? !optionsHighlight.includes(key) : false;
+              const isDisabledOption = optionsDisabled ? optionsDisabled.includes(key) : false;
+              return (
+                <li {...props} style={isDeemphasized ? { opacity: 0.5 } : null}>
+                  {option}
+                  {isDisabledOption && disabledOptionHint ? ` (${disabledOptionHint})` : ""}
+                </li>
+              );
+            }
           : null
       }
     />
