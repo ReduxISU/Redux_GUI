@@ -1,5 +1,14 @@
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Chip,
+  createFilterOptions,
+  Divider,
+  Paper,
+  TextField,
+} from "@mui/material";
 import React, { useState } from "react";
-import { Autocomplete, TextField, Paper, Divider, Button, Chip, Box, createFilterOptions } from "@mui/material";
 
 export default function SearchBarExtensible({
   selected,
@@ -46,27 +55,29 @@ export default function SearchBarExtensible({
       onInputChange={(event, value) => {
         setInput(value ?? "");
       }}
-      value={disabled ? disabledMessage : optionsMap.get(selected) ?? ""}
+      value={disabled ? disabledMessage : (optionsMap.get(selected) ?? "")}
       onChange={(event, value) => {
         value = getKeyByValue(optionsMap, value) ?? "";
         if (value === "" || options.includes(value)) {
           onSelect(value);
         }
       }}
-      options={Array.isArray(options)
-        ? [...options]
-          .sort((a, b) => sortOptions(a, b, { groupBy, groupOrder, optionsHighlight }))
-          .map((x) => optionsMap.get(x) ?? x)
-        : []}
+      options={
+        Array.isArray(options)
+          ? [...options]
+              .sort((a, b) => sortOptions(a, b, { groupBy, groupOrder, optionsHighlight }))
+              .map((x) => optionsMap.get(x) ?? x)
+          : []
+      }
       filterOptions={
         optionSearchText
           ? createFilterOptions({
-            stringify: (option) => {
-              const key = getKeyByValue(optionsMap, option);
-              const extra = key != null ? optionSearchText(key) : null;
-              return extra ? `${option} ${extra}` : option;
-            },
-          })
+              stringify: (option) => {
+                const key = getKeyByValue(optionsMap, option);
+                const extra = key != null ? optionSearchText(key) : null;
+                return extra ? `${option} ${extra}` : option;
+              },
+            })
           : undefined
       }
       getOptionDisabled={
@@ -104,42 +115,50 @@ export default function SearchBarExtensible({
       renderOption={
         optionsHighlight || optionsDisabled || optionTag
           ? (props, option) => {
-            const key = getKeyByValue(optionsMap, option);
-            const isDeemphasized = optionsHighlight ? !optionsHighlight.includes(key) : false;
-            const isDisabledOption = optionsDisabled ? optionsDisabled.includes(key) : false;
-            const tags = optionTag && key != null ? [].concat(optionTag(key)).filter(Boolean) : [];
-            return (
-              <li
-                {...props}
-                style={{
-                  ...(isDeemphasized ? { opacity: 0.5 } : null),
-                  ...(tags.length > 0 ? { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 } : null),
-                }}
-              >
-                <span>
-                  {option}
-                  {isDisabledOption && disabledOptionHint ? ` (${disabledOptionHint})` : ""}
-                </span>
-                {tags.length > 0 ? (
-                  <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
-                    {tags.map((tag) => (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        size="small"
-                        sx={{
-                          color: "#c2410c",
-                          background: "rgba(244,124,32,0.12)",
-                          border: "1px solid rgba(244,124,32,0.35)",
-                          fontSize: "0.72rem",
-                        }}
-                      />
-                    ))}
-                  </Box>
-                ) : null}
-              </li>
-            );
-          }
+              const key = getKeyByValue(optionsMap, option);
+              const isDeemphasized = optionsHighlight ? !optionsHighlight.includes(key) : false;
+              const isDisabledOption = optionsDisabled ? optionsDisabled.includes(key) : false;
+              const tags =
+                optionTag && key != null ? [].concat(optionTag(key)).filter(Boolean) : [];
+              return (
+                <li
+                  {...props}
+                  style={{
+                    ...(isDeemphasized ? { opacity: 0.5 } : null),
+                    ...(tags.length > 0
+                      ? {
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: 8,
+                        }
+                      : null),
+                  }}
+                >
+                  <span>
+                    {option}
+                    {isDisabledOption && disabledOptionHint ? ` (${disabledOptionHint})` : ""}
+                  </span>
+                  {tags.length > 0 ? (
+                    <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
+                      {tags.map((tag) => (
+                        <Chip
+                          key={tag}
+                          label={tag}
+                          size="small"
+                          sx={{
+                            color: "#c2410c",
+                            background: "rgba(244,124,32,0.12)",
+                            border: "1px solid rgba(244,124,32,0.35)",
+                            fontSize: "0.72rem",
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  ) : null}
+                </li>
+              );
+            }
           : null
       }
     />
