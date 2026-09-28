@@ -1,19 +1,20 @@
-import Head from 'next/head'
-import '../styles/globals.css'
-import '../styles/q.css';
-import 'driver.js/dist/driver.css';
-import { ThemeModeProvider } from '../components/ThemeModeContext';
+import Head from "next/head";
+import "../styles/globals.css";
+import "../styles/q.css";
+import "driver.js/dist/driver.css";
+import { ThemeModeProvider } from "../components/ThemeModeContext";
+
 // import '../styles/reducedStyle.css'
 
 // Site-wide default metadata. Lives here (not _document) so it is emitted in the
 // server-rendered HTML that link crawlers (Discord, Slack, iMessage, Twitter, etc.)
 // read — they do not execute JS, so without these tags they show no preview.
 // Individual pages can override any of these with their own <Head>.
-const SITE_URL = 'https://redux.isu.edu'
-const SITE_NAME = 'Redux'
+const SITE_URL = "https://redux.isu.edu";
+const SITE_NAME = "Redux";
 const SITE_DESCRIPTION =
-  'Redux is an educational platform for exploring computational complexity — problems, reductions, and NP-completeness.'
-const OG_IMAGE = `${SITE_URL}/og-image.png` // TODO: add public/og-image.png (recommended 1200x630)
+  "Redux is an educational platform for exploring computational complexity — problems, reductions, and NP-completeness.";
+const OG_IMAGE = `${SITE_URL}/og-image.png`; // TODO: add public/og-image.png (recommended 1200x630)
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -41,7 +42,7 @@ function MyApp({ Component, pageProps }) {
         <Component {...pageProps} />
       </ThemeModeProvider>
     </>
-  )
+  );
 }
 
-export default MyApp
+export default MyApp;

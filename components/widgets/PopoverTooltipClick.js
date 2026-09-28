@@ -1,13 +1,7 @@
-import { useState } from 'react';
-import {
-  Box,
-  Divider,
-  Link,
-  Popover,
-  Typography,
-} from '@mui/material';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { Box, Divider, Link, Popover, Typography } from "@mui/material";
+import { useState } from "react";
 
 function PopoverTooltipClick({ toolTip = {} }) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -25,24 +19,20 @@ function PopoverTooltipClick({ toolTip = {} }) {
 
   return (
     <>
-      <InfoOutlinedIcon
-        onClick={handleClick}
-        style={{ cursor: 'pointer' }}
-        fontSize="medium"
-      />
+      <InfoOutlinedIcon onClick={handleClick} style={{ cursor: "pointer" }} fontSize="medium" />
 
       <Popover
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
         disableRestoreFocus
       >
         <Box sx={{ maxWidth: 520, p: 0 }}>
           {t.header && (
             <>
-              <Box sx={{ px: 2, py: 1, fontWeight: 700, bgcolor: 'grey.100' }}>
+              <Box sx={{ px: 2, py: 1, fontWeight: 700, bgcolor: "grey.100" }}>
                 <Typography variant="subtitle2" fontWeight={700}>
                   {t.header}
                 </Typography>
@@ -56,9 +46,9 @@ function PopoverTooltipClick({ toolTip = {} }) {
               <Typography
                 variant="body2"
                 sx={{
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                  fontSize: '0.85em',
-                  whiteSpace: 'pre-wrap',
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                  fontSize: "0.85em",
+                  whiteSpace: "pre-wrap",
                   mb: 1.5,
                 }}
               >
@@ -71,14 +61,17 @@ function PopoverTooltipClick({ toolTip = {} }) {
             ) : null}
 
             {t.info ? (
-              <Typography variant="body2" sx={{ mb: 1.5, whiteSpace: 'pre-wrap', lineHeight: 1.35 }}>
+              <Typography
+                variant="body2"
+                sx={{ mb: 1.5, whiteSpace: "pre-wrap", lineHeight: 1.35 }}
+              >
                 <strong>Definition:</strong> {t.info}
                 {t.componentLink && (
                   <Link
                     href={t.componentLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    sx={{ ml: 0.5, verticalAlign: 'middle' }}
+                    sx={{ ml: 0.5, verticalAlign: "middle" }}
                   >
                     <OpenInNewIcon fontSize="inherit" />
                   </Link>
@@ -104,7 +97,7 @@ function PopoverTooltipClick({ toolTip = {} }) {
                     href={t.sourceLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    sx={{ ml: 0.5, verticalAlign: 'middle' }}
+                    sx={{ ml: 0.5, verticalAlign: "middle" }}
                   >
                     <OpenInNewIcon fontSize="inherit" />
                   </Link>
