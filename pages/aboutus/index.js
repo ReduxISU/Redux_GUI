@@ -16,9 +16,15 @@ import {
 import { useEffect, useState } from "react";
 import isulogo from "../../components/images/ISULogo.png";
 import { requestContributorDirectory, requestContributorProfile } from "../../components/redux";
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
-import { pageBackground, sectionCardSx, innerCardSx, textColors, surfaceColors } from "../../components/theme";
 import { useThemeMode } from "../../components/ThemeModeContext";
+import {
+  innerCardSx,
+  pageBackground,
+  sectionCardSx,
+  surfaceColors,
+  textColors,
+} from "../../components/theme";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 const reduxBaseUrl = "/api/redux/";
 
@@ -253,20 +259,20 @@ function BioField({ value }) {
 }
 
 const REPO_STAT_FIELDS = [
-  { key: "commits", label: "commits" },
-  { key: "prsOpened", label: "PRs opened" },
-  { key: "prsMerged", label: "PRs merged" },
-  { key: "reviews", label: "reviews" },
+  { key: "commits", singular: "commit", plural: "commits" },
+  { key: "prsOpened", singular: "PR opened", plural: "PRs opened" },
+  { key: "prsMerged", singular: "PR merged", plural: "PRs merged" },
+  { key: "reviews", singular: "review", plural: "reviews" },
 ];
 
-// Renders as "100 commits · 14 PRs opened · 79 PRs merged · 31 reviews", dropping any
+// Renders as "100 commits · 14 PRs opened · 1 PR merged · 31 reviews", dropping any
 // field that's zero or missing -- most contributors only have partial data (see
 // ContributorRepoStats on the backend), especially for pre-PR-workflow-era work.
 function formatRepoStats(stats) {
   if (!stats) return [];
-  return REPO_STAT_FIELDS.map(({ key, label }) => {
+  return REPO_STAT_FIELDS.map(({ key, singular, plural }) => {
     const value = stats[key] ?? 0;
-    return value > 0 ? `${value} ${label}` : null;
+    return value > 0 ? `${value} ${value === 1 ? singular : plural}` : null;
   }).filter(Boolean);
 }
 
@@ -444,10 +450,9 @@ export default function AboutUsPage() {
               <Box component="span" sx={{ color: text.heading, fontWeight: 700 }}>
                 Redux
               </Box>
-              , a platform for NP-Complete problems. Input your challenges and
-              gain access to reductions, solutions, verifiers, and
-              visualizations. Join our community of problem solvers and unravel
-              computational complexities using the application library. The
+              , a platform for NP-Complete problems. Input your challenges and gain access to
+              reductions, solutions, verifiers, and visualizations. Join our community of problem
+              solvers and unravel computational complexities using the application library. The
               project was greatly inspired by Richard Karp&apos;s paper{" "}
               <Link
                 href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
@@ -481,13 +486,11 @@ export default function AboutUsPage() {
                   lineHeight: 1.7,
                 }}
               >
-                Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb
-                Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and
-                Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge
-                Base for Teaching NP-completeness. In Proceedings of the 2024
-                on Innovation and Technology in Computer Science Education V. 1
-                (ITiCSE 2024). Association for Computing Machinery, New York,
-                NY, USA, 255–261.{" "}
+                Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb Eardley, Russell Phillips,
+                Rajiv Khadka, Daniel Igbokwe, and Paul Bodily. 2024. Redux: An Interactive, Dynamic
+                Knowledge Base for Teaching NP-completeness. In Proceedings of the 2024 on
+                Innovation and Technology in Computer Science Education V. 1 (ITiCSE 2024).
+                Association for Computing Machinery, New York, NY, USA, 255–261.{" "}
                 <Link
                   href="https://dl.acm.org/doi/10.1145/3649217.3653544"
                   target="_blank"
@@ -856,10 +859,9 @@ export default function AboutUsPage() {
                 textAlign: "justify",
               }}
             >
-              Any opinions, findings, conclusions, or recommendations
-              expressed in this material are those of the author(s) and do not
-              necessarily reflect the views of the funding agencies who have
-              supported this work.
+              Any opinions, findings, conclusions, or recommendations expressed in this material are
+              those of the author(s) and do not necessarily reflect the views of the funding
+              agencies who have supported this work.
             </Typography>
           </Box>
 
