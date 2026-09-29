@@ -167,7 +167,7 @@ export default function ContributePage() {
               <iframe
                 width="100%"
                 height="420"
-                src="https://www.youtube.com/embed/9vTl522tyhU"
+                src="https://www.youtube-nocookie.com/embed/9vTl522tyhU"
                 title="Redux Setup Tutorial"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -322,15 +322,22 @@ export default function ContributePage() {
             <SectionTitle>PRIVACY POLICY</SectionTitle>
 
             <BodyText sx={{ fontStyle: "italic" }}>
-              Version 1.0 (Updated Tue, 22 Sep 2026).
+              Version 1.0 (Updated Tue, 29 Sep 2026).
             </BodyText>
 
             <BodyText>
               Redux does not collect anything about you. There are no user accounts and no way to
               log in, so there is nothing to sign up for and no password to lose. We do not use
-              Google Analytics or any other analytics, tracking, or advertising service, and the
-              site sets no cookies. There is no cookie-consent banner because there are no cookies
-              to consent to.
+              Google Analytics or any other analytics, tracking, or advertising service, and Redux
+              itself sets no cookies.
+            </BodyText>
+
+            <BodyText>
+              The one exception is the setup tutorial video on this page, which is embedded from
+              YouTube using its privacy-enhanced mode. Loading this page still contacts YouTube to
+              show the player, and if you play the video, YouTube (owned by Google) may set cookies
+              and collect data under Google&apos;s own privacy policy. Redux receives none of that
+              data.
             </BodyText>
 
             <BodyText>
