@@ -33,17 +33,18 @@ export default function TruncatedTextSection({
   const [expanded, setExpanded] = useState(false);
   const isTruncated = text.length > TEXT_PREVIEW_LENGTH;
 
-  if (expanded && text.length > TEXT_TOO_LARGE_TO_RENDER_LENGTH) {
-    return (
-      <Box sx={{ ...textWrapSx(), fontStyle: "italic", opacity: 0.75 }}>{tooLargeMessage}</Box>
-    );
-  }
-
+  // The too-large message still renders alongside the toggle below, so the visitor can
+  // always get back to the preview with "Show less".
+  const tooLargeToRender = expanded && text.length > TEXT_TOO_LARGE_TO_RENDER_LENGTH;
   const displayText = expanded || !isTruncated ? text : text.slice(0, TEXT_PREVIEW_LENGTH) + "…";
 
   return (
     <>
-      <Box sx={textWrapSx()}>{displayText}</Box>
+      {tooLargeToRender ? (
+        <Box sx={{ ...textWrapSx(), fontStyle: "italic", opacity: 0.75 }}>{tooLargeMessage}</Box>
+      ) : (
+        <Box sx={textWrapSx()}>{displayText}</Box>
+      )}
       {isTruncated && (
         <Button
           size="small"
