@@ -96,7 +96,11 @@ export default function VerifyRowReact({
               ? {
                   header: verifierInfo.verifierName ?? "",
                   // plain description only
-                  info: verifierInfo.info ?? verifierInfo.description ?? "",
+                  info:
+                    verifierInfo.verifierDefinition ||
+                    verifierInfo.info ||
+                    verifierInfo.description ||
+                    "",
                   input: verifierInfo.inputDescription ?? "",
                   output: verifierInfo.outputDescription ?? "",
                   // show source

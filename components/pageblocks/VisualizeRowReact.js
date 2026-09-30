@@ -274,7 +274,11 @@ export default function VisualizeRowReact({
   const tip = chosenVisualization
     ? {
         header: visualizationInfo.visualizationName ?? "",
-        info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+        info:
+          visualizationInfo.visualizationDefinition ||
+          visualizationInfo.info ||
+          visualizationInfo.description ||
+          "",
         input: visualizationInfo.inputDescription ?? "",
         output: visualizationInfo.outputDescription ?? "",
         classification: [

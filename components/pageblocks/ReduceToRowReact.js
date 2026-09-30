@@ -177,7 +177,11 @@ export default function ReduceToRowReact({
               ? {
                   header: reducerInfo.reductionName ?? "",
                   // plain description for the reduction
-                  info: reducerInfo.info ?? reducerInfo.description ?? "",
+                  info:
+                    reducerInfo.reductionDefinition ||
+                    reducerInfo.info ||
+                    reducerInfo.description ||
+                    "",
                   input: reducerInfo.inputDescription ?? "",
                   output: reducerInfo.outputDescription ?? "",
                   classification: [
