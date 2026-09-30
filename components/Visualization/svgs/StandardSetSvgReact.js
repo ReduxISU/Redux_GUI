@@ -1,21 +1,25 @@
 import * as d3 from "d3";
 import dynamic from "next/dynamic";
 import React, { useEffect, useRef } from "react";
+import { useThemeMode } from "../../ThemeModeContext";
+import { textColors } from "../../theme";
 import { getColorByKey } from "../constants/VisColorsArray";
 
 function StandardSetSvgReact(props) {
   const ref = useRef(null);
+  const { mode } = useThemeMode();
+  const textColor = textColors(mode).heading;
 
   useEffect(() => {
     try {
       if (props.problemData) {
         globalY = 100;
-        getSets(ref.current, props.problemData, props.gadgetMap, props.gadgetsOn);
+        getSets(ref.current, props.problemData, props.gadgetMap, props.gadgetsOn, textColor);
       }
     } catch (error) {
       console.log("VISUALIZATION FAILED", error);
     }
-  }, [props.problemData, props.gadgetMap, props.gadgetsOn]);
+  }, [props.problemData, props.gadgetMap, props.gadgetsOn, textColor]);
 
   return (
     <svg
@@ -30,7 +34,7 @@ function StandardSetSvgReact(props) {
   );
 }
 
-function getSets(ref, data, gadgetMap, gadgetsOn) {
+function getSets(ref, data, gadgetMap, gadgetsOn, textColor) {
   const margin = { top: 200, right: 30, bottom: 30, left: 200 },
     width = 700 - margin.left - margin.right,
     height = 700 - margin.top - margin.bottom;
@@ -46,7 +50,7 @@ function getSets(ref, data, gadgetMap, gadgetsOn) {
 
   let x = 20;
 
-  recursiveSets(data.data.list, svg, gadgetMap, gadgetsOn, x, width);
+  recursiveSets(data.data.list, svg, gadgetMap, gadgetsOn, x, width, textColor);
 
   d3.selectAll(".true")
     .attr("fill", getColorByKey("ElementHighlight"))
@@ -66,7 +70,7 @@ function asciiToHex(str) {
 
 let globalY = 100; // start Y
 
-function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, maxWidth) {
+function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, maxWidth, textColor) {
   for (let i = 0; i < sets.length; i++) {
     // Wrap line if needed
     if (x >= maxWidth - 50) {
@@ -86,6 +90,7 @@ function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, maxWidth) {
       sets[i].isOrdered,
       sets[i].isValue || false,
       sets[i].color,
+      textColor,
     );
 
     x = s.show(); // x after the set including its rectangle
@@ -100,6 +105,7 @@ function recursiveSets(sets, svg, gadgetMap, gadgetsOn, x, maxWidth) {
         .attr("text-anchor", "left")
         .attr("dominant-baseline", "middle")
         .attr("font-size", "15px")
+        .attr("fill", textColor)
         .text(",")
         .style("pointer-events", "none");
 
@@ -240,6 +246,7 @@ class CustomSet {
     isOrdered = false,
     isValue,
     color,
+    textColor,
   ) {
     this.className = "class" + asciiToHex(className);
     this.svg = svg;
@@ -253,10 +260,18 @@ class CustomSet {
     this.isOrdered = isOrdered;
     this.isValue = isValue;
     this.color = color;
+    this.textColor = textColor;
   }
 
   show(c = this.className) {
     let offsetX = this.x + this.size;
+
+    // A set of plain values gets a light Background box drawn behind it (see the end of
+    // show()), so its braces and commas stay the default black. A set that contains other
+    // sets gets no box, leaving its braces and commas on the page itself, so they need the
+    // theme's text color to stay visible in dark mode.
+    const hasNestedSets = this.elements.some((el) => !el.isValue && el.list);
+    const symbolFill = hasNestedSets ? this.textColor : null;
 
     this.svg
       .append("text")
@@ -265,15 +280,21 @@ class CustomSet {
       .attr("text-anchor", "left")
       .attr("dominant-baseline", "middle")
       .attr("font-size", this.size + "px")
+      .attr("fill", symbolFill)
       .text(!this.isValue ? (this.isOrdered ? "(" : "{") : "")
       .style("pointer-events", "none");
 
-    let hasNestedSets = false;
-
     this.elements.forEach((el, i) => {
       if (!el.isValue && el.list) {
-        hasNestedSets = true;
-        offsetX = recursiveSets([el], this.svg, this.gadgetMap, this.gadgetsOn, offsetX, 700);
+        offsetX = recursiveSets(
+          [el],
+          this.svg,
+          this.gadgetMap,
+          this.gadgetsOn,
+          offsetX,
+          700,
+          this.textColor,
+        );
         if (i < this.elements.length - 1) offsetX += 8;
       } else {
         const e = new element(
@@ -301,6 +322,7 @@ class CustomSet {
           .attr("text-anchor", "left")
           .attr("dominant-baseline", "middle")
           .attr("font-size", this.size + "px")
+          .attr("fill", symbolFill)
           .text(",")
           .style("pointer-events", "none");
         offsetX += this.size + gap;
@@ -316,6 +338,7 @@ class CustomSet {
       .attr("text-anchor", "left")
       .attr("dominant-baseline", "middle")
       .attr("font-size", this.size + "px")
+      .attr("fill", symbolFill)
       .text(!this.isValue ? (this.isOrdered ? ")" : "}") : "")
       .style("pointer-events", "none");
 

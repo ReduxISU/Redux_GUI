@@ -6,8 +6,12 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
+import { useThemeMode } from "../../ThemeModeContext";
+import { textColors } from "../../theme";
 
 export function No_Viz_Svg({ niceProblemName }) {
+  const { mode } = useThemeMode();
+  const textColor = textColors(mode).heading;
   return (
     <Box>
       <Card
@@ -27,7 +31,7 @@ export function No_Viz_Svg({ niceProblemName }) {
         <Typography
           variant="h4"
           component="h4"
-          style={{ color: "black", fontWeight: "normal", textAlign: "center" }}
+          style={{ color: textColor, fontWeight: "normal", textAlign: "center" }}
         >
           The {niceProblemName} visualization has not been implemented yet
         </Typography>
@@ -37,6 +41,8 @@ export function No_Viz_Svg({ niceProblemName }) {
 }
 
 export function No_Reduction_Viz_Svg({ niceReductionName }) {
+  const { mode } = useThemeMode();
+  const textColor = textColors(mode).heading;
   return (
     <Box>
       <Card
@@ -54,7 +60,7 @@ export function No_Reduction_Viz_Svg({ niceReductionName }) {
           variant="h4"
           component="h4"
           style={{
-            color: "black",
+            color: textColor,
             fontWeight: "normal",
             textAlign: "center",
           }}
@@ -73,6 +79,8 @@ export function No_Reduction_Viz_Svg({ niceReductionName }) {
  * / `niceReductionName` are shown as extra context when available.
  */
 export function No_Renderable_Viz_Svg({ niceProblemName, niceReductionName, visualizationType }) {
+  const { mode } = useThemeMode();
+  const textColor = textColors(mode).heading;
   const contextName = niceReductionName ?? niceProblemName;
   return (
     <Box>
@@ -91,7 +99,7 @@ export function No_Renderable_Viz_Svg({ niceProblemName, niceReductionName, visu
           variant="h4"
           component="h4"
           style={{
-            color: "black",
+            color: textColor,
             fontWeight: "normal",
             textAlign: "center",
           }}
@@ -111,6 +119,8 @@ export function No_Renderable_Viz_Svg({ niceProblemName, niceReductionName, visu
  * bugs behind a missing-feature message.
  */
 export function Viz_Render_Error_Svg({ niceProblemName, niceReductionName, visualizationType }) {
+  const { mode } = useThemeMode();
+  const textColor = textColors(mode).heading;
   const contextName = niceReductionName ?? niceProblemName;
   return (
     <Box>
@@ -129,7 +139,7 @@ export function Viz_Render_Error_Svg({ niceProblemName, niceReductionName, visua
           variant="h4"
           component="h4"
           style={{
-            color: "black",
+            color: textColor,
             fontWeight: "normal",
             textAlign: "center",
           }}
