@@ -51,6 +51,7 @@ export default function SolveRowReact({
   setSolvedInstance,
   solverOptions,
   solverNameMap,
+  solverTypeMap,
   problemNameMap,
   chosenReduceTo,
   dragHandleProps,
@@ -115,6 +116,10 @@ export default function SolveRowReact({
           onSelect={setChosenSolver}
           options={solverOptions}
           optionsMap={solverNameMap}
+          optionTag={(key) => ({
+            label: solverTypeLabel(solverTypeMap?.get(key) || "Unclassified"),
+            kind: "solverType",
+          })}
           disabled={!problemName}
           disabledMessage={"No solvers available. Please select a problem."}
           extenderButtons={(input) => {

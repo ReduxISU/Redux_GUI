@@ -21,6 +21,7 @@ import {
   COMPLEXITY_CLASS_ORDER,
   complexityClassLabel,
 } from "../hooks/ProblemFilters/complexityClassOrder";
+import { problemTypeLabel } from "../hooks/ProblemFilters/problemTypeOrder";
 import { useProblemFilters } from "../hooks/ProblemFilters/useProblemFilters";
 import { useProblemIndex } from "../hooks/ProblemFilters/useProblemIndex";
 import { useProblemInfo } from "../hooks/ProblemProvider";
@@ -50,27 +51,11 @@ const DEFAULT_INSTANCE_PARSED = {
   exampleStr: "",
 };
 
-// Display order for the dropdown's complexity-class sections -- see
-// complexityClassOrder.js for the reasoning. Note SearchBarExtensible's groupOrder
-// lookup resolves a value not in this list to sort index -1, i.e. the *top*, not
-// the bottom -- so every declared value must be in COMPLEXITY_CLASS_ORDER, not just
-// the ones currently in use, or a future problem taking on an unlisted class would
-// jump above P.
-
-// Display labels for the dropdown's complexity-class section headers -- the raw
-// enum values above have no hyphen/spacing ("NPComplete"), but the header should
-// read using standard notation ("NP-Complete").
-const COMPLEXITY_CLASS_LABELS = {
-  P: "P",
-  NPComplete: "NP-Complete",
-  NPHard: "NP-Hard",
-  NPIntermediate: "NP-Intermediate",
-  QuantumOracle: "Quantum Oracle",
-  Unclassified: "Unclassified",
-};
-function complexityClassGroupLabel(complexityClass) {
-  return COMPLEXITY_CLASS_LABELS[complexityClass] ?? complexityClass;
-}
+// Sort order for the dropdown's options -- see complexityClassOrder.js for the
+// reasoning. Note SearchBarExtensible's groupOrder lookup resolves a value not in
+// this list to sort index -1, i.e. the *top*, not the bottom -- so every declared
+// value must be in COMPLEXITY_CLASS_ORDER, not just the ones currently in use, or a
+// future problem taking on an unlisted class would jump above P.
 
 /**
  *  Creates an accordion that has a nested autocomplete search bar, as well as an editable problem instance textbox
@@ -221,7 +206,22 @@ export default function ProblemRowReact({
           optionsMap={problemNameMap}
           groupBy={(key) => problemIndex.get(key)?.complexityClass || "Unclassified"}
           groupOrder={COMPLEXITY_CLASS_ORDER}
-          groupLabel={complexityClassGroupLabel}
+          optionTag={(key) => [
+            {
+              label: complexityClassLabel(problemIndex.get(key)?.complexityClass || "Unclassified"),
+              kind: "complexityClass",
+            },
+            {
+              label: problemTypeLabel(problemIndex.get(key)?.problemType || "Unclassified"),
+              kind: "problemType",
+            },
+          ]}
+          optionSearchText={(key) => {
+            const tags = problemIndex.get(key);
+            if (!tags) return "";
+            const solverTypes = tags.solverTypes ? [...tags.solverTypes].join(" ") : "";
+            return `${complexityClassLabel(tags.complexityClass || "Unclassified")} ${tags.problemType ?? ""} ${solverTypes}`;
+          }}
           extenderButtons={(input) => [
             {
               label: `Add new problem "${input}"`,
