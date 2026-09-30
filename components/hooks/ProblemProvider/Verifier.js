@@ -1,12 +1,16 @@
+import React, { useEffect, useState } from "react";
+import { requestAllInfo, requestAllVerifiers } from "../../redux";
 import { useGenericInfo } from "../ProblemProvider";
-import { requestAllVerifiers, requestAllInfo } from "../../redux";
-import React, { useEffect, useState, useRef } from "react";
+import { useWhenChanged } from "../useWhenChanged";
 
 export function useVerifier(url, problemName, problemNameMap, problemInfoMap) {
   const state = {};
   [state.defaultVerifierMap] = useDefaultVerifierMap(url, problemInfoMap);
   [state.verifierOptions] = useVerifierOptions(url, problemName);
-  [state.chosenVerifier, state.setChosenVerifier] = useChosenVerifier(problemName, state.defaultVerifierMap);
+  [state.chosenVerifier, state.setChosenVerifier] = useChosenVerifier(
+    problemName,
+    state.defaultVerifierMap,
+  );
   [state.verifierNameMap] = useVerifierNameMap(url, problemNameMap);
   return state;
 }
@@ -66,26 +70,11 @@ function useVerifierOptions(url, problemName) {
 
 function useChosenVerifier(problemName, defaultVerifierMap) {
   const [chosenVerifier, setChosenVerifier] = useState("");
-  const isFirstRender = useRef(true);
 
-  useEffect(() => {
+  useWhenChanged([problemName, defaultVerifierMap], () => {
     if (!problemName || defaultVerifierMap.size === 0) return;
-
-    let verifierVar = !problemName ? "" : defaultVerifierMap.get(problemName);
-    const storedData = null;
-
-    if (isFirstRender.current) {
-      // First render: read from localStorage
-      if (storedData) {
-        const allData = JSON.parse(storedData);
-        verifierVar = allData.verifier;
-
-      }
-      isFirstRender.current = false;
-    }
-
-    setChosenVerifier(verifierVar);
-  }, [problemName, defaultVerifierMap]);
+    setChosenVerifier(defaultVerifierMap.get(problemName));
+  });
 
   return [chosenVerifier, setChosenVerifier];
 }

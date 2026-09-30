@@ -1,186 +1,115 @@
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  Avatar,
+  Box,
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Link,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import isulogo from "../../components/images/ISULogo.png";
+import { requestContributorDirectory, requestContributorProfile } from "../../components/redux";
+import { useThemeMode } from "../../components/ThemeModeContext";
+import {
+  innerCardSx,
+  pageBackground,
+  sectionCardSx,
+  surfaceColors,
+  textColors,
+} from "../../components/theme";
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
+const reduxBaseUrl = "/api/redux/";
 
-//UI Components
-import {
-  createTheme,
-  ThemeProvider,
-  Container,
-  Box,
-  Typography,
-  Link,
-  Grid,
-  Avatar,
-  Tooltip,
-  CssBaseline,
-} from "@mui/material";
-import isulogo from "../../components/images/ISULogo.png"; //Used for ISU logo at the bottom
-
-
-
-
-//Global Styling
-const theme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: { main: "#8b5cf6" },
-    secondary: { main: "#a855f7" },
-    background: {
-      default: "#07070b",
-      paper: "rgba(255,255,255,0.04)",
-    },
-    text: {
-      primary: "#ffffff",
-      secondary: "#b4b4c7",
-    },
-  },
-  typography: {
-    fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  },
-});
-
-
-//List of research papers
 const publications = [
   {
-    authors: "R. Phillips and P. M. Bodily",
-    title:
-      "Spade: A library for programmatic parsing and verification of discrete data structures",
-    venue:
-      "2025 Intermountain Engineering, Technology and Computing (IETC), pp. 1–5, IEEE, 2025",
-    pdfUrl:
-      "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11039449",
+    citation:
+      "P. M. Bodily, “LLMs, Computational Theory, and Redux: New Directions for CC in Computational Complexity,” in Proceedings of the Workshop on Theoretical CS and Computational Creativity, 2026.",
+    url: "https://computationalcreativity.net/workshops/theorycs-cc-iccc26/",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/bodily_cc_in_computational_complexity.pdf",
   },
   {
-    authors:
-      "K. Marchetti, A. Sevaljevic, A. Diviney, R. Phillips, C. Eardley, R. Khadka, D. Igbokwe, and P. M. Bodily",
-    title:
-      "Redux: An interactive, dynamic knowledge base for teaching NP-completeness",
-    venue:
-      "Proceedings of the 29th annual ACM conference on Innovation and Technology in Computer Science Education (ITiCSE), 2024",
-    pdfUrl: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2206",
+    citation:
+      "R. Phillips and P. M. Bodily. 2025. SPADE: A library for programmatic parsing and verification of discrete data structures. In 2025 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/11039449",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/SPADE.pdf",
   },
   {
-    authors: "A. Sevaljevic and P. M. Bodily",
-    title:
-      "Comparative empirical analysis of dancing links implementations to solve the exact cover problem",
-    venue:
-      "Proceedings of the 4th Intermountain Engineering, Technology, and Computing Conference (i-ETC), pp. 255–258, IEEE, 2024",
-    pdfUrl: "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10564396",
+    citation:
+      "A. Sevaljevic and P. M. Bodily. 2024. Comparative empirical analysis of dancing links implementations to solve the exact cover problem. In 2024 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 255–258.",
+    doi: "https://ieeexplore.ieee.org/document/10564396",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/IETC_2024_submission_dancing_links.pdf",
   },
   {
-    authors: "K. Marchetti and P. Bodily",
-    title: "Visualizing the 3SAT to CLIQUE Reduction Process",
-    venue:
-      "2022 Intermountain Engineering, Technology and Computing (IETC), Orem, UT, USA, 2022, pp. 1-5",
-    pdfUrl:
-      "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9796851",
+    citation:
+      "Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb Eardley, Russell Phillips, Rajiv Khadka, Daniel Igbokwe, and Paul Bodily. 2024. Redux: An Interactive, Dynamic Knowledge Base for Teaching NP-completeness. In Proceedings of the 2024 on Innovation and Technology in Computer Science Education V. 1 (ITiCSE 2024). Association for Computing Machinery, New York, NY, USA, 255–261.",
+    doi: "https://dl.acm.org/doi/10.1145/3649217.3653544",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/ITiSCE_Redux_Submission_2024_WIP.pdf",
   },
   {
-    authors: "K. Marchetti and P. Bodily",
-    title:
-      "KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems",
-    venue:
-      "2022 Intermountain Engineering, Technology and Computing (IETC), Orem, UT, USA, 2022, pp. 1-4",
-    pdfUrl: "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796945",
+    citation:
+      "K. Marchetti and P. Bodily. 2022. KAMI: Leveraging the power of crowd-sourcing to solve complex, real-world problems. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–4. Best Student Paper Award.",
+    doi: "https://ieeexplore.ieee.org/document/9796945",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/KAMI_Leveraging_Open_Source_to_Solve_Complex_Problems.pdf",
+  },
+  {
+    citation:
+      "K. Marchetti and P. Bodily. 2022. Visualizing the 3SAT to CLIQUE Reduction Process. In 2022 Intermountain Engineering, Technology and Computing Conference (IETC), Orem, UT, USA, pp. 1–5.",
+    doi: "https://ieeexplore.ieee.org/document/9796851",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/Visualizing_the_3SAT_to_CLIQUE_Reduction.pdf",
+  },
+  {
+    citation:
+      "P. M. Bodily and D. Ventura, “Open computational creativity problems in computational theory,” in Proceedings of the 13th International Conference on Computational Creativity (ICCC), 2022.",
+    url: "https://computationalcreativity.net/iccc22/accepted-papers/",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/ICCC-2022_17L_Bodily-and-Ventura.pdf",
   },
 ];
 
-
-
-
-//The only contributors whose github profiles are found along with its avatar and link
-const contributorProfiles = {
-  "Pratham Khanal": {
-    image: "https://github.com/pkprathamkhanal.png",
-    github: "https://github.com/pkprathamkhanal",
-  },
-  "Sansar Kharal": {
-    image: "https://github.com/kharsans.png",
-    github: "https://github.com/kharsans",
-  },
-  "Himanshu Jha": {
-    image: "https://github.com/himanshujha05.png",
-    github: "https://github.com/himanshujha05",
-  },
-  "Andrija Sevaljevic": {
-    image: "https://github.com/Andrija-Sevaljevic.png",
-    github: "https://github.com/Andrija-Sevaljevic",
-  },
-  "Jason Wright": {
-    image: "https://github.com/wrigjl.png",
-    github: "https://github.com/wrigjl",
-  },
-  "Daniel Igbokwe": {
-    image: "https://github.com/igbodani.png",
-    github: "https://github.com/igbodani",
-  },
-  "Sabal Subedi": {
-    image: "https://github.com/sabal_subedi.png",
-    github: "https://github.com/sabal_subedi",
-  },
-  "Alex Svancara": {
-    image: "https://github.com/svanalex.png",
-    github: "https://github.com/svanalex",
-  },
-};
-
-
-
-
-//Other links sections at the bottom
-const learnMoreHyperlink = [
-  { label: "Github", url: "https://github.com/ReduxISU/" },
+const awards = [
   {
-    label: "Wikipedia: What is NP-Complete?",
-    url: "https://en.wikipedia.org/wiki/NP-completeness",
+    citation:
+      "Best Graduate Poster Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
+    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
   },
   {
-    label: "Karp&apos;s 21 NP-Complete Problems",
-    url: "https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf",
-  },
-  {
-    label: "Redux GUI Documentation",
-    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
-  },
-  {
-    label: "Redux Backend Documentation",
-    url: "https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md",
-  },
-  {
-    label: "API Swagger Documentation",
-    url: "https://api.redux.portneuf.cose.isu.edu/swagger/index.html",
+    citation:
+      "Best Graduate Oral Presentation in Education, Learning & Training, Andrija Sevaljevic, 2026 ISU Research and Creative Works Symposium.",
+    url: "https://myemail.constantcontact.com/What-s-Happening-in-CoSE.html?soid=1138359982044&aid=HHJEZevfPfU",
   },
 ];
 
-
-
-//It controls all the sections of About, Publications and Contributors
-const theSectionCard = {
-  background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(10px)",
-  borderRadius: "16px",
-  border: "1px solid rgba(255,255,255,0.10)",
-  padding: { xs: 3, md: 4 },
-  transition: "all 0.3s ease",
-  "&:hover": {
-    borderColor: "rgba(168,85,247,0.4)",
-    boxShadow: "0 0 25px rgba(168,85,247,0.15)",
+const thesisAndDissertations = [
+  {
+    citation:
+      "Andrija Sevaljevic, M.S. Thesis, Idaho State University, 2026, “Redux: Design and Implementation of a Reusable Web-Based Visualization System for Algorithmic and Logical Problem Solving”",
+    url: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2565",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/andrija_thesis.pdf",
   },
-};
+  {
+    citation:
+      "Kaden Marchetti, M.S. Thesis, Idaho State University, 2023, “Redux: An Interactive, Dynamic Tool for Learning NP-completeness and Mapping Reductions”",
+    url: "https://etd.iri.isu.edu/ViewSpecimen.aspx?ID=2206",
+    pdf: "https://portneuf.cose.isu.edu/research/publications/kaden_thesis.pdf",
+  },
+];
 
-
-
-
-//For the reusable title sections 
 function TitleSection({ children }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
   return (
     <Typography
       sx={{
-        color: "#ffffff", //color of the font, plain whiwte in general
-        fontSize: "0.85rem", //font size
-        fontWeight: 600,
+        color: text.heading,
+        fontSize: "0.85rem",
+        fontWeight: 700,
         letterSpacing: "0.22em",
         mb: 2,
       }}
@@ -190,16 +119,26 @@ function TitleSection({ children }) {
   );
 }
 
+function getLastName(name) {
+  return name.split(" ").slice(-1)[0].toLowerCase();
+}
 
-function ItemContributor({ name }) {
-  const profile = contributorProfiles[name];
+function ItemContributor({ name, profile, onSelect }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  const surface = surfaceColors(mode);
   if (!profile) {
     return (
       <Typography
+        onClick={() => onSelect(name)}
         sx={{
-          color: "#e5e7eb",
-          fontSize: "0.8rem",
-          lineHeight: 0.89,
+          color: text.body,
+          fontSize: "0.9rem",
+          lineHeight: 1.35,
+          cursor: "pointer",
+          "&:hover": {
+            color: "#F47C20",
+          },
         }}
       >
         {name}
@@ -210,30 +149,14 @@ function ItemContributor({ name }) {
     <Tooltip
       arrow
       placement="right"
-      slotProps={{
-        popper: {
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, 6],
-              },
-            },
-          ],
-        },
-      }}
       title={
         <Box sx={{ p: 1, minWidth: 190 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
-            <Avatar
-              src={profile.image}
-              alt={name}
-              sx={{ width: 50, height: 50 }}
-            />
+            <Avatar src={profile.image} alt={name} sx={{ width: 50, height: 50 }} />
             <Box>
               <Typography
                 sx={{
-                  color: "#ffffff",
+                  color: text.heading,
                   fontWeight: 600,
                   fontSize: "0.92rem",
                 }}
@@ -242,7 +165,7 @@ function ItemContributor({ name }) {
               </Typography>
               <Typography
                 sx={{
-                  color: "#cbd5e1",
+                  color: text.caption,
                   fontSize: "0.78rem",
                 }}
               >
@@ -257,13 +180,13 @@ function ItemContributor({ name }) {
             rel="noopener noreferrer"
             underline="hover"
             sx={{
-              color: "#e9d5ff",
+              color: "#F47C20",
               fontSize: "0.9rem",
               fontWeight: 500,
               display: "inline-block",
               mt: 0.25,
               "&:hover": {
-                color: "#c084fc",
+                color: "#d9670f",
               },
             }}
           >
@@ -272,12 +195,22 @@ function ItemContributor({ name }) {
         </Box>
       }
       slotProps={{
+        popper: {
+          modifiers: [
+            {
+              name: "offset",
+              options: {
+                offset: [0, 6],
+              },
+            },
+          ],
+        },
         tooltip: {
           sx: {
-            bgcolor: "#111118",
-            border: "1px solid rgba(168,85,247,0.35)",
+            bgcolor: surface.surface,
+            border: `1px solid ${surface.border}`,
             borderRadius: "12px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
             padding: "10px 12px",
           },
         },
@@ -285,14 +218,15 @@ function ItemContributor({ name }) {
     >
       <Box
         component="span"
+        onClick={() => onSelect(name)}
         sx={{
-          color: "#e5e7eb",
+          color: text.body,
           fontSize: "0.9rem",
           lineHeight: 1.35,
           cursor: "pointer",
           width: "100%",
           "&:hover": {
-            color: "#d8b4fe",
+            color: "#F47C20",
           },
         }}
       >
@@ -302,254 +236,819 @@ function ItemContributor({ name }) {
   );
 }
 
-
-//Default function
-export default function AboutUsPage() {
+// Only renders when there's an actual value -- avoids "Not specified" clutter for
+// fields (bio, education, ...) a contributor hasn't filled in.
+function ProfileField({ label, value }) {
+  if (!value || value === "Not specified") return null;
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box
-        sx={{
-          minHeight: "100vh",
-          background:
-            "radial-gradient(circle at top, rgba(139,92,246,0.16), transparent 32%), linear-gradient(180deg, #09090f 0%, #07070b 100%)",
-        }}
-      >
-        <ResponsiveAppBar />
+    <Typography sx={{ mb: 0.5 }}>
+      <Box component="span" sx={{ fontWeight: 600 }}>
+        {label}:
+      </Box>{" "}
+      {value}
+    </Typography>
+  );
+}
 
+// Renders as a plain description of what the contributor has accomplished, not a
+// labeled "Bio:" field -- their bio is written in prose already, so a bold label in
+// front of it read like metadata rather than the description it actually is.
+function BioField({ value }) {
+  if (!value || value === "Not specified") return null;
+  return <Typography sx={{ mb: 1 }}>{value}</Typography>;
+}
 
-        <Container maxWidth="lg" sx={{ pt: 2 }}>
-          <Box sx={{ maxWidth: "900px", mx: "auto" }}>
-            <Box id="about" sx={{ ...theSectionCard, mb: 1.5 }}>
-              <TitleSection>ABOUT US</TitleSection>
+const REPO_STAT_FIELDS = [
+  { key: "commits", singular: "commit", plural: "commits" },
+  { key: "prsOpened", singular: "PR opened", plural: "PRs opened" },
+  { key: "prsMerged", singular: "PR merged", plural: "PRs merged" },
+  { key: "reviews", singular: "review", plural: "reviews" },
+];
+
+// Renders as "100 commits · 14 PRs opened · 1 PR merged · 31 reviews", dropping any
+// field that's zero or missing -- most contributors only have partial data (see
+// ContributorRepoStats on the backend), especially for pre-PR-workflow-era work.
+function formatRepoStats(stats) {
+  if (!stats) return [];
+  return REPO_STAT_FIELDS.map(({ key, singular, plural }) => {
+    const value = stats[key] ?? 0;
+    return value > 0 ? `${value} ${value === 1 ? singular : plural}` : null;
+  }).filter(Boolean);
+}
+
+// Whole section (including its own header) collapses to nothing when neither repo has
+// any non-zero stats -- covers contributors predating the stats sync as well as stub
+// entries auto-detected from a new GitHub identity that haven't been backfilled yet.
+function GithubActivitySection({ reduxStats, reduxGuiStats }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+
+  const rows = [
+    { label: "Redux", parts: formatRepoStats(reduxStats) },
+    { label: "Redux GUI", parts: formatRepoStats(reduxGuiStats) },
+  ].filter(({ parts }) => parts.length > 0);
+
+  if (rows.length === 0) return null;
+
+  return (
+    <>
+      <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1, mt: 2 }}>
+        GitHub Activity
+      </Typography>
+      {rows.map(({ label, parts }) => (
+        <Typography key={label} sx={{ mb: 0.5 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            {label}:
+          </Box>{" "}
+          {parts.join(" · ")}
+        </Typography>
+      ))}
+    </>
+  );
+}
+
+function ContributionList({ label, items }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  if (!items || items.length === 0) return null;
+  return (
+    <Box sx={{ mb: 1.5 }}>
+      <Typography sx={{ color: text.heading, fontSize: "0.87rem" }}>
+        <Box component="span" sx={{ fontWeight: 600 }}>
+          {label}:
+        </Box>{" "}
+        {items.length}
+      </Typography>
+      <Box component="ul" sx={{ m: 0, pl: 3, color: text.caption, fontSize: "0.82rem" }}>
+        {items.map((item) => (
+          <Box component="li" key={item}>
+            {item}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+// Unlike ContributionList, these are full freeform sentences (not short names to
+// count) describing real historical work with no live class left to verify against
+// -- e.g. a problem that was later deleted from the codebase. Rendered separately
+// and captioned so it doesn't read as equivalent to the code-verified categories above.
+function LegacyContributionsList({ items }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  if (!items || items.length === 0) return null;
+  return (
+    <Box sx={{ mt: 1.5 }}>
+      <Typography sx={{ color: text.heading, fontSize: "0.87rem", fontWeight: 600 }}>
+        Past Contributions
+      </Typography>
+      <Typography sx={{ color: text.caption, fontSize: "0.78rem", mb: 0.5 }}>
+        Historical work no longer reflected in the current codebase.
+      </Typography>
+      <Box component="ul" sx={{ m: 0, pl: 3, color: text.caption, fontSize: "0.82rem" }}>
+        {items.map((item) => (
+          <Box component="li" key={item}>
+            {item}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+export default function AboutUsPage() {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  const surface = surfaceColors(mode);
+  const theSectionCard = sectionCardSx(mode);
+  const innerCard = innerCardSx(mode);
+
+  const [contributors, setContributors] = useState([]);
+  const [contributorProfiles, setContributorProfiles] = useState({});
+  const [contributorsLoading, setContributorsLoading] = useState(true);
+
+  const [selectedContributor, setSelectedContributor] = useState(null);
+  const [profileData, setProfileData] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    requestContributorDirectory(reduxBaseUrl).then((entries) => {
+      if (cancelled) return;
+      setContributorsLoading(false);
+      if (!entries) return;
+
+      const names = [];
+      const profiles = {};
+      for (const entry of entries) {
+        const name = entry.name ?? entry.Name;
+        const githubUsername = entry.githubUsername ?? entry.GithubUsername;
+        if (!name) continue;
+
+        names.push(name);
+        if (githubUsername) {
+          profiles[name] = {
+            image: `https://github.com/${githubUsername}.png`,
+            github: `https://github.com/${githubUsername}`,
+          };
+        }
+      }
+      setContributors(names);
+      setContributorProfiles(profiles);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleContributorClick = (name) => {
+    setSelectedContributor(name);
+    setProfileData(null);
+    setProfileLoading(true);
+    setModalOpen(true);
+
+    requestContributorProfile(reduxBaseUrl, name).then((data) => {
+      setProfileData(data ?? null);
+      setProfileLoading(false);
+    });
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedContributor(null);
+    setProfileData(null);
+    setProfileLoading(false);
+  };
+
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: pageBackground(mode),
+      }}
+    >
+      <ResponsiveAppBar />
+
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 5 }}>
+        <Box sx={{ maxWidth: "980px", mx: "auto" }}>
+          <Box id="about" sx={{ ...theSectionCard, mb: 1.5 }}>
+            <TitleSection>ABOUT US</TitleSection>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                lineHeight: 1.9,
+                textAlign: "justify",
+              }}
+            >
+              Welcome to{" "}
+              <Box component="span" sx={{ color: text.heading, fontWeight: 700 }}>
+                Redux
+              </Box>
+              , a platform for NP-Complete problems. Input your challenges and gain access to
+              reductions, solutions, verifiers, and visualizations. Join our community of problem
+              solvers and unravel computational complexities using the application library. The
+              project was greatly inspired by Richard Karp&apos;s paper{" "}
+              <Link
+                href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="hover"
+                sx={{ color: "#F47C20", fontWeight: 600 }}
+              >
+                &quot;Reducibility Among Combinatorial Problems&quot;
+              </Link>{" "}
+              (Karp, 1972).
+            </Typography>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                lineHeight: 1.8,
+                mt: 2,
+                textAlign: "justify",
+              }}
+            >
+              When citing Redux, please use the following citation:
+            </Typography>
+
+            <Box sx={{ ...innerCard, mt: 1.2 }}>
               <Typography
                 sx={{
-                  color: "#d1d5db",
-                  fontSize: "0.87rem",
-                  lineHeight: 1.9,
-                  textAlign: "justify"
+                  color: text.body,
+                  fontSize: "0.82rem",
+                  lineHeight: 1.7,
                 }}
               >
-                Welcome to <Box component="span" sx={{ color: "#fff", fontWeight: 500 }}>Redux</Box>, a
-                platform for NP-Complete problems. Input your challenges and gain access to
-                reductions, solutions, verifiers, and visualizations. Join our community of
-                problem solvers and unravel computational complexities using the application
-                library. The project was greatly inspired by Richard Karp&apos;s paper{" "}
+                Kaden Marchetti, Andrija Sevaljevic, Alex Diviney, Caleb Eardley, Russell Phillips,
+                Rajiv Khadka, Daniel Igbokwe, and Paul Bodily. 2024. Redux: An Interactive, Dynamic
+                Knowledge Base for Teaching NP-completeness. In Proceedings of the 2024 on
+                Innovation and Technology in Computer Science Education V. 1 (ITiCSE 2024).
+                Association for Computing Machinery, New York, NY, USA, 255–261.{" "}
                 <Link
-                  href="https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9"
+                  href="https://dl.acm.org/doi/10.1145/3649217.3653544"
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="hover"
-                  sx={{ color: "#c084fc" }}
+                  sx={{ color: "#F47C20", fontWeight: 600, ml: 0.4 }}
                 >
-                  &quot;Reducibility Among Combinatorial Problems&quot;
-                </Link>{" "}
-                (Karp, 1972).
+                  [DOI]
+                </Link>
+                <Link
+                  href="https://portneuf.cose.isu.edu/research/publications/ITiSCE_Redux_Submission_2024_WIP.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  underline="hover"
+                  sx={{ color: "#F47C20", fontWeight: 600, ml: 0.4 }}
+                >
+                  [PDF]
+                </Link>
               </Typography>
-            </Box>
-
-            <Box sx={{ ...theSectionCard, mb: 1.5 }}>
-              <TitleSection>PUBLICATIONS</TitleSection>
-              <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 3 }}>
-                Below are research publications associated with the Redux project and its contributors.
-              </Typography>
-
-              <Box sx={{ display: "grid", gap: .5 }}>
-                {publications.map((pub, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      color: "#d1d5db",
-                      fontSize: "0.8rem",
-                      lineHeight: 1.8,
-                      borderRadius: "12px",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      background: "rgba(255,255,255,0.02)",
-                      p: 2,
-                      "&:hover": {
-                        borderColor: "rgba(168,85,247,0.3)",
-                        background: "rgba(255,255,255,0.04)",
-                      },
-                    }}
-                  >
-                    <Box component="span" sx={{ color: "#9ca3af" }}>{pub.authors}, </Box>
-                    <Box component="span" sx={{ color: "#fff" }}>&quot;{pub.title},&quot; </Box>
-                    <Box component="span" sx={{ color: "#6b7280", fontStyle: "italic" }}>
-                      {pub.venue}.
-                    </Box>{" "}
-                    <Link
-                      href={pub.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      underline="hover"
-                      sx={{ color: "#c084fc" }}
-                    >
-                      [PDF]
-                    </Link>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-
-            <Box sx={{ ...theSectionCard, mb: 1 }}>
-  <TitleSection>CONTRIBUTORS</TitleSection>
-
-  <Typography
-    sx={{
-      color: "#d1d5db",
-      fontSize: "0.87rem",
-      lineHeight: 1.8,
-      mb: 2,
-    }}
-  >
-    This project was started by{" "}
-    <Link
-      href="https://www2.cose.isu.edu/~bodipaul/index.php"
-      target="_blank"
-      rel="noopener noreferrer"
-      underline="hover"
-      sx={{ color: "#a78bfa" }}
-    >
-      Dr. Paul Bodily
-    </Link>
-    , who is also the ISU Faculty Sponsor of the project.
-  </Typography>
-
-  <Typography
-    sx={{
-      color: "#9ca3af",
-      fontSize: "0.87rem",
-      mb: 2,
-    }}
-  >
-    Project contributors
-  </Typography>
-
-  <Grid container spacing={1.5}>
-    {[
-      "Kaden Marchetti",
-      "Caleb Eardley",
-      "Daniel Igbokwe",
-      "Alex Diviney",
-      "Janita Aamir",
-      "Andrija Sevaljevic",
-      "Garret Stouffer",
-      "Alex Svancara",
-      "Eric Hill",
-      "Porter Glines",
-      "Show Pratoomratana",
-      "Russell Phillips",
-      "Michael Crapse",
-      "Ian Gonzalez",
-      "Sabal Subedi",
-      "Himanshu Jha",
-      "Max Grünwoldt",
-      "Paul Gilbreath",
-      "Sansar Kharal",
-      "Pratham Khanal",
-      "George Lake",
-      "Grant Gardner",
-      "Jason Wright",
-      "Andreas Kramer",
-      "Courtney Bodily",
-      "Rakesh Itani",
-      "David Lindeman",
-    ].map((name) => (
-      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={name}>
-        <Box
-          sx={{
-            border: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(255,255,255,0.02)",
-            borderRadius: "10px",
-            px: 1.4,
-            py: 0.6,
-            minHeight: "30px",
-            display: "flex",
-            alignItems: "center",
-            transition: "all 0.2s ease",
-            "&:hover": {
-              borderColor: "rgba(168,85,247,0.28)",
-              background: "rgba(255,255,255,0.04)",
-            },
-          }}
-        >
-          <ItemContributor name={name} />
-        </Box>
-      </Grid>
-    ))}
-  </Grid>
-</Box>
-
-            <Box
-              sx={{
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: "12px",
-                border: "1px solid rgba(255,255,255,0.10)",
-                p: 3,
-                mb: 4,
-              }}
-            >
-              <TitleSection>LEARN MORE</TitleSection>
-              <Typography sx={{ color: "#d1d5db", fontSize: "0.87rem", mb: 2 }}>
-                Additional documentation can be found at the following links:
-              </Typography>
-
-              <Box sx={{ display: "grid", gap: 1.2 }}>
-                {learnMoreHyperlink.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="none"
-                    sx={{
-                      color: "#c084fc",
-                      fontSize: "0.8rem",
-                      "&:hover": { color: "#e9d5ff" },
-                    }}
-                  >
-                    • {item.label}
-                  </Link>
-                ))}
-              </Box>
             </Box>
           </Box>
-        </Container>
 
-        <Box
-  sx={{
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    pt: 2,
-    pb: 3,
-  }}
->
-  <Link
-    href="https://www.isu.edu/cs/"
-    target="_blank"
-    rel="noopener noreferrer"
-    underline="none"
-    sx={{
-      display: "inline-flex",
-      opacity: 60,
-    }}
-  >
-    <Box
-      component="img"
-      src={isulogo.src}
-      alt="Idaho State University Computer Science"
-      sx={{
-        height: 72,
-        width: "auto",
-        display: "block",
-        opacity: 1,
-        filter: "none",
-      }}
-    />
-  </Link>
-</Box>
+          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+            <TitleSection>CONTRIBUTORS</TitleSection>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                lineHeight: 1.6,
+                mb: 2,
+              }}
+            >
+              This project was started by{" "}
+              <Link
+                href="https://www2.cose.isu.edu/~bodipaul/index.php"
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="hover"
+                sx={{ color: "#F47C20", fontWeight: 600 }}
+              >
+                Dr. Paul Bodily
+              </Link>
+              , who is also the ISU Faculty Sponsor of the project.
+            </Typography>
+
+            <Typography
+              sx={{
+                color: text.faint,
+                fontSize: "0.87rem",
+                mb: 2,
+              }}
+            >
+              Project contributors
+            </Typography>
+
+            {contributorsLoading ? (
+              <Typography sx={{ color: text.caption, fontSize: "0.85rem" }}>
+                Loading contributors...
+              </Typography>
+            ) : contributors.length === 0 ? (
+              <Typography sx={{ color: text.caption, fontSize: "0.85rem" }}>
+                Contributor list unavailable right now.
+              </Typography>
+            ) : (
+              // CSS multi-column layout (not a Grid) so the alphabetical order reads
+              // top-to-bottom within a column, then wraps to the next column -- a
+              // Grid/flex wrap would instead fill left-to-right row by row, breaking
+              // the alphabetical reading order across the row.
+              <Box sx={{ columns: { xs: 1, sm: 2, md: 3 }, columnGap: "12px" }}>
+                {[...contributors]
+                  .sort((a, b) => getLastName(a).localeCompare(getLastName(b)))
+                  .map((name) => (
+                    <Box
+                      key={name}
+                      sx={{
+                        breakInside: "avoid",
+                        border: `1px solid ${surface.border}`,
+                        background: surface.surfaceAlt,
+                        borderRadius: "10px",
+                        px: 1.4,
+                        py: 0.8,
+                        mb: 1.5,
+                        minHeight: "34px",
+                        display: "flex",
+                        alignItems: "center",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          borderColor: "#F47C20",
+                          background: surface.surfaceAltHover,
+                        },
+                      }}
+                    >
+                      <ItemContributor
+                        name={name}
+                        profile={contributorProfiles[name]}
+                        onSelect={handleContributorClick}
+                      />
+                    </Box>
+                  ))}
+              </Box>
+            )}
+          </Box>
+
+          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+            <TitleSection>PUBLICATIONS</TitleSection>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                mb: 3,
+              }}
+            >
+              Below are research publications associated with the Redux project and its
+              contributors.
+            </Typography>
+
+            <Box sx={{ display: "grid", gap: 0.8 }}>
+              {publications.map((item, index) => (
+                <Box key={index} sx={innerCard}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.82rem",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {item.citation}{" "}
+                    {item.doi && (
+                      <Link
+                        href={item.doi}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{
+                          color: "#F47C20",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          ml: 0.4,
+                        }}
+                      >
+                        [DOI]
+                      </Link>
+                    )}
+                    {item.url && (
+                      <Link
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{
+                          color: "#F47C20",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          ml: 0.4,
+                        }}
+                      >
+                        [URL]
+                      </Link>
+                    )}
+                    {item.pdf && (
+                      <Link
+                        href={item.pdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{
+                          color: "#F47C20",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          ml: 0.4,
+                        }}
+                      >
+                        [PDF]
+                      </Link>
+                    )}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+
+          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+            <TitleSection>AWARDS</TitleSection>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                mb: 3,
+              }}
+            >
+              Below are awards associated with the Redux project and its contributors.
+            </Typography>
+
+            <Box sx={{ display: "grid", gap: 0.8 }}>
+              {awards.map((item, index) => (
+                <Box key={index} sx={innerCard}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.82rem",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {item.citation}{" "}
+                    {item.doi && (
+                      <Link
+                        href={item.doi}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{
+                          color: "#F47C20",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          ml: 0.4,
+                        }}
+                      >
+                        [DOI]
+                      </Link>
+                    )}
+                    {item.pdf && (
+                      <Link
+                        href={item.pdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{
+                          color: "#F47C20",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          ml: 0.4,
+                        }}
+                      >
+                        [PDF]
+                      </Link>
+                    )}
+                    {item.url && (
+                      <Link
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{
+                          color: "#F47C20",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          ml: 0.4,
+                        }}
+                      >
+                        [URL]
+                      </Link>
+                    )}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+
+          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+            <TitleSection>THESES AND DISSERTATIONS</TitleSection>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                mb: 3,
+              }}
+            >
+              Below are theses and dissertations associated with the Redux project.
+            </Typography>
+
+            <Box sx={{ display: "grid", gap: 0.8 }}>
+              {thesisAndDissertations.map((item, index) => (
+                <Box key={index} sx={innerCard}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.82rem",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {item.citation}{" "}
+                    {item.url && (
+                      <Link
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{
+                          color: "#F47C20",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          ml: 0.4,
+                        }}
+                      >
+                        [URL]
+                      </Link>
+                    )}
+                    {item.pdf && (
+                      <Link
+                        href={item.pdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{
+                          color: "#F47C20",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          ml: 0.4,
+                        }}
+                      >
+                        [PDF]
+                      </Link>
+                    )}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+
+          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+            <TitleSection>SUPPORT</TitleSection>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                lineHeight: 1.9,
+                mb: 2,
+              }}
+            >
+              Redux has been supported by the following grants:
+            </Typography>
+
+            <Box sx={{ display: "grid", gap: 0.8 }}>
+              {[
+                "Bodily, P.M. (Co-Lead), Bradley, J. (Co-Lead), Romney, A. (Co-PI), Petersen, J. (Co-I), “BengalBot MCP: Building AI-Literate Students at Idaho State University,” U.S. Department of Education (DOE) Fund for Improvement of Post-Secondary Education (FIPSE). $300,000. 2026.",
+                "Trosper, M.J., “Applied Computational Models and Algorithmic Solutions to Common Optimization Problems In Energy-Water Systems,” Summer Authentic Research Experience (SARE), Idaho Community-engaged Resilience for Energy-Water Systems (I-CREWS), National Science Foundation (NSF). $6,000. 2026.",
+                "“Crowd-Sourcing and Visualization of Advanced Computational Theory to Facilitate Application of Algorithmic Knowledgebase to Real-World Combinatorial Problems,” Center for Advanced Energy Studies (CAES). 2024.",
+                "“Application of advanced computational theory to facilitate efficient solutions to real-world combinatorial problems”, Center for Advanced Energy Studies (CAES). 2022.",
+                "“Interactive visualization tools for teaching computer science theory”, Idaho State University Office of Research. 2022.",
+              ].map((grant, index) => (
+                <Box key={index} sx={innerCard}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.85rem",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {grant}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.82rem",
+                lineHeight: 1.8,
+                mt: 2.2,
+                textAlign: "justify",
+              }}
+            >
+              Any opinions, findings, conclusions, or recommendations expressed in this material are
+              those of the author(s) and do not necessarily reflect the views of the funding
+              agencies who have supported this work.
+            </Typography>
+          </Box>
+
+          <Box sx={{ ...theSectionCard, mb: 1.5 }}>
+            <TitleSection>LICENSE</TitleSection>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                lineHeight: 1.8,
+              }}
+            >
+              This work is licensed under the{" "}
+              <Link
+                href="https://opensource.org/license/bsd-3-clause"
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="hover"
+                sx={{ color: "#F47C20", fontWeight: 600 }}
+              >
+                BSD 3-Clause License
+              </Link>
+              .
+            </Typography>
+          </Box>
+        </Box>
+      </Container>
+
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          pt: 2,
+          pb: 3,
+        }}
+      >
+        <Link
+          href="https://www.isu.edu/cs/"
+          target="_blank"
+          rel="noopener noreferrer"
+          underline="none"
+          sx={{ display: "inline-flex" }}
+        >
+          {/* Logo's "Idaho State University"/"Computer Science" text and divider
+              line are baked into the PNG as near-black pixels -- can't recolor
+              per-mode with CSS without also distorting the orange mark, so in
+              dark mode it gets a white chip to sit on instead. */}
+          <Box
+            component="img"
+            src={isulogo.src}
+            alt="Idaho State University Computer Science"
+            sx={{
+              height: 72,
+              width: "auto",
+              display: "block",
+              opacity: 1,
+              filter: "none",
+              ...(mode === "dark" && {
+                bgcolor: "#FFFFFF",
+                borderRadius: "8px",
+                p: 1,
+              }),
+            }}
+          />
+        </Link>
       </Box>
-    </ThemeProvider>
+
+      {/* Contributor Profile Modal */}
+      <Dialog
+        open={modalOpen}
+        onClose={handleCloseModal}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: surface.surface,
+              border: `1px solid ${surface.border}`,
+              borderRadius: "16px",
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 2, color: text.heading }}>
+          {contributorProfiles[selectedContributor] && (
+            <Avatar
+              src={contributorProfiles[selectedContributor].image}
+              alt={selectedContributor}
+              sx={{ width: 48, height: 48, border: "2px solid #F47C20" }}
+            />
+          )}
+          {selectedContributor}
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{ position: "absolute", right: 8, top: 8, color: text.caption }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ borderColor: surface.border }}>
+          {profileLoading ? (
+            <Typography sx={{ color: text.caption }}>Loading...</Typography>
+          ) : profileData ? (
+            <Box sx={{ color: text.body, fontSize: "0.87rem" }}>
+              <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1 }}>
+                Personal Information
+              </Typography>
+              <ProfileField label="Email" value={profileData.email ?? profileData.Email} />
+              <ProfileField
+                label="Education"
+                value={profileData.education ?? profileData.Education}
+              />
+              <ProfileField label="Major" value={profileData.major ?? profileData.Major} />
+              <BioField value={profileData.bio ?? profileData.Bio} />
+
+              {contributorProfiles[selectedContributor] && (
+                <Typography sx={{ mb: 2 }}>
+                  <Box component="span" sx={{ fontWeight: 600 }}>
+                    GitHub:
+                  </Box>{" "}
+                  <Link
+                    href={contributorProfiles[selectedContributor].github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={{ color: "#F47C20", fontWeight: 600 }}
+                  >
+                    {contributorProfiles[selectedContributor].github.replace("https://", "")}
+                  </Link>
+                </Typography>
+              )}
+
+              <Typography sx={{ color: text.heading, fontWeight: 600, mb: 1, mt: 2 }}>
+                Contributions
+              </Typography>
+              <Typography sx={{ mb: 1.5 }}>
+                <Box component="span" sx={{ fontWeight: 600 }}>
+                  Total:
+                </Box>{" "}
+                {profileData.totalContributions ?? profileData.TotalContributions ?? 0}
+              </Typography>
+
+              <ContributionList
+                label="Problems"
+                items={profileData.problemsContributed ?? profileData.ProblemsContributed}
+              />
+              <ContributionList
+                label="Solvers"
+                items={profileData.solversCreated ?? profileData.SolversCreated}
+              />
+              <ContributionList
+                label="Reductions"
+                items={profileData.reductionsCreated ?? profileData.ReductionsCreated}
+              />
+              <ContributionList
+                label="Verifiers"
+                items={profileData.verifiersContributed ?? profileData.VerifiersContributed}
+              />
+              <ContributionList
+                label="Visualizations"
+                items={profileData.visualizationsCreated ?? profileData.VisualizationsCreated}
+              />
+
+              <LegacyContributionsList
+                items={profileData.legacyContributions ?? profileData.LegacyContributions}
+              />
+
+              <GithubActivitySection
+                reduxStats={profileData.reduxStats ?? profileData.ReduxStats}
+                reduxGuiStats={profileData.reduxGuiStats ?? profileData.ReduxGuiStats}
+              />
+            </Box>
+          ) : (
+            <Typography sx={{ color: text.caption }}>No profile data found.</Typography>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseModal} sx={{ color: "#F47C20" }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }

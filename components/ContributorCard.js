@@ -2,14 +2,16 @@ import React from "react";
 
 export default function ContributorCard({ name, role, contributions, github, image }) {
   return (
-    <div style={{
-      background: "#111827",
-      border: "1px solid #7c3aed",
-      borderRadius: "12px",
-      padding: "16px",
-      color: "#e5e7eb",
-      maxWidth: "320px"
-    }}>
+    <div
+      style={{
+        background: "#111827",
+        border: "1px solid #7c3aed",
+        borderRadius: "12px",
+        padding: "16px",
+        color: "#e5e7eb",
+        maxWidth: "320px",
+      }}
+    >
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <img
           src={image}
@@ -18,7 +20,7 @@ export default function ContributorCard({ name, role, contributions, github, ima
             width: "48px",
             height: "48px",
             borderRadius: "50%",
-            border: "2px solid #7c3aed"
+            border: "2px solid #7c3aed",
           }}
         />
         <div>

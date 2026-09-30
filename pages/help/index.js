@@ -1,0 +1,299 @@
+import { Box, Container, Link, Typography } from "@mui/material";
+import isulogo from "../../components/images/ISULogo.png";
+import { useThemeMode } from "../../components/ThemeModeContext";
+import { innerCardSx, pageBackground, sectionCardSx, textColors } from "../../components/theme";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+
+const backgroundLinks = [
+  {
+    label: "Computational problem",
+    url: "https://en.wikipedia.org/wiki/Computational_problem",
+  },
+  {
+    label: "Algorithm",
+    url: "https://en.wikipedia.org/wiki/Algorithm",
+  },
+  {
+    label: "List of algorithms",
+    url: "https://en.wikipedia.org/wiki/List_of_algorithms",
+  },
+  {
+    label: "Complexity class",
+    url: "https://en.wikipedia.org/wiki/Complexity_class",
+  },
+  {
+    label: "P (complexity)",
+    url: "https://en.wikipedia.org/wiki/P_(complexity)",
+  },
+  {
+    label: "NP (complexity)",
+    url: "https://en.wikipedia.org/wiki/NP_(complexity)",
+  },
+  {
+    label: "NP-hardness",
+    url: "https://en.wikipedia.org/wiki/NP-hardness",
+  },
+  {
+    label: "NP-completeness",
+    url: "https://en.wikipedia.org/wiki/NP-completeness",
+  },
+  {
+    label: "Karp's 21 NP-complete problems",
+    url: "https://en.wikipedia.org/wiki/Karp%27s_21_NP-complete_problems",
+  },
+  {
+    label: "List of NP-complete problems",
+    url: "https://en.wikipedia.org/wiki/List_of_NP-complete_problems",
+  },
+  {
+    label: "Many-one reduction",
+    url: "https://en.wikipedia.org/wiki/Many-one_reduction",
+  },
+  {
+    label: "Gadget (computer science)",
+    url: "https://en.wikipedia.org/wiki/Gadget_(computer_science)",
+  },
+  {
+    label: "Approximation algorithm",
+    url: "https://en.wikipedia.org/wiki/Approximation_algorithm",
+  },
+];
+
+const accessLinks = [
+  {
+    label: "RESTful API",
+    url: "https://api.redux.portneuf.cose.isu.edu/swagger/index.html",
+  },
+];
+
+const learnMoreLinks = [
+  { label: "Github", url: "https://github.com/ReduxISU/" },
+  {
+    label: "Karp's 21 NP-Complete Problems",
+    url: "https://cgi.di.uoa.gr/~sgk/teaching/grad/handouts/karp.pdf",
+  },
+  {
+    label: "Redux GUI Documentation",
+    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
+  },
+  {
+    label: "Redux Backend Documentation",
+    url: "https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/index.md",
+  },
+];
+
+function SectionTitle({ children }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  return (
+    <Typography
+      sx={{
+        color: text.heading,
+        fontSize: "0.85rem",
+        fontWeight: 700,
+        letterSpacing: "0.22em",
+        mb: 2,
+      }}
+    >
+      {children}
+    </Typography>
+  );
+}
+
+export default function HelpPage() {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  const sectionCardStyle = sectionCardSx(mode);
+  const innerCard = innerCardSx(mode);
+
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: pageBackground(mode),
+      }}
+    >
+      <ResponsiveAppBar />
+
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 5 }}>
+        <Box sx={{ maxWidth: "980px", mx: "auto" }}>
+          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
+            <SectionTitle>WELCOME TO REDUX</SectionTitle>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                lineHeight: 1.9,
+                textAlign: "justify",
+                mb: 2.2,
+              }}
+            >
+              Redux is a dynamic, interactive computer science knowledgebase consisting of canonical
+              computer science problems, solutions, and reduction algorithms. The following pages
+              provide helpful background to the organization of problems, solutions, and reductions
+              in Redux based on the concept of complexity classes:
+            </Typography>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                lineHeight: 1.9,
+                textAlign: "justify",
+              }}
+            >
+              {backgroundLinks.map((link, index) => (
+                <span key={link.label}>
+                  <Link
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={{
+                      color: "#F47C20",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                  {index < backgroundLinks.length - 1 ? ", " : "."}
+                </span>
+              ))}
+            </Typography>
+          </Box>
+
+          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
+            <SectionTitle>ACCESS REDUX CONTENT</SectionTitle>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                lineHeight: 1.9,
+                textAlign: "justify",
+                mb: 2,
+              }}
+            >
+              All of the content of the Redux knowledge base can be accessed directly via:
+            </Typography>
+
+            <Box sx={{ display: "grid", gap: 1 }}>
+              {accessLinks.map((link) => (
+                <Box key={link.label} sx={innerCard}>
+                  <Link
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={{
+                      color: "#F47C20",
+                      fontWeight: 600,
+                      fontSize: "0.82rem",
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                </Box>
+              ))}
+
+              <Box sx={innerCard}>
+                <Typography
+                  sx={{
+                    color: text.body,
+                    fontSize: "0.82rem",
+                    lineHeight: 1.7,
+                  }}
+                >
+                  C# Library import{" "}
+                  <Box
+                    component="span"
+                    sx={{
+                      color: text.caption,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    (instructions coming soon)
+                  </Box>
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
+            <SectionTitle>LEARN MORE</SectionTitle>
+
+            <Typography
+              sx={{
+                color: text.body,
+                fontSize: "0.87rem",
+                mb: 2,
+              }}
+            >
+              Additional documentation can be found at the following links:
+            </Typography>
+
+            <Box sx={{ display: "grid", gap: 1 }}>
+              {learnMoreLinks.map((link) => (
+                <Box key={link.label} sx={innerCard}>
+                  <Link
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={{
+                      color: "#F47C20",
+                      fontWeight: 600,
+                      fontSize: "0.82rem",
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      </Container>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          pt: 2,
+          pb: 3,
+        }}
+      >
+        <Link
+          href="https://www.isu.edu/cs/"
+          target="_blank"
+          rel="noopener noreferrer"
+          underline="none"
+          sx={{ display: "inline-flex" }}
+        >
+          {/* Logo's "Idaho State University"/"Computer Science" text and divider
+              line are baked into the PNG as near-black pixels -- can't recolor
+              per-mode with CSS without also distorting the orange mark, so in
+              dark mode it gets a white chip to sit on instead. */}
+          <Box
+            component="img"
+            src={isulogo.src}
+            alt="Idaho State University Computer Science"
+            sx={{
+              height: 72,
+              width: "auto",
+              display: "block",
+              opacity: 1,
+              filter: "none",
+              ...(mode === "dark" && {
+                bgcolor: "#FFFFFF",
+                borderRadius: "8px",
+                p: 1,
+              }),
+            }}
+          />
+        </Link>
+      </Box>
+    </Box>
+  );
+}

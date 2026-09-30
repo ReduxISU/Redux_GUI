@@ -2,12 +2,13 @@
  * A singular section of a problem.
  */
 
-import React from "react";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Accordion, Card, AccordionContext } from "react-bootstrap";
-import { Stack, Button, Box } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
+import { Accordion, AccordionContext, Card } from "react-bootstrap";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
+import { useThemeMode } from "../ThemeModeContext";
+import { surfaceColors, textColors } from "../theme";
 
 /// Default theme.
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } };
@@ -40,27 +41,57 @@ function ContextAwareToggle({ children, eventKey, callback, colors }) {
 
 /**
  * Represents a singular section of the problem.
+ *
+ * Bootstrap's Card/Card.Header/Card.Body have their own hardcoded CSS
+ * (--bs-card-bg etc.) with no idea our MUI theme -- and thus our light/dark
+ * toggle -- exists, so without an explicit style override here they stay a
+ * fixed white/near-black regardless of mode. Overridden via inline style,
+ * which wins over Bootstrap's class-based CSS.
  */
 export default function ProblemSection({ children, defaultCollapsed = true }) {
+  const { mode } = useThemeMode();
+  const surface = surfaceColors(mode);
+
   return (
     <div>
-      <Accordion className="accordion" defaultActiveKey={defaultCollapsed ? "1" : "0"}>
-        <Card>{children}</Card>
+      <Accordion
+        className="accordion"
+        defaultActiveKey={defaultCollapsed ? "1" : "0"}
+        style={{ borderColor: mode === "dark" ? "transparent" : undefined }}
+      >
+        <Card
+          style={{
+            backgroundColor: surface.surface,
+            borderColor: mode === "dark" ? "transparent" : surface.border,
+          }}
+        >
+          {children}
+        </Card>
       </Accordion>
     </div>
   );
 }
 
 ProblemSection.Header = function Header({ children, title, titleWidth }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  const surface = surfaceColors(mode);
+
   return (
-    <Card.Header>
+    <Card.Header
+      style={{
+        backgroundColor: surface.surfaceAlt,
+        borderColor: mode === "dark" ? "transparent" : surface.border,
+        color: text.heading,
+      }}
+    >
       <Stack direction="row" gap={2} sx={{ alignItems: "center" }}>
         <Box
           sx={{
             width: titleWidth ?? "10%",
             display: "flex",
             justifyContent: "center", // horizontal center
-            alignItems: "center",     // vertical center
+            alignItems: "center", // vertical center
           }}
         >
           {title}
@@ -74,11 +105,16 @@ ProblemSection.Header = function Header({ children, title, titleWidth }) {
   );
 };
 
-
 ProblemSection.Body = function Body({ children }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  const surface = surfaceColors(mode);
+
   return (
     <Accordion.Collapse eventKey="0">
-      <Card.Body>{children}</Card.Body>
+      <Card.Body style={{ backgroundColor: surface.surface, color: text.body }}>
+        {children}
+      </Card.Body>
     </Accordion.Collapse>
   );
 };
