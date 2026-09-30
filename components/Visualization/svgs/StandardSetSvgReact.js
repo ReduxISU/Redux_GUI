@@ -266,6 +266,13 @@ class CustomSet {
   show(c = this.className) {
     let offsetX = this.x + this.size;
 
+    // A set of plain values gets a light Background box drawn behind it (see the end of
+    // show()), so its braces and commas stay the default black. A set that contains other
+    // sets gets no box, leaving its braces and commas on the page itself, so they need the
+    // theme's text color to stay visible in dark mode.
+    const hasNestedSets = this.elements.some((el) => !el.isValue && el.list);
+    const symbolFill = hasNestedSets ? this.textColor : null;
+
     this.svg
       .append("text")
       .attr("x", this.x)
@@ -273,14 +280,12 @@ class CustomSet {
       .attr("text-anchor", "left")
       .attr("dominant-baseline", "middle")
       .attr("font-size", this.size + "px")
+      .attr("fill", symbolFill)
       .text(!this.isValue ? (this.isOrdered ? "(" : "{") : "")
       .style("pointer-events", "none");
 
-    let hasNestedSets = false;
-
     this.elements.forEach((el, i) => {
       if (!el.isValue && el.list) {
-        hasNestedSets = true;
         offsetX = recursiveSets(
           [el],
           this.svg,
@@ -317,6 +322,7 @@ class CustomSet {
           .attr("text-anchor", "left")
           .attr("dominant-baseline", "middle")
           .attr("font-size", this.size + "px")
+          .attr("fill", symbolFill)
           .text(",")
           .style("pointer-events", "none");
         offsetX += this.size + gap;
@@ -332,6 +338,7 @@ class CustomSet {
       .attr("text-anchor", "left")
       .attr("dominant-baseline", "middle")
       .attr("font-size", this.size + "px")
+      .attr("fill", symbolFill)
       .text(!this.isValue ? (this.isOrdered ? ")" : "}") : "")
       .style("pointer-events", "none");
 
