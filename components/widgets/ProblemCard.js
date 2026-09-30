@@ -11,10 +11,14 @@ import { sectionCardSx, surfaceColors, textColors } from "../theme";
 /**
  * Presentational card for one problem in the /browse results grid. Clicking
  * the problem name navigates to `/?problem=<name>`, which the home page
- * reads on mount to auto-select that problem.
+ * (via useProblemName, components/hooks/ProblemProvider/Problem.js) selects
+ * once the problem catalogue has loaded, then strips the param from the URL.
+ * An unrecognized `name` falls back to the default problem (3SAT) rather
+ * than erroring.
  *
- * @param name Raw class/reflection name (e.g. "DEUTSCHJOZSA") -- used only for the
- * link and the React key, never shown to the user.
+ * @param name Raw class/reflection name (e.g. "DEUTSCHJOZSA") -- used for the
+ * link, the `?problem=` value the home page reads, and the React key. Never
+ * shown to the user.
  * @param displayName Human-facing name (e.g. "Deutsch Jozsa") -- what's actually
  * rendered. Falls back to `name` if not given.
  */
