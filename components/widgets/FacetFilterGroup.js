@@ -1,7 +1,24 @@
-import { Box, Checkbox, FormControlLabel, FormGroup, Typography } from "@mui/material";
-import React from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Box, Checkbox, Collapse, FormControlLabel, FormGroup, Typography } from "@mui/material";
+import React, { useId, useState } from "react";
 import { useThemeMode } from "../ThemeModeContext";
 import { textColors } from "../theme";
+
+// Shared hover/focus treatment for anything that should pick up the site's
+// orange accent on hover -- a transparent border reserves the same space the
+// hover border occupies so nothing shifts when it appears. `:has(:focus-visible)`
+// covers keyboard users tabbing to the checkbox nested inside a row/label (which
+// never receives focus itself); unlike `:focus-within`, it doesn't leave the
+// highlight stuck on after a mouse click.
+const hoverHighlightSx = {
+  border: "1px solid transparent",
+  borderRadius: "6px",
+  transition: "background-color 0.15s ease, border-color 0.15s ease",
+  "&:hover, &:has(:focus-visible), &:focus-visible": {
+    borderColor: "#F47C20",
+    backgroundColor: "rgba(244,124,32,0.08)",
+  },
+};
 
 /**
  * Generic, reusable multi-select checkbox facet. Not specific to any one
@@ -21,10 +38,25 @@ import { textColors } from "../theme";
  * Complexity Class facet's options. `null`/undefined for a key renders no
  * subheading before it. Omit entirely for the plain ungrouped list every
  * other facet uses.
+ * @param collapsible Opt-in (default `false`): renders the heading as a
+ * toggle button that collapses/expands the option list, starting expanded.
+ * While collapsed, if any options are selected, the heading shows the count
+ * (e.g. "SOLVER TYPE (2)") so the active filter stays visible without the
+ * list open. Callers that don't pass this prop keep the plain, always-open
+ * heading exactly as before.
  */
-export default function FacetFilterGroup({ label, options, selected, onChange, groupBy = null }) {
+export default function FacetFilterGroup({
+  label,
+  options,
+  selected,
+  onChange,
+  groupBy = null,
+  collapsible = false,
+}) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
+  const [expanded, setExpanded] = useState(true);
+  const contentId = useId();
 
   const toggle = (key) => {
     const next = new Set(selected);
@@ -86,6 +118,16 @@ export default function FacetFilterGroup({ label, options, selected, onChange, g
                     </Box>
                   </Typography>
                 }
+                sx={{
+                  ...hoverHighlightSx,
+                  width: "100%",
+                  boxSizing: "border-box",
+                  ml: -1,
+                  mr: 0,
+                  pl: 1,
+                  pr: 1,
+                  py: 0.25,
+                }}
               />
             </React.Fragment>
           );
@@ -94,20 +136,64 @@ export default function FacetFilterGroup({ label, options, selected, onChange, g
     </FormGroup>
   );
 
+  const headingSx = {
+    color: text.heading,
+    fontSize: "0.78rem",
+    fontWeight: 600,
+    letterSpacing: "0.14em",
+  };
+
+  const selectedCount = selected?.size ?? 0;
+  const headingText =
+    collapsible && !expanded && selectedCount > 0
+      ? `${label.toUpperCase()} (${selectedCount})`
+      : label.toUpperCase();
+
   return (
     <Box>
-      <Typography
-        sx={{
-          color: text.heading,
-          fontSize: "0.78rem",
-          fontWeight: 600,
-          letterSpacing: "0.14em",
-          mb: 0.5,
-        }}
-      >
-        {label.toUpperCase()}
-      </Typography>
-      {checkboxList}
+      {collapsible ? (
+        <Box
+          component="button"
+          type="button"
+          onClick={() => setExpanded((current) => !current)}
+          aria-expanded={expanded}
+          aria-controls={contentId}
+          sx={{
+            all: "unset",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 0.5,
+            width: "100%",
+            boxSizing: "border-box",
+            mx: -0.5,
+            px: 0.5,
+            mb: 0.5,
+            ...hoverHighlightSx,
+          }}
+        >
+          <Typography sx={headingSx}>{headingText}</Typography>
+          <ExpandMoreIcon
+            fontSize="small"
+            sx={{
+              color: text.caption,
+              transform: expanded ? "rotate(180deg)" : "none",
+              transition: "transform 0.15s ease",
+              flexShrink: 0,
+            }}
+          />
+        </Box>
+      ) : (
+        <Typography sx={{ ...headingSx, mb: 0.5 }}>{label.toUpperCase()}</Typography>
+      )}
+      {collapsible ? (
+        <Collapse in={expanded} id={contentId}>
+          {checkboxList}
+        </Collapse>
+      ) : (
+        checkboxList
+      )}
     </Box>
   );
 }
