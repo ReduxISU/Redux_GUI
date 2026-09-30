@@ -27,8 +27,7 @@ const BUTTON = { buttonText: "Verify" };
 const CARD = { cardBodyText: "Enter a certificate:", cardHeaderText: "Verify" };
 const TOOLTIP = {
   header: "Problem Verifier",
-  formalDef: "Choose a verifier to see information about it",
-  info: "",
+  info: "Choose a verifier to see information about it",
 };
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
 
@@ -96,9 +95,14 @@ export default function VerifyRowReact({
             chosenVerifier
               ? {
                   header: verifierInfo.verifierName ?? "",
-                  formalDef: verifierInfo.verifierDefinition ?? "",
                   // plain description only
-                  info: verifierInfo.info ?? verifierInfo.description ?? "",
+                  info:
+                    verifierInfo.verifierDefinition ||
+                    verifierInfo.info ||
+                    verifierInfo.description ||
+                    "",
+                  input: verifierInfo.inputDescription ?? "",
+                  output: verifierInfo.outputDescription ?? "",
                   // show source
                   source: verifierInfo.source,
                   // show contributors

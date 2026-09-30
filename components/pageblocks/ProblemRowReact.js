@@ -38,8 +38,7 @@ const ACCORDION_FORM_TWO = { placeHolder: "default instance" };
 var CARD = { cardBodyText: "Instance", cardHeaderText: "Problem", problemInstance: "" };
 const TOOLTIP = {
   header: "Problem Information",
-  formalDef: "Choose a problem to see information about it",
-  info: "",
+  info: "Choose a problem to see information about it",
   credit: "",
 };
 const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
@@ -168,9 +167,10 @@ export default function ProblemRowReact({
   const tip = problemName
     ? {
         header: problemInfo.problemName ?? "",
-        formalDef: problemInfo.formalDefinition ?? "",
         // It makes description clean
         info: problemInfo.problemDefinition ?? "",
+        input: problemInfo.inputDescription ?? "",
+        output: problemInfo.outputDescription ?? "",
         classification: [
           {
             label: "Complexity class",
@@ -190,7 +190,6 @@ export default function ProblemRowReact({
         //  Popover builds Wikipedia URL
         componentLink: problemInfo.problemLink || "",
         sourceLink: problemInfo.sourceLink || "",
-        isMathDef: true, // only this file adds the flag
       }
     : TOOLTIP;
 
