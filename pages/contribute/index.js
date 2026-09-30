@@ -333,11 +333,13 @@ export default function ContributePage() {
             </BodyText>
 
             <BodyText>
-              The one exception is the setup tutorial video on this page, which is embedded from
-              YouTube using its privacy-enhanced mode. Loading this page still contacts YouTube to
-              show the player, and if you play the video, YouTube (owned by Google) may set cookies
-              and collect data under Google&apos;s own privacy policy. Redux receives none of that
-              data.
+              Some content on the site is hosted by other services. For example, the setup tutorial
+              video on this page is embedded from YouTube (using its privacy-enhanced mode), and
+              contributor pictures on the About Us page are loaded from GitHub. When your browser
+              loads content like this, it sends that service the standard information included in
+              any web request, such as your IP address and browser type. If you play the video,
+              YouTube (owned by Google) may also set cookies and collect data under Google&apos;s
+              own privacy policy. Redux receives none of that data.
             </BodyText>
 
             <BodyText>
