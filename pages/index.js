@@ -31,13 +31,13 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Box, Grid, Typograph } from "@mui/material";
-import Image from "next/image";
 import { memo, useEffect, useState } from "react"; // CHANGED: added useState for row order
 import { Container } from "react-bootstrap";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
 import { useUnload } from "../components/eventHandlers/handleUnload";
 import { useProblemProvider } from "../components/hooks/ProblemProvider";
-import isulogo from "../components/images/ISULogo.png";
+import isulogoDark from "../components/images/ISULogo-Dark.png";
+import isulogoLight from "../components/images/ISULogo-Light.png";
 import { useThemeMode } from "../components/ThemeModeContext";
 import { pageBackground } from "../components/theme";
 import TourLauncher from "../components/tour/TourLauncher";
@@ -184,18 +184,16 @@ function MainPageContent() {
           // marginTop: '25%',
         }}
       >
-        {/* The logo's "Idaho State University"/"Computer Science" text and divider
-              line are baked into the PNG as near-black pixels -- can't recolor them
-              per-mode with CSS without also distorting the orange mark, so in dark
-              mode we give the whole logo a white chip to sit on instead of trying to
-              recolor it. */}
         <Box
-          sx={
-            mode === "dark" ? { bgcolor: "#FFFFFF", borderRadius: "10px", px: 2, py: 1 } : undefined
-          }
-        >
-          <Image src={isulogo} height={125} width={500} alt="ISU logo"></Image>
-        </Box>
+          component="img"
+          src={mode === "dark" ? isulogoDark.src : isulogoLight.src}
+          alt="Idaho State University Computer Science"
+          sx={{
+            height: 72,
+            width: "auto",
+            display: "block",
+          }}
+        />
       </Box>
     </Box>
   );
