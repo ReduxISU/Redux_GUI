@@ -5,44 +5,35 @@
  * and async loading of visualization data.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
-  Button,
-  Switch,
-  FormControlLabel,
-  IconButton,
-  TextField,
-  Tooltip,
-} from "@mui/material";
-import {
-  SkipPrevious,
-  SkipNext,
-  FastRewind,
+  DragIndicator as DragIndicatorIcon,
   FastForward,
+  FastRewind,
+  SkipNext,
+  SkipPrevious,
 } from "@mui/icons-material";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
+import { Button, FormControlLabel, IconButton, Switch, TextField, Tooltip } from "@mui/material";
 import Link from "next/link"; // <-- IMPORTANT for Quantum button
-
-import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
-import SearchBarExtensible from "../widgets/SearchBarExtensible";
-import { visualizationTypeCategory } from "../Visualization/svgs/visualizationCategories";
-
+import { useVisualizationInfo } from "../hooks/ProblemProvider";
+import { useWhenChanged } from "../hooks/useWhenChanged";
 import {
   requestProblemGenericInstance,
   requestReducedInstance,
-  requestVisualization,
   requestReductionVisualization,
   requestSolvedInstance,
+  requestVisualization,
 } from "../redux";
-
-import VisualizationLogic from "../widgets/VisualizationLogic";
-import ProblemSection from "../widgets/ProblemSection";
-import { useVisualizationInfo } from "../hooks/ProblemProvider";
-import { isRenderable } from "../Visualization/svgs/renderability";
-import { surfaceColors, textColors } from "../theme";
 import { useThemeMode } from "../ThemeModeContext";
+import { surfaceColors, textColors } from "../theme";
+import { isRenderable } from "../Visualization/svgs/renderability";
+import { visualizationTypeCategory } from "../Visualization/svgs/visualizationCategories";
+import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
+import ProblemSection from "../widgets/ProblemSection";
+import SearchBarExtensible from "../widgets/SearchBarExtensible";
+import VisualizationLogic from "../widgets/VisualizationLogic";
 
 const CARD = { cardBodyText: "DEFAULT BODY", cardHeaderText: "Visualize" };
 const SWITCHES = {
@@ -84,10 +75,10 @@ export default function VisualizeRowReact({
   const visualizationInfo = useVisualizationInfo(url, chosenVisualization);
 
   const unrenderableOptions = (VisualizationOptions || []).filter(
-    (option) => !isRenderable(visualizationTypeMap?.get(option))
+    (option) => !isRenderable(visualizationTypeMap?.get(option)),
   );
   const hasRenderableOption = (VisualizationOptions || []).some(
-    (option) => !unrenderableOptions.includes(option)
+    (option) => !unrenderableOptions.includes(option),
   );
   const noRenderableOptions = (VisualizationOptions || []).length > 0 && !hasRenderableOption;
 
@@ -111,41 +102,34 @@ export default function VisualizeRowReact({
     { name: "x1", cluster: "2" },
   ];
 
-  const [showSolution, setShowSolution] = useState(false);
   const [showGadgets, setShowGadgets] = useState(false);
   const [showReduction, setShowReduction] = useState(false);
   const [disableGadget, setDisableGadget] = useState(false);
-  const [disableSolution, setDisableSolution] = useState(true);
-  const [disableReduction, setDisableReduction] = useState(!chosenReductionType);
+  const disableSolution = !problemName;
+  const disableReduction = !chosenReductionType;
 
   const [problemVisualizationData, setProblemVisualizationData] = useState(
-    defaultSat3VisualizationArr
+    defaultSat3VisualizationArr,
   );
   const [reducedVisualizationData, setReducedVisualizationData] = useState(
-    defaultCLIQUEVisualizationArr
+    defaultCLIQUEVisualizationArr,
   );
-  const [currentProblemData, setCurrentProblemData] = useState(null);
-  const [currentReductionData, setCurrentReductionData] = useState(null);
   const [problemData, setProblemData] = useState([]);
   const [problemReductionData, setProblemReductionData] = useState([]);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
-  const [instanceReady, setInstanceReady] = useState(false);
-
+  const instanceReady = !!(problemInstance && problemName);
   const isDisabled = showGadgets || showReduction;
   const totalSteps = problemData.length;
+  const showSolution = currentStep === totalSteps - 1 && totalSteps > 1;
+  const currentProblemData = problemData[currentStep] ?? null;
+  const currentReductionData = problemReductionData[currentStep] ?? null;
 
-  // Track when instance is ready
-  useEffect(() => {
-    setInstanceReady(!!(problemInstance && problemName));
-  }, [problemInstance, problemName]);
-
-  useEffect(() => {
+  useWhenChanged([problemName, problemInstance, chosenVisualization], () => {
     setProblemData([]);
-    setCurrentProblemData(null);
     setCurrentStep(0);
-  }, [problemName, problemInstance, chosenVisualization]);
+  });
 
   // Visualization selection (stored choice / renderable default / first renderable option /
   // explicit empty state) is fully resolved inside useChosenVisualization -- see
@@ -173,13 +157,7 @@ export default function VisualizeRowReact({
 
   // Fetch reduction visualization
   useEffect(() => {
-    if (
-      !chosenReduceTo ||
-      !problemInstance ||
-      !showReduction ||
-      !solution
-    )
-      return;
+    if (!chosenReduceTo || !problemInstance || !showReduction || !solution) return;
 
     const fetch = async () => {
       try {
@@ -187,7 +165,7 @@ export default function VisualizeRowReact({
           url,
           chosenReductionType,
           solution,
-          problemInstance
+          problemInstance,
         );
         setProblemReductionData(data ?? []);
       } catch (err) {
@@ -198,7 +176,6 @@ export default function VisualizeRowReact({
     fetch();
   }, [showReduction, chosenReduceTo, problemInstance, solution, chosenReductionType, url]);
 
-
   // Fetch main visualization data
   useEffect(() => {
     if (!instanceReady || !chosenVisualization) return;
@@ -207,11 +184,7 @@ export default function VisualizeRowReact({
 
     const fetch = async () => {
       try {
-        const data = await requestVisualization(
-          url,
-          chosenVisualization,
-          problemInstance,
-        );
+        const data = await requestVisualization(url, chosenVisualization, problemInstance);
 
         if (!alive) return;
 
@@ -219,15 +192,11 @@ export default function VisualizeRowReact({
 
         // In reduction mode, only show the first and last frames to highlight the delta
         if (showReduction && processedData.length > 1) {
-          processedData = [
-            processedData[0],
-            processedData[processedData.length - 1],
-          ];
+          processedData = [processedData[0], processedData[processedData.length - 1]];
         }
 
         setProblemData(processedData);
         setCurrentStep(0);
-        setCurrentProblemData(processedData?.[0] ?? null);
       } catch (err) {
         console.error(err);
       }
@@ -238,14 +207,7 @@ export default function VisualizeRowReact({
     return () => {
       alive = false;
     };
-  }, [
-    instanceReady,
-    chosenVisualization,
-    problemInstance,
-    showReduction,
-    url,
-    problemName,
-  ]);
+  }, [instanceReady, chosenVisualization, problemInstance, showReduction, url, problemName]);
 
   // Fetch SAT3
   useEffect(() => {
@@ -253,21 +215,12 @@ export default function VisualizeRowReact({
 
     const fetchSAT3 = async () => {
       try {
-        const clauses = await requestProblemGenericInstance(
-          url,
-          problemName,
-          problemInstance
-        );
+        const clauses = await requestProblemGenericInstance(url, problemName, problemInstance);
         if (clauses) setProblemVisualizationData(clauses.clauses);
 
         if (chosenReductionType) {
-          const reduced = await requestReducedInstance(
-            url,
-            chosenReductionType,
-            problemInstance
-          );
-          if (reduced)
-            setReducedVisualizationData(reduced.reductionTo.clusterNodes);
+          const reduced = await requestReducedInstance(url, chosenReductionType, problemInstance);
+          if (reduced) setReducedVisualizationData(reduced.reductionTo.clusterNodes);
         }
       } catch (err) {
         console.error("SAT3 fetch failed:", err);
@@ -277,36 +230,21 @@ export default function VisualizeRowReact({
     fetchSAT3();
   }, [problemInstance, problemName, chosenReductionType, url]);
 
-  useEffect(() => {
-    setDisableSolution(!problemName);
-    setDisableReduction(!chosenReduceTo);
-    setShowGadgets(false);
-  }, [problemName, chosenReduceTo]);
+  useWhenChanged([problemName, chosenReduceTo], () => setShowGadgets(false));
 
-  useEffect(() => {
-    setDisableReduction(!chosenReductionType);
+  useWhenChanged([chosenReductionType], () => {
     if (!chosenReductionType) setShowReduction(false);
-  }, [chosenReductionType]);
+  });
 
-  useEffect(() => {
-    setShowSolution(currentStep === totalSteps - 1 && totalSteps > 1);
-  }, [currentStep, totalSteps]);
-
-  useEffect(() => {
-    setCurrentProblemData(problemData[currentStep] ?? null);
-    setCurrentReductionData(problemReductionData[currentStep] ?? null);
-  }, [problemData, currentStep, problemReductionData]);
-
-  // Switch Handlers
+  // Switch Handlers. "Highlight solution" is the last step, so the switch moves the step and
+  // showSolution follows from it.
   function handleSwitch1Change(e) {
-    setShowSolution(e.target.checked);
     setShowGadgets(false);
     setCurrentStep(e.target.checked ? totalSteps - 1 : 0);
   }
 
   function handleSwitch2Change(e) {
     setShowGadgets(e.target.checked);
-    setShowSolution(false);
     setCurrentStep(0);
   }
 
@@ -315,7 +253,6 @@ export default function VisualizeRowReact({
   }
   function handleRefreshButton() {
     setSvgIsLoading(false);
-    setShowSolution(false);
     setShowGadgets(false);
     setShowReduction(false);
     setCurrentStep(0);
@@ -324,8 +261,7 @@ export default function VisualizeRowReact({
   function handleRadioChange(type) {
     if (type === "start") setCurrentStep(0);
     else if (type === "back") setCurrentStep((p) => Math.max(0, p - 1));
-    else if (type === "forward")
-      setCurrentStep((p) => Math.min(totalSteps - 1, p + 1));
+    else if (type === "forward") setCurrentStep((p) => Math.min(totalSteps - 1, p + 1));
     else if (type === "end") setCurrentStep(totalSteps - 1);
   }
 
@@ -337,26 +273,25 @@ export default function VisualizeRowReact({
 
   const tip = chosenVisualization
     ? {
-      header: visualizationInfo.visualizationName ?? "",
-      formalDef: visualizationInfo.visualizationDefinition ?? "",
-      info: visualizationInfo.info ?? visualizationInfo.description ?? "",
-      classification: [
-        {
-          label: "Visualization type",
-          value: visualizationInfo.visualizationType
-            ? visualizationTypeCategory(visualizationInfo.visualizationType)
-            : "Unclassified",
-        },
-      ],
-      source: visualizationInfo.source,
-      credit:
-        Array.isArray(visualizationInfo.contributors) &&
-          visualizationInfo.contributors.length
-          ? visualizationInfo.contributors.join(", ")
-          : "",
-      componentLink: visualizationInfo.visualizationLink || "",
-      sourceLink: visualizationInfo.sourceLink || "",
-    }
+        header: visualizationInfo.visualizationName ?? "",
+        formalDef: visualizationInfo.visualizationDefinition ?? "",
+        info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+        classification: [
+          {
+            label: "Visualization type",
+            value: visualizationInfo.visualizationType
+              ? visualizationTypeCategory(visualizationInfo.visualizationType)
+              : "Unclassified",
+          },
+        ],
+        source: visualizationInfo.source,
+        credit:
+          Array.isArray(visualizationInfo.contributors) && visualizationInfo.contributors.length
+            ? visualizationInfo.contributors.join(", ")
+            : "",
+        componentLink: visualizationInfo.visualizationLink || "",
+        sourceLink: visualizationInfo.sourceLink || "",
+      }
     : TOOLTIP;
 
   return (
@@ -386,22 +321,22 @@ export default function VisualizeRowReact({
 
         <PopoverTooltipClick toolTip={tip} />
         {dragHandleProps && (
-                          <IconButton
-                            {...dragHandleProps.attributes}
-                            {...dragHandleProps.listeners}
-                            size="small"
-                            title="Drag to reorder"
-                            sx={{
-                              cursor: 'grab',
-                              color: text.body,
-                              backgroundColor: surface.surfaceAlt,
-                              '&:hover': { backgroundColor: surface.surfaceAltHover },
-                              mr: 1,
-                            }}
-                          >
-                            <DragIndicatorIcon />
-                          </IconButton>
-                        )}
+          <IconButton
+            {...dragHandleProps.attributes}
+            {...dragHandleProps.listeners}
+            size="small"
+            title="Drag to reorder"
+            sx={{
+              cursor: "grab",
+              color: text.body,
+              backgroundColor: surface.surfaceAlt,
+              "&:hover": { backgroundColor: surface.surfaceAltHover },
+              mr: 1,
+            }}
+          >
+            <DragIndicatorIcon />
+          </IconButton>
+        )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>
@@ -435,19 +370,11 @@ export default function VisualizeRowReact({
               placement="bottom"
               title={isDisabled ? "Navigation disabled during reduction or gadget mode." : ""}
             >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "4px" }}
-              >
-                <IconButton
-                  disabled={isDisabled}
-                  onClick={() => handleRadioChange("start")}
-                >
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <IconButton disabled={isDisabled} onClick={() => handleRadioChange("start")}>
                   <FastRewind />
                 </IconButton>
-                <IconButton
-                  disabled={isDisabled}
-                  onClick={() => handleRadioChange("back")}
-                >
+                <IconButton disabled={isDisabled} onClick={() => handleRadioChange("back")}>
                   <SkipPrevious />
                 </IconButton>
 
@@ -457,23 +384,16 @@ export default function VisualizeRowReact({
                   value={currentStep}
                   onChange={(e) => {
                     const n = Number(e.target.value);
-                    if (!isNaN(n) && n >= 0 && n < totalSteps)
-                      setCurrentStep(n);
+                    if (!isNaN(n) && n >= 0 && n < totalSteps) setCurrentStep(n);
                   }}
                   style={{ width: "70px" }}
                   disabled={isDisabled}
                 />
 
-                <IconButton
-                  disabled={isDisabled}
-                  onClick={() => handleRadioChange("forward")}
-                >
+                <IconButton disabled={isDisabled} onClick={() => handleRadioChange("forward")}>
                   <SkipNext />
                 </IconButton>
-                <IconButton
-                  disabled={isDisabled}
-                  onClick={() => handleRadioChange("end")}
-                >
+                <IconButton disabled={isDisabled} onClick={() => handleRadioChange("end")}>
                   <FastForward />
                 </IconButton>
               </div>
@@ -482,9 +402,30 @@ export default function VisualizeRowReact({
 
           {/* Switches */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <FormControlLabel sx={{ color: text.body }} disabled={disableReduction} checked={showReduction} control={<Switch />} label={SWITCHES.switch3} onChange={handleSwitch3Change} />
-            <FormControlLabel sx={{ color: text.body }} disabled={disableGadget} checked={showGadgets} control={<Switch id="highlightGadgets" />} label={SWITCHES.switch2} onChange={handleSwitch2Change} />
-            <FormControlLabel sx={{ color: text.body }} disabled={disableSolution} checked={showSolution} control={<Switch id="showSolution" />} label={SWITCHES.switch1} onChange={handleSwitch1Change} />
+            <FormControlLabel
+              sx={{ color: text.body }}
+              disabled={disableReduction}
+              checked={showReduction}
+              control={<Switch />}
+              label={SWITCHES.switch3}
+              onChange={handleSwitch3Change}
+            />
+            <FormControlLabel
+              sx={{ color: text.body }}
+              disabled={disableGadget}
+              checked={showGadgets}
+              control={<Switch id="highlightGadgets" />}
+              label={SWITCHES.switch2}
+              onChange={handleSwitch2Change}
+            />
+            <FormControlLabel
+              sx={{ color: text.body }}
+              disabled={disableSolution}
+              checked={showSolution}
+              control={<Switch id="showSolution" />}
+              label={SWITCHES.switch1}
+              onChange={handleSwitch1Change}
+            />
           </div>
         </div>
 

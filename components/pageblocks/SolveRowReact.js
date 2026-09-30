@@ -8,22 +8,25 @@
  * @author Alex Diviney
  */
 
-import React from "react";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Button } from "@mui/material";
-import { Download as DownloadIcon } from '@mui/icons-material';
-import { DragIndicator as DragIndicatorIcon } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
-
-import { requestSolvedInstance } from "../redux";
-import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
+import { Download as DownloadIcon, DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
+import { Button, IconButton } from "@mui/material";
+import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 import { useSolverInfo } from "../hooks/ProblemProvider";
+import { requestSolvedInstance } from "../redux";
+import { useThemeMode } from "../ThemeModeContext";
+import { surfaceColors, textColors } from "../theme";
+import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
-import { surfaceColors, textColors } from "../theme";
-import { useThemeMode } from "../ThemeModeContext";
-import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
+import TruncatedTextSection from "../widgets/TruncatedTextSection";
+
+// Same crash shape TruncatedTextSection was built for on the Reduce pane
+// (ReduceToRowReact.js): solvedInstance is an unbounded-length string from
+// the API, and this pane already has its own Download button right below it.
+const SOLUTION_TOO_LARGE_MESSAGE =
+  "Too large to display. Select Download to get the full solution.";
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" };
 const SOLVE_BUTTON = { buttonText: "Solve" };
@@ -61,15 +64,15 @@ export default function SolveRowReact({
   async function handleSolve() {
     setSolvedInstance(
       chosenSolver && problemInstance
-        ? (await requestSolvedInstance(url, chosenSolver, problemInstance)) ?? ""
-        : ""
+        ? ((await requestSolvedInstance(url, chosenSolver, problemInstance)) ?? "")
+        : "",
     );
   }
 
   async function handleDownload() {
-    const blob = new Blob([solvedInstance], { type: 'text/plain' });
+    const blob = new Blob([solvedInstance], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
 
     link.href = url;
     link.download = "query";
@@ -79,9 +82,8 @@ export default function SolveRowReact({
     document.body.removeChild(link);
   }
 
-  const tip =
-    chosenSolver
-      ? {
+  const tip = chosenSolver
+    ? {
         header: solverInfo.solverName ?? "",
         formalDef: solverInfo.solverDefinition ?? "",
         // Keep description clean
@@ -102,7 +104,7 @@ export default function SolveRowReact({
           { label: "Big-O", value: solverInfo.complexity || "Not yet determined" },
         ],
       }
-      : TOOLTIP;
+    : TOOLTIP;
 
   return (
     <ProblemSection>
@@ -120,31 +122,41 @@ export default function SolveRowReact({
               label: `Add new ${problemNameMap.get(problem)} solution algorithm "${input}"`,
               href: `${url}ProblemTemplate/solver?problemName=${problemName}&solverName=${input}`,
             });
-            return !chosenReduceTo ? [extender(problemName)] : [extender(problemName), extender(chosenReduceTo)];
+            return !chosenReduceTo
+              ? [extender(problemName)]
+              : [extender(problemName), extender(chosenReduceTo)];
           }}
         />{" "}
         <PopoverTooltipClick toolTip={tip} />
         {dragHandleProps && (
-                  <IconButton
-                    {...dragHandleProps.attributes}
-                    {...dragHandleProps.listeners}
-                    size="small"
-                    title="Drag to reorder"
-                    sx={{
-                      cursor: 'grab',
-                      color: text.body,
-                      backgroundColor: surface.surfaceAlt,
-                      '&:hover': { backgroundColor: surface.surfaceAltHover },
-                      mr: 1,
-                    }}
-                  >
-                    <DragIndicatorIcon />
-                  </IconButton>
-                )}
+          <IconButton
+            {...dragHandleProps.attributes}
+            {...dragHandleProps.listeners}
+            size="small"
+            title="Drag to reorder"
+            sx={{
+              cursor: "grab",
+              color: text.body,
+              backgroundColor: surface.surfaceAlt,
+              "&:hover": { backgroundColor: surface.surfaceAltHover },
+              mr: 1,
+            }}
+          >
+            <DragIndicatorIcon />
+          </IconButton>
+        )}
       </ProblemSection.Header>
 
       <ProblemSection.Body>
-        {CARD.cardBodyText + " " + solvedInstance}
+        <p>
+          <b>{CARD.cardBodyText}</b>
+        </p>
+        {solvedInstance ? (
+          <TruncatedTextSection
+            text={solvedInstance}
+            tooLargeMessage={SOLUTION_TOO_LARGE_MESSAGE}
+          />
+        ) : null}
         <div className="submitButton">
           <Button
             size="large"

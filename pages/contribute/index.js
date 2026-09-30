@@ -1,15 +1,23 @@
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import { Box, Container, Link, Typography } from "@mui/material";
 import isulogo from "../../components/images/ISULogo.png";
-
-import { Container, Box, Typography, Link } from "@mui/material";
-import { pageBackground, sectionCardSx, innerCardSx, textColors } from "../../components/theme";
 import { useThemeMode } from "../../components/ThemeModeContext";
+import { innerCardSx, pageBackground, sectionCardSx, textColors } from "../../components/theme";
+import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 const contributionSteps = [
   "Creating a fork of the appropriate repository, front end or back end",
   "Getting Redux running locally for development and testing",
   "Downloading, editing, and integrating templates",
   "Submitting a successful pull request",
+];
+
+const pullRequestChecklist = [
+  "Runs locally without errors — no console errors or warnings introduced",
+  "Follows existing project structure and conventions — components and pages placed consistently with the rest of the repo, matching existing naming and styling patterns",
+  "Tested before submitting — exercised the change locally, covering the normal case and at least one edge case",
+  "Clear PR description — explains what changed, why, and how to verify it",
+  "Scoped to one thing — no unrelated files, formatting-only diffs, or drive-by changes bundled in",
+  "No secrets or environment-specific values committed — API keys, local paths, .env values, etc.",
 ];
 
 const helpfulLinks = [
@@ -82,14 +90,12 @@ export default function ContributePage() {
                 mb: 2.2,
               }}
             >
-              Our goal from the beginning has not been to build a knowledge
-              base ourselves but to build a framework for crowd-sourced
-              contribution across the world, think Wikipedia. We hope to see
-              contributors add everything from new problems, algorithms,
-              reductions, visualizations, features, bug fixes, and beyond. Our
-              goal is to make the framework easy to understand and even easier
-              to extend. Below are tutorials and helpful information to get
-              you started.
+              Our goal from the beginning has not been to build a knowledge base ourselves but to
+              build a framework for crowd-sourced contribution across the world, think Wikipedia. We
+              hope to see contributors add everything from new problems, algorithms, reductions,
+              visualizations, features, bug fixes, and beyond. Our goal is to make the framework
+              easy to understand and even easier to extend. Below are tutorials and helpful
+              information to get you started.
             </Typography>
 
             <Typography
@@ -157,20 +163,21 @@ export default function ContributePage() {
           <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
             <SectionTitle>CHECKLIST FOR A SUCCESSFUL PULL REQUEST</SectionTitle>
 
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-              }}
-            >
-              Before submitting a pull request, make sure your changes run
-              locally, follow the existing project structure, include clear
-              descriptions of the work completed, and are tested carefully.
-              Additional checklist details will be added as the contribution
-              documentation is expanded.
-            </Typography>
+            <Box sx={{ display: "grid", gap: 1 }}>
+              {pullRequestChecklist.map((item) => (
+                <Box key={item} sx={innerCard}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.82rem",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    • {item}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
           </Box>
 
           <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
@@ -208,10 +215,9 @@ export default function ContributePage() {
                 textAlign: "justify",
               }}
             >
-              Interested in getting more involved? We love collaboration!
-              Whether you are an industry partner, a university research
-              group, or an individual passionate about getting involved, we
-              have lots of project ideas we could use your help with. If
+              Interested in getting more involved? We love collaboration! Whether you are an
+              industry partner, a university research group, or an individual passionate about
+              getting involved, we have lots of project ideas we could use your help with. If
               interested, please reach out to Dr. Paul Bodily at{" "}
               <Link
                 href="mailto:bodipaul@isu.edu"
@@ -222,7 +228,8 @@ export default function ContributePage() {
                 }}
               >
                 bodipaul@isu.edu
-              </Link>.
+              </Link>
+              .
             </Typography>
           </Box>
 
@@ -237,8 +244,8 @@ export default function ContributePage() {
                 textAlign: "justify",
               }}
             >
-              Terms of Use content will be added here. This section is
-              intended to describe expectations and conditions for using Redux.
+              Terms of Use content will be added here. This section is intended to describe
+              expectations and conditions for using Redux.
             </Typography>
           </Box>
 
@@ -253,9 +260,8 @@ export default function ContributePage() {
                 textAlign: "justify",
               }}
             >
-              Privacy Policy content will be added here. This section is
-              intended to explain what information is collected, how it is
-              used, and how user privacy is protected.
+              Privacy Policy content will be added here. This section is intended to explain what
+              information is collected, how it is used, and how user privacy is protected.
             </Typography>
           </Box>
         </Box>
