@@ -5,7 +5,10 @@ import {
   complexityClassRank,
 } from "../../components/hooks/ProblemFilters/complexityClassOrder";
 import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
-import { problemTypeLabel } from "../../components/hooks/ProblemFilters/problemTypeOrder";
+import {
+  PROBLEM_TYPE_ORDER,
+  problemTypeLabel,
+} from "../../components/hooks/ProblemFilters/problemTypeOrder";
 import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
 import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
 import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
@@ -33,6 +36,7 @@ export default function BrowsePage() {
     setSelectedComplexityClasses,
     selectedSolverTypes,
     setSelectedSolverTypes,
+    selectedProblemTypes,
     setSelectedProblemTypes,
     selectedVisualizationTypes,
     setSelectedVisualizationTypes,
@@ -55,6 +59,24 @@ export default function BrowsePage() {
         (tags) => [tags.complexityClass],
         (a, b) => complexityClassRank(a) - complexityClassRank(b),
         complexityClassLabel,
+      ),
+    [problemIndex],
+  );
+  // Unlisted values (e.g. the "Unclassified" fallback) sort after the known taxonomy.
+  const problemTypeRank = (value) => {
+    const rank = PROBLEM_TYPE_ORDER.indexOf(value);
+    return rank === -1 ? PROBLEM_TYPE_ORDER.length : rank;
+  };
+  // Problem Type gets its own facet so a filter applied by clicking a card's Problem
+  // Type chip is visible and can be unchecked here, like every other chip-driven
+  // filter. Ordered by the problemTypeOrder.js taxonomy rather than alphabetically.
+  const problemTypeOptions = useMemo(
+    () =>
+      buildFacetOptions(
+        problemIndex,
+        (tags) => [tags.problemType],
+        (a, b) => problemTypeRank(a) - problemTypeRank(b),
+        problemTypeLabel,
       ),
     [problemIndex],
   );
@@ -148,8 +170,8 @@ export default function BrowsePage() {
           Browse Problems
         </Typography>
         <Typography sx={{ color: text.body, fontSize: "0.87rem", mb: 3 }}>
-          Filter the full problem list by complexity class, solver type, visualization type, or
-          reduction reachability.
+          Filter the full problem list by complexity class, problem type, solver type, visualization
+          type, or reduction reachability.
         </Typography>
 
         {loading ? (
@@ -174,6 +196,12 @@ export default function BrowsePage() {
                   options={complexityClassOptions}
                   selected={selectedComplexityClasses}
                   onChange={setSelectedComplexityClasses}
+                />
+                <FacetFilterGroup
+                  label="Problem Type"
+                  options={problemTypeOptions}
+                  selected={selectedProblemTypes}
+                  onChange={setSelectedProblemTypes}
                 />
                 <FacetFilterGroup
                   label="Solver Type"
