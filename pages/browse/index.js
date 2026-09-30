@@ -1,5 +1,18 @@
-import { Box, Button, Chip, CircularProgress, Container, Grid, Typography } from "@mui/material";
-import React, { useMemo } from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Collapse,
+  Container,
+  Grid,
+  IconButton,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   COMPLEXITY_CLASS_ORDER,
   complexityClassLabel,
@@ -32,6 +45,27 @@ export default function BrowsePage() {
   // section card, so it overrides padding -- everything else (color, hover)
   // stays shared.
   const theSectionCard = { ...sectionCardSx(mode), padding: { xs: 2, md: 2.5 } };
+
+  // Filters sidebar collapse state (#325). Starts expanded on both server and client's first
+  // render -- identical output on both sides avoids a hydration mismatch -- then, once mounted,
+  // an effect corrects it to collapsed on small screens (`useMediaQuery` itself reports the SSR
+  // default on that very first client render too, so this only takes effect after the real
+  // media-query result is known). `userToggledFilters` stops that correction from fighting a
+  // manual toggle: once the visitor has clicked the toggle, a later resize/breakpoint change no
+  // longer overrides their choice.
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
+  const userToggledFilters = useRef(false);
+  useEffect(() => {
+    if (!userToggledFilters.current) {
+      setFiltersExpanded(!isSmallScreen);
+    }
+  }, [isSmallScreen]);
+  const toggleFiltersExpanded = () => {
+    userToggledFilters.current = true;
+    setFiltersExpanded((current) => !current);
+  };
 
   const { problemIndex, reductionGraph, loading } = useProblemIndex(reduxBaseUrl);
   const {
@@ -166,16 +200,48 @@ export default function BrowsePage() {
           </Box>
         ) : (
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: filtersExpanded ? 3 : 2 }}>
               <Box
                 sx={{
                   ...theSectionCard,
                   display: "grid",
-                  gap: 2.5,
+                  gap: 1.5,
                   position: { md: "sticky" },
                   top: { md: 16 },
                 }}
               >
+                <Box
+                  sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                >
+                  <Typography sx={{ color: text.heading, fontSize: "0.95rem", fontWeight: 700 }}>
+                    Filters
+                  </Typography>
+                  <IconButton
+                    onClick={toggleFiltersExpanded}
+                    size="small"
+                    aria-expanded={filtersExpanded}
+                    aria-controls="browse-filters-panel"
+                    aria-label={filtersExpanded ? "Collapse filters" : "Expand filters"}
+                    sx={{
+                      color: text.caption,
+                      border: "1px solid transparent",
+                      borderRadius: "6px",
+                      "&:hover, &:focus-visible": {
+                        borderColor: "#F47C20",
+                        background: "rgba(244,124,32,0.08)",
+                      },
+                    }}
+                  >
+                    <ExpandMoreIcon
+                      fontSize="small"
+                      sx={{
+                        transform: filtersExpanded ? "rotate(180deg)" : "none",
+                        transition: "transform 0.15s ease",
+                      }}
+                    />
+                  </IconButton>
+                </Box>
+
                 <Button
                   onClick={clearFilters}
                   variant="outlined"
@@ -190,87 +256,98 @@ export default function BrowsePage() {
                   Clear Filters ({activeFilterTags.length})
                 </Button>
 
-                <FacetFilterGroup
-                  label="Complexity Class"
-                  options={complexityClassOptions}
-                  selected={selectedComplexityClasses}
-                  onChange={setSelectedComplexityClasses}
-                  groupBy={(key) =>
-                    COMPLEXITY_CLASS_ORDER.indexOf(key) <= COMPLEXITY_CLASS_ORDER.indexOf("NPHard")
-                      ? "Classical"
-                      : key === "Unclassified"
-                        ? null
-                        : "Quantum"
-                  }
-                />
-                <FacetFilterGroup
-                  label="Solver Type"
-                  options={solverTypeOptions}
-                  selected={selectedSolverTypes}
-                  onChange={setSelectedSolverTypes}
-                />
-                <FacetFilterGroup
-                  label="Solver Complexity"
-                  options={solverComplexityOptions}
-                  selected={selectedSolverComplexities}
-                  onChange={setSelectedSolverComplexities}
-                />
-                <FacetFilterGroup
-                  label="Visualization Type"
-                  options={visualizationTypeOptions}
-                  selected={selectedVisualizationTypes}
-                  onChange={setSelectedVisualizationTypes}
-                />
+                <Collapse in={filtersExpanded} id="browse-filters-panel">
+                  <Box sx={{ display: "grid", gap: 2.5 }}>
+                    <FacetFilterGroup
+                      label="Complexity Class"
+                      options={complexityClassOptions}
+                      selected={selectedComplexityClasses}
+                      onChange={setSelectedComplexityClasses}
+                      collapsible
+                      groupBy={(key) =>
+                        COMPLEXITY_CLASS_ORDER.indexOf(key) <=
+                        COMPLEXITY_CLASS_ORDER.indexOf("NPHard")
+                          ? "Classical"
+                          : key === "Unclassified"
+                            ? null
+                            : "Quantum"
+                      }
+                    />
+                    <FacetFilterGroup
+                      label="Solver Type"
+                      options={solverTypeOptions}
+                      selected={selectedSolverTypes}
+                      onChange={setSelectedSolverTypes}
+                      collapsible
+                    />
+                    <FacetFilterGroup
+                      label="Solver Complexity"
+                      options={solverComplexityOptions}
+                      selected={selectedSolverComplexities}
+                      onChange={setSelectedSolverComplexities}
+                      collapsible
+                    />
+                    <FacetFilterGroup
+                      label="Visualization Type"
+                      options={visualizationTypeOptions}
+                      selected={selectedVisualizationTypes}
+                      onChange={setSelectedVisualizationTypes}
+                      collapsible
+                    />
 
-                <Box>
-                  <Typography
-                    sx={{
-                      color: text.heading,
-                      fontSize: "0.78rem",
-                      fontWeight: 600,
-                      letterSpacing: "0.14em",
-                      mb: 0.5,
-                    }}
-                  >
-                    REACHABLE FROM
-                  </Typography>
-                  <SearchBarExtensible
-                    selected={reachabilitySource ?? ""}
-                    onSelect={(value) => setReachabilitySource(value || null)}
-                    placeholder="Source problem"
-                    options={problemNames}
-                    optionsMap={problemNameMap}
-                    extenderButtons={() => []}
-                  />
-                  <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-                    <Chip
-                      label="One reduction"
-                      clickable
-                      onClick={() => setReachabilityMode("oneHop")}
-                      sx={{
-                        fontSize: "0.72rem",
-                        color: reachabilityMode === "oneHop" ? "#fff" : text.caption,
-                        background: reachabilityMode === "oneHop" ? "#F47C20" : surface.surfaceAlt,
-                        border: `1px solid ${surface.border}`,
-                      }}
-                    />
-                    <Chip
-                      label="Any reductions"
-                      clickable
-                      onClick={() => setReachabilityMode("anyHops")}
-                      sx={{
-                        fontSize: "0.72rem",
-                        color: reachabilityMode === "anyHops" ? "#fff" : text.caption,
-                        background: reachabilityMode === "anyHops" ? "#F47C20" : surface.surfaceAlt,
-                        border: `1px solid ${surface.border}`,
-                      }}
-                    />
+                    <Box>
+                      <Typography
+                        sx={{
+                          color: text.heading,
+                          fontSize: "0.78rem",
+                          fontWeight: 600,
+                          letterSpacing: "0.14em",
+                          mb: 0.5,
+                        }}
+                      >
+                        REACHABLE FROM
+                      </Typography>
+                      <SearchBarExtensible
+                        selected={reachabilitySource ?? ""}
+                        onSelect={(value) => setReachabilitySource(value || null)}
+                        placeholder="Source problem"
+                        options={problemNames}
+                        optionsMap={problemNameMap}
+                        extenderButtons={() => []}
+                      />
+                      <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                        <Chip
+                          label="One reduction"
+                          clickable
+                          onClick={() => setReachabilityMode("oneHop")}
+                          sx={{
+                            fontSize: "0.72rem",
+                            color: reachabilityMode === "oneHop" ? "#fff" : text.caption,
+                            background:
+                              reachabilityMode === "oneHop" ? "#F47C20" : surface.surfaceAlt,
+                            border: `1px solid ${surface.border}`,
+                          }}
+                        />
+                        <Chip
+                          label="Any reductions"
+                          clickable
+                          onClick={() => setReachabilityMode("anyHops")}
+                          sx={{
+                            fontSize: "0.72rem",
+                            color: reachabilityMode === "anyHops" ? "#fff" : text.caption,
+                            background:
+                              reachabilityMode === "anyHops" ? "#F47C20" : surface.surfaceAlt,
+                            border: `1px solid ${surface.border}`,
+                          }}
+                        />
+                      </Box>
+                    </Box>
                   </Box>
-                </Box>
+                </Collapse>
               </Box>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 9 }}>
+            <Grid size={{ xs: 12, md: filtersExpanded ? 9 : 10 }}>
               <Typography sx={{ color: text.caption, fontSize: "0.82rem", mb: 1.5 }}>
                 {filteredProblems.length} problem{filteredProblems.length === 1 ? "" : "s"}
                 {activeFilterTags.length > 0 && (
