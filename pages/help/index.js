@@ -1,5 +1,6 @@
 import { Box, Container, Link, Typography } from "@mui/material";
-import isulogo from "../../components/images/ISULogo.png";
+import isulogoDark from "../../components/images/ISULogo-Dark.png";
+import isulogoLight from "../../components/images/ISULogo-Light.png";
 import { useThemeMode } from "../../components/ThemeModeContext";
 import { innerCardSx, pageBackground, sectionCardSx, textColors } from "../../components/theme";
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
@@ -271,25 +272,14 @@ export default function HelpPage() {
           underline="none"
           sx={{ display: "inline-flex" }}
         >
-          {/* Logo's "Idaho State University"/"Computer Science" text and divider
-              line are baked into the PNG as near-black pixels -- can't recolor
-              per-mode with CSS without also distorting the orange mark, so in
-              dark mode it gets a white chip to sit on instead. */}
           <Box
             component="img"
-            src={isulogo.src}
+            src={mode === "dark" ? isulogoDark.src : isulogoLight.src}
             alt="Idaho State University Computer Science"
             sx={{
               height: 72,
               width: "auto",
               display: "block",
-              opacity: 1,
-              filter: "none",
-              ...(mode === "dark" && {
-                bgcolor: "#FFFFFF",
-                borderRadius: "8px",
-                p: 1,
-              }),
             }}
           />
         </Link>
