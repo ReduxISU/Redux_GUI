@@ -43,6 +43,27 @@ function intersects(setA, setB) {
 }
 
 /**
+ * Combined Solver Type + Solver Complexity rule. Both facets describe the SAME
+ * solver, so when both have a selection a problem matches only if at least one
+ * single solver has a type in `types` AND a complexity bucket in `complexities`
+ * (a problem with a Brute Force solver that is exponential and a different,
+ * polynomial solver of another type must NOT match "Brute Force + Polynomial").
+ * When only one facet has a selection it falls back to the plain per-facet check
+ * against that facet's aggregate Set; an empty selection never filters.
+ * OR semantics hold within each facet.
+ */
+export function solverFiltersMatch(tags, types, complexities) {
+  if (types.size > 0 && complexities.size > 0) {
+    return tags.solvers.some(
+      (solver) => types.has(solver.type) && complexities.has(solver.complexity),
+    );
+  }
+  if (types.size > 0) return intersects(tags.solverTypes, types);
+  if (complexities.size > 0) return intersects(tags.solverComplexities, complexities);
+  return true;
+}
+
+/**
  * Faceted filter state over the derived problem index from `useProblemIndex`,
  * plus an optional reduction-reachability filter. Facets combine with AND;
  * multiple selections within a single facet combine with OR (a problem
@@ -89,13 +110,7 @@ export function useProblemFilters(problemIndex, reductionGraph) {
       ) {
         continue;
       }
-      if (selectedSolverTypes.size > 0 && !intersects(tags.solverTypes, selectedSolverTypes)) {
-        continue;
-      }
-      if (
-        selectedSolverComplexities.size > 0 &&
-        !intersects(tags.solverComplexities, selectedSolverComplexities)
-      ) {
+      if (!solverFiltersMatch(tags, selectedSolverTypes, selectedSolverComplexities)) {
         continue;
       }
       if (selectedProblemTypes.size > 0 && !selectedProblemTypes.has(tags.problemType)) {

@@ -8,11 +8,10 @@
  * @author Alex Diviney
  */
 
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Download as DownloadIcon, DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
 import { Button, IconButton } from "@mui/material";
-import { Card } from "react-bootstrap";
 import { complexityClassLabel } from "../hooks/ProblemFilters/complexityClassOrder";
 import { reductionTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 import { useProblemInfo, useReducerInfo } from "../hooks/ProblemProvider";
@@ -22,6 +21,7 @@ import { surfaceColors, textColors } from "../theme";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
+import TruncatedTextSection from "../widgets/TruncatedTextSection";
 
 const ACCORDION_FORM_ONE = {
   placeHolder: "Select Problem To Reduce To",
@@ -33,18 +33,22 @@ const REDUCE_BUTTON = { buttonText: "Reduce" };
 const CARD = { cardBodyText: "Reduce To:", cardHeaderText: "Reduce" };
 const TOOLTIP1 = {
   header: "Reduce To Problem",
-  formalDef: "Choose a problem to reduce your original problem to to see information about it",
-  info: "",
+  info: "Choose a problem to reduce your original problem to to see information about it",
 };
 const TOOLTIP2 = {
   header: "Reduction Type",
-  formalDef: "Choose a type of reduction to see information about it",
-  info: "",
+  info: "Choose a type of reduction to see information about it",
   reductionType: "",
   complexity: "",
   complexityBucket: "",
 };
 const THEME = { colors: { grey: "#424242", orange: "#d4441c", white: "#ffffff" } };
+
+// Reduced-instance-specific wording for TruncatedTextSection's too-large
+// fallback (components/widgets/TruncatedTextSection.js) -- the component
+// itself is shared with the Solve pane's solution output.
+const REDUCED_INSTANCE_TOO_LARGE_MESSAGE =
+  "Too large to display. Select Download to get the full reduced instance.";
 
 // ReductionCost describes output-size blowup relative to input size, a
 // separate axis from ReductionComplexityBucket (runtime, shown below as
@@ -127,9 +131,10 @@ export default function ReduceToRowReact({
             chosenReduceTo
               ? {
                   header: reduceToInfo.problemName ?? "",
-                  formalDef: reduceToInfo.formalDefinition ?? "",
                   // description only
                   info: reduceToInfo.problemDefinition ?? "",
+                  input: reduceToInfo.inputDescription ?? "",
+                  output: reduceToInfo.outputDescription ?? "",
                   classification: [
                     {
                       label: "Complexity class",
@@ -177,9 +182,14 @@ export default function ReduceToRowReact({
             chosenReductionType
               ? {
                   header: reducerInfo.reductionName ?? "",
-                  formalDef: reducerInfo.reductionDefinition ?? "",
                   // plain description for the reduction
-                  info: reducerInfo.info ?? reducerInfo.description ?? "",
+                  info:
+                    reducerInfo.reductionDefinition ||
+                    reducerInfo.info ||
+                    reducerInfo.description ||
+                    "",
+                  input: reducerInfo.inputDescription ?? "",
+                  output: reducerInfo.outputDescription ?? "",
                   classification: [
                     {
                       label: "Reduction cost",
@@ -270,7 +280,9 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
 
   // Checks if this is actually a node / edge format. If not, show the original form.
   if (!prettyInstance) {
-    return <Card.Text>{instance}</Card.Text>;
+    return (
+      <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
+    );
   }
   if (prettyInstance[0] === "GRAPH") {
     return (
@@ -293,7 +305,9 @@ function ReduceInfo({ instance, chosenReduceTo, problemName }) {
     );
   }
 
-  return <Card.Text>{instance}</Card.Text>;
+  return (
+    <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
+  );
 }
 
 function ReduceInfoBool({ instance, literals, clauses }) {
@@ -302,15 +316,15 @@ function ReduceInfoBool({ instance, literals, clauses }) {
       <p>
         <b>Literals:</b>
       </p>
-      <p>{literals}</p>
+      <TruncatedTextSection text={literals} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
       <p>
         <b>Clauses:</b>
       </p>
-      <p>{clauses}</p>
+      <TruncatedTextSection text={clauses} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
       <p>
         <b>Original form:</b>
       </p>
-      <p>{instance}</p>
+      <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
     </>
   );
 }
@@ -322,17 +336,17 @@ function ReduceInfoGraph({ instance, nodes, edges, k_value, problemName }) {
         <b>Reduced {problemName} Instance:</b>
       </p>
 
-      <p>{instance}</p>
+      <TruncatedTextSection text={instance} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
 
       <p>
         <b>Nodes:</b>
       </p>
-      <p>{nodes}</p>
+      <TruncatedTextSection text={nodes} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
 
       <p>
         <b>Edges:</b>
       </p>
-      <p /*style={{wordBreak: 'breakWord', color: 'red'}}> */>{edges}</p>
+      <TruncatedTextSection text={edges} tooLargeMessage={REDUCED_INSTANCE_TOO_LARGE_MESSAGE} />
       <p>
         <b>K value:</b> {k_value}
       </p>

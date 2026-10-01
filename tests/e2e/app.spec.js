@@ -141,3 +141,31 @@ test("the 3SAT verifier answers True and False correctly", async ({ page }) => {
   await verifyButton.click();
   await expect(body).toContainText("Verifier output: False");
 });
+
+test("a ?problem= URL param selects that problem instead of the default", async ({ page }) => {
+  // Regression test for #326: /browse's problem cards link to `/?problem=<CLASSKEY>`
+  // (components/widgets/ProblemCard.js), and the home page used to ignore that param and always
+  // land on the default (3SAT). useProblemName (components/hooks/ProblemProvider/Problem.js) now
+  // applies it once the problem catalogue has loaded.
+  await page.goto("/?problem=CLIQUE");
+
+  await expect(row(page, "Problem").getByRole("combobox")).toHaveValue("Clique");
+});
+
+test("an unrecognized ?problem= URL param falls back to the default problem", async ({ page }) => {
+  await page.goto("/?problem=NOTAREALPROBLEM");
+
+  await expect(row(page, "Problem").getByRole("combobox")).toHaveValue("3SAT");
+});
+
+test("clicking a problem card on /browse opens that problem on the home page", async ({ page }) => {
+  await page.goto("/browse");
+
+  // Wait for the grid to load before clicking -- while loading, the page shows a spinner instead
+  // of any cards, and the click would just miss.
+  const cliqueLink = page.getByRole("link", { name: "Clique", exact: true });
+  await expect(cliqueLink).toBeVisible();
+  await cliqueLink.click();
+
+  await expect(row(page, "Problem").getByRole("combobox")).toHaveValue("Clique");
+});

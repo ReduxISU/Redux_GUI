@@ -20,14 +20,20 @@ import { surfaceColors, textColors } from "../theme";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
+import TruncatedTextSection from "../widgets/TruncatedTextSection";
+
+// Same crash shape TruncatedTextSection was built for on the Reduce pane
+// (ReduceToRowReact.js): solvedInstance is an unbounded-length string from
+// the API, and this pane already has its own Download button right below it.
+const SOLUTION_TOO_LARGE_MESSAGE =
+  "Too large to display. Select Download to get the full solution.";
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" };
 const SOLVE_BUTTON = { buttonText: "Solve" };
 const CARD = { cardBodyText: "Solution:", cardHeaderText: "Solve" };
 const TOOLTIP = {
   header: "Solver Information",
-  formalDef: "Choose a type of solver to see information about it",
-  info: "",
+  info: "Choose a type of solver to see information about it",
   solverType: "",
   complexity: "",
   complexityBucket: "",
@@ -44,6 +50,7 @@ export default function SolveRowReact({
   setSolvedInstance,
   solverOptions,
   solverNameMap,
+  solverTypeMap,
   problemNameMap,
   chosenReduceTo,
   dragHandleProps,
@@ -78,9 +85,10 @@ export default function SolveRowReact({
   const tip = chosenSolver
     ? {
         header: solverInfo.solverName ?? "",
-        formalDef: solverInfo.solverDefinition ?? "",
         // Keep description clean
-        info: solverInfo.info ?? solverInfo.description ?? "",
+        info: solverInfo.solverDefinition || solverInfo.info || solverInfo.description || "",
+        input: solverInfo.inputDescription ?? "",
+        output: solverInfo.outputDescription ?? "",
         // Source on its own line
         source: solverInfo.source,
         credit:
@@ -108,6 +116,10 @@ export default function SolveRowReact({
           onSelect={setChosenSolver}
           options={solverOptions}
           optionsMap={solverNameMap}
+          optionTag={(key) => ({
+            label: solverTypeLabel(solverTypeMap?.get(key) || "Unclassified"),
+            kind: "solverType",
+          })}
           disabled={!problemName}
           disabledMessage={"No solvers available. Please select a problem."}
           extenderButtons={(input) => {
@@ -141,7 +153,15 @@ export default function SolveRowReact({
       </ProblemSection.Header>
 
       <ProblemSection.Body>
-        {CARD.cardBodyText + " " + solvedInstance}
+        <p>
+          <b>{CARD.cardBodyText}</b>
+        </p>
+        {solvedInstance ? (
+          <TruncatedTextSection
+            text={solvedInstance}
+            tooLargeMessage={SOLUTION_TOO_LARGE_MESSAGE}
+          />
+        ) : null}
         <div className="submitButton">
           <Button
             size="large"

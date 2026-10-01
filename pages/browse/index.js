@@ -19,7 +19,10 @@ import {
   complexityClassRank,
 } from "../../components/hooks/ProblemFilters/complexityClassOrder";
 import { buildFacetOptions } from "../../components/hooks/ProblemFilters/facetOptions";
-import { problemTypeLabel } from "../../components/hooks/ProblemFilters/problemTypeOrder";
+import {
+  PROBLEM_TYPE_ORDER,
+  problemTypeLabel,
+} from "../../components/hooks/ProblemFilters/problemTypeOrder";
 import {
   solverComplexityLabel,
   solverComplexityRank,
@@ -76,6 +79,7 @@ export default function BrowsePage() {
     selectedSolverComplexities,
     setSelectedSolverComplexities,
     selectedProblemTypes,
+    setSelectedProblemTypes,
     selectedVisualizationTypes,
     setSelectedVisualizationTypes,
     reachabilitySource,
@@ -108,6 +112,24 @@ export default function BrowsePage() {
       ),
     [problemIndex],
   );
+  // Unlisted values (e.g. the "Unclassified" fallback) sort after the known taxonomy.
+  const problemTypeRank = (value) => {
+    const rank = PROBLEM_TYPE_ORDER.indexOf(value);
+    return rank === -1 ? PROBLEM_TYPE_ORDER.length : rank;
+  };
+  // Problem Type gets its own facet so a filter applied by clicking a card's Problem
+  // Type chip is visible and can be unchecked here, like every other chip-driven
+  // filter. Ordered by the problemTypeOrder.js taxonomy rather than alphabetically.
+  const problemTypeOptions = useMemo(
+    () =>
+      buildFacetOptions(
+        problemIndex,
+        (tags) => [tags.problemType],
+        (a, b) => problemTypeRank(a) - problemTypeRank(b),
+        problemTypeLabel,
+      ),
+    [problemIndex],
+  );
   // Labels via solverTypeLabel so the checkboxes read "Brute Force"/"Breadth First
   // Search" rather than the raw "BruteForce"/"BreadthFirstSearch" wire values.
   const solverTypeOptions = useMemo(
@@ -132,7 +154,9 @@ export default function BrowsePage() {
   // instead of one with the combined count. See visualizationCategories.js.
   // "All Visualizations" is prepended as a synthetic option (ALL_VISUALIZATIONS_KEY,
   // handled specially in useProblemFilters) rather than a real category, so it's
-  // built here instead of via buildFacetOptions.
+  // built here instead of via buildFacetOptions. useProblemIndex's "Unimplemented"
+  // sentinel stays an ordinary option (unlike the ProblemCard chip list below, which
+  // strips it) so every "No visualizations" card can still be found.
   const visualizationTypeOptions = useMemo(() => {
     const categoryOptions = buildFacetOptions(problemIndex, (tags) => tags.visualizationCategories);
     const renderableCount = [...problemIndex.values()].filter(
@@ -143,6 +167,55 @@ export default function BrowsePage() {
       ...categoryOptions,
     ];
   }, [problemIndex]);
+
+  // Clicking a chip on a card toggles that value in the matching sidebar facet
+  // selection -- same effect as checking/unchecking it in FacetFilterGroup.
+  // Sets store raw wire values (e.g. "NPComplete"), so these take the chip's
+  // raw value, not its display label.
+  const toggleComplexityClassFilter = (value) => {
+    setSelectedComplexityClasses((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
+  const toggleSolverTypeFilter = (value) => {
+    setSelectedSolverTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
+  const toggleProblemTypeFilter = (value) => {
+    setSelectedProblemTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
+  const toggleVisualizationTypeFilter = (value) => {
+    setSelectedVisualizationTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
 
   const problemNames = useMemo(() => [...problemIndex.keys()].sort(), [problemIndex]);
   const problemNameMap = useMemo(
@@ -189,8 +262,8 @@ export default function BrowsePage() {
           Browse Problems
         </Typography>
         <Typography sx={{ color: text.body, fontSize: "0.87rem", mb: 3 }}>
-          Filter the full problem list by complexity class, solver type, solver complexity,
-          visualization type, or reduction reachability.
+          Filter the full problem list by complexity class, problem type, solver type, solver
+          complexity, visualization type, or reduction reachability.
         </Typography>
 
         {loading ? (
@@ -272,6 +345,13 @@ export default function BrowsePage() {
                             ? null
                             : "Quantum"
                       }
+                    />
+                    <FacetFilterGroup
+                      label="Problem Type"
+                      options={problemTypeOptions}
+                      selected={selectedProblemTypes}
+                      onChange={setSelectedProblemTypes}
+                      collapsible
                     />
                     <FacetFilterGroup
                       label="Solver Type"
@@ -374,8 +454,25 @@ export default function BrowsePage() {
                           name={name}
                           displayName={tags.displayName}
                           complexityClass={complexityClassLabel(tags.complexityClass)}
-                          solverTypes={[...tags.solverTypes].map(solverTypeLabel).sort()}
-                          hasRenderableVisualization={tags.hasRenderableVisualization}
+                          complexityClassValue={tags.complexityClass}
+                          problemType={problemTypeLabel(tags.problemType)}
+                          problemTypeValue={tags.problemType}
+                          solverTypes={[...tags.solverTypes]
+                            .map((type) => ({ value: type, label: solverTypeLabel(type) }))
+                            .sort((a, b) => a.label.localeCompare(b.label))}
+                          visualizationTypes={[...tags.visualizationCategories]
+                            // useProblemIndex's "Unimplemented" sentinel is a real facet
+                            // option (so it can still be filtered on below) but never a
+                            // real category -- stripped here so ProblemCard never renders
+                            // it as a chip; its length-0 fallback ("No visualizations")
+                            // fires instead. Direct project-owner instruction.
+                            .filter((category) => category !== "Unimplemented")
+                            .map((category) => ({ value: category, label: category }))
+                            .sort((a, b) => a.label.localeCompare(b.label))}
+                          onComplexityClassClick={toggleComplexityClassFilter}
+                          onProblemTypeClick={toggleProblemTypeFilter}
+                          onSolverTypeClick={toggleSolverTypeFilter}
+                          onVisualizationTypeClick={toggleVisualizationTypeFilter}
                         />
                       </Grid>
                     );

@@ -1,5 +1,6 @@
 import { Box, Container, Link, Typography } from "@mui/material";
-import isulogo from "../../components/images/ISULogo.png";
+import isulogoDark from "../../components/images/ISULogo-Dark.png";
+import isulogoLight from "../../components/images/ISULogo-Light.png";
 import { useThemeMode } from "../../components/ThemeModeContext";
 import { innerCardSx, pageBackground, sectionCardSx, textColors } from "../../components/theme";
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
@@ -9,6 +10,15 @@ const contributionSteps = [
   "Getting Redux running locally for development and testing",
   "Downloading, editing, and integrating templates",
   "Submitting a successful pull request",
+];
+
+const pullRequestChecklist = [
+  "Runs locally without errors — no console errors or warnings introduced",
+  "Follows existing project structure and conventions — components and pages placed consistently with the rest of the repo, matching existing naming and styling patterns",
+  "Tested before submitting — exercised the change locally, covering the normal case and at least one edge case",
+  "Clear PR description — explains what changed, why, and how to verify it",
+  "Scoped to one thing — no unrelated files, formatting-only diffs, or drive-by changes bundled in",
+  "No secrets or environment-specific values committed — API keys, local paths, .env values, etc.",
 ];
 
 const helpfulLinks = [
@@ -154,19 +164,21 @@ export default function ContributePage() {
           <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
             <SectionTitle>CHECKLIST FOR A SUCCESSFUL PULL REQUEST</SectionTitle>
 
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-              }}
-            >
-              Before submitting a pull request, make sure your changes run locally, follow the
-              existing project structure, include clear descriptions of the work completed, and are
-              tested carefully. Additional checklist details will be added as the contribution
-              documentation is expanded.
-            </Typography>
+            <Box sx={{ display: "grid", gap: 1 }}>
+              {pullRequestChecklist.map((item) => (
+                <Box key={item} sx={innerCard}>
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.82rem",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    • {item}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
           </Box>
 
           <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
@@ -271,25 +283,14 @@ export default function ContributePage() {
           underline="none"
           sx={{ display: "inline-flex" }}
         >
-          {/* Logo's "Idaho State University"/"Computer Science" text and divider
-              line are baked into the PNG as near-black pixels -- can't recolor
-              per-mode with CSS without also distorting the orange mark, so in
-              dark mode it gets a white chip to sit on instead. */}
           <Box
             component="img"
-            src={isulogo.src}
+            src={mode === "dark" ? isulogoDark.src : isulogoLight.src}
             alt="Idaho State University Computer Science"
             sx={{
               height: 72,
               width: "auto",
               display: "block",
-              opacity: 1,
-              filter: "none",
-              ...(mode === "dark" && {
-                bgcolor: "#FFFFFF",
-                borderRadius: "8px",
-                p: 1,
-              }),
             }}
           />
         </Link>
