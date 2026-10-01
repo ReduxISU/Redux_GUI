@@ -191,6 +191,21 @@ docker run -it --rm -p 3000:3000 --name reduxgui reduxgui
 
 **Note:** The Docker server uses production binaries, so warnings will be different from the development environment.
 
+### CI and publishing
+
+`.github/workflows/rbs.yml` runs the whole pipeline through the
+[Redux Build System](https://github.com/ReduxISU/Redux_Build_System) inside this repo's dev
+container: `audit → format-check → lint → build → integration-test → push`. Gates and thresholds
+live in `rbs.toml`, and the same command runs locally:
+
+```bash
+rbs ci
+```
+
+On a push to `ReduxAPI_GUI`, and only if every gate passed, `push` publishes the exact image the
+integration tests ran against to `ghcr.io/reduxisu/redux_gui` as `:<sha7>` and `:latest`. On pull
+requests it reports `skipped`. See [TESTING.md](TESTING.md) for the integration suite.
+
 ---
 
 ## Branching Strategy
