@@ -28,6 +28,16 @@ import TruncatedTextSection from "../widgets/TruncatedTextSection";
 const SOLUTION_TOO_LARGE_MESSAGE =
   "Too large to display. Select Download to get the full solution.";
 
+// solverInfo.complexity is a MathematicalFunction ({ Function, Description, VariableNames }),
+// not a plain string -- the "O(...)" framing is a display concern, not part of the wire
+// value, so it's built here rather than on the backend type. Falls back to treating it as
+// an already-formatted string for backward compatibility with an older backend.
+function formatBigO(complexity) {
+  if (!complexity) return null;
+  if (typeof complexity === "string") return complexity;
+  return `O(${complexity.Function})${complexity.Description ?? ""}`;
+}
+
 const ACCORDION_FORM_ONE = { placeHolder: "Select Solver" };
 const SOLVE_BUTTON = { buttonText: "Solve" };
 const CARD = { cardBodyText: "Solution:", cardHeaderText: "Solve" };
@@ -102,7 +112,7 @@ export default function SolveRowReact({
         classification: [
           { label: "Solver type", value: solverTypeLabel(solverInfo.solverType || "Unclassified") },
           { label: "Complexity bucket", value: solverInfo.complexityBucket || "Unclassified" },
-          { label: "Big-O", value: solverInfo.complexity || "Not yet determined" },
+          { label: "Big-O", value: formatBigO(solverInfo.complexity) || "Not yet determined" },
         ],
       }
     : TOOLTIP;
