@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import "../styles/q.css";
 import "driver.js/dist/driver.css";
 import { ThemeModeProvider } from "../components/ThemeModeContext";
+import SiteLayout from "../components/widgets/SiteLayout";
 
 // import '../styles/reducedStyle.css'
 
@@ -49,7 +50,14 @@ function MyApp({ Component, pageProps }) {
       */}
       <NextThemesProvider attribute="class" enableSystem>
         <ThemeModeProvider>
-          <Component {...pageProps} />
+          {/* Header and footer for every page; see components/widgets/SiteLayout.js. */}
+          {Component.noSiteLayout ? (
+            <Component {...pageProps} />
+          ) : (
+            <SiteLayout>
+              <Component {...pageProps} />
+            </SiteLayout>
+          )}
         </ThemeModeProvider>
       </NextThemesProvider>
     </>
