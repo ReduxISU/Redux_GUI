@@ -12,7 +12,7 @@ export function useSolver(url, problemName, problemNameMap, problemInfoMap, prob
     problemName,
     state.defaultSolverMap,
   );
-  [state.solverNameMap] = useSolverNameMap(url, problemNameMap);
+  [state.solverNameMap, , state.solverTypeMap] = useSolverNameMap(url, problemNameMap);
   [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(
     problemInstance,
     state.chosenSolver,
@@ -34,6 +34,9 @@ function useSolvedInstance(problemInstance, chosenSolver) {
 
 function useSolverNameMap(url, problemNameMap) {
   const [solverNameMap, setSolverNameMap] = useState(new Map());
+  // Raw solverType wire value (e.g. "BruteForce") per solver key, for the
+  // solver dropdown's optionTag -- SolveRowReact.js labels it via solverTypeLabel.
+  const [solverTypeMap, setSolverTypeMap] = useState(new Map());
 
   useEffect(() => {
     const problems = Array.from(problemNameMap.keys());
@@ -41,6 +44,7 @@ function useSolverNameMap(url, problemNameMap) {
       const allSolvers = (await requestAllSolvers(url)) ?? {};
       const allInfo = (await requestAllInfo(url)) ?? {};
       let map = new Map();
+      let typeMap = new Map();
 
       for (const problem of problems) {
         const solvers = allSolvers[problem] ?? [];
@@ -48,13 +52,15 @@ function useSolverNameMap(url, problemNameMap) {
           const solver = s.split(" ")[0];
           const info = allInfo[solver];
           map.set(s, info?.solverName || s);
+          typeMap.set(s, info?.solverType || "Unclassified");
         }
       }
       setSolverNameMap(map);
+      setSolverTypeMap(typeMap);
     })();
   }, [url, problemNameMap]);
 
-  return [solverNameMap, setSolverNameMap];
+  return [solverNameMap, setSolverNameMap, solverTypeMap];
 }
 
 function useDefaultSolverMap(url, problemInfoMap) {
