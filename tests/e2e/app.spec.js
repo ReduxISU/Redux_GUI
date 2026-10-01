@@ -37,8 +37,12 @@ test("the problem catalogue loads from the backend", async ({ page }) => {
   // Opening the dropdown proves the whole catalogue arrived, not just the default. With a broken
   // proxy or backend this list would simply be empty and the page would still look fine — that
   // is the failure this test exists to catch.
+  // Options' accessible names include their tags ("Clique NP-Complete Graph Theory"), so match the
+  // option holding the exact text "Clique" rather than its whole name (and not "Clique Cover").
   await problemInput.click();
-  await expect(page.getByRole("option", { name: "Clique", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("option").filter({ has: page.getByText("Clique", { exact: true }) }),
+  ).toBeVisible();
 });
 
 test("the default problem renders a visualization", async ({ page }) => {
