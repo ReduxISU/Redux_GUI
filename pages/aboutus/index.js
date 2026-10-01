@@ -122,11 +122,14 @@ function getLastName(name) {
 
 // No hover popup -- each contributor's own GitHub avatar (a real link to their
 // profile), or a question mark for contributors without a linked GitHub
-// profile, sits to the left of the name at all times, and clicking the name
-// itself opens that contributor's details (handled by `onSelect`) -- the
-// avatar and the name are separate click targets, same as the old tooltip's
-// "icon links out, name opens details" split.
-function ItemContributor({ name, profile, onSelect }) {
+// profile, sits to the left of the name at all times. The whole box is a single
+// control that opens that contributor's details (handled by `onSelect`): the
+// name is a real <button> whose ::after stretches over the entire box (the
+// positioned ancestor is the box in the parent), so clicking anywhere on the
+// box -- or Tab then Enter/Space -- opens the dialog. The avatar link sits
+// above that overlay and stays its own focusable target, so no interactive
+// element is nested inside another.
+function ItemContributor({ name, profile, onSelect, expanded }) {
   const { mode } = useThemeMode();
   const text = textColors(mode);
 
@@ -141,6 +144,8 @@ function ItemContributor({ name, profile, onSelect }) {
           sx={{
             display: "inline-flex",
             flexShrink: 0,
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <Avatar
@@ -156,20 +161,33 @@ function ItemContributor({ name, profile, onSelect }) {
           sx={{ color: text.caption, flexShrink: 0 }}
         />
       )}
-      <Typography
+      <Box
+        component="button"
+        type="button"
         onClick={() => onSelect(name)}
+        aria-haspopup="dialog"
+        aria-expanded={expanded}
         sx={{
+          all: "unset",
+          boxSizing: "border-box",
           color: text.body,
           fontSize: "0.95rem",
           lineHeight: 1.35,
           cursor: "pointer",
-          "&:hover": {
-            color: "#F47C20",
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            borderRadius: "10px",
+          },
+          "&:focus-visible::after": {
+            outline: "2px solid #F47C20",
+            outlineOffset: "-2px",
           },
         }}
       >
         {name}
-      </Typography>
+      </Box>
     </Box>
   );
 }
@@ -533,8 +551,9 @@ export default function AboutUsPage() {
                               minHeight: "46px",
                               display: "flex",
                               alignItems: "center",
+                              position: "relative",
                               transition: "all 0.2s ease",
-                              "&:hover": {
+                              "&:hover, &:has(button:focus-visible)": {
                                 borderColor: "#F47C20",
                                 background: surface.surfaceAltHover,
                               },
@@ -542,6 +561,7 @@ export default function AboutUsPage() {
                           >
                             <ItemContributor
                               name={name}
+                              expanded={modalOpen && selectedContributor === name}
                               profile={contributorProfiles[name]}
                               onSelect={handleContributorClick}
                             />
