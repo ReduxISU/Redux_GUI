@@ -33,8 +33,7 @@ const SOLVE_BUTTON = { buttonText: "Solve" };
 const CARD = { cardBodyText: "Solution:", cardHeaderText: "Solve" };
 const TOOLTIP = {
   header: "Solver Information",
-  formalDef: "Choose a type of solver to see information about it",
-  info: "",
+  info: "Choose a type of solver to see information about it",
   solverType: "",
   complexity: "",
   complexityBucket: "",
@@ -51,6 +50,7 @@ export default function SolveRowReact({
   setSolvedInstance,
   solverOptions,
   solverNameMap,
+  solverTypeMap,
   problemNameMap,
   chosenReduceTo,
   dragHandleProps,
@@ -85,9 +85,10 @@ export default function SolveRowReact({
   const tip = chosenSolver
     ? {
         header: solverInfo.solverName ?? "",
-        formalDef: solverInfo.solverDefinition ?? "",
         // Keep description clean
-        info: solverInfo.info ?? solverInfo.description ?? "",
+        info: solverInfo.solverDefinition || solverInfo.info || solverInfo.description || "",
+        input: solverInfo.inputDescription ?? "",
+        output: solverInfo.outputDescription ?? "",
         // Source on its own line
         source: solverInfo.source,
         credit:
@@ -115,6 +116,10 @@ export default function SolveRowReact({
           onSelect={setChosenSolver}
           options={solverOptions}
           optionsMap={solverNameMap}
+          optionTag={(key) => ({
+            label: solverTypeLabel(solverTypeMap?.get(key) || "Unclassified"),
+            kind: "solverType",
+          })}
           disabled={!problemName}
           disabledMessage={"No solvers available. Please select a problem."}
           extenderButtons={(input) => {

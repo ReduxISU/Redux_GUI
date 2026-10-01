@@ -1,7 +1,19 @@
 import React from "react";
+import { useThemeMode } from "../../ThemeModeContext";
+import { surfaceColors, textColors } from "../../theme";
 import { getColorByKey } from "../constants/VisColorsArray";
 
+// Cells/rows with an explicit highlight color (row.color / cellColors) sit on a
+// fixed-hex VisColors swatch that doesn't change with theme, so they always use
+// this fixed dark text rather than the page's theme-aware textColor -- otherwise
+// dark mode's near-white text would go illegible against a light swatch.
+const HIGHLIGHTED_TEXT_COLOR = "#111827";
+
 export default function DynamicTableSvgReact({ problemData }) {
+  const { mode } = useThemeMode();
+  const textColor = textColors(mode).heading;
+  const surface = surfaceColors(mode);
+
   if (!problemData || !problemData.rows || !problemData.columns) return null;
 
   const { title, columns, rows } = problemData;
@@ -15,6 +27,7 @@ export default function DynamicTableSvgReact({ problemData }) {
             fontFamily: "monospace",
             fontSize: "14px",
             fontWeight: "bold",
+            color: textColor,
           }}
         >
           {title}
@@ -37,10 +50,11 @@ export default function DynamicTableSvgReact({ problemData }) {
             width: "100%",
             fontFamily: "monospace",
             fontSize: "14px",
+            color: textColor,
           }}
         >
           <thead>
-            <tr style={{ backgroundColor: "#f0f0f0", position: "sticky", top: 0 }}>
+            <tr style={{ backgroundColor: surface.surfaceAlt, position: "sticky", top: 0 }}>
               {columns.map((col) => (
                 <th key={col.key} style={thStyle}>
                   {col.label}
@@ -53,7 +67,8 @@ export default function DynamicTableSvgReact({ problemData }) {
               <tr
                 key={row.id ?? rowIndex}
                 style={{
-                  backgroundColor: row.color ? getColorByKey(row.color) : "white",
+                  backgroundColor: row.color ? getColorByKey(row.color) : surface.surface,
+                  color: row.color ? HIGHLIGHTED_TEXT_COLOR : undefined,
                   fontWeight: row.color ? "bold" : "normal",
                 }}
               >
@@ -65,6 +80,7 @@ export default function DynamicTableSvgReact({ problemData }) {
                       style={{
                         ...tdStyle,
                         backgroundColor: cellColor ? getColorByKey(cellColor) : "inherit",
+                        color: cellColor ? HIGHLIGHTED_TEXT_COLOR : undefined,
                       }}
                     >
                       {row.cells?.[col.key] ?? "-"}
