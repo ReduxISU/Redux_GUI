@@ -38,7 +38,9 @@ test("the problem catalogue loads from the backend", async ({ page }) => {
   // proxy or backend this list would simply be empty and the page would still look fine — that
   // is the failure this test exists to catch.
   await problemInput.click();
-  await expect(page.getByRole("option", { name: "Clique", exact: true })).toBeVisible();
+  // Each option also carries its complexity-class and problem-type chips, so the option's
+  // accessible name is "Clique NP-Complete Graph Theory"; match the label text itself.
+  await expect(page.getByRole("listbox").getByText("Clique", { exact: true })).toBeVisible();
 });
 
 test("the default problem renders a visualization", async ({ page }) => {
