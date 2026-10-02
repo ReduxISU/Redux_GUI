@@ -260,13 +260,11 @@ function BioField({ value }) {
 }
 
 const REPO_STAT_FIELDS = [
-  { key: "commits", singular: "commit", plural: "commits" },
-  { key: "prsOpened", singular: "PR opened", plural: "PRs opened" },
   { key: "prsMerged", singular: "PR merged", plural: "PRs merged" },
   { key: "reviews", singular: "review", plural: "reviews" },
 ];
 
-// Renders as "100 commits · 14 PRs opened · 1 PR merged · 31 reviews", dropping any
+// Renders as "1 PR merged · 31 reviews", dropping any
 // field that's zero or missing -- most contributors only have partial data (see
 // ContributorRepoStats on the backend), especially for pre-PR-workflow-era work.
 function formatRepoStats(stats) {
