@@ -13,10 +13,9 @@ import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels
 import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
 import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
 import { useThemeMode } from "../../components/ThemeModeContext";
-import { pageBackground, sectionCardSx, surfaceColors, textColors } from "../../components/theme";
+import { sectionCardSx, surfaceColors, textColors } from "../../components/theme";
 import FacetFilterGroup from "../../components/widgets/FacetFilterGroup";
 import ProblemCard from "../../components/widgets/ProblemCard";
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 import SearchBarExtensible from "../../components/widgets/SearchBarExtensible";
 
 const reduxBaseUrl = "/api/redux/";
@@ -157,14 +156,7 @@ export default function BrowsePage() {
   );
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: pageBackground(mode),
-      }}
-    >
-      <ResponsiveAppBar />
-
+    <>
       <Container maxWidth="lg" sx={{ pt: 3, pb: 6 }}>
         <Typography sx={{ color: text.heading, fontSize: "1.4rem", fontWeight: 600, mb: 0.5 }}>
           Browse Problems
@@ -327,6 +319,6 @@ export default function BrowsePage() {
           </Grid>
         )}
       </Container>
-    </Box>
+    </>
   );
 }
