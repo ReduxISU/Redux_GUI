@@ -14,6 +14,16 @@ export default function DynamicTableSvgReact({ problemData }) {
   const textColor = textColors(mode).heading;
   const surface = surfaceColors(mode);
 
+  // Opaque fills: a sticky cell must hide what scrolls beneath it, and the dark-mode surfaceAlt
+  // is translucent, so it is layered over the solid surface colour.
+  const headerFill = {
+    backgroundColor: surface.surface,
+    position: "sticky",
+    top: 0,
+    zIndex: 1,
+    backgroundImage: `linear-gradient(${surface.surfaceAlt}, ${surface.surfaceAlt})`,
+  };
+
   if (!problemData || !problemData.rows || !problemData.columns) return null;
 
   const { title, columns, rows } = problemData;
@@ -33,6 +43,7 @@ export default function DynamicTableSvgReact({ problemData }) {
           {title}
         </div>
       )}
+      {/* Horizontal scroll with a sticky first column, so wide tables stay readable on a phone. */}
       {/* Capped height with a sticky header: traces (a DFA run, a long Dijkstra table)
                 can be far taller than the visualization pane, and scrolling one out of view
                 loses the column labels that make the rows readable. */}
@@ -48,6 +59,7 @@ export default function DynamicTableSvgReact({ problemData }) {
           style={{
             borderCollapse: "collapse",
             width: "100%",
+            minWidth: "max-content",
             fontFamily: "monospace",
             fontSize: "14px",
             color: textColor,
@@ -55,8 +67,11 @@ export default function DynamicTableSvgReact({ problemData }) {
         >
           <thead>
             <tr style={{ backgroundColor: surface.surfaceAlt, position: "sticky", top: 0 }}>
-              {columns.map((col) => (
-                <th key={col.key} style={thStyle}>
+              {columns.map((col, colIndex) => (
+                <th
+                  key={col.key}
+                  style={{ ...thStyle, ...headerFill, ...(colIndex === 0 ? stickyHeadCell : null) }}
+                >
                   {col.label}
                 </th>
               ))}
@@ -72,13 +87,14 @@ export default function DynamicTableSvgReact({ problemData }) {
                   fontWeight: row.color ? "bold" : "normal",
                 }}
               >
-                {columns.map((col) => {
+                {columns.map((col, colIndex) => {
                   const cellColor = row.cellColors?.[col.key];
                   return (
                     <td
                       key={col.key}
                       style={{
                         ...tdStyle,
+                        ...(colIndex === 0 ? stickyCell : null),
                         backgroundColor: cellColor ? getColorByKey(cellColor) : "inherit",
                         color: cellColor ? HIGHLIGHTED_TEXT_COLOR : undefined,
                       }}
@@ -102,6 +118,9 @@ const thStyle = {
   textAlign: "center",
   fontWeight: "bold",
 };
+
+const stickyCell = { position: "sticky", left: 0, zIndex: 1 };
+const stickyHeadCell = { left: 0, zIndex: 2 };
 
 const tdStyle = {
   border: "1px solid #ccc",
