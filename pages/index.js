@@ -150,9 +150,17 @@ function MainPageContent() {
       <div className="container-fluid">
         {/** This is an artifact from the old bootstrap code, may be deprecated */}
         <div className="d-flex flex-column">
-          <div className="p-2 col-example">
-            <ShareButton problem={problem} solver={solver} verifier={verifier} reducer={reducer} />
+          {/* In normal flow under the nav bar, so neither button can cover a row's controls. */}
+          <div className="p-2 col-example d-flex justify-content-between align-items-center">
             <TourLauncher />
+            <div className="ms-auto">
+              <ShareButton
+                problem={problem}
+                solver={solver}
+                verifier={verifier}
+                reducer={reducer}
+              />
+            </div>
           </div>
           <DndContext
             sensors={sensors}
