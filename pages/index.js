@@ -30,7 +30,6 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Grid, Typograph } from "@mui/material";
 import { memo, useEffect, useState } from "react"; // CHANGED: added useState for row order
 import { Container } from "react-bootstrap";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
