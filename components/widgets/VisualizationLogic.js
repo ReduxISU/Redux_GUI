@@ -7,6 +7,10 @@ import { makeIdsUnique, processReductions, remapIdsDeep } from "../redux";
 import { No_Renderable_Viz_Svg, Viz_Render_Error_Svg } from "../Visualization/svgs/No_Viz_SVG";
 import { isRenderable } from "../Visualization/svgs/renderability";
 import Visualizations from "../Visualization/svgs/Visualizations.js";
+import ZoomPanView from "../Visualization/ZoomPanView";
+
+// Table visualizations scroll natively instead of zooming.
+const NON_ZOOMABLE_TYPES = ["DynamicTable", "Dynamic Table"];
 
 export default function VisualizationLogic({
   url,
@@ -26,6 +30,8 @@ export default function VisualizationLogic({
   const [gadgetMap, setGadgetMap] = useState([]);
   let visualization;
   let reducedVisualization;
+  let zoomMain = false;
+  let zoomReduced = false;
 
   const solve = visualizationState.solverOn;
 
@@ -78,6 +84,7 @@ export default function VisualizationLogic({
           gadgetMap,
           visualizationState.gadgetsOn,
         );
+        zoomMain = !NON_ZOOMABLE_TYPES.includes(visualizationType);
       } catch (err) {
         console.error("visualization renderer threw", visualizationType, err);
         visualization = (
@@ -106,6 +113,7 @@ export default function VisualizationLogic({
             gadgetMap,
             visualizationState.gadgetsOn,
           );
+          zoomReduced = !NON_ZOOMABLE_TYPES.includes(reductionVisualization);
 
           //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance,
           // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
@@ -123,6 +131,17 @@ export default function VisualizationLogic({
         }
       }
     }
+  }
+
+  // A different problem, instance or visualization starts from the fitted view again.
+  const resetKey = `${problemName}|${problemInstance}|${visualizationType}`;
+  if (zoomMain) visualization = <ZoomPanView resetKey={resetKey}>{visualization}</ZoomPanView>;
+  if (zoomReduced) {
+    reducedVisualization = (
+      <ZoomPanView resetKey={`${resetKey}|${reductionVisualization}`}>
+        {reducedVisualization}
+      </ZoomPanView>
+    );
   }
 
   if (!visualizationState.reductionOn && !loading) {
