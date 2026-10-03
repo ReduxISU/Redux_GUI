@@ -10,13 +10,12 @@
 
 import React, { useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Download as DownloadIcon, DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
-import { Button, IconButton } from "@mui/material";
+import { Download as DownloadIcon } from "@mui/icons-material";
+import { Button } from "@mui/material";
 import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import { requestSolvedInstance } from "../redux";
-import { useThemeMode } from "../ThemeModeContext";
-import { surfaceColors, textColors } from "../theme";
+import DragHandle from "../widgets/DragHandle";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
@@ -55,10 +54,6 @@ export default function SolveRowReact({
   chosenReduceTo,
   dragHandleProps,
 }) {
-  const { mode } = useThemeMode();
-  const surface = surfaceColors(mode);
-  const text = textColors(mode);
-
   const solverInfo = useSolverInfo(url, chosenSolver);
 
   async function handleSolve() {
@@ -133,23 +128,7 @@ export default function SolveRowReact({
           }}
         />{" "}
         <PopoverTooltipClick toolTip={tip} />
-        {dragHandleProps && (
-          <IconButton
-            {...dragHandleProps.attributes}
-            {...dragHandleProps.listeners}
-            size="small"
-            title="Drag to reorder"
-            sx={{
-              cursor: "grab",
-              color: text.body,
-              backgroundColor: surface.surfaceAlt,
-              "&:hover": { backgroundColor: surface.surfaceAltHover },
-              mr: 1,
-            }}
-          >
-            <DragIndicatorIcon />
-          </IconButton>
-        )}
+        <DragHandle dragHandleProps={dragHandleProps} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>
