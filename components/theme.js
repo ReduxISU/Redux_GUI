@@ -141,6 +141,41 @@ export function textColors(mode) {
       };
 }
 
+// Thin, low-contrast vertical scrollbar for tall/scrollable panels (the
+// Browse sidebar's scrollable facet lists, About Us's collapsible section
+// bodies) -- the browser's own default scrollbar draws a solid track/background
+// that reads as an extra box around content this size; this keeps just a slim,
+// faint thumb on a transparent track so it's still obvious the panel scrolls,
+// without that boxed-in look. Direct project-owner instruction.
+//
+// Firefox's `scrollbar-color` is a single thumb/track shorthand -- no separate
+// pseudo-elements, and "transparent" is a real value there, unlike some older
+// engines. WebKit/Chromium need the `::-webkit-scrollbar` pseudo-element
+// family instead; both are included so every engine gets the same look. Uses
+// `text.faint` (the same subtle grey the unchecked-checkbox border already
+// uses) as the thumb color rather than inventing a new one.
+export function thinScrollbarSx(mode) {
+  const thumb = mode === "dark" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.18)";
+  const thumbHover = mode === "dark" ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.28)";
+  return {
+    scrollbarWidth: "thin",
+    scrollbarColor: `${thumb} transparent`,
+    "&::-webkit-scrollbar": {
+      width: "6px",
+    },
+    "&::-webkit-scrollbar-track": {
+      background: "transparent",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      background: thumb,
+      borderRadius: "999px",
+    },
+    "&::-webkit-scrollbar-thumb:hover": {
+      background: thumbHover,
+    },
+  };
+}
+
 // Plain surface tokens (card backgrounds/borders outside sectionCardSx/
 // innerCardSx -- e.g. a chip or avatar background that isn't itself a card).
 export function surfaceColors(mode) {
