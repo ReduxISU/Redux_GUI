@@ -39,3 +39,6 @@ export default function QuantumDemoPage() {
     </div>
   );
 }
+
+// Hidden sandbox page: no site header/footer (see components/widgets/SiteLayout.js).
+QuantumDemoPage.noSiteLayout = true;
