@@ -144,6 +144,56 @@ test("the 3SAT verifier answers True and False correctly", async ({ page }) => {
   await expect(body).toContainText("Verifier output: False");
 });
 
+test("a 3SAT certificate containing new lines reaches the backend instead of being rejected", async ({
+  page,
+}) => {
+  const verifyRow = row(page, "Verify");
+  const verifyButton = verifyRow.getByRole("button", {
+    name: "Verify",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(verifyButton).toBeEnabled();
+  await verifyRow.getByRole("button", { name: "▼" }).click();
+  const body = verifyRow.locator(".card-body");
+  await expect(body).toBeVisible();
+
+  // Regression test for #327: the frontend used to reject anything with a new line as "Invalid
+  // Input" before the request was sent. Only assert that the backend answers True/False. Its
+  // answer for new-line-separated pairs is currently unreliable (Redux backend issue), so the
+  // value itself is deliberately not asserted.
+  await body.getByRole("textbox").fill("(x1:True,\nx2:True,\nx3:False)");
+  await verifyButton.click();
+  await expect(body).toContainText(/Verifier output: (True|False)/);
+  await expect(body).not.toContainText("Invalid Input");
+});
+
+test("a malformed certificate shows the backend's parse error, never undefined", async ({
+  page,
+  expectedFailures,
+}) => {
+  // The backend answers an unreadable certificate with a deliberate 400; don't let the
+  // silent-failure guard treat that as a hidden failure.
+  expectedFailures.push({ url: "ProblemProvider/verify", status: 400 });
+
+  const verifyRow = row(page, "Verify");
+  const verifyButton = verifyRow.getByRole("button", {
+    name: "Verify",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(verifyButton).toBeEnabled();
+  await verifyRow.getByRole("button", { name: "▼" }).click();
+  const body = verifyRow.locator(".card-body");
+  await expect(body).toBeVisible();
+
+  await body.getByRole("textbox").fill("garbage(((");
+  await verifyButton.click();
+  await expect(body).toContainText("Certificate couldn't be read.");
+  await expect(body).toContainText("Expected:");
+  await expect(body).not.toContainText("undefined");
+});
+
 test("a ?problem= URL param selects that problem instead of the default", async ({ page }) => {
   // Regression test for #326: /browse's problem cards link to `/?problem=<CLASSKEY>`
   // (components/widgets/ProblemCard.js), and the home page used to ignore that param and always
