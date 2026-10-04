@@ -33,6 +33,7 @@ import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProble
 import { useThemeMode } from "../../components/ThemeModeContext";
 import { pageBackground, sectionCardSx, surfaceColors, textColors } from "../../components/theme";
 import { ALL_VISUALIZATIONS_KEY } from "../../components/Visualization/svgs/visualizationCategories";
+import ActiveFilterSummary from "../../components/widgets/ActiveFilterSummary";
 import FacetFilterGroup from "../../components/widgets/FacetFilterGroup";
 import ProblemCard from "../../components/widgets/ProblemCard";
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
@@ -248,6 +249,76 @@ export default function BrowsePage() {
     problemNameMap,
   ]);
 
+  // The same active filters, grouped the way they combine (see ActiveFilterSummary): groups AND
+  // together, values inside a group OR together, and Solver Type + Solver Complexity form one
+  // group when both are set because a single solver has to match both.
+  const filterGroups = useMemo(() => {
+    const visualizationTypeLabel = (value) =>
+      value === ALL_VISUALIZATIONS_KEY ? "All Visualizations" : value;
+    const part = (label, selected, toLabel) => ({ label, values: [...selected].map(toLabel) });
+    const groups = [];
+    if (selectedComplexityClasses.size > 0) {
+      groups.push({
+        key: "complexityClass",
+        parts: [part("Complexity class", selectedComplexityClasses, complexityClassLabel)],
+      });
+    }
+    if (selectedProblemTypes.size > 0) {
+      groups.push({
+        key: "problemType",
+        parts: [part("Problem type", selectedProblemTypes, problemTypeLabel)],
+      });
+    }
+    if (selectedSolverTypes.size > 0 && selectedSolverComplexities.size > 0) {
+      groups.push({
+        key: "solver",
+        parts: [
+          part("A solver that is", selectedSolverTypes, solverTypeLabel),
+          part("", selectedSolverComplexities, solverComplexityLabel),
+        ],
+        note: "(both on the same solver)",
+      });
+    } else if (selectedSolverTypes.size > 0) {
+      groups.push({
+        key: "solver",
+        parts: [part("Solver type", selectedSolverTypes, solverTypeLabel)],
+      });
+    } else if (selectedSolverComplexities.size > 0) {
+      groups.push({
+        key: "solver",
+        parts: [part("Solver complexity", selectedSolverComplexities, solverComplexityLabel)],
+      });
+    }
+    if (selectedVisualizationTypes.size > 0) {
+      groups.push({
+        key: "visualization",
+        parts: [part("Visualization", selectedVisualizationTypes, visualizationTypeLabel)],
+      });
+    }
+    if (reachabilitySource) {
+      groups.push({
+        key: "reachability",
+        parts: [
+          {
+            label: "Reachable from",
+            values: [problemNameMap.get(reachabilitySource) ?? reachabilitySource],
+          },
+        ],
+        note: reachabilityMode === "anyHops" ? "by any number of reductions" : "by one reduction",
+      });
+    }
+    return groups;
+  }, [
+    selectedComplexityClasses,
+    selectedSolverTypes,
+    selectedSolverComplexities,
+    selectedProblemTypes,
+    selectedVisualizationTypes,
+    reachabilitySource,
+    reachabilityMode,
+    problemNameMap,
+  ]);
+
   return (
     <Box
       sx={{
@@ -428,15 +499,7 @@ export default function BrowsePage() {
             </Grid>
 
             <Grid size={{ xs: 12, md: filtersExpanded ? 9 : 10 }}>
-              <Typography sx={{ color: text.caption, fontSize: "0.82rem", mb: 1.5 }}>
-                {filteredProblems.length} problem{filteredProblems.length === 1 ? "" : "s"}
-                {activeFilterTags.length > 0 && (
-                  <>
-                    {" "}
-                    matching: <strong>{activeFilterTags.join(", ")}</strong>
-                  </>
-                )}
-              </Typography>
+              <ActiveFilterSummary count={filteredProblems.length} groups={filterGroups} />
 
               {filteredProblems.length === 0 ? (
                 <Box sx={{ ...theSectionCard, textAlign: "center", py: 5 }}>
