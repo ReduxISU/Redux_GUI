@@ -138,7 +138,11 @@ export default function VisualizationLogic({
   if (zoomMain) visualization = <ZoomPanView resetKey={resetKey}>{visualization}</ZoomPanView>;
   if (zoomReduced) {
     reducedVisualization = (
-      <ZoomPanView resetKey={`${resetKey}|${reductionVisualization}`}>
+      // Includes the target problem and reduction too: two reductions can share a renderer, and
+      // switching between them must still start from the fitted view.
+      <ZoomPanView
+        resetKey={`${resetKey}|${reductionName}|${chosenReductionType}|${reductionVisualization}`}
+      >
         {reducedVisualization}
       </ZoomPanView>
     );

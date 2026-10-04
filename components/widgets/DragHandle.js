@@ -13,7 +13,9 @@ export default function DragHandle({ dragHandleProps }) {
       {...dragHandleProps.listeners}
       aria-label="Drag to reorder"
       title="Drag to reorder"
-      sx={{ cursor: "grab" }}
+      // touch-action: none, or the browser starts scrolling partway through a touch drag, which
+      // cancels the pointer and snaps the section back (dnd-kit requires it on the drag handle).
+      sx={{ cursor: "grab", touchAction: "none" }}
     >
       <DragIndicatorIcon />
     </HeaderIconButton>
