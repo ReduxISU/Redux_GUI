@@ -154,7 +154,7 @@ test("a 3SAT certificate containing new lines reaches the backend instead of bei
     includeHidden: true,
   });
   await expect(verifyButton).toBeEnabled();
-  await verifyRow.getByRole("button", { name: "▼" }).click();
+  await verifyRow.getByRole("button", { name: "Expand Verify section" }).click();
   const body = verifyRow.locator(".card-body");
   await expect(body).toBeVisible();
 
@@ -183,7 +183,7 @@ test("a malformed certificate shows the backend's parse error, never undefined",
     includeHidden: true,
   });
   await expect(verifyButton).toBeEnabled();
-  await verifyRow.getByRole("button", { name: "▼" }).click();
+  await verifyRow.getByRole("button", { name: "Expand Verify section" }).click();
   const body = verifyRow.locator(".card-body");
   await expect(body).toBeVisible();
 
