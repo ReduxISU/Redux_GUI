@@ -39,7 +39,7 @@ The Redux Frontend is a Next.js-based web application that provides an interacti
 
 Before you begin, ensure you have the following installed:
 
-- [Node.js](https://nodejs.org/en/download) (with npm)
+- [Node.js](https://nodejs.org/en/download) version 26 or newer (it comes with npm)
 - [Redux Backend](https://github.com/ReduxISU/Redux) (must be running)
 
 ---
@@ -56,34 +56,42 @@ cd Redux_GUI
 ### Step 2: Install Dependencies
 
 ```bash
-npm install
+npm ci
 ```
+
+`npm ci` installs exactly the package versions the project expects.
 
 ### Step 3: Ensure Backend is Running
 
 The Redux GUI requires the Redux API to be running. If you need to work on both the frontend and backend simultaneously:
 
 1. Clone the Redux API repository
-2. Launch the Redux API using `dotnet run`
+2. Launch the Redux API using `dotnet run` (the Redux repo's [setup guide](https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/guides/setup.md) has the details)
 3. The API will be available at `http://127.0.0.1:27000/`
+
+The GUI finds the API through the `REDUX_BASE_URL` setting. `.env.development` already points it at `http://localhost:27000/`, so for local work you do not need to change anything.
 
 ### Step 4: Start Development Server
 
 ```bash
 npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
 ## Code Overview
 
 The Redux frontend is currently functionally complete. The majority of future additions will be **visualizations**.
 
-![VizFiles](./images/VizFiles.png)
-
 ### Key Directory Structure
 
 **Visualization Files:**
-- `components/Visualization/svgs/Visualizations.js` - Maps problem names to visualization components
-- `components/Visualization/svgs/ReducedVisualizations.js` - Maps reduction names to visualization components  
+- `components/Visualization/svgs/Visualizations.js` - The registry that maps a `visualizationType` (for example `GraphD3`) to the renderer that draws it
+- `components/Visualization/svgs/visualizationTypes.json` - A copy of the API's list of visualization types (see "Adding New Visualizations" below)
 - `components/Visualization/svgs/` - Contains all SVG-generating React components
+- `components/widgets/VisualizationLogic.js` - Looks up the renderer and hands it the data to draw (reductions are drawn through the same registry)
 
 **Page Components:**
 - `components/pageblocks/` - Major components that make up the main interface
@@ -104,51 +112,26 @@ When adding new features:
 
 ### Adding New Visualizations
 
-All visualizations are built on the frontend. Follow these steps to add a new visualization:
+A visualization has two halves. The **API** works out the data and sends it as JSON. The **GUI** (this repo) draws that JSON. For the full cross-repo walkthrough, read the Redux guide
+[Adding a visualization](https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/guides/adding-a-visualization.md).
 
-#### 1. Create the Visualization Component
+**Most of the time you do not need to change this repo.** If your new problem can be drawn by an existing renderer (graphs, sets, SAT formulas, quantum circuits, tables, pump schedules), you only add a visualization class in the Redux API. The GUI asks the API what exists and draws it.
 
-Add your visualization to the `components/Visualization/svgs/` folder.
+You only change this repo when you need a **brand-new visualization type** that no existing renderer can draw. Then:
 
-**Requirements:**
-- Must be a React component function
-- Must return an SVG element
-- Should take only a URL for an API call as a parameter
+1. **Create the renderer.** Add a React component to `components/Visualization/svgs/` that returns an SVG. The GUI fetches the data for you and passes it in as props, so your component does not call the API itself. It receives `problemData` (the JSON the API produced), `solve`, `url`, `gadgetMap`, and `gadgetsOn`. Copy a small existing renderer such as `StandardGraphSvgReact.js` and follow its style.
+2. **Register it.** In `components/Visualization/svgs/Visualizations.js`, add a small factory function and one entry to the `Visualizations` map, keyed by the type name:
 
-**Example structure:**
+   ```javascript
+   ["GraphD3", renderGraphD3],
+   ```
 
-![SVG Return Example](./images/svgreturn.png)
+   Keep the key a double-quoted string at the start of the entry. The coverage checker reads the file with a text pattern, not a JavaScript parser.
+3. **Update the vendored manifest.** Add the type name to `components/Visualization/svgs/visualizationTypes.json`. This file is a copy of the API's `Documentation/visualization-types.json`.
+4. **Check it.** Run `npm run check:visualizations`. It fails if the registry and the manifest disagree.
+5. **Open the matching API PR** in the Redux repo (new `VisualizationType` member plus its manifest entry). Open this GUI PR first and link the two PRs to each other. If the lists drift apart, a daily check (`.github/workflows/manifest-drift.yml`) opens an issue. It never blocks your PR.
 
-Current best practice is that these functions take only a URL for an API call, which returns information specific to the visualization. Because each visualization is specialized, the way the SVG is generated is up to the developer working on the problem, although they should follow the style of current visualizations and reuse methods for similar visualizations wherever possible.
-
-#### 2. Follow Best Practices
-
-- The API URL should return information specific to your visualization
-- Follow the style of existing visualizations
-- Reuse methods for similar visualizations wherever possible
-- Ensure the visualization works for both solved and unsolved problem instances
-
-#### 3. Register the Visualization
-
-Once your visualization is complete, add it to the appropriate map:
-
-![Visualization Map](./images/VisualizationMap.png)
-
-**For general problem visualizations:**
-- Open `components/Visualization/svgs/Visualizations.js`
-- Add your component to the map with the problem name as the key
-
-**For reduction visualizations:**
-- Open `components/Visualization/svgs/ReducedVisualizations.js`
-- Add your component to the map with the reduction name as the key
-
-**Example:**
-```javascript
-const visualizationMap = {
-  "My Problem Name": (props) => <MyProblemVisualization {...props} />,
-  // ... other visualizations
-};
-```
+Whichever case you are in, make sure the visualization works for both solved and unsolved problem instances.
 
 ### Adding New Major Components
 
@@ -164,32 +147,20 @@ General-purpose React components should be added to the `components/widgets/` fo
 
 ## Deployment
 
-### Production Deployment with npm
-
-To deploy the application in production mode:
-
-```bash
-npm install
-npm run build
-npm start
-```
-
-This will:
-- Install all dependencies
-- Build a production-optimized version
-- Start a production server on port 3000
-
 ### Docker Deployment
 
-Alternatively, deploy using Docker:
+Production runs as a Docker image. The `Dockerfile` installs dependencies and builds the site inside the image, so you do not need to run `npm run build` first:
 
 ```bash
-npm run build
 docker build -t reduxgui .
 docker run -it --rm -p 3000:3000 --name reduxgui reduxgui
 ```
 
+The site is then at [http://localhost:3000](http://localhost:3000). Add `-e REDUX_BASE_URL=<address of a running Redux API>` to the `docker run` command so the container can reach the API.
+
 **Note:** The Docker server uses production binaries, so warnings will be different from the development environment.
+
+To only check that the site builds (no Docker), run `npm run build`.
 
 ### CI and publishing
 
@@ -204,58 +175,73 @@ rbs ci
 
 On a push to `ReduxAPI_GUI`, and only if every gate passed, `push` publishes the exact image the
 integration tests ran against to `ghcr.io/reduxisu/redux_gui` as `:<sha7>` and `:latest`. On pull
-requests it reports `skipped`. See [TESTING.md](TESTING.md) for the integration suite.
+requests it reports `skipped`. See [TESTING.md](TESTING.md) for the integration suite and how to run it.
+
+For a plain-language overview of every check on a PR (what it does, which ones block merging, and what to do when one fails), see the Redux guide [Building and testing](https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/guides/building-and-testing.md).
+
+Before you push, run:
+
+```bash
+npm run format:check   # formatting (Biome); `npm run format` fixes it
+npm run lint           # code problems (ESLint); `npm run lint:fix` fixes many
+npm run check:visualizations
+npm run build
+```
 
 ---
 
 ## Branching Strategy
 
-### Production Branch
-- **Branch name:** `ReduxAPI_GUI`
-- Additions should **only** be made through merging from the `develop` branch
-- Requires code review before merging
-
-### Development Branch
-- **Branch name:** `develop`
-- Most code additions are made directly here
-- Relatively few merge conflicts
+There is one long-lived branch: **`ReduxAPI_GUI`**. It is the production branch, and every change reaches it through a pull request (PR).
 
 ### Workflow
 
-1. **Make changes** on the `develop` branch (or create a feature branch from `develop`)
-2. **Create a pull request** to merge into `develop`
-3. **Assign a reviewer** for code review
-4. **Reviewer completes** the pull request after approval
-5. **Periodically merge** `develop` into `ReduxAPI_GUI` for production deployment
+1. **Create a branch** from `ReduxAPI_GUI`, with a descriptive name:
 
-** Important:** The person who completes the code review is responsible for completing the pull request.
+   ```bash
+   git fetch origin
+   git switch -c my-change origin/ReduxAPI_GUI
+   ```
+
+2. **Make your changes** and run the checks listed under "CI and publishing" above.
+3. **Open a pull request** that targets `ReduxAPI_GUI`.
+4. **Assign a reviewer** for code review.
+5. **Wait for the checks to pass.** When a push to `ReduxAPI_GUI` succeeds, the image is published automatically (see "CI and publishing").
+
+**Important:** The person who completes the code review is responsible for completing the pull request.
 
 ---
 
 ## Definition of Done
 
+### Any pull request
+
+- `npm run format:check` and `npm run lint` pass
+- `npm run check:visualizations` passes
+- `npm run build` succeeds
+- The PR targets `ReduxAPI_GUI` and the CI checks are green (read the rbs report, not just the status)
+- If you changed behavior a user can see, you added or updated an integration test, or explained in the PR why not (see [TESTING.md](TESTING.md))
+
 ### New Visualizations
 
-All added visualizations must fulfill the following requirements:
+If your visualization reuses an existing type, the work is in the Redux API and is covered by the [checklist in that guide](https://github.com/ReduxISU/Redux/blob/CSharpAPI/Documentation/guides/adding-a-visualization.md). Nothing is needed here.
 
- **React Component Structure**
-- Visualization function is a React component that returns an SVG
-- Component takes an API call URL as a parameter
+If you added a **new type** to this repo, all of the following must be true:
 
- **API Integration**
-- API endpoint specific to the visualization is functional
-- Both solved and unsolved variations have working endpoints
-- Endpoints are documented correctly in the backend
+**React Component Structure**
+- The renderer is a React component that returns an SVG
+- It draws from the `problemData` prop it is given, and does not call the API itself
+- It follows the style of existing visualizations and reuses their methods where applicable
 
- **Feature Completeness**
-- Solution highlighting is functional for general problem visualization
-- Gadget highlighting is functional for reduction visualizations
-- Works for all relevant reduction types
+**Feature Completeness**
+- Solution highlighting works (both solved and unsolved instances draw correctly)
+- Gadget highlighting works if the type is used for reduction visualizations
+- It works for all relevant reduction types
 
- **Code Integration**
-- React component is added to the correct visualization map
-- Component follows the style of existing visualizations
-- Reuses methods from similar visualizations where applicable
+**Code Integration**
+- The renderer is registered in `components/Visualization/svgs/Visualizations.js`
+- The type name is in `components/Visualization/svgs/visualizationTypes.json`, spelled exactly like the API's enum member
+- The matching Redux API PR exists and links to this one
 
 ---
 
@@ -278,7 +264,7 @@ For a complete list of contributors, visit our [About Us page](https://redux.por
 ### Technology Stack
 - **Framework:** Next.js (React)
 - **Visualization:** D3.js, SVG
-- **Styling:** CSS/Styled Components
+- **Styling:** MUI (Material UI) and CSS
 - **API Communication:** REST API calls to Redux Backend
 
 ### Related Repositories
