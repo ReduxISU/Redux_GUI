@@ -26,9 +26,13 @@ import { visualizationTypeCategory } from "../../Visualization/svgs/visualizatio
  * @param url Base API URL, e.g. `/api/redux/`.
  * @returns `{ problemIndex: Map<problemName, {displayName: string,
  * complexityClass: string, complexityClasses: Set<string>, problemType: string,
- * solverTypes: Set<string>, visualizationTypes: Set<string>,
- * visualizationCategories: Set<string>}>,
- * reductionGraph: object, loading: boolean }`. visualizationTypes is the raw wire
+ * solverTypes: Set<string>, solverComplexities: Set<string>,
+ * solvers: Array<{type: string, complexity: string}>, visualizationTypes: Set<string>,
+ * visualizationCategories: Set<string>, hasRenderableVisualization: boolean}>,
+ * reductionGraph: object, loading: boolean }`. solverComplexities is each solver's
+ * declared `complexityBucket` (Interfaces/SolverComplexityBucket.cs -- a coarse
+ * worst-case-growth classification, distinct from complexityClass), same
+ * per-problem-solvers derivation as solverTypes. visualizationTypes is the raw wire
  * vocabulary (GraphD3/GraphLaTeX/...); visualizationCategories is the deduped
  * conceptual-category projection of it (both collapse to "Graph") -- use the latter
  * for anything user-facing (filters, display), the former only where the specific
@@ -103,20 +107,36 @@ export function useProblemIndex(url) {
         const displayName = problemInfo?.problemName || problemInfo?.ProblemName || problemName;
         const complexityClass =
           problemInfo?.complexityClass || problemInfo?.ComplexityClass || "Unclassified";
-        // NP-Complete is a subset of NP by definition (Interfaces/ComplexityClass.cs's
-        // doc comment on NP) -- the engine expands that implication here rather than
-        // requiring every NP-Complete problem to redundantly declare both, so a problem
-        // counts toward (and can be filtered by) both facet options.
+        // Direct project-owner instruction: browsing "NP" should surface NP-Complete
+        // and NP-Hard problems too, alongside anything declared bare "NP" (e.g. Prime
+        // Factorization) -- NP-Complete is a subset of NP by definition
+        // (Interfaces/ComplexityClass.cs's doc comment on NP), and NP-Hard is treated
+        // the same way here for browsing purposes even though it isn't a strict subset
+        // in the textbook sense. The engine expands both implications here rather than
+        // requiring every problem to redundantly declare every class it browses under,
+        // so a problem counts toward (and can be filtered by) every facet option this
+        // implies.
         const complexityClasses = new Set([complexityClass]);
-        if (complexityClass === "NPComplete") complexityClasses.add("NP");
+        if (complexityClass === "NPComplete" || complexityClass === "NPHard") {
+          complexityClasses.add("NP");
+        }
 
         const problemType = problemInfo?.problemType || problemInfo?.ProblemType || "Unclassified";
 
         const solverTypes = new Set();
+        const solverComplexities = new Set();
+        // Per-solver {type, complexity} pairs, kept alongside the two aggregate Sets so
+        // a combined Solver Type + Solver Complexity filter can require ONE solver to
+        // satisfy both (see solverMatchesBoth in useProblemFilters).
+        const solvers = [];
         for (const solverClassName of solversByProblem[problemName] ?? []) {
           const solverInfo = info[solverClassName];
           const solverType = solverInfo?.solverType || solverInfo?.SolverType || "Unclassified";
           solverTypes.add(solverType);
+          const solverComplexity =
+            solverInfo?.complexityBucket || solverInfo?.ComplexityBucket || "Unclassified";
+          solverComplexities.add(solverComplexity);
+          solvers.push({ type: solverType, complexity: solverComplexity });
         }
 
         const visualizationTypeSet = new Set();
@@ -136,7 +156,10 @@ export function useProblemIndex(url) {
             visualizationCategorySet.add(visualizationTypeCategory(type));
           }
         }
-        if (visualizationCategorySet.size === 0) {
+        // Captured before the "Unimplemented" sentinel is added below -- backs the
+        // "All Visualizations" filter option (see useProblemFilters).
+        const hasRenderableVisualization = visualizationCategorySet.size > 0;
+        if (!hasRenderableVisualization) {
           visualizationCategorySet.add("Unimplemented");
         }
 
@@ -146,8 +169,11 @@ export function useProblemIndex(url) {
           complexityClasses,
           problemType,
           solverTypes,
+          solverComplexities,
+          solvers,
           visualizationTypes: visualizationTypeSet,
           visualizationCategories: visualizationCategorySet,
+          hasRenderableVisualization,
         });
       }
 
