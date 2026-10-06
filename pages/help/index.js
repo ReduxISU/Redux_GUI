@@ -76,7 +76,7 @@ const learnMoreLinks = [
   },
   {
     label: "Redux GUI Documentation",
-    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
+    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/README.md",
   },
   {
     label: "Redux Backend Documentation",
