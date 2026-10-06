@@ -1,8 +1,10 @@
 import { Box, Container, Link, Typography } from "@mui/material";
-import isulogo from "../../components/images/ISULogo.png";
+import isulogoDark from "../../components/images/ISULogo-Dark.png";
+import isulogoLight from "../../components/images/ISULogo-Light.png";
 import { useThemeMode } from "../../components/ThemeModeContext";
-import { innerCardSx, pageBackground, sectionCardSx, textColors } from "../../components/theme";
+import { innerCardSx, pageBackground, textColors } from "../../components/theme";
 import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
+import StaticSection from "../../components/widgets/StaticSection";
 
 const contributionSteps = [
   "Creating a fork of the appropriate repository, front end or back end",
@@ -41,7 +43,7 @@ function SectionTitle({ children }) {
         fontSize: "0.85rem",
         fontWeight: 700,
         letterSpacing: "0.22em",
-        mb: 2,
+        whiteSpace: "nowrap",
       }}
     >
       {children}
@@ -77,7 +79,6 @@ function BodyText({ children, sx }) {
 export default function ContributePage() {
   const { mode } = useThemeMode();
   const text = textColors(mode);
-  const sectionCardStyle = sectionCardSx(mode);
   const innerCard = innerCardSx(mode);
 
   return (
@@ -91,306 +92,351 @@ export default function ContributePage() {
 
       <Container maxWidth="lg" sx={{ pt: 4, pb: 5 }}>
         <Box sx={{ maxWidth: "980px", mx: "auto" }}>
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>CONTRIBUTE TO REDUX</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.heading,
-                fontSize: "1rem",
-                fontWeight: 700,
-                lineHeight: 1.8,
-                mb: 1.5,
-              }}
-            >
-              Redux depends on contributors like you.
-            </Typography>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-                mb: 2.2,
-              }}
-            >
-              Our goal from the beginning has not been to build a knowledge base ourselves but to
-              build a framework for crowd-sourced contribution across the world, think Wikipedia. We
-              hope to see contributors add everything from new problems, algorithms, reductions,
-              visualizations, features, bug fixes, and beyond. Our goal is to make the framework
-              easy to understand and even easier to extend. Below are tutorials and helpful
-              information to get you started.
-            </Typography>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                mb: 2,
-              }}
-            >
-              Any contribution to Redux requires:
-            </Typography>
-
-            <Box sx={{ display: "grid", gap: 1 }}>
-              {contributionSteps.map((step) => (
-                <Box key={step} sx={innerCard}>
-                  <Typography
-                    sx={{
-                      color: text.body,
-                      fontSize: "0.82rem",
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    • {step}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>TUTORIAL VIDEOS</SectionTitle>
-
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.8,
-                mb: 2,
-              }}
-            >
-              Here are tutorial videos for each of these steps:
-            </Typography>
-
-            <Box
-              sx={{
-                width: "100%",
-                borderRadius: "12px",
-                overflow: "hidden",
-                border: mode === "dark" ? "1px solid rgba(255,255,255,0.10)" : "1px solid #E5E7EB",
-              }}
-            >
-              <iframe
-                width="100%"
-                height="420"
-                src="https://www.youtube-nocookie.com/embed/9vTl522tyhU"
-                title="Redux Setup Tutorial"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+          <Box sx={{ mb: 1.5 }}>
+            <StaticSection>
+              <StaticSection.Header
+                title={<SectionTitle>CONTRIBUTE TO REDUX</SectionTitle>}
+                titleWidth="auto"
               />
-            </Box>
-          </Box>
+              <StaticSection.Body>
+                <Typography
+                  sx={{
+                    color: text.heading,
+                    fontSize: "1rem",
+                    fontWeight: 700,
+                    lineHeight: 1.8,
+                    mb: 1.5,
+                  }}
+                >
+                  Redux depends on contributors like you.
+                </Typography>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>CHECKLIST FOR A SUCCESSFUL PULL REQUEST</SectionTitle>
+                <Typography
+                  sx={{
+                    color: text.body,
+                    fontSize: "0.87rem",
+                    lineHeight: 1.9,
+                    textAlign: "justify",
+                    mb: 2.2,
+                  }}
+                >
+                  Our goal from the beginning has not been to build a knowledge base ourselves but
+                  to build a framework for crowd-sourced contribution across the world, think
+                  Wikipedia. We hope to see contributors add everything from new problems,
+                  algorithms, reductions, visualizations, features, bug fixes, and beyond. Our goal
+                  is to make the framework easy to understand and even easier to extend. Below are
+                  tutorials and helpful information to get you started.
+                </Typography>
 
-            <Box sx={{ display: "grid", gap: 1 }}>
-              {pullRequestChecklist.map((item) => (
-                <Box key={item} sx={innerCard}>
-                  <Typography
-                    sx={{
-                      color: text.body,
-                      fontSize: "0.82rem",
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    • {item}
-                  </Typography>
+                <Typography
+                  sx={{
+                    color: text.body,
+                    fontSize: "0.87rem",
+                    lineHeight: 1.9,
+                    mb: 2,
+                  }}
+                >
+                  Any contribution to Redux requires:
+                </Typography>
+
+                <Box sx={{ display: "grid", gap: 1 }}>
+                  {contributionSteps.map((step) => (
+                    <Box key={step} sx={innerCard}>
+                      <Typography
+                        sx={{
+                          color: text.body,
+                          fontSize: "0.82rem",
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        • {step}
+                      </Typography>
+                    </Box>
+                  ))}
                 </Box>
-              ))}
-            </Box>
+              </StaticSection.Body>
+            </StaticSection>
           </Box>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>HELPFUL LINKS</SectionTitle>
+          <Box sx={{ mb: 1.5 }}>
+            <StaticSection>
+              <StaticSection.Header
+                title={<SectionTitle>TUTORIAL VIDEOS</SectionTitle>}
+                titleWidth="auto"
+              />
+              <StaticSection.Body>
+                <Typography
+                  sx={{
+                    color: text.body,
+                    fontSize: "0.87rem",
+                    lineHeight: 1.8,
+                    mb: 2,
+                  }}
+                >
+                  Here are tutorial videos for each of these steps:
+                </Typography>
 
-            <Box sx={{ display: "grid", gap: 1 }}>
-              {helpfulLinks.map((link) => (
-                <Box key={link.label} sx={innerCard}>
+                <Box
+                  sx={{
+                    width: "100%",
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    border:
+                      mode === "dark" ? "1px solid rgba(255,255,255,0.10)" : "1px solid #E5E7EB",
+                  }}
+                >
+                  <iframe
+                    width="100%"
+                    height="420"
+                    src="https://www.youtube-nocookie.com/embed/9vTl522tyhU"
+                    title="Redux Setup Tutorial"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </Box>
+              </StaticSection.Body>
+            </StaticSection>
+          </Box>
+
+          <Box sx={{ mb: 1.5 }}>
+            <StaticSection>
+              <StaticSection.Header
+                title={<SectionTitle>CHECKLIST FOR A SUCCESSFUL PULL REQUEST</SectionTitle>}
+                titleWidth="auto"
+              />
+              <StaticSection.Body>
+                <Box sx={{ display: "grid", gap: 1 }}>
+                  {pullRequestChecklist.map((item) => (
+                    <Box key={item} sx={innerCard}>
+                      <Typography
+                        sx={{
+                          color: text.body,
+                          fontSize: "0.82rem",
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        • {item}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </StaticSection.Body>
+            </StaticSection>
+          </Box>
+
+          <Box sx={{ mb: 1.5 }}>
+            <StaticSection>
+              <StaticSection.Header
+                title={<SectionTitle>HELPFUL LINKS</SectionTitle>}
+                titleWidth="auto"
+              />
+              <StaticSection.Body>
+                <Box sx={{ display: "grid", gap: 1 }}>
+                  {helpfulLinks.map((link) => (
+                    <Box key={link.label} sx={innerCard}>
+                      <Link
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        sx={{
+                          color: "#F47C20",
+                          fontWeight: 600,
+                          fontSize: "0.82rem",
+                        }}
+                      >
+                        {link.label}
+                      </Link>
+                    </Box>
+                  ))}
+                </Box>
+              </StaticSection.Body>
+            </StaticSection>
+          </Box>
+
+          <Box sx={{ mb: 1.5 }}>
+            <StaticSection>
+              <StaticSection.Header
+                title={<SectionTitle>GET INVOLVED</SectionTitle>}
+                titleWidth="auto"
+              />
+              <StaticSection.Body>
+                <Typography
+                  sx={{
+                    color: text.body,
+                    fontSize: "0.87rem",
+                    lineHeight: 1.9,
+                    textAlign: "justify",
+                  }}
+                >
+                  Interested in getting more involved? We love collaboration! Whether you are an
+                  industry partner, a university research group, or an individual passionate about
+                  getting involved, we have lots of project ideas we could use your help with. If
+                  interested, please reach out to Dr. Paul Bodily at{" "}
                   <Link
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="mailto:bodipaul@isu.edu"
                     underline="hover"
                     sx={{
                       color: "#F47C20",
                       fontWeight: 600,
-                      fontSize: "0.82rem",
                     }}
                   >
-                    {link.label}
+                    bodipaul@isu.edu
                   </Link>
-                </Box>
-              ))}
-            </Box>
+                  .
+                </Typography>
+              </StaticSection.Body>
+            </StaticSection>
           </Box>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>GET INVOLVED</SectionTitle>
+          <Box sx={{ mb: 1.5 }}>
+            <StaticSection>
+              <StaticSection.Header
+                title={<SectionTitle>TERMS OF USE</SectionTitle>}
+                titleWidth="auto"
+              />
+              <StaticSection.Body>
+                <BodyText>
+                  Redux is offered at no cost to the computer science community. It is built and
+                  maintained by students and faculty at Idaho State University, and it exists to
+                  help people learn about NP-completeness, mapping reductions, and algorithmic
+                  problem solving. If you find it useful, we would be glad if you told other
+                  students and instructors about it.
+                </BodyText>
 
-            <Typography
-              sx={{
-                color: text.body,
-                fontSize: "0.87rem",
-                lineHeight: 1.9,
-                textAlign: "justify",
-              }}
-            >
-              Interested in getting more involved? We love collaboration! Whether you are an
-              industry partner, a university research group, or an individual passionate about
-              getting involved, we have lots of project ideas we could use your help with. If
-              interested, please reach out to Dr. Paul Bodily at{" "}
-              <Link
-                href="mailto:bodipaul@isu.edu"
-                underline="hover"
-                sx={{
-                  color: "#F47C20",
-                  fontWeight: 600,
-                }}
-              >
-                bodipaul@isu.edu
-              </Link>
-              .
-            </Typography>
+                <BodyText>
+                  Students and instructors are welcome to use this site directly in their classes.
+                  If you take screenshots or recordings from Redux and use them in slides,
+                  assignments, or publications, please cite this website
+                  (https://redux.portneuf.cose.isu.edu/) and, where relevant, the theses listed on
+                  our{" "}
+                  <Link href="/aboutus" underline="hover" sx={linkSx}>
+                    About Us
+                  </Link>{" "}
+                  page.
+                </BodyText>
+
+                <BodyText>
+                  Redux is open source and released under the BSD 3-Clause License. You are free to
+                  fork either repository, modify it, self-host your own copy, and redistribute it,
+                  including for commercial purposes, provided you follow the license: keep the
+                  copyright notice and disclaimer intact, and do not use the name of Idaho State
+                  University or the names of contributors to endorse your derivative work without
+                  permission. The full text lives in the{" "}
+                  <Link
+                    href="https://github.com/ReduxISU/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={linkSx}
+                  >
+                    LICENSE file in each repository
+                  </Link>
+                  . If you would like to build on Redux, we would rather you contribute to it, so
+                  please get in touch.
+                </BodyText>
+
+                <BodyText>
+                  Redux is provided &quot;as is&quot;, without warranty of any kind, as stated in
+                  the license. We make no guarantee that the site will be available, that solvers
+                  will finish in reasonable time on large inputs, or that any particular result is
+                  correct. It is a research and teaching tool, so please do not rely on it for
+                  anything critical without checking the results yourself.
+                </BodyText>
+
+                <BodyText>
+                  Redux is not a finished project and is still actively being developed. If you hit
+                  a bug, or you would like to see a problem, solver, reduction, or visualization
+                  that is not there yet, please open an issue on{" "}
+                  <Link
+                    href="https://github.com/ReduxISU/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={linkSx}
+                  >
+                    GitHub
+                  </Link>{" "}
+                  or contact Dr. Paul Bodily at{" "}
+                  <Link href="mailto:bodipaul@isu.edu" underline="hover" sx={linkSx}>
+                    bodipaul@isu.edu
+                  </Link>
+                  .
+                </BodyText>
+              </StaticSection.Body>
+            </StaticSection>
           </Box>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>TERMS OF USE</SectionTitle>
+          <Box sx={{ mb: 1.5 }}>
+            <StaticSection>
+              <StaticSection.Header
+                title={<SectionTitle>PRIVACY POLICY</SectionTitle>}
+                titleWidth="auto"
+              />
+              <StaticSection.Body>
+                <BodyText sx={{ fontStyle: "italic" }}>
+                  Version 1.0 (Updated Tue, 29 Sep 2026).
+                </BodyText>
 
-            <BodyText>
-              Redux is offered at no cost to the computer science community. It is built and
-              maintained by students and faculty at Idaho State University, and it exists to help
-              people learn about NP-completeness, mapping reductions, and algorithmic problem
-              solving. If you find it useful, we would be glad if you told other students and
-              instructors about it.
-            </BodyText>
+                <BodyText>
+                  Redux does not collect anything about you. There are no user accounts and no way
+                  to log in, so there is nothing to sign up for and no password to lose. We do not
+                  use Google Analytics or any other analytics, tracking, or advertising service, and
+                  Redux itself sets no cookies.
+                </BodyText>
 
-            <BodyText>
-              Students and instructors are welcome to use this site directly in their classes. If
-              you take screenshots or recordings from Redux and use them in slides, assignments, or
-              publications, please cite this website (https://redux.portneuf.cose.isu.edu/) and,
-              where relevant, the theses listed on our{" "}
-              <Link href="/aboutus" underline="hover" sx={linkSx}>
-                About Us
-              </Link>{" "}
-              page.
-            </BodyText>
+                <BodyText>
+                  Some content on the site is hosted by other services. For example, the setup
+                  tutorial video on this page is embedded from YouTube (using its privacy-enhanced
+                  mode), and contributor pictures on the About Us page are loaded from GitHub. When
+                  your browser loads content like this, it sends that service the standard
+                  information included in any web request, such as your IP address and browser type.
+                  If you play the video, YouTube (owned by Google) may also set cookies and collect
+                  data under Google&apos;s own privacy policy. Redux receives none of that data.
+                </BodyText>
 
-            <BodyText>
-              Redux is open source and released under the BSD 3-Clause License. You are free to fork
-              either repository, modify it, self-host your own copy, and redistribute it, including
-              for commercial purposes, provided you follow the license: keep the copyright notice
-              and disclaimer intact, and do not use the name of Idaho State University or the names
-              of contributors to endorse your derivative work without permission. The full text
-              lives in the{" "}
-              <Link
-                href="https://github.com/ReduxISU/"
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                sx={linkSx}
-              >
-                LICENSE file in each repository
-              </Link>
-              . If you would like to build on Redux, we would rather you contribute to it, so please
-              get in touch.
-            </BodyText>
+                <BodyText>
+                  Two small preferences are stored in your own browser, using local storage: whether
+                  you prefer light or dark mode, and whether you have already dismissed the guided
+                  tour. These never leave your device, are never sent to us, and clearing your
+                  browser data removes them.
+                </BodyText>
 
-            <BodyText>
-              Redux is provided &quot;as is&quot;, without warranty of any kind, as stated in the
-              license. We make no guarantee that the site will be available, that solvers will
-              finish in reasonable time on large inputs, or that any particular result is correct.
-              It is a research and teaching tool, so please do not rely on it for anything critical
-              without checking the results yourself.
-            </BodyText>
+                <BodyText>
+                  When you solve, verify, or reduce a problem, the instance you entered is sent to
+                  the Redux API so it can be worked on, and the answer is sent back to your browser.
+                  Redux has no database and does not save your problem instances; they are discarded
+                  once the response is returned. Note that the Share button builds a link containing
+                  your problem instance, so if you share that link, anyone who has it can see that
+                  instance.
+                </BodyText>
 
-            <BodyText>
-              Redux is not a finished project and is still actively being developed. If you hit a
-              bug, or you would like to see a problem, solver, reduction, or visualization that is
-              not there yet, please open an issue on{" "}
-              <Link
-                href="https://github.com/ReduxISU/"
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                sx={linkSx}
-              >
-                GitHub
-              </Link>{" "}
-              or contact Dr. Paul Bodily at{" "}
-              <Link href="mailto:bodipaul@isu.edu" underline="hover" sx={linkSx}>
-                bodipaul@isu.edu
-              </Link>
-              .
-            </BodyText>
-          </Box>
+                <BodyText>
+                  This site is hosted by Idaho State University, so your use of it is also covered
+                  by the university&apos;s{" "}
+                  <Link
+                    href="https://www.isu.edu/ogc/privacy/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={linkSx}
+                  >
+                    privacy statement
+                  </Link>
+                  , which describes how ISU handles information submitted through its websites and
+                  applications.
+                </BodyText>
 
-          <Box sx={{ ...sectionCardStyle, mb: 1.5 }}>
-            <SectionTitle>PRIVACY POLICY</SectionTitle>
-
-            <BodyText sx={{ fontStyle: "italic" }}>
-              Version 1.0 (Updated Tue, 29 Sep 2026).
-            </BodyText>
-
-            <BodyText>
-              Redux does not collect anything about you. There are no user accounts and no way to
-              log in, so there is nothing to sign up for and no password to lose. We do not use
-              Google Analytics or any other analytics, tracking, or advertising service, and Redux
-              itself sets no cookies.
-            </BodyText>
-
-            <BodyText>
-              Some content on the site is hosted by other services. For example, the setup tutorial
-              video on this page is embedded from YouTube (using its privacy-enhanced mode), and
-              contributor pictures on the About Us page are loaded from GitHub. When your browser
-              loads content like this, it sends that service the standard information included in
-              any web request, such as your IP address and browser type. If you play the video,
-              YouTube (owned by Google) may also set cookies and collect data under Google&apos;s
-              own privacy policy. Redux receives none of that data.
-            </BodyText>
-
-            <BodyText>
-              Two small preferences are stored in your own browser, using local storage: whether you
-              prefer light or dark mode, and whether you have already dismissed the guided tour.
-              These never leave your device, are never sent to us, and clearing your browser data
-              removes them.
-            </BodyText>
-
-            <BodyText>
-              When you solve, verify, or reduce a problem, the instance you entered is sent to the
-              Redux API so it can be worked on, and the answer is sent back to your browser. Redux
-              has no database and does not save your problem instances; they are discarded once the
-              response is returned. Note that the Share button builds a link containing your problem
-              instance, so if you share that link, anyone who has it can see that instance.
-            </BodyText>
-
-            <BodyText>
-              This site is hosted by Idaho State University, so your use of it is also covered by
-              the university&apos;s{" "}
-              <Link
-                href="https://www.isu.edu/ogc/privacy/"
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                sx={linkSx}
-              >
-                privacy statement
-              </Link>
-              , which describes how ISU handles information submitted through its websites and
-              applications.
-            </BodyText>
-
-            <BodyText>
-              If you have a question about any of this, please contact Dr. Paul Bodily at{" "}
-              <Link href="mailto:bodipaul@isu.edu" underline="hover" sx={linkSx}>
-                bodipaul@isu.edu
-              </Link>
-              .
-            </BodyText>
+                <BodyText>
+                  If you have a question about any of this, please contact Dr. Paul Bodily at{" "}
+                  <Link href="mailto:bodipaul@isu.edu" underline="hover" sx={linkSx}>
+                    bodipaul@isu.edu
+                  </Link>
+                  .
+                </BodyText>
+              </StaticSection.Body>
+            </StaticSection>
           </Box>
         </Box>
       </Container>
@@ -410,25 +456,14 @@ export default function ContributePage() {
           underline="none"
           sx={{ display: "inline-flex" }}
         >
-          {/* Logo's "Idaho State University"/"Computer Science" text and divider
-              line are baked into the PNG as near-black pixels -- can't recolor
-              per-mode with CSS without also distorting the orange mark, so in
-              dark mode it gets a white chip to sit on instead. */}
           <Box
             component="img"
-            src={isulogo.src}
+            src={mode === "dark" ? isulogoDark.src : isulogoLight.src}
             alt="Idaho State University Computer Science"
             sx={{
               height: 72,
               width: "auto",
               display: "block",
-              opacity: 1,
-              filter: "none",
-              ...(mode === "dark" && {
-                bgcolor: "#FFFFFF",
-                borderRadius: "8px",
-                p: 1,
-              }),
             }}
           />
         </Link>
