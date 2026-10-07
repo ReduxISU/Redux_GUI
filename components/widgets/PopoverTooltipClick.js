@@ -4,6 +4,7 @@ import { Box, Divider, Link, Popover, Typography } from "@mui/material";
 import { useState } from "react";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
+import HeaderIconButton from "./HeaderIconButton";
 
 function PopoverTooltipClick({ toolTip = {} }) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -24,7 +25,9 @@ function PopoverTooltipClick({ toolTip = {} }) {
 
   return (
     <>
-      <InfoOutlinedIcon onClick={handleClick} style={{ cursor: "pointer" }} fontSize="medium" />
+      <HeaderIconButton onClick={handleClick} aria-label="Show information" aria-haspopup="dialog">
+        <InfoOutlinedIcon fontSize="medium" />
+      </HeaderIconButton>
 
       <Popover
         open={open}

@@ -10,12 +10,8 @@
 
 import React, { useContext, useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import {
-  Download as DownloadIcon,
-  DragIndicator as DragIndicatorIcon,
-  Folder as FolderIcon,
-} from "@mui/icons-material";
-import { Box, Button, IconButton, Stack, TextField } from "@mui/material";
+import { Download as DownloadIcon, Folder as FolderIcon } from "@mui/icons-material";
+import { Box, Button, Stack, TextField } from "@mui/material";
 import ProblemInstanceParser from "../../Tools/ProblemInstanceParser";
 import {
   COMPLEXITY_CLASS_ORDER,
@@ -26,11 +22,10 @@ import { useProblemFilters } from "../hooks/ProblemFilters/useProblemFilters";
 import { useProblemIndex } from "../hooks/ProblemFilters/useProblemIndex";
 import { useProblemInfo } from "../hooks/ProblemProvider";
 import { useWhenChanged } from "../hooks/useWhenChanged";
-import { useThemeMode } from "../ThemeModeContext";
-import { surfaceColors, textColors } from "../theme";
+import DragHandle from "../widgets/DragHandle";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemFilterMenu from "../widgets/ProblemFilterMenu";
-import ProblemSection from "../widgets/ProblemSection";
+import ProblemSection, { LABEL_COLUMN_WIDTH } from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
 
 const ACCORDION_FORM_ONE = { placeHolder: "Select problem" };
@@ -68,10 +63,6 @@ export default function ProblemRowReact({
   setProblemInstance,
   dragHandleProps,
 }) {
-  const { mode } = useThemeMode();
-  const surface = surfaceColors(mode);
-  const text = textColors(mode);
-
   const problemInfo = useProblemInfo(url, problemName);
   const { problemIndex, reductionGraph } = useProblemIndex(url);
   const {
@@ -237,28 +228,22 @@ export default function ProblemRowReact({
           clearFilters={clearFilters}
         />{" "}
         <PopoverTooltipClick toolTip={tip} />
-        {dragHandleProps && (
-          <IconButton
-            {...dragHandleProps.attributes}
-            {...dragHandleProps.listeners}
-            size="small"
-            title="Drag to reorder"
-            sx={{
-              cursor: "grab",
-              color: text.body,
-              backgroundColor: surface.surfaceAlt,
-              "&:hover": { backgroundColor: surface.surfaceAltHover },
-              mr: 1,
-            }}
-          >
-            <DragIndicatorIcon />
-          </IconButton>
-        )}
+        <DragHandle dragHandleProps={dragHandleProps} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>
-        <Stack direction="row" gap={1}>
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          sx={{ gap: 2, alignItems: { md: "center" } }}
+        >
+          <Box
+            sx={{
+              flex: { md: `0 0 ${LABEL_COLUMN_WIDTH}px` },
+              display: "flex",
+              justifyContent: { xs: "flex-start", md: "center" },
+              alignItems: "center",
+            }}
+          >
             {CARD.cardBodyText}
           </Box>
           {/* <FormControl as="textarea" value={problemLocalInstance} onChange={handleChangeInstance} ></FormControl> *FORM CONTROL 2 (dropdown) */}
@@ -267,7 +252,7 @@ export default function ProblemRowReact({
             error={!instanceParsed.test}
             id="outlined-error"
             label={!instanceParsed.test ? "Incorrect Format" : "Problem Instance"}
-            sx={{ width: "100%" }}
+            sx={{ width: "100%", flex: { md: 1 }, minWidth: 0 }}
             value={problemLocalInstance}
             onChange={handleChangeInstance}
             helperText={
@@ -277,7 +262,9 @@ export default function ProblemRowReact({
             multiline
             maxRows={5}
           ></TextField>
-          <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
+          <div
+            style={{ display: "flex", flexDirection: "row", gap: "8px", alignSelf: "flex-start" }}
+          >
             <Button
               size="large"
               color="white"
