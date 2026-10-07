@@ -1,6 +1,6 @@
 import { Box, Container, Link, Typography } from "@mui/material";
 import { useThemeMode } from "../../components/ThemeModeContext";
-import { innerCardSx, sectionCardSx, textColors } from "../../components/theme";
+import { innerCardSx, textColors } from "../../components/theme";
 import StaticSection from "../../components/widgets/StaticSection";
 
 // Nested per the "Complexity class" grouping -- its `children` render as a
@@ -73,7 +73,7 @@ const learnMoreLinks = [
   },
   {
     label: "Redux GUI Documentation",
-    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/Documentation/index.md",
+    url: "https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/README.md",
   },
   {
     label: "Redux Backend Documentation",
