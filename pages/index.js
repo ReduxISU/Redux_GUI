@@ -30,18 +30,12 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Box, Grid, Typograph } from "@mui/material";
 import { memo, useEffect, useState } from "react"; // CHANGED: added useState for row order
 import { Container } from "react-bootstrap";
 import { useHandleParameters } from "../components/eventHandlers/handleParameters";
 import { useUnload } from "../components/eventHandlers/handleUnload";
 import { useProblemProvider } from "../components/hooks/ProblemProvider";
-import isulogoDark from "../components/images/ISULogo-Dark.png";
-import isulogoLight from "../components/images/ISULogo-Light.png";
-import { useThemeMode } from "../components/ThemeModeContext";
-import { pageBackground } from "../components/theme";
 import TourLauncher from "../components/tour/TourLauncher";
-import ResponsiveAppBar from "../components/widgets/ResponsiveAppBar";
 import ShareButton from "../components/widgets/ShareButton";
 
 const SHOW_QUANTUM_VIS = false; //Flag to show a quantum circuit visualizer (sandbox feature)
@@ -96,7 +90,6 @@ function SortableRow({ id, children }) {
  */
 function MainPageContent() {
   const imgStyle = { textAlign: "center" };
-  const { mode } = useThemeMode();
 
   //useHandleParameters();
 
@@ -144,9 +137,7 @@ function MainPageContent() {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", background: pageBackground(mode) }}>
-      <ResponsiveAppBar></ResponsiveAppBar>
-
+    <>
       <div className="container-fluid">
         {/** This is an artifact from the old bootstrap code, may be deprecated */}
         <div className="d-flex flex-column">
@@ -171,31 +162,7 @@ function MainPageContent() {
       </div>
 
       {/*<!-- /Container-->*/}
-
-      {/* <footer className='fixed-bottom centered'> */}
-      {/* </footer> */}
-
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "10vh",
-          // marginTop: '25%',
-        }}
-      >
-        <Box
-          component="img"
-          src={mode === "dark" ? isulogoDark.src : isulogoLight.src}
-          alt="Idaho State University Computer Science"
-          sx={{
-            height: 72,
-            width: "auto",
-            display: "block",
-          }}
-        />
-      </Box>
-    </Box>
+    </>
   );
 }
 
