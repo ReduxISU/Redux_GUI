@@ -7,13 +7,7 @@
 
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import {
-  DragIndicator as DragIndicatorIcon,
-  FastForward,
-  FastRewind,
-  SkipNext,
-  SkipPrevious,
-} from "@mui/icons-material";
+import { FastForward, FastRewind, SkipNext, SkipPrevious } from "@mui/icons-material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Button, FormControlLabel, IconButton, Switch, TextField, Tooltip } from "@mui/material";
 import Link from "next/link"; // <-- IMPORTANT for Quantum button
@@ -30,6 +24,7 @@ import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
 import { isRenderable } from "../Visualization/svgs/renderability";
 import { visualizationTypeCategory } from "../Visualization/svgs/visualizationCategories";
+import DragHandle from "../widgets/DragHandle";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
@@ -41,6 +36,8 @@ const SWITCHES = {
   switch2: "Highlight gadgets",
   switch3: "Show reduction",
 };
+// 44px touch targets below md, the default 40px above.
+const STEP_BUTTON_SX = { width: { xs: 44, md: 40 }, height: { xs: 44, md: 40 } };
 const ACCORDION_FORM_ONE = { placeHolder: "Select visualization" };
 const TOOLTIP = {
   header: "Visualization Information",
@@ -329,23 +326,7 @@ export default function VisualizeRowReact({
         />
 
         <PopoverTooltipClick toolTip={tip} />
-        {dragHandleProps && (
-          <IconButton
-            {...dragHandleProps.attributes}
-            {...dragHandleProps.listeners}
-            size="small"
-            title="Drag to reorder"
-            sx={{
-              cursor: "grab",
-              color: text.body,
-              backgroundColor: surface.surfaceAlt,
-              "&:hover": { backgroundColor: surface.surfaceAltHover },
-              mr: 1,
-            }}
-          >
-            <DragIndicatorIcon />
-          </IconButton>
-        )}
+        <DragHandle dragHandleProps={dragHandleProps} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>
@@ -362,13 +343,15 @@ export default function VisualizeRowReact({
             backgroundColor: surface.surfaceAlt,
             color: text.body,
             flexWrap: "wrap",
+            gap: "12px",
           }}
         >
           {/* Refresh + Step navigation */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
             <Button
               style={{ backgroundColor: "#43a047" }}
               variant="outlined"
+              sx={{ minHeight: { xs: 44, md: "auto" } }}
               startIcon={<RefreshIcon />}
               onClick={handleRefreshButton}
             >
@@ -379,11 +362,19 @@ export default function VisualizeRowReact({
               placement="bottom"
               title={isDisabled ? "Navigation disabled during reduction or gadget mode." : ""}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <IconButton disabled={isDisabled} onClick={() => handleRadioChange("start")}>
+              <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px" }}>
+                <IconButton
+                  sx={STEP_BUTTON_SX}
+                  disabled={isDisabled}
+                  onClick={() => handleRadioChange("start")}
+                >
                   <FastRewind />
                 </IconButton>
-                <IconButton disabled={isDisabled} onClick={() => handleRadioChange("back")}>
+                <IconButton
+                  sx={STEP_BUTTON_SX}
+                  disabled={isDisabled}
+                  onClick={() => handleRadioChange("back")}
+                >
                   <SkipPrevious />
                 </IconButton>
 
@@ -399,10 +390,18 @@ export default function VisualizeRowReact({
                   disabled={isDisabled}
                 />
 
-                <IconButton disabled={isDisabled} onClick={() => handleRadioChange("forward")}>
+                <IconButton
+                  sx={STEP_BUTTON_SX}
+                  disabled={isDisabled}
+                  onClick={() => handleRadioChange("forward")}
+                >
                   <SkipNext />
                 </IconButton>
-                <IconButton disabled={isDisabled} onClick={() => handleRadioChange("end")}>
+                <IconButton
+                  sx={STEP_BUTTON_SX}
+                  disabled={isDisabled}
+                  onClick={() => handleRadioChange("end")}
+                >
                   <FastForward />
                 </IconButton>
               </div>
@@ -410,7 +409,7 @@ export default function VisualizeRowReact({
           </div>
 
           {/* Switches */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0 16px" }}>
             <FormControlLabel
               sx={{ color: text.body }}
               disabled={disableReduction}

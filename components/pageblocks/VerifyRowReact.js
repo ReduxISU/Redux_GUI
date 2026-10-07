@@ -10,14 +10,14 @@
 
 import React, { useContext, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
-import { Button, IconButton } from "@mui/material";
+import { Button } from "@mui/material";
 import { FormControl } from "react-bootstrap";
 import { useVerifierInfo } from "../hooks/ProblemProvider";
 import { useWhenChanged } from "../hooks/useWhenChanged";
 import { requestIsCertificateValid, requestVerifiedInstance } from "../redux";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
+import DragHandle from "../widgets/DragHandle";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
@@ -117,23 +117,7 @@ export default function VerifyRowReact({
               : TOOLTIP
           }
         ></PopoverTooltipClick>
-        {dragHandleProps && (
-          <IconButton
-            {...dragHandleProps.attributes}
-            {...dragHandleProps.listeners}
-            size="small"
-            title="Drag to reorder"
-            sx={{
-              cursor: "grab",
-              color: text.body,
-              backgroundColor: surface.surfaceAlt,
-              "&:hover": { backgroundColor: surface.surfaceAltHover },
-              mr: 1,
-            }}
-          >
-            <DragIndicatorIcon />
-          </IconButton>
-        )}
+        <DragHandle dragHandleProps={dragHandleProps} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>

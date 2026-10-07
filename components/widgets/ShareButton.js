@@ -1,8 +1,8 @@
 import { Share as ShareIcon } from "@mui/icons-material";
+import { Fab } from "@mui/material";
 import React from "react";
-import Button from "react-bootstrap/Button";
 
-const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
+const GREY = "#424242";
 
 const createShareLink = (baseUrl, data) => {
   const params = new URLSearchParams(data).toString();
@@ -48,17 +48,15 @@ const handleShare = async (problem, solver, verifier, reducer) => {
 };
 
 const ShareButton = ({ problem, solver, verifier, reducer }) => (
-  <Button
+  <Fab
     data-tour-id="share-button"
-    variant="primary"
-    className="corner-button"
-    size="large"
-    color="white"
-    style={{ backgroundColor: THEME.colors.grey }}
+    size="medium"
+    aria-label="Share this problem"
+    sx={{ backgroundColor: GREY, color: "#fff", "&:hover": { backgroundColor: "#616161" } }}
     onClick={() => handleShare(problem, solver, verifier, reducer)}
   >
     <ShareIcon />
-  </Button>
+  </Fab>
 );
 
 export default ShareButton;
