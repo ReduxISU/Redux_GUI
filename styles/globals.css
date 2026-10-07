@@ -24,17 +24,6 @@ a {
   border: 2px solid #ccc; /* Dark border */
 }
 
-.TextBox {
-  text-align: center;
-  margin: 100px;
-  background-color: aliceblue;
-}
-
-.TextBoxInner {
-  margin: 100px;
-  text-align: center;
-}
-
 .toggleButton {
   text-align: right;
 }
