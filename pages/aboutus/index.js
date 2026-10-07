@@ -473,6 +473,26 @@ export default function AboutUsPage() {
                       </Link>
                     </Typography>
                   </Box>
+
+                  <Typography
+                    sx={{
+                      color: text.body,
+                      fontSize: "0.87rem",
+                      lineHeight: 1.8,
+                      mt: 2,
+                    }}
+                  >
+                    Learn more:{" "}
+                    <Link
+                      href="https://api.redux.portneuf.cose.isu.edu/swagger/index.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{ color: "#F47C20", fontWeight: 600 }}
+                    >
+                      Swagger API documentation
+                    </Link>
+                  </Typography>
                 </Box>
               </ProblemSection.Body>
             </ProblemSection>
