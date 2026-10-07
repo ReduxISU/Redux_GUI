@@ -50,19 +50,17 @@ a {
   align-self: flex-start;
 }
 
-.corner-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  /* Ensure it appears above other elements */
-}
+/* Touch targets on phones: at least 44px. */
+@media (max-width: 899.95px) {
+  .fixed-button {
+    height: 44px;
+    min-width: 44px;
+  }
 
-.corner-button-left {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1000;
+  .submitButton .MuiButton-root {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 .driver-popover {

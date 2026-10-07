@@ -10,6 +10,7 @@ import {
   Adb as AdbIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
+  Menu as MenuIcon,
 } from "@mui/icons-material"; // Grouped icons safely
 import {
   AppBar,
@@ -17,6 +18,8 @@ import {
   Button,
   Container,
   IconButton,
+  Menu,
+  MenuItem,
   Toolbar,
   Tooltip,
   Typography,
@@ -26,8 +29,13 @@ import { useThemeMode } from "../ThemeModeContext";
 
 const pages = ["Home", "About Us", "Browse", "Help", "Contribute"];
 
+// "Home" -> "/", "About Us" -> "/aboutus", ...
+const pageHref = (page) => (page === "Home" ? "/" : "/" + page.toLowerCase().replace(" ", ""));
+
 const ResponsiveAppBar = () => {
   const { mode, toggleMode } = useThemeMode();
+  const [menuAnchor, setMenuAnchor] = React.useState(null);
+  const closeMenu = () => setMenuAnchor(null);
 
   return (
     // Fixed dark chrome, independent of the page's own theme (which several
@@ -61,14 +69,44 @@ const ResponsiveAppBar = () => {
             REDUX
           </Typography>
 
-          <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+          {/* Below md the nav links collapse into a hamburger menu. */}
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              aria-label="Open navigation menu"
+              aria-controls="nav-menu"
+              aria-haspopup="true"
+              aria-expanded={menuAnchor ? "true" : undefined}
+              onClick={(e) => setMenuAnchor(e.currentTarget)}
+              sx={{ color: "inherit", width: 44, height: 44, mr: 1 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="nav-menu"
+              anchorEl={menuAnchor}
+              open={Boolean(menuAnchor)}
+              onClose={closeMenu}
+              slotProps={{ list: { "aria-label": "Navigation" } }}
+            >
+              {pages.map((page) => (
+                <MenuItem
+                  key={page}
+                  component="a"
+                  href={pageHref(page)}
+                  onClick={closeMenu}
+                  sx={{ minHeight: 44, minWidth: 160 }}
+                >
+                  {page}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
           <Typography
-            variant="h5"
+            variant="h6"
             noWrap
             component="a"
-            href=""
+            href="/"
             sx={{
-              mr: 2,
               display: { xs: "flex", md: "none" },
               flexGrow: 1,
               fontFamily: "monospace",
@@ -77,7 +115,9 @@ const ResponsiveAppBar = () => {
               color: "inherit",
               textDecoration: "none",
             }}
-          ></Typography>
+          >
+            REDUX
+          </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" }, gap: 0.5 }}>
             {pages.map((page) => {
               var currentHref = page.toLowerCase();

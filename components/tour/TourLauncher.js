@@ -30,7 +30,7 @@ export default function TourLauncher() {
       },
     });
 
-  const shared = { color: "secondary", className: "corner-button-left", onClick: start };
+  const shared = { color: "secondary", onClick: start };
 
   return (
     completed !== null &&
