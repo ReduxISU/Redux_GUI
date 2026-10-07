@@ -14,13 +14,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import isulogoDark from "../../components/images/ISULogo-Dark.png";
-import isulogoLight from "../../components/images/ISULogo-Light.png";
 import { requestContributorDirectory, requestContributorProfile } from "../../components/redux";
 import { useThemeMode } from "../../components/ThemeModeContext";
-import { innerCardSx, pageBackground, surfaceColors, textColors } from "../../components/theme";
+import { innerCardSx, surfaceColors, textColors } from "../../components/theme";
 import ProblemSection from "../../components/widgets/ProblemSection";
-import ResponsiveAppBar from "../../components/widgets/ResponsiveAppBar";
 
 const reduxBaseUrl = "/api/redux/";
 
@@ -378,14 +375,7 @@ export default function AboutUsPage() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: pageBackground(mode),
-      }}
-    >
-      <ResponsiveAppBar />
-
+    <>
       <Container maxWidth="lg" sx={{ pt: 4, pb: 5 }}>
         <Box sx={{ maxWidth: "980px", mx: "auto" }}>
           <Box id="about" sx={{ mb: 1.5 }}>
@@ -909,35 +899,6 @@ export default function AboutUsPage() {
         </Box>
       </Container>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          pt: 2,
-          pb: 3,
-        }}
-      >
-        <Link
-          href="https://www.isu.edu/cs/"
-          target="_blank"
-          rel="noopener noreferrer"
-          underline="none"
-          sx={{ display: "inline-flex" }}
-        >
-          <Box
-            component="img"
-            src={mode === "dark" ? isulogoDark.src : isulogoLight.src}
-            alt="Idaho State University Computer Science"
-            sx={{
-              height: 72,
-              width: "auto",
-              display: "block",
-            }}
-          />
-        </Link>
-      </Box>
-
       {/* Contributor Profile Modal */}
       <Dialog
         open={modalOpen}
@@ -1056,6 +1017,6 @@ export default function AboutUsPage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </>
   );
 }
