@@ -98,6 +98,7 @@ export default function SolveRowReact({
 
         componentLink: solverInfo.solverLink || "",
         sourceLink: solverInfo.sourceLink || "",
+        sourceFile: solverInfo.sourceFile || "",
 
         classification: [
           { label: "Solver type", value: solverTypeLabel(solverInfo.solverType || "Unclassified") },

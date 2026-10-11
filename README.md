@@ -71,6 +71,8 @@ The Redux GUI requires the Redux API to be running. If you need to work on both 
 
 The GUI finds the API through the `REDUX_BASE_URL` setting. `.env.development` already points it at `http://localhost:27000/`, so for local work you do not need to change anything.
 
+The info boxes link each problem, solver, verifier, visualization, and reduction to its source file on GitHub. The repo defaults to `https://github.com/reduxISU/Redux`; set `NEXT_PUBLIC_REDUX_REPO_URL` (e.g. in `.env.local`) to point at a fork. It is read at build time, so restart `npm run dev` after changing it.
+
 ### Step 4: Start Development Server
 
 ```bash
@@ -156,7 +158,7 @@ docker build -t reduxgui .
 docker run -it --rm -p 3000:3000 --name reduxgui reduxgui
 ```
 
-The site is then at [http://localhost:3000](http://localhost:3000). Add `-e REDUX_BASE_URL=<address of a running Redux API>` to the `docker run` command so the container can reach the API.
+The site is then at [http://localhost:3000](http://localhost:3000). Add `-e REDUX_BASE_URL=<address of a running Redux API>` to the `docker run` command so the container can reach the API. To link the info boxes to a different source repo, pass `--build-arg NEXT_PUBLIC_REDUX_REPO_URL=<repo URL>` to `docker build` (a `docker run -e` will not work, since the value is baked in at build time).
 
 **Note:** The Docker server uses production binaries, so warnings will be different from the development environment.
 
