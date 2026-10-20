@@ -39,7 +39,9 @@ apiTest("concurrent render-tikz requests all succeed", async ({ request }) => {
 const row = (page, title) =>
   page.locator(".accordion").filter({ has: page.getByText(title, { exact: true }) });
 
-test("a failed TikZ render shows an error instead of a blank picture", async ({ page }) => {
+test("a failed TikZ render shows Failed to Visualize with the reason, not a blank picture", async ({
+  page,
+}) => {
   await page.route("**/api/render-tikz", (route) =>
     route.fulfill({
       status: 500,
@@ -53,5 +55,10 @@ test("a failed TikZ render shows an error instead of a blank picture", async ({ 
   await page.goto("/?problem=DFA");
   await rendered;
 
-  await expect(row(page, "Visualize").getByRole("alert")).toHaveText("Couldn't draw this picture.");
+  // "Failed to Visualize", then which step failed and what the server said.
+  const alert = row(page, "Visualize").getByRole("alert");
+  await expect(alert).toContainText("Failed to Visualize");
+  await expect(alert).toContainText("TikZ drawing (the render-tikz request) failed");
+  await expect(alert).toContainText("HTTP 500");
+  await expect(alert).toContainText("TeX engine render failed.");
 });
