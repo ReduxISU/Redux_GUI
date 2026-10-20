@@ -25,14 +25,23 @@ export function useProblemProvider(url) {
   };
 }
 
+const NO_INFO = {};
+
+// Returns {} until the info for the current `info` arrives; a late answer for an earlier `info`
+// is dropped, so a switch never briefly shows the previous item's info (e.g. its picture type).
 export function useGenericInfo(url, info) {
-  const [genericInfo, setGenericInfo] = useState({});
+  const [fetched, setFetched] = useState({ info: undefined, genericInfo: {} });
 
   useEffect(() => {
+    let ignore = false;
     (async () => {
-      setGenericInfo(!info ? {} : ((await requestInfo(url, info)) ?? {}));
+      const genericInfo = !info ? {} : ((await requestInfo(url, info)) ?? {});
+      if (!ignore) setFetched({ info, genericInfo });
     })();
+    return () => {
+      ignore = true;
+    };
   }, [info, url]);
 
-  return genericInfo; // There should be no reason to set the information
+  return fetched.info === info ? fetched.genericInfo : NO_INFO; // There should be no reason to set the information
 }

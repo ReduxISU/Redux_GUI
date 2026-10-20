@@ -58,6 +58,7 @@ export default function VisualizeRowReact({
   reductionNameMap,
   reducedInstance,
   reductionVisualization,
+  noReductions,
   chosenSolver,
   defaultSolverMap,
   chosenVisualization,
@@ -114,20 +115,21 @@ export default function VisualizeRowReact({
   const [reducedVisualizationData, setReducedVisualizationData] = useState(
     defaultCLIQUEVisualizationArr,
   );
-  const [problemData, setProblemData] = useState([]);
-  const [problemReductionData, setProblemReductionData] = useState([]);
+  // Picture frames for the current choices; null while they are loading.
+  const [problemData, setProblemData] = useState(null);
+  const [problemReductionData, setProblemReductionData] = useState(null);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
   const instanceReady = !!(problemInstance && problemName);
   const isDisabled = showGadgets || showReduction;
-  const totalSteps = problemData.length;
+  const totalSteps = problemData?.length ?? 0;
   const showSolution = currentStep === totalSteps - 1 && totalSteps > 1;
-  const currentProblemData = problemData[currentStep] ?? null;
-  const currentReductionData = problemReductionData[currentStep] ?? null;
+  const currentProblemData = problemData?.[currentStep] ?? null;
+  const currentReductionData = problemReductionData?.[currentStep] ?? null;
 
   useWhenChanged([problemName, problemInstance, chosenVisualization], () => {
-    setProblemData([]);
+    setProblemData(null);
     setCurrentStep(0);
   });
 
@@ -137,27 +139,42 @@ export default function VisualizeRowReact({
   // calling setChosenVisualization from this component marks the pick as "user selected" and
   // permanently blocks the hook's own default resolution for that problem.
 
-  // fetch solution when instance or solver changes, since it's needed for some visualizations and reductions
+  // fetch solution when instance or solver changes, since it's needed for some visualizations and reductions.
+  // undefined while solving, false if the solve failed.
   const [solution, setSolution] = useState(undefined);
+
+  useWhenChanged([problemInstance, chosenSolver], () => setSolution(undefined));
 
   useEffect(() => {
     if (!problemInstance || !chosenSolver) return;
+    let ignore = false;
 
     const fetchSolvedInstance = async () => {
       try {
         const solved = await requestSolvedInstance(url, chosenSolver, problemInstance);
-        setSolution(solved);
+        if (!ignore) setSolution(solved || false);
       } catch (err) {
         console.error("Failed to solve instance:", err);
       }
     };
 
     fetchSolvedInstance();
+
+    return () => {
+      ignore = true;
+    };
   }, [problemInstance, chosenSolver, url]);
+
+  // The reduction picture belongs to one problem, instance, reduction and solution; drop it as
+  // soon as any of them changes so the old one is never shown.
+  useWhenChanged([showReduction, problemInstance, chosenReductionType, solution], () =>
+    setProblemReductionData(null),
+  );
 
   // Fetch reduction visualization
   useEffect(() => {
-    if (!chosenReduceTo || !problemInstance || !showReduction || !solution) return;
+    if (!chosenReductionType || !problemInstance || !showReduction || !solution) return;
+    let ignore = false;
 
     const fetch = async () => {
       try {
@@ -167,14 +184,18 @@ export default function VisualizeRowReact({
           solution,
           problemInstance,
         );
-        setProblemReductionData(data ?? []);
+        if (!ignore) setProblemReductionData(data ?? []);
       } catch (err) {
         console.error("Failed to load reduction visualization:", err);
       }
     };
 
     fetch();
-  }, [showReduction, chosenReduceTo, problemInstance, solution, chosenReductionType, url]);
+
+    return () => {
+      ignore = true;
+    };
+  }, [showReduction, problemInstance, solution, chosenReductionType, url]);
 
   // Fetch main visualization data
   useEffect(() => {
@@ -232,9 +253,22 @@ export default function VisualizeRowReact({
 
   useWhenChanged([problemName, chosenReduceTo], () => setShowGadgets(false));
 
-  useWhenChanged([chosenReductionType], () => {
-    if (!chosenReductionType) setShowReduction(false);
+  // A problem with nothing to reduce turns "Show reduction" off. The reduction type is empty
+  // while a new problem's or target's options load, so that alone is not a reason to turn it off.
+  useWhenChanged([noReductions], () => {
+    if (noReductions) setShowReduction(false);
   });
+
+  // "loading" until the current picture arrives, "missing" when the answer had nothing to draw.
+  const pictureStatus = (frames, frame) =>
+    frames === null ? "loading" : !frame || Object.keys(frame).length === 0 ? "missing" : "ready";
+  const problemStatus =
+    instanceReady && chosenVisualization ? pictureStatus(problemData, currentProblemData) : "none";
+  const reductionStatus = !showReduction
+    ? "none"
+    : solution === false
+      ? "missing"
+      : pictureStatus(problemReductionData, currentReductionData);
 
   // Switch Handlers. "Highlight solution" is the last step, so the switch moves the step and
   // showSolution follows from it.
@@ -458,7 +492,9 @@ export default function VisualizeRowReact({
           visualizationType={visualizationInfo.visualizationType}
           visualizationName={chosenVisualization}
           problemData={currentProblemData}
+          problemStatus={problemStatus}
           reductionData={currentReductionData}
+          reductionStatus={reductionStatus}
           showSolutionToggle={showSolution}
           reductionVisualization={reductionVisualization}
         />

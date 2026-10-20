@@ -87,7 +87,11 @@ export async function requestGadgetMap(url, reduction, instance) {
   );
 }
 
-export async function processReductions(url, reductionPath, instance) {
+/**
+ * @param isCurrent Optional; when it returns false the walk stops early (resolving `undefined`),
+ * so an answer nobody is waiting for any more sends no further requests.
+ */
+export async function processReductions(url, reductionPath, instance, isCurrent = () => true) {
   const reductions = reductionPath.split("-").map((r) => r.trim());
 
   let currentInstance = instance;
@@ -95,7 +99,9 @@ export async function processReductions(url, reductionPath, instance) {
 
   for (const reduction of reductions) {
     const nextMap = await requestGadgetMap(url, reduction, currentInstance);
+    if (!isCurrent()) return undefined;
     const nextInstance = await requestReducedInstanceFromPath(url, reduction, currentInstance);
+    if (!isCurrent()) return undefined;
 
     // compose A→B and B→C into A→C
     if (currentMap) {

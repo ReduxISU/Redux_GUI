@@ -60,21 +60,26 @@ function useDefaultVisualizationMap(url, problemInfoMap) {
   return [defaultVisualizationMap, setDefaultVisualizationMap];
 }
 
+// One shared empty list, so "not loaded yet" keeps the same identity from render to render.
+const NO_OPTIONS = [];
+
+// Options are kept together with the problem they were fetched for, and hidden until the current
+// problem's arrive, so a switch never picks (and requests) the previous problem's visualization.
 function useVisualizationOptions(url, problemName) {
-  const [VisualizationOptions, setVisualizationOptions] = useState([]);
+  const [fetched, setFetched] = useState({ problemName: undefined, options: NO_OPTIONS });
 
   useEffect(() => {
+    let ignore = false;
     (async () => {
-      if (!problemName) {
-        setVisualizationOptions([]);
-        return;
-      }
-      const allVisualizations = (await requestAllVisualizations(url)) ?? {};
-      setVisualizationOptions(allVisualizations[problemName] ?? []);
+      const allVisualizations = problemName ? ((await requestAllVisualizations(url)) ?? {}) : {};
+      if (!ignore) setFetched({ problemName, options: allVisualizations[problemName] ?? [] });
     })();
+    return () => {
+      ignore = true;
+    };
   }, [problemName, url]);
 
-  return [VisualizationOptions, setVisualizationOptions];
+  return [fetched.problemName === problemName ? fetched.options : NO_OPTIONS];
 }
 
 /**

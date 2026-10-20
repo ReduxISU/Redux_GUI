@@ -1,5 +1,5 @@
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
-import { Card, Typography } from "@mui/material";
+import { Card, CircularProgress, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { useContext } from "react";
 import "@fontsource/roboto/300.css";
@@ -66,6 +66,57 @@ export function No_Reduction_Viz_Svg({ niceReductionName }) {
           }}
         >
           The {niceReductionName ?? "chosen reduction"} visualization has not been implemented yet
+        </Typography>
+      </Card>
+    </Box>
+  );
+}
+
+/**
+ * Shown in place of a picture while the current problem's or reduction's picture is loading, so
+ * the previous one is never left on screen after a switch.
+ */
+export function Loading_Viz_Svg() {
+  const { mode } = useThemeMode();
+  return (
+    <Box role="status" sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
+      <CircularProgress size={28} />
+      <Typography style={{ color: textColors(mode).heading }}>Loading visualization…</Typography>
+    </Box>
+  );
+}
+
+/**
+ * Shown when the backend answered with no picture (an empty or failed answer) for the current
+ * problem or reduction.
+ */
+export function No_Picture_Viz_Svg({ niceProblemName, reduction }) {
+  const { mode } = useThemeMode();
+  const textColor = textColors(mode).heading;
+  const what = reduction ? "reduction" : (niceProblemName ?? "");
+  return (
+    <Box>
+      <Card
+        variant="outlined"
+        sx={{
+          bgcolor: "primary.lGray",
+          boxShadow: 1,
+          borderRadius: 2,
+          p: 2,
+          minWidth: 300,
+        }}
+      >
+        <ErrorOutlineIcon fontSize="large"></ErrorOutlineIcon>
+        <Typography
+          variant="h4"
+          component="h4"
+          style={{
+            color: textColor,
+            fontWeight: "normal",
+            textAlign: "center",
+          }}
+        >
+          No {what} picture is available for this instance.
         </Typography>
       </Card>
     </Box>

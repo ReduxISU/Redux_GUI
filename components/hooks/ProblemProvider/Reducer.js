@@ -17,19 +17,34 @@ const PREFERRED_REDUCTION_TYPE = {
   VERTEXCOVER: "sipserReduceToVC",
 };
 
+// One shared empty list, so "not loaded yet" keeps the same identity from render to render.
+const NO_OPTIONS = [];
+
 function pickDefault(preferred, options) {
   return options.includes(preferred) ? preferred : (options[0] ?? "");
 }
 
 export function useReducer(url, problemName, problemInstance) {
   const state = {};
-  [state.reduceToOptions] = useReduceToOptions(url, problemName);
+  let reduceToOptionsLoaded, reductionTypeOptionsLoaded;
+  [state.reduceToOptions, reduceToOptionsLoaded] = useReduceToOptions(url, problemName);
   [state.chosenReduceTo, state.setChosenReduceTo] = useChosenReduceTo(
     problemName,
     state.reduceToOptions,
   );
   [state.reductionNameMap] = useReductionNameMap(url, problemName, state.chosenReduceTo);
-  [state.reductionTypeOptions] = useReductionTypeOptions(url, problemName, state.chosenReduceTo);
+  [state.reductionTypeOptions, reductionTypeOptionsLoaded] = useReductionTypeOptions(
+    url,
+    problemName,
+    state.chosenReduceTo,
+  );
+  // True once it is known there is nothing to reduce: the problem has no targets, or the chosen
+  // target has no reduction path. It stays false while the options are loading.
+  state.noReductions =
+    (reduceToOptionsLoaded && state.reduceToOptions.length === 0) ||
+    (!!state.chosenReduceTo &&
+      reductionTypeOptionsLoaded &&
+      state.reductionTypeOptions.length === 0);
   [state.chosenReductionType, state.setChosenReductionType] = useChosenReductionType(
     problemName,
     state.chosenReduceTo,
@@ -52,11 +67,16 @@ export function useReducerInfo(url, reducer) {
   const [genericInfo, setGenericInfo] = useState({});
 
   useEffect(() => {
+    let ignore = false;
     (async () => {
-      setGenericInfo(
-        !reducer ? {} : ((await requestReductionInfo(url, (reducer ?? "").split("-")[0])) ?? {}),
-      );
+      const info = !reducer
+        ? {}
+        : ((await requestReductionInfo(url, (reducer ?? "").split("-")[0])) ?? {});
+      if (!ignore) setGenericInfo(info);
     })();
+    return () => {
+      ignore = true;
+    };
   }, [reducer, url]);
 
   return genericInfo; // There should be no reason to set the information
@@ -70,48 +90,78 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
   // Automatically reduces the instance one the reduction type is chosen.
   // This makes it so it's less input from the user but also makes the "Reduce" button effectly useless.
   useEffect(() => {
+    let ignore = false;
     (async () => {
-      setReducedInstance(
+      const reduced =
         chosenReductionType && problemInstance
           ? ((await requestReducedInstanceFromPath(url, chosenReductionType, problemInstance)) ??
-              "")
-          : "",
-      );
+            "")
+          : "";
+      if (!ignore) setReducedInstance(reduced);
     })();
+    return () => {
+      ignore = true;
+    };
   }, [chosenReductionType, problemInstance, url]);
 
   return [reducedInstance, setReducedInstance];
 }
 
+// The target's picture type, or undefined while the current target's type is still loading.
 function useReductionVisualization(url, chosenReduceTo) {
-  const [reductionVisualization, setReductionVisualization] = useState("");
+  const [fetched, setFetched] = useState({ reduceTo: undefined, type: "" });
 
   useEffect(() => {
+    let ignore = false;
     (async () => {
       const info = chosenReduceTo ? await requestInfo(url, chosenReduceTo) : null;
-      setReductionVisualization(info?.defaultVisualization?.visualizationType ?? "");
+      if (!ignore) {
+        setFetched({
+          reduceTo: chosenReduceTo,
+          type: info?.defaultVisualization?.visualizationType ?? "",
+        });
+      }
     })();
+    return () => {
+      ignore = true;
+    };
   }, [url, chosenReduceTo]);
 
-  return [reductionVisualization, setReductionVisualization];
+  const setReductionVisualization = (type) => setFetched({ reduceTo: chosenReduceTo, type });
+  return [
+    fetched.reduceTo === chosenReduceTo ? fetched.type : undefined,
+    setReductionVisualization,
+  ];
 }
 
+// Options are kept together with the problem they were fetched for. Until the current problem's
+// arrive this returns NO_OPTIONS and loaded = false, so nothing picks from another problem's list.
 function useReduceToOptions(url, problemName) {
-  const [reduceToOptions, setReduceToOptions] = useState([]);
+  const [fetched, setFetched] = useState({ problemName: undefined, options: NO_OPTIONS });
 
   useEffect(() => {
+    let ignore = false;
     (async () => {
-      setReduceToOptions(
-        (problemName ? ((await requestReductionOptions(url, problemName)) ?? []) : []).sort(),
-      );
+      const options = (
+        problemName ? ((await requestReductionOptions(url, problemName)) ?? []) : []
+      ).sort();
+      if (!ignore) setFetched({ problemName, options });
     })();
+    return () => {
+      ignore = true;
+    };
   }, [problemName, url]);
 
-  return [reduceToOptions, setReduceToOptions];
+  const loaded = fetched.problemName === problemName;
+  return [loaded ? fetched.options : NO_OPTIONS, loaded];
 }
 
 function useReductionTypeOptions(url, problemName, chosenReduceTo) {
-  const [reductionTypeOptions, setReductionTypeOptions] = useState([]);
+  const [fetched, setFetched] = useState({
+    problemName: undefined,
+    chosenReduceTo: undefined,
+    options: NO_OPTIONS,
+  });
 
   async function requestPreparedReductions(url, problemName, chosenReduceTo) {
     const reductions = (await requestReductions(url, problemName, chosenReduceTo)) ?? [];
@@ -123,17 +173,24 @@ function useReductionTypeOptions(url, problemName, chosenReduceTo) {
   }
 
   useEffect(() => {
+    let ignore = false;
     (async () => {
-      setReductionTypeOptions(
-        (problemName && chosenReduceTo
+      const options = (
+        problemName && chosenReduceTo
           ? ((await requestPreparedReductions(url, problemName, chosenReduceTo)) ?? [])
           : []
-        ).sort(),
-      );
+      ).sort();
+      if (!ignore) setFetched({ problemName, chosenReduceTo, options });
     })();
+    return () => {
+      ignore = true;
+    };
   }, [chosenReduceTo, url, problemName]);
 
-  return [reductionTypeOptions, setReductionTypeOptions];
+  // Right after a problem or target switch the stored options still belong to the old one. Hide
+  // them until the current ones arrive, so the default below never re-picks the old reduction.
+  const loaded = fetched.problemName === problemName && fetched.chosenReduceTo === chosenReduceTo;
+  return [loaded ? fetched.options : NO_OPTIONS, loaded];
 }
 
 function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOptions) {
@@ -141,6 +198,8 @@ function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOption
 
   useWhenChanged([problemName, chosenReduceTo], () => setChosenReductionType(""));
 
+  // reductionTypeOptions only ever holds the current target's options (NO_OPTIONS while they
+  // load), so the choice stays empty until they arrive.
   useWhenChanged([reductionTypeOptions, chosenReduceTo], () => {
     if (reductionTypeOptions.length === 0) return;
     setChosenReductionType(
@@ -172,13 +231,16 @@ function useReductionNameMap(url, problemName, chosenReduceTo) {
   const [reductionNameMap, setReductionNameMap] = useState(new Map());
 
   useEffect(() => {
+    let ignore = false;
     (async () => {
-      setReductionNameMap(
-        chosenReduceTo
-          ? await requestReductionNameMap(url, problemName, chosenReduceTo)
-          : new Map(),
-      );
+      const map = chosenReduceTo
+        ? await requestReductionNameMap(url, problemName, chosenReduceTo)
+        : new Map();
+      if (!ignore) setReductionNameMap(map);
     })();
+    return () => {
+      ignore = true;
+    };
   }, [chosenReduceTo, url, problemName]);
 
   return [reductionNameMap, setReductionNameMap];
