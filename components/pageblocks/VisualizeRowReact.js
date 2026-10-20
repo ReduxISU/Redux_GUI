@@ -58,6 +58,8 @@ export default function VisualizeRowReact({
   reductionNameMap,
   reducedInstance,
   reductionVisualization,
+  reductionVisualizationError,
+  reductionOptionsError,
   noReductions,
   chosenSolver,
   defaultSolverMap,
@@ -67,13 +69,18 @@ export default function VisualizeRowReact({
   VisualizationOptions,
   defaultVisualizationMap,
   visualizationTypeMap,
+  visualizationListStatus,
+  visualizationListError,
   dragHandleProps,
 }) {
   const { mode } = useThemeMode();
   const surface = surfaceColors(mode);
   const text = textColors(mode);
 
-  const visualizationInfo = useVisualizationInfo(url, chosenVisualization);
+  const [visualizationInfo, visualizationInfoStatus, visualizationInfoError] = useVisualizationInfo(
+    url,
+    chosenVisualization,
+  );
 
   const unrenderableOptions = (VisualizationOptions || []).filter(
     (option) => !isRenderable(visualizationTypeMap?.get(option)),
@@ -115,9 +122,12 @@ export default function VisualizeRowReact({
   const [reducedVisualizationData, setReducedVisualizationData] = useState(
     defaultCLIQUEVisualizationArr,
   );
-  // Picture frames for the current choices; null while they are loading.
+  // Picture frames for the current choices; null while they are loading. The *Error values say
+  // what went wrong when the request for them failed, and are null otherwise.
   const [problemData, setProblemData] = useState(null);
+  const [problemDataError, setProblemDataError] = useState(null);
   const [problemReductionData, setProblemReductionData] = useState(null);
+  const [reductionDataError, setReductionDataError] = useState(null);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -130,6 +140,7 @@ export default function VisualizeRowReact({
 
   useWhenChanged([problemName, problemInstance, chosenVisualization], () => {
     setProblemData(null);
+    setProblemDataError(null);
     setCurrentStep(0);
   });
 
@@ -140,21 +151,35 @@ export default function VisualizeRowReact({
   // permanently blocks the hook's own default resolution for that problem.
 
   // fetch solution when instance or solver changes, since it's needed for some visualizations and reductions.
-  // undefined while solving, false if the solve failed.
+  // undefined while solving, false if the solve failed (solveError then says why).
   const [solution, setSolution] = useState(undefined);
+  const [solveError, setSolveError] = useState(null);
 
-  useWhenChanged([problemInstance, chosenSolver], () => setSolution(undefined));
+  useWhenChanged([problemInstance, chosenSolver], () => {
+    setSolution(undefined);
+    setSolveError(null);
+  });
 
   useEffect(() => {
     if (!problemInstance || !chosenSolver) return;
     let ignore = false;
 
     const fetchSolvedInstance = async () => {
+      let error = null;
       try {
-        const solved = await requestSolvedInstance(url, chosenSolver, problemInstance);
-        if (!ignore) setSolution(solved || false);
+        const solved = await requestSolvedInstance(url, chosenSolver, problemInstance, (detail) => {
+          error = detail;
+        });
+        if (ignore) return;
+        setSolution(solved || false);
+        // A falsy answer can't be told apart from a failure here, so it counts as one.
+        if (!solved) setSolveError(error ?? "The solver sent back no solution.");
       } catch (err) {
         console.error("Failed to solve instance:", err);
+        if (!ignore) {
+          setSolution(false);
+          setSolveError(String(err?.message ?? err));
+        }
       }
     };
 
@@ -167,9 +192,10 @@ export default function VisualizeRowReact({
 
   // The reduction picture belongs to one problem, instance, reduction and solution; drop it as
   // soon as any of them changes so the old one is never shown.
-  useWhenChanged([showReduction, problemInstance, chosenReductionType, solution], () =>
-    setProblemReductionData(null),
-  );
+  useWhenChanged([showReduction, problemInstance, chosenReductionType, solution], () => {
+    setProblemReductionData(null);
+    setReductionDataError(null);
+  });
 
   // Fetch reduction visualization
   useEffect(() => {
@@ -177,16 +203,27 @@ export default function VisualizeRowReact({
     let ignore = false;
 
     const fetch = async () => {
+      let error = null;
       try {
         const data = await requestReductionVisualization(
           url,
           chosenReductionType,
           solution,
           problemInstance,
+          (detail) => {
+            error = detail;
+          },
         );
-        if (!ignore) setProblemReductionData(data ?? []);
+        if (ignore) return;
+        // undefined means the request failed; [] is an answer with nothing to draw.
+        setProblemReductionData(data ?? []);
+        setReductionDataError(data === undefined ? (error ?? "No answer.") : null);
       } catch (err) {
         console.error("Failed to load reduction visualization:", err);
+        if (!ignore) {
+          setProblemReductionData([]);
+          setReductionDataError(String(err?.message ?? err));
+        }
       }
     };
 
@@ -204,8 +241,11 @@ export default function VisualizeRowReact({
     let alive = true;
 
     const fetch = async () => {
+      let error = null;
       try {
-        const data = await requestVisualization(url, chosenVisualization, problemInstance);
+        const data = await requestVisualization(url, chosenVisualization, problemInstance, (d) => {
+          error = d;
+        });
 
         if (!alive) return;
 
@@ -217,9 +257,15 @@ export default function VisualizeRowReact({
         }
 
         setProblemData(processedData);
+        // undefined means the request failed; [] is an answer with nothing to draw.
+        setProblemDataError(data === undefined ? (error ?? "No answer.") : null);
         setCurrentStep(0);
       } catch (err) {
         console.error(err);
+        if (alive) {
+          setProblemData([]);
+          setProblemDataError(String(err?.message ?? err));
+        }
       }
     };
 
@@ -259,16 +305,84 @@ export default function VisualizeRowReact({
     if (noReductions) setShowReduction(false);
   });
 
-  // "loading" until the current picture arrives, "missing" when the answer had nothing to draw.
+  // What each side of the picture pane shows: "loading" until the picture and everything it needs
+  // arrive, "failed" when a request for any of them failed, "missing" when the answer had nothing
+  // to draw, "ready" to draw it, and "none" when there is nothing to show (no problem or instance
+  // chosen, or "Show reduction" off). A failure carries { step, detail }: which request failed and
+  // for which problem, visualization or reduction, and what went wrong (HTTP status and server
+  // error text, no answer, ...).
   const pictureStatus = (frames, frame) =>
     frames === null ? "loading" : !frame || Object.keys(frame).length === 0 ? "missing" : "ready";
-  const problemStatus =
-    instanceReady && chosenVisualization ? pictureStatus(problemData, currentProblemData) : "none";
-  const reductionStatus = !showReduction
-    ? "none"
-    : solution === false
-      ? "missing"
-      : pictureStatus(problemReductionData, currentReductionData);
+  const niceName = (name) => problemNameMap?.get(name) ?? name;
+  const pictureFor = `problem ${niceName(problemName)}, visualization ${chosenVisualization}`;
+  const reductionFor = `problem ${niceName(problemName)}, reduction ${
+    chosenReductionType || "(not chosen)"
+  } to ${niceName(chosenReduceTo) || "(no target)"}`;
+
+  let problemStatus = "none";
+  let problemFailure = null;
+  if (!instanceReady) {
+    problemStatus = "none";
+  } else if (!chosenVisualization) {
+    // No picture picked yet: the problem's list of pictures is still loading, failed, or has
+    // nothing this interface can pick.
+    problemStatus = visualizationListStatus === "ready" ? "missing" : visualizationListStatus;
+    if (visualizationListError) {
+      problemFailure = {
+        step: `${visualizationListError.step} failed for problem ${niceName(problemName)}.`,
+        detail: visualizationListError.detail,
+      };
+    }
+  } else if (visualizationInfoStatus === "loading") {
+    problemStatus = "loading";
+  } else if (visualizationInfoStatus === "failed") {
+    problemStatus = "failed";
+    problemFailure = {
+      step: `Picture type (info) request failed for ${pictureFor}.`,
+      detail: visualizationInfoError,
+    };
+  } else if (problemDataError) {
+    problemStatus = "failed";
+    problemFailure = {
+      step: `Picture request failed for ${pictureFor}.`,
+      detail: problemDataError,
+    };
+  } else {
+    problemStatus = pictureStatus(problemData, currentProblemData);
+  }
+
+  let reductionStatus = "none";
+  let reductionFailure = null;
+  if (!showReduction) {
+    reductionStatus = "none";
+  } else if (reductionOptionsError) {
+    reductionStatus = "failed";
+    reductionFailure = {
+      step: `${reductionOptionsError.step} failed for ${reductionFor}.`,
+      detail: reductionOptionsError.detail,
+    };
+  } else if (reductionVisualizationError) {
+    reductionStatus = "failed";
+    reductionFailure = {
+      step: `Reduction picture type (info) request failed for ${reductionFor}.`,
+      detail: reductionVisualizationError,
+    };
+  } else if (solution === false) {
+    // The reduction picture is drawn from the solution, so a failed solve fails it too.
+    reductionStatus = "failed";
+    reductionFailure = {
+      step: `Solve with ${chosenSolver} (needed for the reduction picture) failed for ${reductionFor}.`,
+      detail: solveError,
+    };
+  } else if (reductionDataError) {
+    reductionStatus = "failed";
+    reductionFailure = {
+      step: `Reduction picture request failed for ${reductionFor}.`,
+      detail: reductionDataError,
+    };
+  } else {
+    reductionStatus = pictureStatus(problemReductionData, currentReductionData);
+  }
 
   // Switch Handlers. "Highlight solution" is the last step, so the switch moves the step and
   // showSolution follows from it.
@@ -493,8 +607,10 @@ export default function VisualizeRowReact({
           visualizationName={chosenVisualization}
           problemData={currentProblemData}
           problemStatus={problemStatus}
+          problemFailure={problemFailure}
           reductionData={currentReductionData}
           reductionStatus={reductionStatus}
+          reductionFailure={reductionFailure}
           showSolutionToggle={showSolution}
           reductionVisualization={reductionVisualization}
         />

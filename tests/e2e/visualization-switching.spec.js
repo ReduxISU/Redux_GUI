@@ -12,8 +12,14 @@ import { expect, test } from "./fixtures";
 const row = (page, title) =>
   page.locator(".accordion").filter({ has: page.getByText(title, { exact: true }) });
 
-// Drawn pictures only; every toolbar icon is an <svg> too.
-const pictures = (locator) => locator.locator("svg:not(.MuiSvgIcon-root)");
+// Drawn pictures only; every toolbar icon is an <svg> too, and so is the Loading spinner.
+const pictures = (locator) =>
+  locator.locator("svg:not(.MuiSvgIcon-root):not(.MuiCircularProgress-svg)");
+
+// The picture pane's loading and failed states (components/Visualization/svgs/No_Viz_SVG.js).
+const loadingNote = (locator) => locator.getByRole("status").filter({ hasText: "Loading..." });
+const failedNote = (locator) =>
+  locator.getByRole("alert").filter({ hasText: "Failed to Visualize" });
 
 // The right-hand pane of the Visualize row when "Show reduction" is on.
 const reductionPane = (page) => row(page, "Visualize").locator(".wrap > .MuiContainer-root").nth(1);
@@ -138,30 +144,143 @@ test("switching to a problem with no reductions turns Show reduction off", async
   expect(requests.filter((url) => url.includes("reduction="))).toEqual([]);
 });
 
-for (const [answer, reply] of [
-  ["an empty", { json: [] }],
-  ["a failed", { status: 500, body: "boom" }],
+test("a problem whose picture comes back empty says no picture is available, not that it failed", async ({
+  page,
+}) => {
+  await page.route(/visualize\?visualization=CliqueDefaultVisualization/, (route) =>
+    route.fulfill({ json: [] }),
+  );
+  await page.goto("/");
+  const visualizeRow = row(page, "Visualize");
+  await expect(pictures(visualizeRow).first()).toBeVisible();
+
+  await choose(page, "Problem", "Clique");
+
+  await expect(visualizeRow).toContainText("No Clique picture is available for this instance.");
+  await expect(pictures(visualizeRow)).toHaveCount(0);
+  await expect(failedNote(visualizeRow)).toHaveCount(0);
+});
+
+// A failed picture request ends on "Failed to Visualize" with which request failed, for what, and
+// what happened; never on the old picture, a blank pane or endless loading.
+for (const [what, answer, details] of [
+  [
+    "a 500",
+    (route) => route.fulfill({ status: 500, body: "visualizer exploded" }),
+    [/HTTP 500/, /visualizer exploded/],
+  ],
+  ["an aborted", (route) => route.abort(), [/No answer from the server/]],
 ]) {
-  test(`a problem whose picture comes back as ${answer} answer says so instead of keeping the old one`, async ({
+  test(`${what} picture request shows Failed to Visualize with the reason`, async ({
     page,
     expectedFailures,
   }) => {
-    // The failed answer is provoked on purpose; don't let the silent-failure guard flag it.
+    // The failure is provoked on purpose; don't let the silent-failure guard flag it.
     expectedFailures.push({
       url: "visualize?visualization=CliqueDefaultVisualization",
       status: 500,
       log: "CliqueDefaultVisualization VISUALIZE REQUEST FAILED",
     });
-    await page.route(/visualize\?visualization=CliqueDefaultVisualization/, (route) =>
-      route.fulfill(reply),
-    );
+    await page.route(/visualize\?visualization=CliqueDefaultVisualization/, answer);
     await page.goto("/");
     const visualizeRow = row(page, "Visualize");
     await expect(pictures(visualizeRow).first()).toBeVisible();
 
     await choose(page, "Problem", "Clique");
 
-    await expect(visualizeRow).toContainText("No Clique picture is available for this instance.");
+    const failed = failedNote(visualizeRow);
+    await expect(failed).toBeVisible();
+    await expect(failed).toContainText(
+      "Picture request failed for problem Clique, visualization CliqueDefaultVisualization.",
+    );
+    for (const detail of details) await expect(failed).toContainText(detail);
     await expect(pictures(visualizeRow)).toHaveCount(0);
+    await expect(loadingNote(visualizeRow)).toHaveCount(0);
   });
 }
+
+test("a slow picture shows Loading... until it arrives", async ({ page }) => {
+  await holdAnswers(page, /visualize\?visualization=CliqueDefaultVisualization/, 4000);
+  await page.goto("/");
+  const visualizeRow = row(page, "Visualize");
+  await expect(pictures(visualizeRow).first()).toBeVisible();
+
+  await choose(page, "Problem", "Clique");
+
+  await expect(loadingNote(visualizeRow)).toBeVisible();
+  await expect(pictures(visualizeRow)).toHaveCount(0);
+  await expect(pictures(visualizeRow).first()).toBeVisible();
+  await expect(loadingNote(visualizeRow)).toHaveCount(0);
+});
+
+test("a failed picture type request shows Failed to Visualize, not endless loading", async ({
+  page,
+  expectedFailures,
+}) => {
+  expectedFailures.push({
+    url: "info?interface=CliqueDefaultVisualization",
+    status: 500,
+    log: "CliqueDefaultVisualization INFO REQUEST FAILED",
+  });
+  await page.route(/info\?interface=CliqueDefaultVisualization/, (route) =>
+    route.fulfill({ status: 500, json: { title: "info exploded" } }),
+  );
+  await page.goto("/");
+  const visualizeRow = row(page, "Visualize");
+  await expect(pictures(visualizeRow).first()).toBeVisible();
+
+  await choose(page, "Problem", "Clique");
+
+  const failed = failedNote(visualizeRow);
+  await expect(failed).toBeVisible();
+  await expect(failed).toContainText(
+    "Picture type (info) request failed for problem Clique, visualization CliqueDefaultVisualization.",
+  );
+  await expect(failed).toContainText("HTTP 500");
+  await expect(failed).toContainText("info exploded");
+  await expect(loadingNote(visualizeRow)).toHaveCount(0);
+});
+
+test("while the list of pictures loads the pane shows Loading..., never a blank", async ({
+  page,
+}) => {
+  const deliveredAll = await holdAnswers(page, /Navigation\/Batch\/allVisualizations/, 4000);
+  await page.goto("/");
+  const visualizeRow = row(page, "Visualize");
+
+  // The list is held back, so nothing can be drawn yet; the pane says it is loading.
+  await expect(loadingNote(visualizeRow)).toBeVisible();
+  await expect(pictures(visualizeRow)).toHaveCount(0);
+
+  await deliveredAll();
+  await expect(pictures(visualizeRow).first()).toBeVisible();
+  await expect(loadingNote(visualizeRow)).toHaveCount(0);
+});
+
+test("a failed reduction picture request shows Failed to Visualize on the reduction side", async ({
+  page,
+  expectedFailures,
+}) => {
+  expectedFailures.push({
+    url: "visualizeReduction?reduction=SipserReduceToCliqueStandard",
+    status: 500,
+    log: "SipserReduceToCliqueStandard VISUALIZE REQUEST FAILED",
+  });
+  await page.route(/visualizeReduction\?reduction=SipserReduceToCliqueStandard/, (route) =>
+    route.fulfill({ status: 500, body: "reduction exploded" }),
+  );
+  await page.goto("/");
+  await expect(pictures(row(page, "Visualize")).first()).toBeVisible();
+
+  await showReduction(page);
+
+  const failed = failedNote(reductionPane(page));
+  await expect(failed).toBeVisible();
+  await expect(failed).toContainText(
+    "Reduction picture request failed for problem 3SAT, reduction SipserReduceToCliqueStandard to Clique.",
+  );
+  await expect(failed).toContainText("HTTP 500");
+  await expect(failed).toContainText("reduction exploded");
+  // The main picture is unaffected.
+  await expect(pictures(row(page, "Visualize")).first()).toBeVisible();
+});

@@ -5,13 +5,35 @@ import {
   requestAllVisualizationTypes,
 } from "../../redux";
 import { isRenderable } from "../../Visualization/svgs/renderability";
-import { useGenericInfo } from "../ProblemProvider";
+import { useGenericInfoWithStatus } from "../ProblemProvider";
 
 export function useVisualization(url, problemName, problemNameMap, problemInfoMap) {
   const state = {};
+  let optionsStatus, optionsError, typesStatus, typesError;
   [state.defaultVisualizationMap] = useDefaultVisualizationMap(url, problemInfoMap);
-  [state.VisualizationOptions] = useVisualizationOptions(url, problemName);
-  state.visualizationTypeMap = useVisualizationTypeMap(url, state.VisualizationOptions);
+  [state.VisualizationOptions, optionsStatus, optionsError] = useVisualizationOptions(
+    url,
+    problemName,
+  );
+  [state.visualizationTypeMap, typesStatus, typesError] = useVisualizationTypeMap(
+    url,
+    state.VisualizationOptions,
+  );
+  // Whether the current problem's list of pictures (and their types, which decide the default)
+  // is "loading", "failed" or "ready", so the Visualize row can say so instead of staying blank;
+  // visualizationListError is { step, detail } saying what went wrong when it failed.
+  state.visualizationListError =
+    optionsStatus === "failed"
+      ? { step: "Picture list request", detail: optionsError }
+      : typesStatus === "failed"
+        ? { step: "Picture types request", detail: typesError }
+        : null;
+  state.visualizationListStatus =
+    optionsStatus === "failed" || typesStatus === "failed"
+      ? "failed"
+      : optionsStatus === "loading" || typesStatus === "loading"
+        ? "loading"
+        : "ready";
   [state.chosenVisualization, state.setChosenVisualization] = useChosenVisualization(
     problemName,
     state.defaultVisualizationMap,
@@ -22,8 +44,9 @@ export function useVisualization(url, problemName, problemNameMap, problemInfoMa
   return state;
 }
 
+// Returns [info, status, error] (see useGenericInfoWithStatus).
 export function useVisualizationInfo(url, Visualization) {
-  return useGenericInfo(url, Visualization);
+  return useGenericInfoWithStatus(url, Visualization);
 }
 
 function useDefaultVisualizationMap(url, problemInfoMap) {
@@ -65,21 +88,38 @@ const NO_OPTIONS = [];
 
 // Options are kept together with the problem they were fetched for, and hidden until the current
 // problem's arrive, so a switch never picks (and requests) the previous problem's visualization.
+// Returns [options, status, error], status being "loading", "failed" or "ready".
 function useVisualizationOptions(url, problemName) {
-  const [fetched, setFetched] = useState({ problemName: undefined, options: NO_OPTIONS });
+  const [fetched, setFetched] = useState({
+    problemName: undefined,
+    options: NO_OPTIONS,
+    error: null,
+  });
 
   useEffect(() => {
     let ignore = false;
     (async () => {
-      const allVisualizations = problemName ? ((await requestAllVisualizations(url)) ?? {}) : {};
-      if (!ignore) setFetched({ problemName, options: allVisualizations[problemName] ?? [] });
+      let error = null;
+      const allVisualizations = problemName
+        ? await requestAllVisualizations(url, (detail) => {
+            error = detail;
+          })
+        : {};
+      if (!ignore) {
+        setFetched({
+          problemName,
+          options: allVisualizations?.[problemName] ?? [],
+          error: allVisualizations === undefined ? (error ?? "No answer.") : null,
+        });
+      }
     })();
     return () => {
       ignore = true;
     };
   }, [problemName, url]);
 
-  return [fetched.problemName === problemName ? fetched.options : NO_OPTIONS];
+  if (fetched.problemName !== problemName) return [NO_OPTIONS, "loading", null];
+  return [fetched.options, fetched.error ? "failed" : "ready", fetched.error];
 }
 
 /**
@@ -94,17 +134,20 @@ function useVisualizationOptions(url, problemName) {
  * off each class's entry in `allInfo` instead. Both paths must work.
  */
 function useVisualizationTypeMap(url, VisualizationOptions) {
-  const [visualizationTypeMap, setVisualizationTypeMap] = useState(new Map());
+  // The map is kept with the options it was built for, to tell "still loading" from "done".
+  const [fetched, setFetched] = useState({ options: undefined, map: new Map(), error: null });
 
   useEffect(() => {
+    let ignore = false;
     (async () => {
       if (!VisualizationOptions?.length) {
-        setVisualizationTypeMap(new Map());
+        if (!ignore) setFetched({ options: VisualizationOptions, map: new Map(), error: null });
         return;
       }
 
       const allTypes = await requestAllVisualizationTypes(url);
       const map = new Map();
+      let error = null;
 
       if (allTypes) {
         for (const className of VisualizationOptions) {
@@ -115,19 +158,28 @@ function useVisualizationTypeMap(url, VisualizationOptions) {
         // allVisualizationTypes isn't deployed on the connected API yet --
         // derive the same className -> type mapping from allInfo, which
         // already carries visualizationType per visualization.
-        const allInfo = (await requestAllInfo(url)) ?? {};
+        const allInfo = await requestAllInfo(url, (detail) => {
+          error = detail;
+        });
+        if (allInfo === undefined) error ??= "No answer.";
         for (const className of VisualizationOptions) {
           const type =
-            allInfo[className]?.visualizationType || allInfo[className]?.VisualizationType;
+            allInfo?.[className]?.visualizationType || allInfo?.[className]?.VisualizationType;
           if (type) map.set(className, type);
         }
       }
 
-      setVisualizationTypeMap(map);
+      if (!ignore) setFetched({ options: VisualizationOptions, map, error });
     })();
+    return () => {
+      ignore = true;
+    };
   }, [url, VisualizationOptions]);
 
-  return visualizationTypeMap;
+  // Returns [map, status, error]; until the current options' types arrive the last map is kept
+  // (as before) and the status is "loading". "failed" means neither types source answered.
+  if (fetched.options !== VisualizationOptions) return [fetched.map, "loading", null];
+  return [fetched.map, fetched.error ? "failed" : "ready", fetched.error];
 }
 
 function useChosenVisualization(

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Split from "react-split";
 import { makeIdsUnique, processReductions, remapIdsDeep } from "../redux";
 import {
+  Failed_Viz_Svg,
   Loading_Viz_Svg,
   No_Picture_Viz_Svg,
   No_Renderable_Viz_Svg,
@@ -13,7 +14,13 @@ import {
 import { isRenderable } from "../Visualization/svgs/renderability";
 import Visualizations from "../Visualization/svgs/Visualizations.js";
 
-const NO_GADGETS = { key: null, gadgets: [], fromIdMap: new Map(), toIdMap: new Map() };
+const NO_GADGETS = {
+  key: null,
+  failure: null,
+  gadgets: [],
+  fromIdMap: new Map(),
+  toIdMap: new Map(),
+};
 
 export default function VisualizationLogic({
   url,
@@ -26,10 +33,13 @@ export default function VisualizationLogic({
   visualizationState,
   loading,
   visualizationType,
+  visualizationName,
   problemData,
   problemStatus,
+  problemFailure,
   reductionData,
   reductionStatus,
+  reductionFailure,
   reductionVisualization,
 }) {
   let visualization;
@@ -53,10 +63,25 @@ export default function VisualizationLogic({
   useEffect(() => {
     if (!gadgetKey) return;
     let ignore = false;
-    processReductions(url, chosenReductionType, problemInstance, () => !ignore)
-      .catch((err) => console.error("gadget map request failed", err))
+    let failure = null;
+    processReductions(
+      url,
+      chosenReductionType,
+      problemInstance,
+      () => !ignore,
+      (step, detail) => {
+        failure = { step, detail };
+      },
+    )
+      .catch((err) => {
+        console.error("gadget map request failed", err);
+        failure = { step: "Gadget map", detail: String(err?.message ?? err) };
+      })
       .then((rawGadgetMap) => {
-        if (!ignore) setFetchedGadgets({ key: gadgetKey, ...makeIdsUnique(rawGadgetMap) });
+        if (ignore) return;
+        // processReductions answers undefined when a gadget or reduce request failed.
+        if (rawGadgetMap === undefined) failure ??= { step: "Gadget map", detail: "No answer." };
+        setFetchedGadgets({ key: gadgetKey, failure, ...makeIdsUnique(rawGadgetMap) });
       });
     return () => {
       ignore = true;
@@ -80,9 +105,12 @@ export default function VisualizationLogic({
     [reductionData, gadgetsReady, fetchedGadgets],
   );
 
-  // The main picture is drawn without waiting for the gadget map.
-  if (problemStatus === "loading" || (problemStatus === "ready" && !visualizationType)) {
+  // The main picture is drawn without waiting for the gadget map. Statuses come from
+  // VisualizeRowReact: "loading", "failed", "missing" (an empty answer), "ready" or "none".
+  if (problemStatus === "loading") {
     visualization = <Loading_Viz_Svg />;
+  } else if (problemStatus === "failed") {
+    visualization = <Failed_Viz_Svg {...problemFailure} />;
   } else if (problemStatus === "missing") {
     visualization = <No_Picture_Viz_Svg niceProblemName={problemNameMap.get(problemName)} />;
   } else if (problemStatus === "ready") {
@@ -107,7 +135,9 @@ export default function VisualizationLogic({
         visualization = (
           <Viz_Render_Error_Svg
             niceProblemName={problemNameMap.get(problemName)}
+            visualizationName={visualizationName}
             visualizationType={visualizationType}
+            error={err}
           />
         );
       }
@@ -116,7 +146,18 @@ export default function VisualizationLogic({
 
   // The reduction picture waits for its gadget map, so both sides use the same unique ids.
   if (visualizationState.reductionOn) {
-    if (
+    if (reductionStatus === "failed") {
+      reducedVisualization = <Failed_Viz_Svg {...reductionFailure} />;
+    } else if (reductionStatus === "ready" && gadgetsReady && fetchedGadgets.failure) {
+      reducedVisualization = (
+        <Failed_Viz_Svg
+          step={`${fetchedGadgets.failure.step} failed (needed for the reduction picture of ${
+            problemNameMap.get(problemName) ?? problemName
+          }).`}
+          detail={fetchedGadgets.failure.detail}
+        />
+      );
+    } else if (
       reductionStatus === "loading" ||
       (reductionStatus === "ready" && (!gadgetsReady || reductionVisualization === undefined))
     ) {
@@ -149,8 +190,9 @@ export default function VisualizationLogic({
         console.error("reduction visualization renderer threw", reductionVisualization, err);
         reducedVisualization = (
           <Viz_Render_Error_Svg
-            niceReductionName={reductionNameMap.get(chosenReductionType)}
+            niceReductionName={reductionNameMap.get(chosenReductionType) ?? chosenReductionType}
             visualizationType={reductionVisualization}
+            error={err}
           />
         );
       }
