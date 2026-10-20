@@ -46,10 +46,15 @@ function safeNumber(n, fallback = 0) {
 function LaTeXGraphSvgReact({ problemData }) {
   const [svgHtml, setSvgHtml] = useState("");
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
   const { mode } = useThemeMode();
 
   useEffect(() => {
     if (!problemData) return;
+
+    // Set by the cleanup when problemData or mode changes, so a slow answer for the old input
+    // can't overwrite the picture (or the error) for the new one.
+    let ignore = false;
 
     // Node fill/outline stay white-on-black regardless of theme -- each node is
     // its own self-contained "chip" that's legible either way. Only elements
@@ -68,6 +73,7 @@ function LaTeXGraphSvgReact({ problemData }) {
 
     async function processGraph() {
       setLoading(true);
+      setFailed(false);
 
       const rand = seededRandom(12345);
 
@@ -228,21 +234,36 @@ function LaTeXGraphSvgReact({ problemData }) {
 
       const tikz = `\\begin{tikzpicture}\n${nodeDefs}${edgeDefs}\\end{tikzpicture}`;
 
-      try {
-        const response = await fetch("/api/render-tikz", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tikzBody: tikz }),
-        });
+      const response = await fetch("/api/render-tikz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tikzBody: tikz }),
+      });
 
-        const result = await response.json();
-        if (result.success) setSvgHtml(result.svg);
-      } finally {
-        setLoading(false);
-      }
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error ?? "TikZ render failed");
+      return result.svg;
     }
 
-    processGraph();
+    // A failed render used to leave the pane blank with no message (issue #389); show an error
+    // instead, and drop the previous picture so it can't pass for this one.
+    processGraph()
+      .then((svg) => {
+        if (!ignore) setSvgHtml(svg);
+      })
+      .catch((err) => {
+        if (ignore) return;
+        console.error("TikZ picture failed to draw:", err);
+        setSvgHtml("");
+        setFailed(true);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [problemData, mode]);
 
   return (
@@ -275,6 +296,18 @@ function LaTeXGraphSvgReact({ problemData }) {
             }}
           />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      ) : failed ? (
+        <div
+          role="alert"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "400px",
+          }}
+        >
+          Couldn&apos;t draw this picture.
         </div>
       ) : (
         <div dangerouslySetInnerHTML={{ __html: svgHtml }} />
