@@ -284,3 +284,79 @@ test("a failed reduction picture request shows Failed to Visualize on the reduct
   // The main picture is unaffected.
   await expect(pictures(row(page, "Visualize")).first()).toBeVisible();
 });
+
+// A request that never answers (no reply and no error) would leave the pane on "Loading..."
+// forever; after REQUEST_TIMEOUT_MS (60 s) it fails instead. Playwright's clock fast-forwards the
+// browser's timers, so the test does not wait the real 60 seconds.
+const NEVER_ANSWER = () => {
+  // Never fulfilled, continued or aborted: the request just hangs.
+};
+
+test("a picture request with no answer shows Failed to Visualize after 60 seconds", async ({
+  page,
+  expectedFailures,
+}) => {
+  expectedFailures.push({
+    url: "visualize?visualization=CliqueDefaultVisualization",
+    status: 0,
+    log: "CliqueDefaultVisualization VISUALIZE REQUEST FAILED",
+  });
+  await page.clock.install();
+  await page.route(/visualize\?visualization=CliqueDefaultVisualization/, NEVER_ANSWER);
+  await page.goto("/");
+  const visualizeRow = row(page, "Visualize");
+  await expect(pictures(visualizeRow).first()).toBeVisible();
+
+  const asked = page.waitForRequest(/visualize\?visualization=CliqueDefaultVisualization/);
+  await choose(page, "Problem", "Clique");
+  await asked;
+  await expect(loadingNote(visualizeRow)).toBeVisible();
+
+  // Just short of the limit it is still loading; past it, it has failed.
+  await page.clock.fastForward(59_000);
+  await expect(loadingNote(visualizeRow)).toBeVisible();
+  await page.clock.fastForward(2_000);
+
+  const failed = failedNote(visualizeRow);
+  await expect(failed).toBeVisible();
+  await expect(failed).toContainText(
+    "Picture request failed for problem Clique, visualization CliqueDefaultVisualization.",
+  );
+  await expect(failed).toContainText("No answer from the server after 60 seconds.");
+  await expect(loadingNote(visualizeRow)).toHaveCount(0);
+});
+
+test("an old request that times out after a switch is not shown as a failure", async ({
+  page,
+  expectedFailures,
+}) => {
+  // The old request still times out and logs it; only the pane must not show it.
+  expectedFailures.push({
+    url: "visualizeReduction?reduction=SipserReduceToCliqueStandard",
+    status: 0,
+    log: "SipserReduceToCliqueStandard VISUALIZE REQUEST FAILED",
+  });
+  await page.clock.install();
+  await page.route(/visualizeReduction\?reduction=SipserReduceToCliqueStandard/, NEVER_ANSWER);
+  await page.goto("/");
+  const visualizeRow = row(page, "Visualize");
+  await expect(pictures(visualizeRow).first()).toBeVisible();
+
+  // 3SAT's reduction picture hangs; switch away while it is still waiting.
+  const oldPictureAsked = page.waitForRequest(/visualizeReduction\?reduction=SipserReduceToClique/);
+  await showReduction(page);
+  await oldPictureAsked;
+  await choose(page, "Problem", "Clique");
+  await expect(pictures(reductionPane(page)).first()).toBeVisible();
+
+  const oldRequestTimedOut = page.waitForEvent("console", (message) =>
+    message.text().includes("SipserReduceToCliqueStandard VISUALIZE REQUEST FAILED"),
+  );
+  await page.clock.fastForward(61_000);
+  await oldRequestTimedOut;
+  await page.waitForTimeout(500);
+
+  await expect(failedNote(visualizeRow)).toHaveCount(0);
+  await expect(pictures(reductionPane(page)).first()).toBeVisible();
+  await expect(pictures(visualizeRow).first()).toBeVisible();
+});

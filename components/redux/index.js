@@ -30,10 +30,35 @@ async function describeFailedResponse(resp) {
   return text ? `${status}: ${text}` : status;
 }
 
-/** Describes a fetch that got no response at all (network error, abort or timeout). */
+/** Describes a fetch that got no response at all (network error or abort). */
 function describeFetchError(error) {
-  if (error?.name === "TimeoutError") return "The request timed out.";
   return `No answer from the server (${error?.message || String(error)}).`;
+}
+
+// How long a request may go without a full answer before it counts as failed. Without it a
+// request that hangs (no answer and no error) would leave its pane on "Loading..." forever.
+export const REQUEST_TIMEOUT_MS = 60_000;
+
+const TIMEOUT_TEXT = `No answer from the server after ${REQUEST_TIMEOUT_MS / 1000} seconds.`;
+
+/**
+ * Starts the REQUEST_TIMEOUT_MS clock for one request. `signal` aborts the request when it runs
+ * out, `timedOut()` says whether it did, and `clear()` stops it once the request is done. A plain
+ * timer is used rather than AbortSignal.timeout so tests can fast-forward it with Playwright's
+ * clock.
+ */
+function startTimeout() {
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort(new DOMException(TIMEOUT_TEXT, "TimeoutError"));
+  }, REQUEST_TIMEOUT_MS);
+  return {
+    signal: controller.signal,
+    timedOut: () => timedOut,
+    clear: () => clearTimeout(timer),
+  };
 }
 
 /**
@@ -44,25 +69,35 @@ function describeFetchError(error) {
  * @returns `undefined` on failure and logs the error.
  */
 async function fetchAndParse(url, init, failMsg, onError) {
-  let resp;
+  // The timeout covers the whole exchange: waiting for the answer and reading its body.
+  const timeout = startTimeout();
   try {
-    resp = await fetch(url, init);
-  } catch (error) {
-    console.log(`${failMsg()}: `, error);
-    onError?.(describeFetchError(error));
-    return undefined;
-  }
-  if (!resp.ok) {
-    console.log(`${failMsg()}: ${resp.status} (${resp.statusText})`);
-    onError?.(await describeFailedResponse(resp));
-    return undefined;
-  }
-  try {
-    return await resp.json();
-  } catch (error) {
-    console.log(`${failMsg()}: `, error);
-    onError?.(`The server's answer could not be read (${error?.message || String(error)}).`);
-    return undefined;
+    let resp;
+    try {
+      resp = await fetch(url, { ...init, signal: timeout.signal });
+    } catch (error) {
+      console.log(`${failMsg()}: `, error);
+      onError?.(timeout.timedOut() ? TIMEOUT_TEXT : describeFetchError(error));
+      return undefined;
+    }
+    if (!resp.ok) {
+      console.log(`${failMsg()}: ${resp.status} (${resp.statusText})`);
+      onError?.(await describeFailedResponse(resp));
+      return undefined;
+    }
+    try {
+      return await resp.json();
+    } catch (error) {
+      console.log(`${failMsg()}: `, error);
+      onError?.(
+        timeout.timedOut()
+          ? TIMEOUT_TEXT
+          : `The server's answer could not be read (${error?.message || String(error)}).`,
+      );
+      return undefined;
+    }
+  } finally {
+    timeout.clear();
   }
 }
 
@@ -470,11 +505,13 @@ function describeVerifyError(status, body) {
  * the certificate, e.g. "Certificate couldn't be read. Expected: ...". Never `undefined`.
  */
 export async function requestVerifiedInstance(url, problem, verifier, instance, certificate) {
+  const timeout = startTimeout();
   try {
     const resp = await fetch(`${url}ProblemProvider/verify?verifier=${verifier}`, {
       method: "POST",
       body: JSON.stringify({ problemInstance: instance, certificate: certificate }),
       headers: { "Content-Type": "application/json; charset=UTF-8" },
+      signal: timeout.signal,
     });
     if (resp.ok) {
       return await resp.json();
@@ -494,7 +531,12 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
     return describeVerifyError(resp.status, body);
   } catch (error) {
     console.log(`${verifier} VERIFIED INSTANCE REQUEST FAILED: `, error);
+    if (timeout.timedOut()) {
+      return `The verifier didn't answer within ${REQUEST_TIMEOUT_MS / 1000} seconds. Try again.`;
+    }
     return "Couldn't reach the verifier. Check your connection and try again.";
+  } finally {
+    timeout.clear();
   }
 }
 
