@@ -163,6 +163,7 @@ Start from the example closest to what you want:
 | Clicking something and checking the result | `app.spec.js` › *solving 3SAT* | Expanding a row, waiting for enabled, asserting output |
 | Typing input and checking both outcomes | `app.spec.js` › *the 3SAT verifier answers…* | Filling a textbox, asserting a positive and a negative result |
 | A structural contract of the page | `tests/e2e/tour.spec.js` | Counting anchors the tour depends on, no backend data needed |
+| A race between a switch and a late answer | `tests/e2e/visualization-switching.spec.js` | Holding answers back with `page.route`, faking an empty or failed answer |
 
 ### Things that will cost you an afternoon if nobody tells you
 
@@ -224,10 +225,8 @@ These do not need a browser or a backend; call the handler directly with a fake 
 - A test asserting CLIQUE (which has two visualizations) selects its declared default. The bug that
   once broke this is fixed; the test that would keep it fixed is not written.
 - Anything in `KNOWN_SILENT_FAILURES` in `tests/e2e/fixtures.js`. Fix the request, delete the
-  entry, and the guard starts protecting that call. Two are nearly free:
-  several calls fire with an empty `reduction=` parameter before the reduction has been chosen,
-  which should simply be guarded; and the Problem row seeds a placeholder instance that the backend
-  rejects before the real default arrives.
+  entry, and the guard starts protecting that call. One is nearly free: the Problem row seeds a
+  placeholder instance that the backend rejects before the real default arrives.
 
 **Later**
 - A tour walkthrough test (click through every step, assert the popover titles and that Solve and

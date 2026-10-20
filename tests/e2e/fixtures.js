@@ -44,24 +44,6 @@ const KNOWN_SILENT_FAILURES = [
     log: "SOLVED INSTANCE REQUEST FAILED",
     why: "the visualize row auto-solves on mount, hitting the same placeholder instance as above",
   },
-  {
-    url: "ProblemProvider/gadgets?reduction=",
-    status: 400,
-    log: "MAP GADGETS REQUEST FAILED",
-    why: "fires before chosenReductionType resolves, so `reduction` is empty",
-  },
-  {
-    url: "ProblemProvider/reduce?reduction=",
-    status: 400,
-    log: "REDUCED INSTANCE REQUEST FAILED",
-    why: "fires before chosenReductionType resolves, so `reduction` is empty",
-  },
-  {
-    url: "ProblemProvider/reduce?reduction=",
-    status: 400,
-    log: "REDUCED INSTANCE FROM PATH REQUEST FAILED",
-    why: "downstream of the empty-reduction call above",
-  },
 ];
 
 const isKnownResponse = (url, status) =>
@@ -72,6 +54,7 @@ const isKnownLog = (text) => KNOWN_SILENT_FAILURES.some((known) => text.includes
 export const test = base.extend({
   // Per-test opt-out for a failure the test provokes on purpose (e.g. a malformed certificate).
   // A test pushes `{ url, status }` entries; only those exact failures are ignored for that test.
+  // An entry may also carry `log`, the REQUEST FAILED message that failure prints.
   expectedFailures: [[], { option: false }],
 
   guardAgainstSilentFailures: [
@@ -95,7 +78,8 @@ export const test = base.extend({
       // Catches the case with no response at all — the backend unreachable, where fetch rejects.
       page.on("console", (message) => {
         const text = message.text();
-        if (text.includes("REQUEST FAILED") && !isKnownLog(text)) {
+        const isExpected = expectedFailures.some((e) => e.log && text.includes(e.log));
+        if (text.includes("REQUEST FAILED") && !isKnownLog(text) && !isExpected) {
           failures.push(`console: ${text}`);
         }
       });
