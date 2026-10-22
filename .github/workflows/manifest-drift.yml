@@ -1,7 +1,7 @@
 # Detects drift between the vendored visualization-type manifest and the API's
 # committed copy.
 #
-# The PR gate (main.yml -> npm run check:visualizations) proves the local registry
+# The PR gate (rbs unit-test -> tests/unit/visualization-coverage.test.mjs) proves the local registry
 # matches the local vendored manifest. It cannot notice that the vendored manifest
 # has itself gone stale, because a new API type ships in the other repo. That is the
 # gap this job closes.
