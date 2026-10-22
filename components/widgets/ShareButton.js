@@ -19,7 +19,6 @@ const handleShare = async (problem, solver, verifier, reducer) => {
     verifier: verifier.chosenVerifier ?? "",
   };
 
-  localStorage.setItem("problemData", JSON.stringify(data));
   // Create the share URL with the parameters
   const shareUrl = createShareLink(window.location.origin + window.location.pathname, data);
 
