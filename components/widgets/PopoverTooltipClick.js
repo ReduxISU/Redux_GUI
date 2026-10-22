@@ -4,6 +4,7 @@ import { Box, Divider, Link, Popover, Typography } from "@mui/material";
 import { useState } from "react";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
+import HeaderIconButton from "./HeaderIconButton";
 
 // GitHub repo holding the backend source; `sourceFile` paths from the API are relative to it.
 // NEXT_PUBLIC_ vars are inlined at build time, so overriding this requires a rebuild.
@@ -36,7 +37,9 @@ function PopoverTooltipClick({ toolTip = {} }) {
 
   return (
     <>
-      <InfoOutlinedIcon onClick={handleClick} style={{ cursor: "pointer" }} fontSize="medium" />
+      <HeaderIconButton onClick={handleClick} aria-label="Show information" aria-haspopup="dialog">
+        <InfoOutlinedIcon fontSize="medium" />
+      </HeaderIconButton>
 
       <Popover
         open={open}
