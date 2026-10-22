@@ -8,7 +8,7 @@
  * @author Alex Diviney
  */
 
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Download as DownloadIcon, DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
 import { Button, IconButton } from "@mui/material";
@@ -60,11 +60,14 @@ export default function SolveRowReact({
   const text = textColors(mode);
 
   const solverInfo = useSolverInfo(url, chosenSolver);
+  // Why the last Solve failed ({ message, hint }), e.g. the quantum service being down.
+  const [solveError, setSolveError] = useState(null);
 
   async function handleSolve() {
+    setSolveError(null);
     setSolvedInstance(
       chosenSolver && problemInstance
-        ? ((await requestSolvedInstance(url, chosenSolver, problemInstance)) ?? "")
+        ? ((await requestSolvedInstance(url, chosenSolver, problemInstance, setSolveError)) ?? "")
         : "",
     );
   }
@@ -167,6 +170,17 @@ export default function SolveRowReact({
             text={solvedInstance}
             tooLargeMessage={SOLUTION_TOO_LARGE_MESSAGE}
           />
+        ) : null}
+        {solveError ? (
+          <p role="alert" style={{ color: text.heading }}>
+            {solveError.message}
+            {solveError.hint ? (
+              <>
+                <br />
+                <span style={{ color: text.body }}>Try: {solveError.hint}</span>
+              </>
+            ) : null}
+          </p>
         ) : null}
         <div className="submitButton">
           <Button
