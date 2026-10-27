@@ -14,6 +14,7 @@ import { Download as DownloadIcon, DragIndicator as DragIndicatorIcon } from "@m
 import { Button, IconButton } from "@mui/material";
 import { complexityClassLabel } from "../hooks/ProblemFilters/complexityClassOrder";
 import { reductionTypeLabel } from "../hooks/ProblemFilters/tagLabels";
+import { tagListOrUnclassified } from "../hooks/ProblemFilters/tagLists";
 import { useProblemInfo, useReducerInfo } from "../hooks/ProblemProvider";
 import { requestReducedInstanceFromPath } from "../redux";
 import { useThemeMode } from "../ThemeModeContext";
@@ -201,7 +202,9 @@ export default function ReduceToRowReact({
                     },
                     {
                       label: "Reduction type",
-                      value: reductionTypeLabel(reducerInfo.reductionType || "Unclassified"),
+                      value: tagListOrUnclassified(reducerInfo, "reductionTypes", "reductionType")
+                        .map(reductionTypeLabel)
+                        .join(", "),
                     },
                     {
                       label: "Complexity bucket",

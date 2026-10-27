@@ -494,6 +494,21 @@ export function requestAllVisualizationTypes(url) {
 }
 
 /**
+ * @returns the problem-variant vocabulary in display order, e.g.
+ * `["Decision", "Optimization", "Unclassified"]` -- the values a problem's `problemVariants`
+ * list can hold (ReduxISU/Redux#946).
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error, including when the endpoint doesn't exist
+ * yet on the connected API -- callers should fall back to ordering whatever variants the
+ * problems themselves declare (none, on such an API).
+ */
+export function requestProblemVariants(url) {
+  return cachedRequest(`${url}|problemVariants`, () =>
+    fetchJson(`${url}Navigation/ProblemVariants`, () => "PROBLEM VARIANTS REQUEST FAILED"),
+  );
+}
+
+/**
  * @returns the full reduction graph as an adjacency map:
  * `{ [fromProblemName]: { [toProblemName]: [{className, endpoint, inputType, outputType,
  * fromComplexity, toComplexity, cost}] } }`.

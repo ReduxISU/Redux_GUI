@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { requestAllInfo, requestAllSolvers } from "../../redux";
+import { tagListOrUnclassified } from "../ProblemFilters/tagLists";
 import { useGenericInfo } from "../ProblemProvider";
 import { useWhenChanged } from "../useWhenChanged";
 
@@ -34,8 +35,9 @@ function useSolvedInstance(problemInstance, chosenSolver) {
 
 function useSolverNameMap(url, problemNameMap) {
   const [solverNameMap, setSolverNameMap] = useState(new Map());
-  // Raw solverType wire value (e.g. "BruteForce") per solver key, for the
-  // solver dropdown's optionTag -- SolveRowReact.js labels it via solverTypeLabel.
+  // Raw solverTypes wire values (e.g. ["Greedy", "Approximation"]) per solver key,
+  // in the backend's order, for the solver dropdown's optionTag -- SolveRowReact.js
+  // labels each via solverTypeLabel.
   const [solverTypeMap, setSolverTypeMap] = useState(new Map());
 
   useEffect(() => {
@@ -52,7 +54,7 @@ function useSolverNameMap(url, problemNameMap) {
           const solver = s.split(" ")[0];
           const info = allInfo[solver];
           map.set(s, info?.solverName || s);
-          typeMap.set(s, info?.solverType || "Unclassified");
+          typeMap.set(s, tagListOrUnclassified(info, "solverTypes", "solverType"));
         }
       }
       setSolverNameMap(map);
