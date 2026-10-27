@@ -25,8 +25,8 @@ import { tagList, tagListOrUnclassified } from "./tagLists";
  *
  * Also returns the raw reduction graph (from `requestReductionGraph`) for
  * reachability filtering -- see `useProblemFilters` -- and the problem-variant
- * vocabulary in display order (from `requestProblemVariants`; `[]` on an API
- * without that endpoint).
+ * vocabulary in display order (from `requestProblemVariants`, asked for only when a
+ * problem declares `problemVariants`; otherwise `[]`).
  *
  * Every tag category is read as a LIST via tagList.js (#409): an item can carry
  * several tags from one category, and a problem/solver/visualization counts toward
@@ -78,28 +78,29 @@ export function useProblemIndex(url) {
     (async () => {
       setLoading(true);
 
-      const [
-        problems,
-        allInfo,
-        allSolvers,
-        allVisualizations,
-        allVisualizationTypes,
-        graph,
-        variants,
-      ] = await Promise.all([
-        requestAllProblems(url),
-        requestAllInfo(url),
-        requestAllSolvers(url),
-        requestAllVisualizations(url),
-        requestAllVisualizationTypes(url),
-        requestReductionGraph(url),
-        requestProblemVariants(url),
-      ]);
-
-      if (cancelled) return;
+      const [problems, allInfo, allSolvers, allVisualizations, allVisualizationTypes, graph] =
+        await Promise.all([
+          requestAllProblems(url),
+          requestAllInfo(url),
+          requestAllSolvers(url),
+          requestAllVisualizations(url),
+          requestAllVisualizationTypes(url),
+          requestReductionGraph(url),
+        ]);
 
       const problemNames = problems ?? [];
       const info = allInfo ?? {};
+
+      // /Navigation/ProblemVariants ships with the problemVariants field
+      // (ReduxISU/Redux#946), so it is only asked for when some problem actually
+      // declares one. An older API would answer 404, and the e2e silent-failure guard
+      // (tests/e2e/fixtures.js) rightly fails on any failed request.
+      const hasProblemVariants = problemNames.some((name) =>
+        Array.isArray(info[name]?.problemVariants),
+      );
+      const variants = hasProblemVariants ? await requestProblemVariants(url) : undefined;
+
+      if (cancelled) return;
       const solversByProblem = allSolvers ?? {};
       const visualizationsByProblem = allVisualizations ?? {};
       const visualizationTypes = allVisualizationTypes ?? null;
