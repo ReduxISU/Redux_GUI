@@ -4,11 +4,13 @@
 
 [![Idaho State University](https://img.shields.io/badge/Idaho%20State%20University-Computer%20Science-orange)](https://www.isu.edu/cs/)
 
-##  Live Demo
+## Live Demo
+
 - **Website**: [https://redux.portneuf.cose.isu.edu/](https://redux.portneuf.cose.isu.edu/)
 - **Backend Repository**: [Redux Backend](https://github.com/ReduxISU/Redux)
 
-##  Table of Contents
+## Table of Contents
+
 - [About Redux Frontend](#about-redux-frontend)
 - [Prerequisites](#prerequisites)
 - [Local Development Setup](#local-development-setup)
@@ -108,6 +110,7 @@ When adding new features:
 - **New major components** → Add to `components/pageblocks/` folder, then implement in `pages/index.js`
 - **New visualizations** → Add to `components/Visualization/svgs/` folder
 - **New widgets** → Add to `components/widgets/` folder
+
 ---
 
 ## Adding to the Codebase
@@ -258,18 +261,21 @@ For a complete list of contributors, visit our [About Us page](https://redux.por
 ## Additional Resources
 
 ### Documentation
+
 - [Redux Backend Repository](https://github.com/ReduxISU/Redux)
 - [Redux Backend API Documentation](https://api.redux.portneuf.cose.isu.edu/swagger/index.html)
 - [Wikipedia: What is NP-Complete?](https://en.wikipedia.org/wiki/NP-completeness)
 - [Karp's 21 NP-Complete Problems](https://en.wikipedia.org/wiki/Karp%27s_21_NP-complete_problems)
 
 ### Technology Stack
+
 - **Framework:** Next.js (React)
 - **Visualization:** D3.js, SVG
 - **Styling:** MUI (Material UI) and CSS
 - **API Communication:** REST API calls to Redux Backend
 
 ### Related Repositories
+
 - **Backend API:** [Redux](https://github.com/ReduxISU/Redux)
 - **Quantum Solver:** [quantumsolver](https://github.com/ReduxISU/quantumsolver)
 
@@ -288,5 +294,3 @@ For a complete list of contributors, visit our [About Us page](https://redux.por
 This project is developed at Idaho State University's Computer Science Department.
 
 ---
-
-
