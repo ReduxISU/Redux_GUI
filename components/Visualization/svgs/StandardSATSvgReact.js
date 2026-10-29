@@ -58,7 +58,18 @@ function getSets(ref, data, gadgetMap, gadgetsOn, textColor) {
   const clauses = data.clauses;
 
   for (let i = 0; i < clauses.length; i++) {
-    let c = new clause(clauses[i].id, svg, x, y, clauses[i].literals, 13, gadgetMap, gadgetsOn);
+    let c = new clause(
+      clauses[i].id,
+      svg,
+      x,
+      y,
+      clauses[i].literals,
+      13,
+      gadgetMap,
+      gadgetsOn,
+      clauses[i].weight,
+      textColor,
+    );
     c.show();
     x += c.width + 8;
     if (i < clauses.length - 1) {
@@ -245,7 +256,18 @@ class literal {
 }
 
 class clause {
-  constructor(className, svg, x, y, literals, size = 20, gadgetMap, gadgetsOn) {
+  constructor(
+    className,
+    svg,
+    x,
+    y,
+    literals,
+    size = 20,
+    gadgetMap,
+    gadgetsOn,
+    weight,
+    textColor,
+  ) {
     this.className = "class" + className;
     this.svg = svg;
     this.x = x;
@@ -256,6 +278,8 @@ class clause {
     this.width = 0;
     this.gadgetMap = gadgetMap;
     this.gadgetsOn = gadgetsOn;
+    this.weight = weight;
+    this.textColor = textColor;
   }
   show(c = this.className) {
     // starting offset
@@ -328,16 +352,45 @@ class clause {
       .text(")")
       .style("pointer-events", "none");
 
+    offsetX += this.size / 2;
+    const expressionWidth = offsetX - this.x;
+    let backgroundY = this.y - this.size;
+    let backgroundHeight = this.size * 2;
+
+    if (this.weight !== null && this.weight !== undefined) {
+      const weightLabel = `w=${this.weight}`;
+      const weightSize = this.size * 0.8;
+      const weightWidth = weightSize * 0.6 * weightLabel.length;
+      const weightY = this.y - this.size;
+      const topPadding = 3.5;
+
+      this.svg
+        .append("text")
+        .attr("x", this.x + expressionWidth / 2)
+        .attr("y", weightY)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("font-size", weightSize + "px")
+        .attr("font-family", "'Courier New', Courier, monospace")
+        .attr("fill", this.textColor)
+        .text(weightLabel)
+        .style("pointer-events", "none");
+
+      offsetX = this.x + Math.max(expressionWidth, (expressionWidth + weightWidth) / 2);
+      backgroundY = weightY - weightSize / 2 - topPadding;
+      backgroundHeight = this.y + this.size - backgroundY;
+    }
+
     // compute width for background rect
-    this.width = offsetX - this.x + this.size / 2;
+    this.width = offsetX - this.x;
 
     this.svg
       .append("rect")
       .attr("x", this.x)
-      .attr("y", this.y - this.size)
+      .attr("y", backgroundY)
       .attr("fill", getColorByKey("Background"))
       .attr("stroke", getColorByKey("Background"))
-      .attr("height", this.size * 2)
+      .attr("height", backgroundHeight)
       .attr("width", this.width)
       .attr("class", this.className + " gadget")
       .attr("stroke-linejoin", "round")
