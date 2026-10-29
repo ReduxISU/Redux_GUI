@@ -256,18 +256,7 @@ class literal {
 }
 
 class clause {
-  constructor(
-    className,
-    svg,
-    x,
-    y,
-    literals,
-    size = 20,
-    gadgetMap,
-    gadgetsOn,
-    weight,
-    textColor,
-  ) {
+  constructor(className, svg, x, y, literals, size = 20, gadgetMap, gadgetsOn, weight, textColor) {
     this.className = "class" + className;
     this.svg = svg;
     this.x = x;
