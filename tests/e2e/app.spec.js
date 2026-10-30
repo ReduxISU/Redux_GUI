@@ -93,6 +93,108 @@ test("solving 3SAT returns a satisfying assignment", async ({ page }) => {
   await expect(body).toContainText(/Solution:\s*\(x\d+:(True|False)/);
 });
 
+test("a solver that can't run shows the backend's message and hint", async ({
+  page,
+  expectedFailures,
+}) => {
+  // Stands in for the quantum service being down (Redux #625): the backend answers 503
+  // solver_unavailable with a message and a hint.
+  expectedFailures.push({ url: "ProblemProvider/solve", status: 503 });
+
+  const solveRow = row(page, "Solve");
+  const solveButton = solveRow.getByRole("button", {
+    name: "Solve",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(solveButton).toBeEnabled();
+  await solveRow.getByRole("button", { name: "▼" }).click();
+  const body = solveRow.locator(".card-body");
+  await expect(body).toBeVisible();
+
+  // Routed only now, so the visualize row's solve on page load still reaches the real backend.
+  await page.route("**/ProblemProvider/solve?**", (route) =>
+    route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error: "solver_unavailable",
+        message: "Shor's Algorithm couldn't get an answer from the quantum service.",
+        hint: "PrimeFactorSolver runs without the quantum service; or try again later.",
+      }),
+    }),
+  );
+  await solveButton.click();
+
+  const alert = body.getByRole("alert");
+  await expect(alert).toContainText("couldn't get an answer from the quantum service");
+  await expect(alert).toContainText("Try: PrimeFactorSolver runs without the quantum service");
+  await expect(body).not.toContainText("undefined");
+});
+
+test("a solver's error doesn't follow the user to another solver", async ({
+  page,
+  expectedFailures,
+}) => {
+  expectedFailures.push({ url: "ProblemProvider/solve", status: 503 });
+
+  const solveRow = row(page, "Solve");
+  const solveButton = solveRow.getByRole("button", {
+    name: "Solve",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(solveButton).toBeEnabled();
+  await solveRow.getByRole("button", { name: "▼" }).click();
+  const body = solveRow.locator(".card-body");
+  await expect(body).toBeVisible();
+
+  const chooseAnotherSolver = async () => {
+    const solverInput = solveRow.getByRole("combobox");
+    const current = await solverInput.inputValue();
+    await solverInput.click();
+    await page
+      .getByRole("listbox")
+      .getByRole("option")
+      .filter({ hasNotText: current })
+      .first()
+      .click();
+    await expect(solverInput).not.toHaveValue(current);
+  };
+
+  // Each answer waits to be released, so the second half can fail after the selection moved on.
+  let releases = [];
+  await page.route("**/ProblemProvider/solve?**", async (route) => {
+    await new Promise((release) => releases.push(release));
+    await route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "solver_unavailable", message: "Solver unavailable." }),
+    });
+  });
+  const answerSolve = async () => {
+    await expect.poll(() => releases.length).toBeGreaterThan(0);
+    releases.forEach((release) => void release());
+    releases = [];
+  };
+
+  // An error already on screen clears when the solver changes.
+  await solveButton.click();
+  await answerSolve();
+  await expect(body.getByRole("alert")).toContainText("Solver unavailable.");
+  await chooseAnotherSolver();
+  await expect(body.getByRole("alert")).toHaveCount(0);
+
+  // So does a failure that only comes back after the solver changed.
+  const answered = page.waitForResponse("**/ProblemProvider/solve?**");
+  await solveButton.click();
+  await expect.poll(() => releases.length).toBeGreaterThan(0);
+  await chooseAnotherSolver();
+  await answerSolve();
+  await answered;
+  await expect(body.getByRole("alert")).toHaveCount(0);
+});
+
 test("reducing 3SAT to Clique renders the reduced instance", async ({ page }) => {
   const reduceRow = row(page, "Reduce");
 
