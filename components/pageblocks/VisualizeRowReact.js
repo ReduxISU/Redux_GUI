@@ -293,6 +293,7 @@ export default function VisualizeRowReact({
             : "",
         componentLink: visualizationInfo.visualizationLink || "",
         sourceLink: visualizationInfo.sourceLink || "",
+        sourceFile: visualizationInfo.sourceFile || "",
       }
     : TOOLTIP;
 

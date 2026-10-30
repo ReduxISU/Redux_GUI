@@ -145,6 +145,7 @@ export default function ReduceToRowReact({
                   // hyperlink
                   componentLink: reduceToInfo.problemLink || "",
                   sourceLink: reduceToInfo.sourceLink || "",
+                  sourceFile: reduceToInfo.sourceFile || "",
                 }
               : TOOLTIP1
           }
@@ -212,6 +213,7 @@ export default function ReduceToRowReact({
                       : "",
                   componentLink: reducerInfo.problemLink || "",
                   sourceLink: reducerInfo.sourceLink || "",
+                  sourceFile: reducerInfo.sourceFile || "",
                 }
               : TOOLTIP2
           }

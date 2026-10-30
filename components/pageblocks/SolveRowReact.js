@@ -93,11 +93,17 @@ export default function SolveRowReact({
 
         componentLink: solverInfo.solverLink || "",
         sourceLink: solverInfo.sourceLink || "",
+        sourceFile: solverInfo.sourceFile || "",
 
         classification: [
           { label: "Solver type", value: solverTypeLabel(solverInfo.solverType || "Unclassified") },
           { label: "Complexity bucket", value: solverInfo.complexityBucket || "Unclassified" },
-          { label: "Big-O", value: solverInfo.complexity || "Not yet determined" },
+          {
+            label: "Big-O",
+            value: solverInfo.timeComplexity
+              ? `O(${solverInfo.timeComplexity.Function})${solverInfo.timeComplexity.Description ?? ""}`
+              : "Not yet determined",
+          },
         ],
       }
     : TOOLTIP;

@@ -4,11 +4,13 @@
 
 [![Idaho State University](https://img.shields.io/badge/Idaho%20State%20University-Computer%20Science-orange)](https://www.isu.edu/cs/)
 
-##  Live Demo
+## Live Demo
+
 - **Website**: [https://redux.portneuf.cose.isu.edu/](https://redux.portneuf.cose.isu.edu/)
 - **Backend Repository**: [Redux Backend](https://github.com/ReduxISU/Redux)
 
-##  Table of Contents
+## Table of Contents
+
 - [About Redux Frontend](#about-redux-frontend)
 - [Prerequisites](#prerequisites)
 - [Local Development Setup](#local-development-setup)
@@ -71,6 +73,8 @@ The Redux GUI requires the Redux API to be running. If you need to work on both 
 
 The GUI finds the API through the `REDUX_BASE_URL` setting. `.env.development` already points it at `http://localhost:27000/`, so for local work you do not need to change anything.
 
+The info boxes link each problem, solver, verifier, visualization, and reduction to its source file on GitHub. The repo defaults to `https://github.com/reduxISU/Redux`; set `NEXT_PUBLIC_REDUX_REPO_URL` (e.g. in `.env.local`) to point at a fork. It is read at build time, so restart `npm run dev` after changing it.
+
 ### Step 4: Start Development Server
 
 ```bash
@@ -106,6 +110,7 @@ When adding new features:
 - **New major components** → Add to `components/pageblocks/` folder, then implement in `pages/index.js`
 - **New visualizations** → Add to `components/Visualization/svgs/` folder
 - **New widgets** → Add to `components/widgets/` folder
+
 ---
 
 ## Adding to the Codebase
@@ -156,7 +161,7 @@ docker build -t reduxgui .
 docker run -it --rm -p 3000:3000 --name reduxgui reduxgui
 ```
 
-The site is then at [http://localhost:3000](http://localhost:3000). Add `-e REDUX_BASE_URL=<address of a running Redux API>` to the `docker run` command so the container can reach the API.
+The site is then at [http://localhost:3000](http://localhost:3000). Add `-e REDUX_BASE_URL=<address of a running Redux API>` to the `docker run` command so the container can reach the API. To link the info boxes to a different source repo, pass `--build-arg NEXT_PUBLIC_REDUX_REPO_URL=<repo URL>` to `docker build` (a `docker run -e` will not work, since the value is baked in at build time).
 
 **Note:** The Docker server uses production binaries, so warnings will be different from the development environment.
 
@@ -256,18 +261,21 @@ For a complete list of contributors, visit our [About Us page](https://redux.por
 ## Additional Resources
 
 ### Documentation
+
 - [Redux Backend Repository](https://github.com/ReduxISU/Redux)
 - [Redux Backend API Documentation](https://api.redux.portneuf.cose.isu.edu/swagger/index.html)
 - [Wikipedia: What is NP-Complete?](https://en.wikipedia.org/wiki/NP-completeness)
 - [Karp's 21 NP-Complete Problems](https://en.wikipedia.org/wiki/Karp%27s_21_NP-complete_problems)
 
 ### Technology Stack
+
 - **Framework:** Next.js (React)
 - **Visualization:** D3.js, SVG
 - **Styling:** MUI (Material UI) and CSS
 - **API Communication:** REST API calls to Redux Backend
 
 ### Related Repositories
+
 - **Backend API:** [Redux](https://github.com/ReduxISU/Redux)
 - **Quantum Solver:** [quantumsolver](https://github.com/ReduxISU/quantumsolver)
 
@@ -286,5 +294,3 @@ For a complete list of contributors, visit our [About Us page](https://redux.por
 This project is developed at Idaho State University's Computer Science Department.
 
 ---
-
-

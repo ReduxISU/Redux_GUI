@@ -181,6 +181,7 @@ export default function ProblemRowReact({
         //  Popover builds Wikipedia URL
         componentLink: problemInfo.problemLink || "",
         sourceLink: problemInfo.sourceLink || "",
+        sourceFile: problemInfo.sourceFile || "",
       }
     : TOOLTIP;
 
