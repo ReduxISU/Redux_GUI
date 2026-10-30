@@ -366,14 +366,21 @@ export default function ContributePage() {
               />
               <StaticSection.Body>
                 <BodyText sx={{ fontStyle: "italic" }}>
-                  Version 1.0 (Updated Tue, 29 Sep 2026).
+                  Version 1.1 (Updated Thu, 29 Oct 2026).
                 </BodyText>
 
                 <BodyText>
-                  Redux does not collect anything about you. There are no user accounts and no way
-                  to log in, so there is nothing to sign up for and no password to lose. We do not
-                  use Google Analytics or any other analytics, tracking, or advertising service, and
-                  Redux itself sets no cookies.
+                  Redux does not use your information to identify or track you. There are no user
+                  accounts and no way to log in, so there is nothing to sign up for and no password
+                  to lose. We do not use Google Analytics or any other analytics, tracking, or
+                  advertising service, and Redux itself sets no cookies.
+                </BodyText>
+
+                <BodyText>
+                  Like most websites, the servers that host Redux keep standard access logs. These
+                  record details of each request, such as your IP address, the time, and the page or
+                  API address requested. The hosting providers keep these logs to operate and secure
+                  the servers.
                 </BodyText>
 
                 <BodyText>
