@@ -38,7 +38,9 @@ test("the problem catalogue loads from the backend", async ({ page }) => {
   // proxy or backend this list would simply be empty and the page would still look fine — that
   // is the failure this test exists to catch.
   await problemInput.click();
-  await expect(page.getByRole("option", { name: "Clique", exact: true })).toBeVisible();
+  // Each option also carries its complexity-class and problem-type chips, so the option's
+  // accessible name is "Clique NP-Complete Graph Theory"; match the label text itself.
+  await expect(page.getByRole("listbox").getByText("Clique", { exact: true })).toBeVisible();
 });
 
 test("the default problem renders a visualization", async ({ page }) => {
@@ -140,4 +142,82 @@ test("the 3SAT verifier answers True and False correctly", async ({ page }) => {
   await certificate.fill("(x1:False,x2:True,x3:False)");
   await verifyButton.click();
   await expect(body).toContainText("Verifier output: False");
+});
+
+test("a 3SAT certificate containing new lines reaches the backend instead of being rejected", async ({
+  page,
+}) => {
+  const verifyRow = row(page, "Verify");
+  const verifyButton = verifyRow.getByRole("button", {
+    name: "Verify",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(verifyButton).toBeEnabled();
+  await verifyRow.getByRole("button", { name: "▼" }).click();
+  const body = verifyRow.locator(".card-body");
+  await expect(body).toBeVisible();
+
+  // Regression test for #327: the frontend used to reject anything with a new line as "Invalid
+  // Input" before the request was sent. Only assert that the backend answers True/False. Its
+  // answer for new-line-separated pairs is currently unreliable (Redux backend issue), so the
+  // value itself is deliberately not asserted.
+  await body.getByRole("textbox").fill("(x1:True,\nx2:True,\nx3:False)");
+  await verifyButton.click();
+  await expect(body).toContainText(/Verifier output: (True|False)/);
+  await expect(body).not.toContainText("Invalid Input");
+});
+
+test("a malformed certificate shows the backend's parse error, never undefined", async ({
+  page,
+  expectedFailures,
+}) => {
+  // The backend answers an unreadable certificate with a deliberate 400; don't let the
+  // silent-failure guard treat that as a hidden failure.
+  expectedFailures.push({ url: "ProblemProvider/verify", status: 400 });
+
+  const verifyRow = row(page, "Verify");
+  const verifyButton = verifyRow.getByRole("button", {
+    name: "Verify",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(verifyButton).toBeEnabled();
+  await verifyRow.getByRole("button", { name: "▼" }).click();
+  const body = verifyRow.locator(".card-body");
+  await expect(body).toBeVisible();
+
+  await body.getByRole("textbox").fill("garbage(((");
+  await verifyButton.click();
+  await expect(body).toContainText("Certificate couldn't be read.");
+  await expect(body).toContainText("Expected:");
+  await expect(body).not.toContainText("undefined");
+});
+
+test("a ?problem= URL param selects that problem instead of the default", async ({ page }) => {
+  // Regression test for #326: /browse's problem cards link to `/?problem=<CLASSKEY>`
+  // (components/widgets/ProblemCard.js), and the home page used to ignore that param and always
+  // land on the default (3SAT). useProblemName (components/hooks/ProblemProvider/Problem.js) now
+  // applies it once the problem catalogue has loaded.
+  await page.goto("/?problem=CLIQUE");
+
+  await expect(row(page, "Problem").getByRole("combobox")).toHaveValue("Clique");
+});
+
+test("an unrecognized ?problem= URL param falls back to the default problem", async ({ page }) => {
+  await page.goto("/?problem=NOTAREALPROBLEM");
+
+  await expect(row(page, "Problem").getByRole("combobox")).toHaveValue("3SAT");
+});
+
+test("clicking a problem card on /browse opens that problem on the home page", async ({ page }) => {
+  await page.goto("/browse");
+
+  // Wait for the grid to load before clicking -- while loading, the page shows a spinner instead
+  // of any cards, and the click would just miss.
+  const cliqueLink = page.getByRole("link", { name: "Clique", exact: true });
+  await expect(cliqueLink).toBeVisible();
+  await cliqueLink.click();
+
+  await expect(row(page, "Problem").getByRole("combobox")).toHaveValue("Clique");
 });

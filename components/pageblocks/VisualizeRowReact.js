@@ -44,7 +44,7 @@ const SWITCHES = {
 const ACCORDION_FORM_ONE = { placeHolder: "Select visualization" };
 const TOOLTIP = {
   header: "Visualization Information",
-  formalDef: "Choose a visualization to see info about it",
+  info: "Choose a visualization to see info about it",
 };
 
 export default function VisualizeRowReact({
@@ -274,8 +274,13 @@ export default function VisualizeRowReact({
   const tip = chosenVisualization
     ? {
         header: visualizationInfo.visualizationName ?? "",
-        formalDef: visualizationInfo.visualizationDefinition ?? "",
-        info: visualizationInfo.info ?? visualizationInfo.description ?? "",
+        info:
+          visualizationInfo.visualizationDefinition ||
+          visualizationInfo.info ||
+          visualizationInfo.description ||
+          "",
+        input: visualizationInfo.inputDescription ?? "",
+        output: visualizationInfo.outputDescription ?? "",
         classification: [
           {
             label: "Visualization type",
@@ -291,6 +296,7 @@ export default function VisualizeRowReact({
             : "",
         componentLink: visualizationInfo.visualizationLink || "",
         sourceLink: visualizationInfo.sourceLink || "",
+        sourceFile: visualizationInfo.sourceFile || "",
       }
     : TOOLTIP;
 
@@ -305,6 +311,10 @@ export default function VisualizeRowReact({
           optionsMap={VisualizationNameMap}
           optionsDisabled={unrenderableOptions}
           disabledOptionHint="no renderer available"
+          optionTag={(key) => ({
+            label: visualizationTypeCategory(visualizationTypeMap?.get(key)),
+            kind: "visualizationType",
+          })}
           disabled={!problemName || noRenderableOptions}
           disabledMessage={
             noRenderableOptions

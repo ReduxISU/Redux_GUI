@@ -26,13 +26,30 @@ import { visualizationTypeCategory } from "../../Visualization/svgs/visualizatio
  * @param url Base API URL, e.g. `/api/redux/`.
  * @returns `{ problemIndex: Map<problemName, {displayName: string,
  * complexityClass: string, complexityClasses: Set<string>, problemType: string,
- * solverTypes: Set<string>, visualizationTypes: Set<string>,
+ * solverTypes: Set<string>, solverComplexities: Set<string>,
+ * solvers: Array<{type: string, complexity: string}>, visualizationTypes: Set<string>,
  * visualizationCategories: Set<string>, hasRenderableVisualization: boolean}>,
- * reductionGraph: object, loading: boolean }`. visualizationTypes is the raw wire
+ * reductionGraph: object, loading: boolean }`. solverComplexities is each solver's
+ * declared `complexityBucket` (Interfaces/SolverComplexityBucket.cs -- a coarse
+ * worst-case-growth classification, distinct from complexityClass), same
+ * per-problem-solvers derivation as solverTypes. visualizationTypes is the raw wire
  * vocabulary (GraphD3/GraphLaTeX/...); visualizationCategories is the deduped
  * conceptual-category projection of it (both collapse to "Graph") -- use the latter
  * for anything user-facing (filters, display), the former only where the specific
- * renderer technology actually matters (e.g. isRenderable).
+ * renderer technology actually matters.
+ *
+ * Direct project-owner instruction: a visualization class that isn't actually
+ * renderable (declared "Unimplemented", blank, or any other value with no
+ * registered renderer -- isRenderable() is the one place that's decided, so
+ * this never re-derives it from the raw string) never contributes a real
+ * category. When a problem ends up with NO real category this way -- whether
+ * it declared no visualizations at all, or declared only unrenderable ones --
+ * visualizationCategories gets the single sentinel member "Unimplemented"
+ * instead, so it's still a normal facet option (a person can filter for "every
+ * problem with no visualization") without ever being a real, renderable-seeming
+ * category. Consumers that display this set as chips (ProblemCard, via
+ * pages/browse/index.js) are the ones responsible for stripping that sentinel
+ * back out before rendering -- see those files' own comments.
  * The Map's key (`problemName`) is the raw class/reflection name (e.g.
  * "DEUTSCHJOZSA"), matching how the backend keys solvers/visualizations/reductions
  * by problem -- use `tags.displayName` (e.g. "Deutsch Jozsa") for anything shown to
@@ -90,20 +107,36 @@ export function useProblemIndex(url) {
         const displayName = problemInfo?.problemName || problemInfo?.ProblemName || problemName;
         const complexityClass =
           problemInfo?.complexityClass || problemInfo?.ComplexityClass || "Unclassified";
-        // NP-Complete is a subset of NP by definition (Interfaces/ComplexityClass.cs's
-        // doc comment on NP) -- the engine expands that implication here rather than
-        // requiring every NP-Complete problem to redundantly declare both, so a problem
-        // counts toward (and can be filtered by) both facet options.
+        // Direct project-owner instruction: browsing "NP" should surface NP-Complete
+        // and NP-Hard problems too, alongside anything declared bare "NP" (e.g. Prime
+        // Factorization) -- NP-Complete is a subset of NP by definition
+        // (Interfaces/ComplexityClass.cs's doc comment on NP), and NP-Hard is treated
+        // the same way here for browsing purposes even though it isn't a strict subset
+        // in the textbook sense. The engine expands both implications here rather than
+        // requiring every problem to redundantly declare every class it browses under,
+        // so a problem counts toward (and can be filtered by) every facet option this
+        // implies.
         const complexityClasses = new Set([complexityClass]);
-        if (complexityClass === "NPComplete") complexityClasses.add("NP");
+        if (complexityClass === "NPComplete" || complexityClass === "NPHard") {
+          complexityClasses.add("NP");
+        }
 
         const problemType = problemInfo?.problemType || problemInfo?.ProblemType || "Unclassified";
 
         const solverTypes = new Set();
+        const solverComplexities = new Set();
+        // Per-solver {type, complexity} pairs, kept alongside the two aggregate Sets so
+        // a combined Solver Type + Solver Complexity filter can require ONE solver to
+        // satisfy both (see solverMatchesBoth in useProblemFilters).
+        const solvers = [];
         for (const solverClassName of solversByProblem[problemName] ?? []) {
           const solverInfo = info[solverClassName];
           const solverType = solverInfo?.solverType || solverInfo?.SolverType || "Unclassified";
           solverTypes.add(solverType);
+          const solverComplexity =
+            solverInfo?.complexityBucket || solverInfo?.ComplexityBucket || "Unclassified";
+          solverComplexities.add(solverComplexity);
+          solvers.push({ type: solverType, complexity: solverComplexity });
         }
 
         const visualizationTypeSet = new Set();
@@ -111,18 +144,23 @@ export function useProblemIndex(url) {
         // values collapse to (GraphD3/GraphLaTeX both -> "Graph") -- a separate Set
         // from visualizationTypeSet so a problem with both counts once toward
         // "Graph", not twice, when a facet is built from this instead of the raw
-        // set (see visualizationCategories.js).
+        // set (see visualizationCategories.js). Gated on isRenderable(), not a
+        // truthy/non-"Unimplemented" check, so a declared type with no registered
+        // renderer at all falls into the same "not a real category" bucket as an
+        // explicit "Unimplemented" declaration -- see this file's own header.
         const visualizationCategorySet = new Set();
-        let hasRenderableVisualization = false;
         for (const visClassName of visualizationsByProblem[problemName] ?? []) {
           const type = resolveVisualizationType(visClassName);
-          if (type) {
+          if (isRenderable(type)) {
             visualizationTypeSet.add(type);
             visualizationCategorySet.add(visualizationTypeCategory(type));
           }
-          if (isRenderable(type)) {
-            hasRenderableVisualization = true;
-          }
+        }
+        // Captured before the "Unimplemented" sentinel is added below -- backs the
+        // "All Visualizations" filter option (see useProblemFilters).
+        const hasRenderableVisualization = visualizationCategorySet.size > 0;
+        if (!hasRenderableVisualization) {
+          visualizationCategorySet.add("Unimplemented");
         }
 
         map.set(problemName, {
@@ -131,6 +169,8 @@ export function useProblemIndex(url) {
           complexityClasses,
           problemType,
           solverTypes,
+          solverComplexities,
+          solvers,
           visualizationTypes: visualizationTypeSet,
           visualizationCategories: visualizationCategorySet,
           hasRenderableVisualization,

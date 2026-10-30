@@ -70,14 +70,24 @@ const isKnownResponse = (url, status) =>
 const isKnownLog = (text) => KNOWN_SILENT_FAILURES.some((known) => text.includes(known.log));
 
 export const test = base.extend({
+  // Per-test opt-out for a failure the test provokes on purpose (e.g. a malformed certificate).
+  // A test pushes `{ url, status }` entries; only those exact failures are ignored for that test.
+  expectedFailures: [[], { option: false }],
+
   guardAgainstSilentFailures: [
-    async ({ page }, use) => {
+    async ({ page, expectedFailures }, use) => {
       const failures = [];
 
       page.on("response", (response) => {
         const url = response.url();
         const status = response.status();
-        if (url.includes("/api/redux/") && status >= 400 && !isKnownResponse(url, status)) {
+        const isExpected = expectedFailures.some((e) => url.includes(e.url) && status === e.status);
+        if (
+          url.includes("/api/redux/") &&
+          status >= 400 &&
+          !isKnownResponse(url, status) &&
+          !isExpected
+        ) {
           failures.push(`HTTP ${status} ${url}`);
         }
       });

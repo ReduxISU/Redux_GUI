@@ -76,48 +76,6 @@ async function cachedRequest(cacheKey, requestFn) {
 }
 
 /**
- * This function is a temporary solution for validating user input until it is ported to the Redux API.
- * @returns `true` if the specified verifier certificate is valid.
- */
-function isCertificateValid(problem, certificate) {
-  var cleanInput = certificate.replace(new RegExp(/[( )]/g), ""); // Strips spaces and ()
-  cleanInput = cleanInput.replaceAll(":", "=");
-  var regexFormat = /[^-.,=:!{}\w;]/; // Checks for special characters not including -.,=:!{}
-  if (regexFormat.test(cleanInput) == true) {
-    // Invalid characters found, warn user.
-    return false;
-  } else {
-    var validUserInput = true;
-    if (problem == "SAT" || problem == "SAT3") {
-      var clauses = cleanInput.split(",");
-      const regex = /[^!\w]/; // Only allow alphanumber and !
-      const notBooleanRegex = /[^true$|^True$|^t$|^T$|^false$|^False$|^F$|^f$]/;
-      clauses.forEach((clause) => {
-        const singleClause = clause.split("=");
-
-        if (singleClause.length !== 2 || regex.test(singleClause[0] == true)) {
-          // No boolean assigned to variable.
-          validUserInput = false;
-          return false;
-        }
-
-        if (notBooleanRegex.test(singleClause[1] == true)) {
-          // boolean is not in the form True/true/T/F...
-          validUserInput = false;
-          return false;
-        } else {
-          // Replace True/true/t with T and False/false/f with F
-          singleClause[1] = singleClause[1].replace(new RegExp(/^false$|^False$|^f$/g), "F");
-          singleClause[1] = singleClause[1].replace(new RegExp(/^True$|^true$|^t$/g), "T");
-          validUserInput = true; // valid input
-        }
-      });
-    }
-    return validUserInput;
-  }
-}
-
-/**
  * @returns the gadget map of ids based on an `instance` from the specified `reduction`.
  * @returns `undefined` on failure and logs the error.
  */
@@ -398,20 +356,51 @@ export async function requestVerifiers(url, problem) {
 }
 
 /**
- * @returns the verified `instance` results from the specified `verifier`.
- * @returns `undefined` on failure and logs the error.
+ * Turns a failed verify response into a message for the user. The backend answers an unreadable
+ * certificate with a 400 `certificate_parse_error` body quoting the expected format.
+ */
+function describeVerifyError(status, body) {
+  if (body?.error === "certificate_parse_error") {
+    const expected = body.expected ? ` Expected: ${body.expected}` : "";
+    const detail = body.detail ? ` (${body.detail})` : "";
+    return `Certificate couldn't be read.${expected}${detail}`;
+  }
+  const message = body?.message ?? body?.detail ?? body?.title ?? body?.error;
+  return `Verification failed (HTTP ${status})${message ? `: ${message}` : ""}`;
+}
+
+/**
+ * @returns the verified `instance` result from the specified `verifier`.
+ * @returns a human-readable error message (a string) if the request fails or the backend rejects
+ * the certificate, e.g. "Certificate couldn't be read. Expected: ...". Never `undefined`.
  */
 export async function requestVerifiedInstance(url, problem, verifier, instance, certificate) {
-  // Temporary solution until certificate validation is moved to the Redux API
-  if (!isCertificateValid(problem, certificate)) {
-    return "Invalid Input";
+  try {
+    const resp = await fetch(`${url}ProblemProvider/verify?verifier=${verifier}`, {
+      method: "POST",
+      body: JSON.stringify({ problemInstance: instance, certificate: certificate }),
+      headers: { "Content-Type": "application/json; charset=UTF-8" },
+    });
+    if (resp.ok) {
+      return await resp.json();
+    }
+    let body;
+    try {
+      body = await resp.json();
+    } catch {
+      body = undefined;
+    }
+    // A rejected certificate is expected user error, not a broken request; only log the rest.
+    if (body?.error !== "certificate_parse_error") {
+      console.log(
+        `${verifier} VERIFIED INSTANCE REQUEST FAILED: ${resp.status} (${resp.statusText})`,
+      );
+    }
+    return describeVerifyError(resp.status, body);
+  } catch (error) {
+    console.log(`${verifier} VERIFIED INSTANCE REQUEST FAILED: `, error);
+    return "Couldn't reach the verifier. Check your connection and try again.";
   }
-
-  return await fetchPostJson(
-    `${url}ProblemProvider/verify?verifier=${verifier}`,
-    { problemInstance: instance, certificate: certificate },
-    () => `${verifier} VERIFIED INSTANCE REQUEST FAILED`,
-  );
 }
 
 /**

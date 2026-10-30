@@ -61,8 +61,15 @@ export default async function handler(req, res) {
   }
 
   res.status(upstream.status);
+  // Node's fetch already decompresses gzip/br bodies, so forwarding the upstream
+  // content-encoding/content-length would make the browser try to decode (and size)
+  // plain bytes as if they were still compressed (ERR_CONTENT_DECODING_FAILED).
   for (const [key, value] of upstream.headers) {
-    if (!["transfer-encoding", "connection"].includes(key.toLowerCase())) {
+    if (
+      !["transfer-encoding", "connection", "content-encoding", "content-length"].includes(
+        key.toLowerCase(),
+      )
+    ) {
       res.setHeader(key, value);
     }
   }

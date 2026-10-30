@@ -1,5 +1,7 @@
 import * as d3 from "d3";
 import { useEffect, useRef } from "react";
+import { useThemeMode } from "../../ThemeModeContext";
+import { textColors } from "../../theme";
 import { getColorByKey } from "../constants/VisColorsArray";
 
 const CIRCUIT_WIDTH = 700;
@@ -50,6 +52,8 @@ export default function StandardCircuitSvgReact({
 }) {
   const margin = CIRCUIT_MARGIN;
   const ref = useRef(null);
+  const { mode } = useThemeMode();
+  const textColor = textColors(mode).heading;
 
   const parsedData = parseCircuitData(problemData);
 
@@ -119,6 +123,7 @@ export default function StandardCircuitSvgReact({
       .attr("y", 20)
       .attr("font-size", 16)
       .attr("font-weight", "bold")
+      .attr("fill", textColor)
       .text(parsedData.title ?? "Quantum Circuit");
 
     qubits.forEach((q, qi) => {
@@ -129,6 +134,7 @@ export default function StandardCircuitSvgReact({
         .attr("y", y + 4)
         .attr("text-anchor", "end")
         .attr("font-size", 12)
+        .attr("fill", textColor)
         .text(q);
 
       svg
@@ -158,6 +164,7 @@ export default function StandardCircuitSvgReact({
         .attr("y", busY - 10)
         .attr("text-anchor", "end")
         .attr("font-size", 12)
+        .attr("fill", textColor)
         .text("c");
     }
 
@@ -224,6 +231,7 @@ export default function StandardCircuitSvgReact({
         .attr("text-anchor", "middle")
         .attr("font-size", 12)
         .attr("font-weight", 700)
+        .attr("fill", textColor)
         .text(ov.label || "U_f");
     });
 
@@ -389,6 +397,7 @@ export default function StandardCircuitSvgReact({
           .attr("text-anchor", "middle")
           .attr("font-size", 12)
           .attr("font-weight", "bold")
+          .attr("fill", textColor)
           .text("M");
 
         if (Array.isArray(g.classical) && g.classical.length && classical.length) {
@@ -504,6 +513,7 @@ export default function StandardCircuitSvgReact({
           .attr("text-anchor", "middle")
           .attr("font-size", 11)
           .attr("font-weight", 600)
+          .attr("fill", textColor)
           .text(name);
 
         if (value !== undefined) {
@@ -513,6 +523,7 @@ export default function StandardCircuitSvgReact({
             .attr("y", busY + 32)
             .attr("text-anchor", "middle")
             .attr("font-size", 11)
+            .attr("fill", textColor)
             .text(String(value));
         }
       });
@@ -539,6 +550,7 @@ export default function StandardCircuitSvgReact({
           .attr("x", offsetX + 18)
           .attr("y", -2)
           .attr("font-size", 11)
+          .attr("fill", textColor)
           .text(label);
         offsetX += 18 + label.length * 7;
       });
@@ -552,6 +564,7 @@ export default function StandardCircuitSvgReact({
     margin.left,
     margin.right,
     margin.top,
+    textColor,
   ]);
 
   const oracle = parsedData?.metadata?.oracleType;

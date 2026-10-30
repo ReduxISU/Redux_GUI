@@ -2,10 +2,27 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Box, Divider, Link, Popover, Typography } from "@mui/material";
 import { useState } from "react";
+import { useThemeMode } from "../ThemeModeContext";
+import { surfaceColors, textColors } from "../theme";
+
+// GitHub repo holding the backend source; `sourceFile` paths from the API are relative to it.
+// NEXT_PUBLIC_ vars are inlined at build time, so overriding this requires a rebuild.
+const REDUX_REPO_URL = (
+  process.env.NEXT_PUBLIC_REDUX_REPO_URL || "https://github.com/reduxISU/Redux"
+).replace(/\/+$/, "");
+
+// blob/HEAD resolves to the repo's default branch.
+function sourceFileUrl(sourceFile) {
+  const path = sourceFile.split("/").map(encodeURIComponent).join("/");
+  return `${REDUX_REPO_URL}/blob/HEAD/${path}`;
+}
 
 function PopoverTooltipClick({ toolTip = {} }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const { mode } = useThemeMode();
+  const surface = surfaceColors(mode);
+  const text = textColors(mode);
 
   const handleClick = (e) => {
     setAnchorEl(e.currentTarget);
@@ -32,8 +49,8 @@ function PopoverTooltipClick({ toolTip = {} }) {
         <Box sx={{ maxWidth: 520, p: 0 }}>
           {t.header && (
             <>
-              <Box sx={{ px: 2, py: 1, fontWeight: 700, bgcolor: "grey.100" }}>
-                <Typography variant="subtitle2" fontWeight={700}>
+              <Box sx={{ px: 2, py: 1, fontWeight: 700, bgcolor: surface.surfaceAlt }}>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ color: text.heading }}>
                   {t.header}
                 </Typography>
               </Box>
@@ -42,21 +59,15 @@ function PopoverTooltipClick({ toolTip = {} }) {
           )}
 
           <Box sx={{ px: 2, py: 1.5, maxWidth: 480 }}>
-            {t.formalDef && t.isMathDef ? (
-              <Typography
-                variant="body2"
-                sx={{
-                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                  fontSize: "0.85em",
-                  whiteSpace: "pre-wrap",
-                  mb: 1.5,
-                }}
-              >
-                {t.formalDef}
+            {t.input ? (
+              <Typography variant="body2" sx={{ lineHeight: 1.35 }}>
+                <strong>Input:</strong> {t.input}
               </Typography>
-            ) : t.formalDef ? (
-              <Typography variant="body2" sx={{ mb: 1.5 }}>
-                {t.formalDef}
+            ) : null}
+
+            {t.output ? (
+              <Typography variant="body2" sx={{ mb: 1.5, lineHeight: 1.35 }}>
+                <strong>Output:</strong> {t.output}
               </Typography>
             ) : null}
 
@@ -102,6 +113,21 @@ function PopoverTooltipClick({ toolTip = {} }) {
                     <OpenInNewIcon fontSize="inherit" />
                   </Link>
                 )}
+              </Typography>
+            ) : null}
+
+            {t.sourceFile ? (
+              <Typography variant="body2" sx={{ mb: 0.75, lineHeight: 1.35 }}>
+                <strong>Code:</strong>{" "}
+                <Link
+                  href={sourceFileUrl(t.sourceFile)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ wordBreak: "break-all" }}
+                >
+                  {t.sourceFile}
+                  <OpenInNewIcon fontSize="inherit" sx={{ ml: 0.5, verticalAlign: "middle" }} />
+                </Link>
               </Typography>
             ) : null}
 

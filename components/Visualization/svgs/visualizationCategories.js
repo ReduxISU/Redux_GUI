@@ -20,14 +20,26 @@ const VISUALIZATION_TYPE_CATEGORIES = {
   PumpSchedule: "Pump Schedule",
 };
 
+/** Category label for the visualization-status sentinel and for anything that
+ * doesn't (yet) have a real category -- "Unimplemented" itself, and any future
+ * VisualizationType.cs value added before this map is updated to categorize it. */
+export const UNIMPLEMENTED_CATEGORY = "Unimplemented";
+
+/** Sentinel `selectedVisualizationTypes` key for the "All Visualizations" filter
+ * option -- matches every problem with a renderable visualization (i.e. every
+ * category except Unimplemented), regardless of which specific category. Not a
+ * real visualizationType wire value, so it can't collide with one. */
+export const ALL_VISUALIZATIONS_KEY = "__all_visualizations__";
+
 /**
  * The simplified display category for a visualizationType wire value, e.g.
- * "GraphD3" -> "Graph". Falls back to the raw value itself for anything not in the
- * map (e.g. "Unimplemented", or a newly-declared type not yet categorized here) so
- * it's never silently dropped from the UI.
+ * "GraphD3" -> "Graph". Falls back to `UNIMPLEMENTED_CATEGORY` for anything not
+ * in the map -- "Unimplemented" itself, and also any newly-declared
+ * VisualizationType.cs value not yet categorized here, so an uncategorized type
+ * groups with "no renderer" instead of appearing as its own raw-value category.
  */
 export function visualizationTypeCategory(type) {
-  return (type && VISUALIZATION_TYPE_CATEGORIES[type]) || type;
+  return (type && VISUALIZATION_TYPE_CATEGORIES[type]) || UNIMPLEMENTED_CATEGORY;
 }
 
 export default VISUALIZATION_TYPE_CATEGORIES;
