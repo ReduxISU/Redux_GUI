@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "node --test \"tests/unit/**/*.test.mjs\"",
     "test:e2e": "playwright test",
     "format": "biome check --write .",
     "format:check": "biome check .",

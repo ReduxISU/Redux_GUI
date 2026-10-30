@@ -5,6 +5,7 @@ import {
   requestAllVisualizationTypes,
 } from "../../redux";
 import { isRenderable } from "../../Visualization/svgs/renderability";
+import { tagList } from "../ProblemFilters/tagLists";
 import { useGenericInfo } from "../ProblemProvider";
 
 export function useVisualization(url, problemName, problemNameMap, problemInfoMap) {
@@ -12,6 +13,11 @@ export function useVisualization(url, problemName, problemNameMap, problemInfoMa
   [state.defaultVisualizationMap] = useDefaultVisualizationMap(url, problemInfoMap);
   [state.VisualizationOptions] = useVisualizationOptions(url, problemName);
   state.visualizationTypeMap = useVisualizationTypeMap(url, state.VisualizationOptions);
+  state.visualizationTagMap = useVisualizationTagMap(
+    url,
+    state.VisualizationOptions,
+    state.visualizationTypeMap,
+  );
   [state.chosenVisualization, state.setChosenVisualization] = useChosenVisualization(
     problemName,
     state.defaultVisualizationMap,
@@ -123,6 +129,39 @@ function useVisualizationTypeMap(url, VisualizationOptions) {
   }, [url, VisualizationOptions]);
 
   return visualizationTypeMap;
+}
+
+/**
+ * Every `visualizationType` each of `VisualizationOptions` declares, in the
+ * backend's order -- `Map<className, string[]>` -- for the visualization dropdown's
+ * tags only (#409). Picking a renderer stays with `useVisualizationTypeMap` above,
+ * which keeps using the single (first) type. Read from allInfo's
+ * `visualizationTypes` list via tagList (its single field on an older API),
+ * falling back to that renderer type for a class allInfo has no entry for.
+ */
+function useVisualizationTagMap(url, VisualizationOptions, visualizationTypeMap) {
+  const [visualizationTagMap, setVisualizationTagMap] = useState(new Map());
+
+  useEffect(() => {
+    (async () => {
+      if (!VisualizationOptions?.length) {
+        setVisualizationTagMap(new Map());
+        return;
+      }
+
+      const allInfo = (await requestAllInfo(url)) ?? {};
+      const map = new Map();
+      for (const className of VisualizationOptions) {
+        const declared = tagList(allInfo[className], "visualizationTypes", "visualizationType");
+        const rendererType = visualizationTypeMap.get(className);
+        const types = declared.length > 0 ? declared : rendererType ? [rendererType] : [];
+        if (types.length > 0) map.set(className, types);
+      }
+      setVisualizationTagMap(map);
+    })();
+  }, [url, VisualizationOptions, visualizationTypeMap]);
+
+  return visualizationTagMap;
 }
 
 function useChosenVisualization(
