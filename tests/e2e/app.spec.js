@@ -54,10 +54,10 @@ test("the default problem renders a visualization", async ({ page }) => {
   // and passes without anything having been drawn.
   await expect(visualizeRow.locator("svg:not(.MuiSvgIcon-root)").first()).toBeVisible();
 
-  // The two ways a visualization can fail to draw (no renderer registered for the declared type,
-  // and a renderer that threw). Both render a card of text where the picture should be, so
-  // without this the assertion above could pass on an error message.
-  await expect(visualizeRow).not.toContainText(/can.t render|failed to render/);
+  // The ways a visualization can fail to draw (no renderer registered for the declared type, a
+  // failed request, and a renderer that threw). Each renders a card of text where the picture
+  // should be, so without this the assertion above could pass on an error message.
+  await expect(visualizeRow).not.toContainText(/can.t render|failed to render|Failed to Visualize/);
 });
 
 test("solving 3SAT returns a satisfying assignment", async ({ page }) => {
