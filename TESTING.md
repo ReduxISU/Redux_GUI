@@ -22,7 +22,7 @@ Everything you need — Node 26, the `rbs` build tool, Chromium, Docker access �
 
 1. Install the **Dev Containers** extension.
 2. Open the repo, then **Reopen in Container** when prompted (or `Ctrl/Cmd+Shift+P` →
-   *Dev Containers: Reopen in Container*).
+   _Dev Containers: Reopen in Container_).
 3. Wait for the first build. It installs dependencies and downloads Chromium, so it takes a few
    minutes once; after that it is cached.
 
@@ -49,8 +49,8 @@ docker ps --filter publish=3000     # find what has it
 docker rm -f <name>                 # if it is a container
 ```
 
-**A failed start leaves a broken container behind.** If `devcontainer up` fails *while setting up
-networking*, it leaves a half-created container, and the next attempt **reuses that same container**
+**A failed start leaves a broken container behind.** If `devcontainer up` fails _while setting up
+networking_, it leaves a half-created container, and the next attempt **reuses that same container**
 — which has no network at all. The symptom is misleading: setup fails with a DNS error like
 `curl: (6) Could not resolve host: mise.run`, which looks like a problem with your network. It is
 not. Delete the container and try again:
@@ -59,9 +59,9 @@ not. Delete the container and try again:
 docker rm -f $(docker ps -aq --filter "label=devcontainer.local_folder=$PWD")
 ```
 
-**`rbs` is missing a command you expect.** `rbs` is installed into the container *image*, so a
+**`rbs` is missing a command you expect.** `rbs` is installed into the container _image_, so a
 cached image pins it to whenever that image was built. Rebuild to pick up a newer one — in VS Code,
-*Dev Containers: Rebuild Container*; from the terminal:
+_Dev Containers: Rebuild Container_; from the terminal:
 
 ```bash
 devcontainer up --workspace-folder . --build-no-cache --remove-existing-container
@@ -155,21 +155,21 @@ route that exists look permanently broken.
 
 Start from the example closest to what you want:
 
-| You want to test | Copy | Technique it shows |
-|---|---|---|
-| What the API returns to the GUI | `tests/e2e/proxy.spec.js` | HTTP assertions, no browser — fast and stable |
-| A dropdown, a value, a page state | `app.spec.js` › *the problem catalogue loads* | Locating a row, reading a combobox |
-| A visualization drawing | `app.spec.js` › *renders a visualization* | Asserting on drawn SVG, and ruling out error cards |
-| Clicking something and checking the result | `app.spec.js` › *solving 3SAT* | Expanding a row, waiting for enabled, asserting output |
-| Typing input and checking both outcomes | `app.spec.js` › *the 3SAT verifier answers…* | Filling a textbox, asserting a positive and a negative result |
-| A structural contract of the page | `tests/e2e/tour.spec.js` | Counting anchors the tour depends on, no backend data needed |
+| You want to test                           | Copy                                          | Technique it shows                                            |
+| ------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------- |
+| What the API returns to the GUI            | `tests/e2e/proxy.spec.js`                     | HTTP assertions, no browser — fast and stable                 |
+| A dropdown, a value, a page state          | `app.spec.js` › _the problem catalogue loads_ | Locating a row, reading a combobox                            |
+| A visualization drawing                    | `app.spec.js` › _renders a visualization_     | Asserting on drawn SVG, and ruling out error cards            |
+| Clicking something and checking the result | `app.spec.js` › _solving 3SAT_                | Expanding a row, waiting for enabled, asserting output        |
+| Typing input and checking both outcomes    | `app.spec.js` › _the 3SAT verifier answers…_  | Filling a textbox, asserting a positive and a negative result |
+| A structural contract of the page          | `tests/e2e/tour.spec.js`                      | Counting anchors the tour depends on, no backend data needed  |
 
 ### Things that will cost you an afternoon if nobody tells you
 
 **Do not use `getByLabel` for the dropdowns.** All six of them render `id="search-bar"`
 (`components/widgets/SearchBarExtensible.js`), so all six `<label for="search-bar">` elements point
 at whichever input the browser saw first. Every `getByLabel("Select …")` call on this page silently
-resolves to the *Problem* row's input — no error, just the wrong element. Use the `row()` helper in
+resolves to the _Problem_ row's input — no error, just the wrong element. Use the `row()` helper in
 `app.spec.js` to scope to a row by its header title, then `getByRole("combobox")` inside it.
 (This duplicate id is also a genuine accessibility bug: screen readers announce every dropdown as
 "Select problem". Fixing it is on the backlog.)
@@ -208,8 +208,8 @@ matching example above as your starting point.
 **More flows**
 - One test per visualization type in `components/Visualization/svgs/Visualizations.js`. There are
   many and almost none are covered.
-- The three switches on the Visualize row (*Show reduction*, *Highlight gadgets*, *Highlight
-  solution*) and the frame stepper — none is covered.
+- The three switches on the Visualize row (_Show reduction_, _Highlight gadgets_, _Highlight
+  solution_) and the frame stepper — none is covered.
 - A smoke test per route: `/browse` and `/aboutus` both call the backend and neither is tested.
 
 **The proxy's error handling** (`pages/api/redux/[...path].js`) — none of these is tested:
