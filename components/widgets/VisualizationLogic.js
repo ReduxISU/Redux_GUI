@@ -4,6 +4,8 @@ import { Container } from "@mui/material";
 import { useEffect, useState } from "react";
 import Split from "react-split";
 import { makeIdsUnique, processReductions, remapIdsDeep } from "../redux";
+import PictureCanvas from "../Visualization/pictures/PictureCanvas";
+import { hasPictureRenderer } from "../Visualization/pictures/registry";
 import { No_Renderable_Viz_Svg, Viz_Render_Error_Svg } from "../Visualization/svgs/No_Viz_SVG";
 import { isRenderable } from "../Visualization/svgs/renderability";
 import Visualizations from "../Visualization/svgs/Visualizations.js";
@@ -19,7 +21,10 @@ export default function VisualizationLogic({
   visualizationState,
   loading,
   visualizationType,
+  visualizationName,
   problemData,
+  picture,
+  frameIndex,
   reductionData,
   reductionVisualization,
 }) {
@@ -61,7 +66,26 @@ export default function VisualizationLogic({
     url,
   ]);
 
-  if (url && problemInstance && mappedProblemData && Object.keys(mappedProblemData).length > 0) {
+  const drawsFrames = picture?.format === "frames" && hasPictureRenderer(picture.type);
+
+  if (drawsFrames) {
+    visualization = (
+      <PictureCanvas
+        idPrefix="viz-picture"
+        name={visualizationName}
+        type={picture.type}
+        payload={picture.payload}
+        frame={problemData}
+        frameIndex={frameIndex}
+        frameCount={picture.frames.length}
+      />
+    );
+  } else if (
+    url &&
+    problemInstance &&
+    mappedProblemData &&
+    Object.keys(mappedProblemData).length > 0
+  ) {
     if (!isRenderable(visualizationType)) {
       visualization = (
         <No_Renderable_Viz_Svg

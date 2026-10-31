@@ -122,6 +122,8 @@ A visualization has two halves. The **API** works out the data and sends it as J
 
 **Most of the time you do not need to change this repo.** If your new problem can be drawn by an existing renderer (graphs, sets, SAT formulas, quantum circuits, tables, pump schedules), you only add a visualization class in the Redux API. The GUI asks the API what exists and draws it.
 
+**New picture types (the visualization redesign, #351).** The API serves redesigned pictures under `format=frames` as `{type, payload, frames}`, keyed by picture type (`"Graph"`, `"Formula"`, ...). Those renderers live in `components/Visualization/pictures/` and are registered in `pictures/registry.js`; its header says how to add one. A picture type with no renderer there falls back to the old flat list and the legacy registry below, so the two systems run side by side until every type is ported.
+
 You only change this repo when you need a **brand-new visualization type** that no existing renderer can draw. Then:
 
 1. **Create the renderer.** Add a React component to `components/Visualization/svgs/` that returns an SVG. The GUI fetches the data for you and passes it in as props, so your component does not call the API itself. It receives `problemData` (the JSON the API produced), `solve`, `url`, `gadgetMap`, and `gadgetsOn`. Copy a small existing renderer such as `StandardGraphSvgReact.js` and follow its style.

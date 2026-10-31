@@ -12,6 +12,7 @@ export function useVisualization(url, problemName, problemNameMap, problemInfoMa
   [state.defaultVisualizationMap] = useDefaultVisualizationMap(url, problemInfoMap);
   [state.VisualizationOptions] = useVisualizationOptions(url, problemName);
   state.visualizationTypeMap = useVisualizationTypeMap(url, state.VisualizationOptions);
+  state.pictureTypeMap = usePictureTypeMap(url, state.VisualizationOptions);
   [state.chosenVisualization, state.setChosenVisualization] = useChosenVisualization(
     problemName,
     state.defaultVisualizationMap,
@@ -123,6 +124,33 @@ function useVisualizationTypeMap(url, VisualizationOptions) {
   }, [url, VisualizationOptions]);
 
   return visualizationTypeMap;
+}
+
+/**
+ * Class name -> the picture type the visualization serves under `format=frames` (Redux#841), or
+ * `null` for a legacy one. An API older than the field leaves every entry out, so the map stays
+ * empty and `requestPicture` asks for frames first.
+ */
+function usePictureTypeMap(url, VisualizationOptions) {
+  const [pictureTypeMap, setPictureTypeMap] = useState(new Map());
+
+  useEffect(() => {
+    (async () => {
+      if (!VisualizationOptions?.length) {
+        setPictureTypeMap(new Map());
+        return;
+      }
+      const allInfo = (await requestAllInfo(url)) ?? {};
+      const map = new Map();
+      for (const className of VisualizationOptions) {
+        const info = allInfo[className];
+        if (info && "pictureType" in info) map.set(className, info.pictureType);
+      }
+      setPictureTypeMap(map);
+    })();
+  }, [url, VisualizationOptions]);
+
+  return pictureTypeMap;
 }
 
 function useChosenVisualization(

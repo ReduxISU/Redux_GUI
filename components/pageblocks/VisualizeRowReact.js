@@ -20,14 +20,16 @@ import Link from "next/link"; // <-- IMPORTANT for Quantum button
 import { useVisualizationInfo } from "../hooks/ProblemProvider";
 import { useWhenChanged } from "../hooks/useWhenChanged";
 import {
+  requestAllSolvers,
   requestProblemGenericInstance,
   requestReducedInstance,
   requestReductionVisualization,
   requestSolvedInstance,
-  requestVisualization,
 } from "../redux";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
+import { FrameCaption } from "../Visualization/pictures/PictureCanvas";
+import { EMPTY_PICTURE, requestPicture } from "../Visualization/pictures/pictureRequest";
 import { isRenderable } from "../Visualization/svgs/renderability";
 import { visualizationTypeCategory } from "../Visualization/svgs/visualizationCategories";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
@@ -66,6 +68,7 @@ export default function VisualizeRowReact({
   VisualizationOptions,
   defaultVisualizationMap,
   visualizationTypeMap,
+  pictureTypeMap,
   dragHandleProps,
 }) {
   const { mode } = useThemeMode();
@@ -114,22 +117,33 @@ export default function VisualizeRowReact({
   const [reducedVisualizationData, setReducedVisualizationData] = useState(
     defaultCLIQUEVisualizationArr,
   );
-  const [problemData, setProblemData] = useState([]);
+  const [picture, setPicture] = useState(EMPTY_PICTURE);
   const [problemReductionData, setProblemReductionData] = useState([]);
   const [svgIsLoading, setSvgIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
   const instanceReady = !!(problemInstance && problemName);
   const isDisabled = showGadgets || showReduction;
-  const totalSteps = problemData.length;
+  const totalSteps = picture.frames.length;
   const showSolution = currentStep === totalSteps - 1 && totalSteps > 1;
-  const currentProblemData = problemData[currentStep] ?? null;
+  const currentProblemData = picture.frames[currentStep] ?? null;
+  const caption = picture.format === "frames" ? currentProblemData?.caption : undefined;
   const currentReductionData = problemReductionData[currentStep] ?? null;
 
   useWhenChanged([problemName, problemInstance, chosenVisualization], () => {
-    setProblemData([]);
+    setPicture(EMPTY_PICTURE);
     setCurrentStep(0);
   });
+
+  // chosenSolver catches up with a problem switch one render late, so it is only sent once it
+  // belongs to the current problem; this map is global, so it agrees with problemName in-render.
+  const [solversByProblem, setSolversByProblem] = useState({});
+  useEffect(() => {
+    requestAllSolvers(url).then((all) => setSolversByProblem(all ?? {}));
+  }, [url]);
+  const pictureSolver = solversByProblem[problemName]?.includes(chosenSolver)
+    ? chosenSolver
+    : undefined;
 
   // Visualization selection (stored choice / renderable default / first renderable option /
   // explicit empty state) is fully resolved inside useChosenVisualization -- see
@@ -184,18 +198,22 @@ export default function VisualizeRowReact({
 
     const fetch = async () => {
       try {
-        const data = await requestVisualization(url, chosenVisualization, problemInstance);
+        const data = await requestPicture(url, {
+          visualization: chosenVisualization,
+          pictureType: pictureTypeMap?.get(chosenVisualization),
+          instance: problemInstance,
+          solver: pictureSolver,
+        });
 
         if (!alive) return;
 
-        let processedData = data ? [...data] : [];
-
         // In reduction mode, only show the first and last frames to highlight the delta
-        if (showReduction && processedData.length > 1) {
-          processedData = [processedData[0], processedData[processedData.length - 1]];
-        }
+        const frames =
+          showReduction && data.frames.length > 1
+            ? [data.frames[0], data.frames[data.frames.length - 1]]
+            : data.frames;
 
-        setProblemData(processedData);
+        setPicture({ ...data, frames });
         setCurrentStep(0);
       } catch (err) {
         console.error(err);
@@ -207,7 +225,16 @@ export default function VisualizeRowReact({
     return () => {
       alive = false;
     };
-  }, [instanceReady, chosenVisualization, problemInstance, showReduction, url, problemName]);
+  }, [
+    instanceReady,
+    chosenVisualization,
+    problemInstance,
+    showReduction,
+    url,
+    problemName,
+    pictureSolver,
+    pictureTypeMap,
+  ]);
 
   // Fetch SAT3
   useEffect(() => {
@@ -439,6 +466,8 @@ export default function VisualizeRowReact({
           </div>
         </div>
 
+        {caption && <FrameCaption id="viz-caption" frame={currentProblemData} />}
+
         {/* Main visualization */}
         <VisualizationLogic
           loading={svgIsLoading}
@@ -458,6 +487,8 @@ export default function VisualizeRowReact({
           visualizationType={visualizationInfo.visualizationType}
           visualizationName={chosenVisualization}
           problemData={currentProblemData}
+          picture={picture}
+          frameIndex={currentStep}
           reductionData={currentReductionData}
           showSolutionToggle={showSolution}
           reductionVisualization={reductionVisualization}

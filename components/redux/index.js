@@ -404,12 +404,19 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
 }
 
 /**
- * @returns the graph visualization of the problem instance.
+ * @param options.solver the solver class name whose run to draw (Redux#733); omitted = the
+ * visualization's own solver.
+ * @param options.format `"frames"` for the `{type, payload, frames}` response; omitted = the old
+ * flat list of frames.
+ * @returns the visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualization(url, visualization, instance) {
+export async function requestVisualization(url, visualization, instance, options = {}) {
+  const params = new URLSearchParams({ visualization });
+  if (options.solver) params.set("solver", options.solver);
+  if (options.format) params.set("format", options.format);
   return await fetchPostJson(
-    `${url}ProblemProvider/visualize?visualization=${visualization}`,
+    `${url}ProblemProvider/visualize?${params}`,
     instance,
     () => `${visualization} VISUALIZE REQUEST FAILED`,
   );
