@@ -8,12 +8,13 @@
  * @author Alex Diviney
  */
 
-import React, { useContext } from "react";
+import React, { useContext, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Download as DownloadIcon, DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
 import { Button, IconButton } from "@mui/material";
 import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 import { useSolverInfo } from "../hooks/ProblemProvider";
+import { useWhenChanged } from "../hooks/useWhenChanged";
 import { requestSolvedInstance } from "../redux";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
@@ -60,11 +61,29 @@ export default function SolveRowReact({
   const text = textColors(mode);
 
   const solverInfo = useSolverInfo(url, chosenSolver);
+  // Why the last Solve failed ({ message, hint }), e.g. the quantum service being down.
+  const [solveError, setSolveError] = useState(null);
+  // Bumped on every Solve and selection change, so a failure that arrives late is dropped.
+  const solveRun = useRef(0);
+
+  // Same reset as the solved instance in useSolvedInstance. A new problem brings a new instance.
+  useWhenChanged([problemInstance, chosenSolver], () => {
+    solveRun.current += 1;
+    setSolveError(null);
+  });
 
   async function handleSolve() {
+    solveRun.current += 1;
+    const run = solveRun.current;
+    setSolveError(null);
+    const onError = (error) => {
+      if (run === solveRun.current) {
+        setSolveError(error);
+      }
+    };
     setSolvedInstance(
       chosenSolver && problemInstance
-        ? ((await requestSolvedInstance(url, chosenSolver, problemInstance)) ?? "")
+        ? ((await requestSolvedInstance(url, chosenSolver, problemInstance, onError)) ?? "")
         : "",
     );
   }
@@ -167,6 +186,17 @@ export default function SolveRowReact({
             text={solvedInstance}
             tooLargeMessage={SOLUTION_TOO_LARGE_MESSAGE}
           />
+        ) : null}
+        {solveError ? (
+          <p role="alert" style={{ color: text.heading }}>
+            {solveError.message}
+            {solveError.hint ? (
+              <>
+                <br />
+                <span style={{ color: text.body }}>Try: {solveError.hint}</span>
+              </>
+            ) : null}
+          </p>
         ) : null}
         <div className="submitButton">
           <Button
