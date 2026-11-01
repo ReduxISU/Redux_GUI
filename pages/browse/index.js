@@ -27,7 +27,11 @@ import {
   solverComplexityLabel,
   solverComplexityRank,
 } from "../../components/hooks/ProblemFilters/solverComplexityOrder";
-import { solverTypeLabel } from "../../components/hooks/ProblemFilters/tagLabels";
+import {
+  problemVariantLabel,
+  solverTypeLabel,
+} from "../../components/hooks/ProblemFilters/tagLabels";
+import { compareByOrder, UNCLASSIFIED } from "../../components/hooks/ProblemFilters/tagLists";
 import { useProblemFilters } from "../../components/hooks/ProblemFilters/useProblemFilters";
 import { useProblemIndex } from "../../components/hooks/ProblemFilters/useProblemIndex";
 import { useThemeMode } from "../../components/ThemeModeContext";
@@ -70,7 +74,8 @@ export default function BrowsePage() {
     setFiltersExpanded((current) => !current);
   };
 
-  const { problemIndex, reductionGraph, loading } = useProblemIndex(reduxBaseUrl);
+  const { problemIndex, reductionGraph, problemVariantOrder, loading } =
+    useProblemIndex(reduxBaseUrl);
   const {
     selectedComplexityClasses,
     setSelectedComplexityClasses,
@@ -80,6 +85,8 @@ export default function BrowsePage() {
     setSelectedSolverComplexities,
     selectedProblemTypes,
     setSelectedProblemTypes,
+    selectedProblemVariants,
+    setSelectedProblemVariants,
     selectedVisualizationTypes,
     setSelectedVisualizationTypes,
     reachabilitySource,
@@ -120,15 +127,30 @@ export default function BrowsePage() {
   // Problem Type gets its own facet so a filter applied by clicking a card's Problem
   // Type chip is visible and can be unchecked here, like every other chip-driven
   // filter. Ordered by the problemTypeOrder.js taxonomy rather than alphabetically.
+  // A problem with several types counts toward each of them (#409).
   const problemTypeOptions = useMemo(
     () =>
       buildFacetOptions(
         problemIndex,
-        (tags) => [tags.problemType],
+        (tags) => tags.problemTypes,
         (a, b) => problemTypeRank(a) - problemTypeRank(b),
         problemTypeLabel,
       ),
     [problemIndex],
+  );
+  // Decision / Optimization (#409, #321), in /Navigation/ProblemVariants order. Built
+  // from the problems' own problemVariants like every other facet, so on an API
+  // without that field (or endpoint) this is a single "Unclassified" option holding
+  // every problem rather than an error.
+  const problemVariantOptions = useMemo(
+    () =>
+      buildFacetOptions(
+        problemIndex,
+        (tags) => tags.problemVariants,
+        compareByOrder(problemVariantOrder),
+        problemVariantLabel,
+      ),
+    [problemIndex, problemVariantOrder],
   );
   // Labels via solverTypeLabel so the checkboxes read "Brute Force"/"Breadth First
   // Search" rather than the raw "BruteForce"/"BreadthFirstSearch" wire values.
@@ -205,6 +227,17 @@ export default function BrowsePage() {
       return next;
     });
   };
+  const toggleProblemVariantFilter = (value) => {
+    setSelectedProblemVariants((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
   const toggleVisualizationTypeFilter = (value) => {
     setSelectedVisualizationTypes((prev) => {
       const next = new Set(prev);
@@ -233,6 +266,7 @@ export default function BrowsePage() {
       ...[...selectedSolverTypes].map(solverTypeLabel),
       ...[...selectedSolverComplexities].map(solverComplexityLabel),
       ...[...selectedProblemTypes].map(problemTypeLabel),
+      ...[...selectedProblemVariants].map(problemVariantLabel),
       ...[...selectedVisualizationTypes].map(visualizationTypeLabel),
       ...(reachabilitySource
         ? [`Reachable from ${problemNameMap.get(reachabilitySource) ?? reachabilitySource}`]
@@ -243,6 +277,7 @@ export default function BrowsePage() {
     selectedSolverTypes,
     selectedSolverComplexities,
     selectedProblemTypes,
+    selectedProblemVariants,
     selectedVisualizationTypes,
     reachabilitySource,
     problemNameMap,
@@ -266,6 +301,12 @@ export default function BrowsePage() {
       groups.push({
         key: "problemType",
         parts: [part("Problem type", selectedProblemTypes, problemTypeLabel)],
+      });
+    }
+    if (selectedProblemVariants.size > 0) {
+      groups.push({
+        key: "problemVariant",
+        parts: [part("Decision / Optimization", selectedProblemVariants, problemVariantLabel)],
       });
     }
     if (selectedSolverTypes.size > 0 && selectedSolverComplexities.size > 0) {
@@ -312,6 +353,7 @@ export default function BrowsePage() {
     selectedSolverTypes,
     selectedSolverComplexities,
     selectedProblemTypes,
+    selectedProblemVariants,
     selectedVisualizationTypes,
     reachabilitySource,
     reachabilityMode,
@@ -325,8 +367,8 @@ export default function BrowsePage() {
           Browse Problems
         </Typography>
         <Typography sx={{ color: text.body, fontSize: "0.87rem", mb: 3 }}>
-          Filter the full problem list by complexity class, problem type, solver type, solver
-          complexity, visualization type, or reduction reachability.
+          Filter the full problem list by complexity class, problem type, decision or optimization,
+          solver type, solver complexity, visualization type, or reduction reachability.
         </Typography>
 
         {loading ? (
@@ -414,6 +456,13 @@ export default function BrowsePage() {
                       options={problemTypeOptions}
                       selected={selectedProblemTypes}
                       onChange={setSelectedProblemTypes}
+                      collapsible
+                    />
+                    <FacetFilterGroup
+                      label="Decision / Optimization"
+                      options={problemVariantOptions}
+                      selected={selectedProblemVariants}
+                      onChange={setSelectedProblemVariants}
                       collapsible
                     />
                     <FacetFilterGroup
@@ -510,8 +559,19 @@ export default function BrowsePage() {
                           displayName={tags.displayName}
                           complexityClass={complexityClassLabel(tags.complexityClass)}
                           complexityClassValue={tags.complexityClass}
-                          problemType={problemTypeLabel(tags.problemType)}
-                          problemTypeValue={tags.problemType}
+                          problemTypes={tags.problemTypes.map((type) => ({
+                            value: type,
+                            label: problemTypeLabel(type),
+                          }))}
+                          problemVariants={tags.problemVariants
+                            // An "Unclassified" variant chip on every card (all of them,
+                            // against an API without problemVariants) says nothing the
+                            // sidebar facet doesn't -- left off the card, still filterable.
+                            .filter((variant) => variant !== UNCLASSIFIED)
+                            .map((variant) => ({
+                              value: variant,
+                              label: problemVariantLabel(variant),
+                            }))}
                           solverTypes={[...tags.solverTypes]
                             .map((type) => ({ value: type, label: solverTypeLabel(type) }))
                             .sort((a, b) => a.label.localeCompare(b.label))}
@@ -526,6 +586,7 @@ export default function BrowsePage() {
                             .sort((a, b) => a.label.localeCompare(b.label))}
                           onComplexityClassClick={toggleComplexityClassFilter}
                           onProblemTypeClick={toggleProblemTypeFilter}
+                          onProblemVariantClick={toggleProblemVariantFilter}
                           onSolverTypeClick={toggleSolverTypeFilter}
                           onVisualizationTypeClick={toggleVisualizationTypeFilter}
                         />

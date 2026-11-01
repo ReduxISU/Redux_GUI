@@ -122,7 +122,7 @@ export default function SearchBarExtensible({
                       <Box sx={{ display: "flex", gap: 0.5, mr: 0.5, flexShrink: 0 }}>
                         {selectedTags.map((tag) => (
                           <Chip
-                            key={tag.kind ?? tag.label}
+                            key={`${tag.kind ?? ""}:${tag.label}`}
                             label={tag.label}
                             size="small"
                             sx={tagChipSx(tag.kind, { mode })}
@@ -172,7 +172,7 @@ export default function SearchBarExtensible({
                     <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
                       {tags.map((tag) => (
                         <Chip
-                          key={tag.kind ?? tag.label}
+                          key={`${tag.kind ?? ""}:${tag.label}`}
                           label={tag.label}
                           size="small"
                           sx={tagChipSx(tag.kind, { mode })}

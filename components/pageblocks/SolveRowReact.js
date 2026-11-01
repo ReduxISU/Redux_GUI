@@ -13,6 +13,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Download as DownloadIcon, DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
 import { Button, IconButton } from "@mui/material";
 import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
+import { tagListOrUnclassified } from "../hooks/ProblemFilters/tagLists";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import { useWhenChanged } from "../hooks/useWhenChanged";
 import { requestSolvedInstance } from "../redux";
@@ -120,7 +121,12 @@ export default function SolveRowReact({
         sourceFile: solverInfo.sourceFile || "",
 
         classification: [
-          { label: "Solver type", value: solverTypeLabel(solverInfo.solverType || "Unclassified") },
+          {
+            label: "Solver type",
+            value: tagListOrUnclassified(solverInfo, "solverTypes", "solverType")
+              .map(solverTypeLabel)
+              .join(", "),
+          },
           { label: "Complexity bucket", value: solverInfo.complexityBucket || "Unclassified" },
           {
             label: "Big-O",
@@ -141,10 +147,13 @@ export default function SolveRowReact({
           onSelect={setChosenSolver}
           options={solverOptions}
           optionsMap={solverNameMap}
-          optionTag={(key) => ({
-            label: solverTypeLabel(solverTypeMap?.get(key) || "Unclassified"),
-            kind: "solverType",
-          })}
+          // One tag per solver type, in the backend's order (#409).
+          optionTag={(key) =>
+            (solverTypeMap?.get(key) ?? ["Unclassified"]).map((type) => ({
+              label: solverTypeLabel(type),
+              kind: "solverType",
+            }))
+          }
           disabled={!problemName}
           disabledMessage={"No solvers available. Please select a problem."}
           extenderButtons={(input) => {
