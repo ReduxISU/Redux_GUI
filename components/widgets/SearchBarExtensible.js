@@ -48,11 +48,27 @@ export default function SearchBarExtensible({
   ...props
 }) {
   const [input, setInput] = useState("");
+  // Controlled open so the paper stays up when the filter yields no options —
+  // that is exactly when the Add new … extender buttons are needed (#387).
+  const [open, setOpen] = useState(false);
   const { mode } = useThemeMode();
 
   return (
     <Autocomplete
       {...props}
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={(_event, reason) => {
+        if (
+          reason === "blur" ||
+          reason === "escape" ||
+          reason === "selectOption" ||
+          reason === "removeOption" ||
+          reason === "toggleInput"
+        ) {
+          setOpen(false);
+        }
+      }}
       slots={{
         paper: ({ children }) => (
           <SearchBarPaper input={input} optionsMap={optionsMap} extenderButtons={extenderButtons}>
@@ -60,8 +76,15 @@ export default function SearchBarExtensible({
           </SearchBarPaper>
         ),
       }}
-      onInputChange={(event, value) => {
-        setInput(value ?? "");
+      onInputChange={(_event, value, reason) => {
+        const next = value ?? "";
+        setInput(next);
+        if (reason === "input" && next !== "") {
+          setOpen(true);
+        }
+        if (reason === "clear" || reason === "reset") {
+          setOpen(false);
+        }
       }}
       value={disabled ? disabledMessage : (optionsMap.get(selected) ?? "")}
       onChange={(event, value) => {
@@ -214,6 +237,10 @@ function sortOptions(a, b, { groupBy, groupOrder, optionsHighlight }) {
 }
 
 function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
+  const buttons =
+    typeof extenderButtons === "function" && shouldOfferExtenders(input, [...optionsMap.values()])
+      ? extenderButtons(input)
+      : [];
   return (
     <Paper
       sx={{
@@ -228,10 +255,10 @@ function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
       }}
     >
       {children}
-      {input === "" || insensitiveContains([...optionsMap.values()], input) ? null : (
+      {buttons.length > 0 ? (
         <>
           <Divider />
-          {extenderButtons(input).map(({ label, href }, idx) => (
+          {buttons.map(({ label, href }, idx) => (
             <Button
               key={`ExtenderButton#${idx}`}
               color="primary"
@@ -247,9 +274,14 @@ function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
             </Button>
           ))}
         </>
-      )}
+      ) : null}
     </Paper>
   );
+}
+
+/** True when typed text is non-empty and not an exact option label (case-insensitive). */
+export function shouldOfferExtenders(input, optionLabels) {
+  return input !== "" && !insensitiveContains(optionLabels, input);
 }
 
 function insensitiveContains(array, value) {
