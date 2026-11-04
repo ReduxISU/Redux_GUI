@@ -16,11 +16,12 @@ import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 import { tagListOrUnclassified } from "../hooks/ProblemFilters/tagLists";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import { useWhenChanged } from "../hooks/useWhenChanged";
-import { requestSolvedInstance } from "../redux";
+import { requestSolvedInstance, userFacingError } from "../redux";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
+import RequestErrorMessage from "../widgets/RequestErrorMessage";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
 import TruncatedTextSection from "../widgets/TruncatedTextSection";
 
@@ -62,7 +63,7 @@ export default function SolveRowReact({
   const text = textColors(mode);
 
   const solverInfo = useSolverInfo(url, chosenSolver);
-  // Why the last Solve failed ({ message, hint }), e.g. the quantum service being down.
+  // Why the last Solve failed ({ message, hint, detail }), e.g. the quantum service being down.
   const [solveError, setSolveError] = useState(null);
   // Bumped on every Solve and selection change, so a failure that arrives late is dropped.
   const solveRun = useRef(0);
@@ -77,15 +78,10 @@ export default function SolveRowReact({
     solveRun.current += 1;
     const run = solveRun.current;
     setSolveError(null);
-    // A solver that can't run answers with `{ message, hint }`; any other failure has only the
-    // description of what went wrong.
-    const onError = (detail, body) => {
-      if (run === solveRun.current) {
-        setSolveError({
-          message: body?.message || body?.detail || body?.title || body?.error || detail,
-          hint: body?.hint ?? "",
-        });
-      }
+    // A solver that can't run answers with `{ message, hint }`; an unreachable server or any
+    // other failure gets a plain message (userFacingError).
+    const onError = (...failure) => {
+      if (run === solveRun.current) setSolveError(userFacingError(...failure));
     };
     setSolvedInstance(
       chosenSolver && problemInstance
@@ -201,17 +197,7 @@ export default function SolveRowReact({
             tooLargeMessage={SOLUTION_TOO_LARGE_MESSAGE}
           />
         ) : null}
-        {solveError ? (
-          <p role="alert" style={{ color: text.heading }}>
-            {solveError.message}
-            {solveError.hint ? (
-              <>
-                <br />
-                <span style={{ color: text.body }}>Try: {solveError.hint}</span>
-              </>
-            ) : null}
-          </p>
-        ) : null}
+        <RequestErrorMessage error={solveError} />
         <div className="submitButton">
           <Button
             size="large"

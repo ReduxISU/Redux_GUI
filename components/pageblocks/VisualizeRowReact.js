@@ -26,6 +26,7 @@ import {
   requestReductionVisualization,
   requestSolvedInstance,
   requestVisualization,
+  userFacingError,
 } from "../redux";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
@@ -131,7 +132,8 @@ export default function VisualizeRowReact({
     defaultCLIQUEVisualizationArr,
   );
   // Picture frames for the current choices; null while they are loading. The *Error values say
-  // what went wrong when the request for them failed, and are null otherwise.
+  // what went wrong when the request for them failed ({ message, hint, detail }, see
+  // userFacingError), and are null otherwise.
   const [problemData, setProblemData] = useState(null);
   const [problemDataError, setProblemDataError] = useState(null);
   const [problemReductionData, setProblemReductionData] = useState(null);
@@ -159,7 +161,8 @@ export default function VisualizeRowReact({
   // permanently blocks the hook's own default resolution for that problem.
 
   // fetch solution when instance or solver changes, since it's needed for some visualizations and reductions.
-  // undefined while solving, false if the solve failed (solveError then says why).
+  // undefined while solving, false if the solve failed (solveError then says why, as
+  // { message, hint, detail }).
   const [solution, setSolution] = useState(undefined);
   const [solveError, setSolveError] = useState(null);
 
@@ -175,18 +178,23 @@ export default function VisualizeRowReact({
     const fetchSolvedInstance = async () => {
       let error = null;
       try {
-        const solved = await requestSolvedInstance(url, chosenSolver, problemInstance, (detail) => {
-          error = detail;
-        });
+        const solved = await requestSolvedInstance(
+          url,
+          chosenSolver,
+          problemInstance,
+          (...failure) => {
+            error = userFacingError(...failure);
+          },
+        );
         if (ignore) return;
         setSolution(solved || false);
         // A falsy answer can't be told apart from a failure here, so it counts as one.
-        if (!solved) setSolveError(error ?? "The solver sent back no solution.");
+        if (!solved) setSolveError(error ?? userFacingError("The solver sent back no solution."));
       } catch (err) {
         console.error("Failed to solve instance:", err);
         if (!ignore) {
           setSolution(false);
-          setSolveError(String(err?.message ?? err));
+          setSolveError(userFacingError(String(err?.message ?? err)));
         }
       }
     };
@@ -218,19 +226,19 @@ export default function VisualizeRowReact({
           chosenReductionType,
           solution,
           problemInstance,
-          (detail) => {
-            error = detail;
+          (...failure) => {
+            error = userFacingError(...failure);
           },
         );
         if (ignore) return;
         // undefined means the request failed; [] is an answer with nothing to draw.
         setProblemReductionData(data ?? []);
-        setReductionDataError(data === undefined ? (error ?? "No answer.") : null);
+        setReductionDataError(data === undefined ? (error ?? userFacingError("No answer.")) : null);
       } catch (err) {
         console.error("Failed to load reduction visualization:", err);
         if (!ignore) {
           setProblemReductionData([]);
-          setReductionDataError(String(err?.message ?? err));
+          setReductionDataError(userFacingError(String(err?.message ?? err)));
         }
       }
     };
@@ -251,9 +259,14 @@ export default function VisualizeRowReact({
     const fetch = async () => {
       let error = null;
       try {
-        const data = await requestVisualization(url, chosenVisualization, problemInstance, (d) => {
-          error = d;
-        });
+        const data = await requestVisualization(
+          url,
+          chosenVisualization,
+          problemInstance,
+          (...failure) => {
+            error = userFacingError(...failure);
+          },
+        );
 
         if (!alive) return;
 
@@ -266,13 +279,13 @@ export default function VisualizeRowReact({
 
         setProblemData(processedData);
         // undefined means the request failed; [] is an answer with nothing to draw.
-        setProblemDataError(data === undefined ? (error ?? "No answer.") : null);
+        setProblemDataError(data === undefined ? (error ?? userFacingError("No answer.")) : null);
         setCurrentStep(0);
       } catch (err) {
         console.error(err);
         if (alive) {
           setProblemData([]);
-          setProblemDataError(String(err?.message ?? err));
+          setProblemDataError(userFacingError(String(err?.message ?? err)));
         }
       }
     };
@@ -318,7 +331,8 @@ export default function VisualizeRowReact({
   // to draw, "ready" to draw it, and "none" when there is nothing to show (no problem or instance
   // chosen, or "Show reduction" off). A failure carries { step, detail }: which request failed and
   // for which problem, visualization or reduction, and what went wrong (HTTP status and server
-  // error text, no answer, ...).
+  // error text, no answer, ...). Failed picture and solve requests also carry the
+  // { message, hint } to show the user (userFacingError).
   const pictureStatus = (frames, frame) =>
     frames === null ? "loading" : !frame || Object.keys(frame).length === 0 ? "missing" : "ready";
   const niceName = (name) => problemNameMap?.get(name) ?? name;
@@ -353,7 +367,7 @@ export default function VisualizeRowReact({
     problemStatus = "failed";
     problemFailure = {
       step: `Picture request failed for ${pictureFor}.`,
-      detail: problemDataError,
+      ...problemDataError,
     };
   } else {
     problemStatus = pictureStatus(problemData, currentProblemData);
@@ -380,13 +394,13 @@ export default function VisualizeRowReact({
     reductionStatus = "failed";
     reductionFailure = {
       step: `Solve with ${chosenSolver} (needed for the reduction picture) failed for ${reductionFor}.`,
-      detail: solveError,
+      ...solveError,
     };
   } else if (reductionDataError) {
     reductionStatus = "failed";
     reductionFailure = {
       step: `Reduction picture request failed for ${reductionFor}.`,
-      detail: reductionDataError,
+      ...reductionDataError,
     };
   } else {
     reductionStatus = pictureStatus(problemReductionData, currentReductionData);

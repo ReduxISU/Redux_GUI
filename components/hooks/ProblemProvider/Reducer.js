@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   requestInfo,
   requestReducedInstanceFromPath,
   requestReductionInfo,
   requestReductionOptions,
   requestReductions,
+  userFacingError,
 } from "../../redux";
 import { useGenericInfo } from "../ProblemProvider";
 import { useWhenChanged } from "../useWhenChanged";
@@ -61,12 +62,8 @@ export function useReducer(url, problemName, problemInstance) {
     state.chosenReduceTo,
     state.reductionTypeOptions,
   );
-  [state.reducedInstance, state.setReducedInstance] = useReducedInstance(
-    url,
-    problemInstance,
-    state.chosenReduceTo,
-    state.chosenReductionType,
-  );
+  [state.reducedInstance, state.setReducedInstance, state.reduce, state.reduceError] =
+    useReducedInstance(url, problemInstance, state.chosenReduceTo, state.chosenReductionType);
   [
     state.reductionVisualization,
     state.setReductionVisualization,
@@ -94,29 +91,48 @@ export function useReducerInfo(url, reducer) {
   return genericInfo; // There should be no reason to set the information
 }
 
+// Returns [reducedInstance, setReducedInstance, reduce, reduceError]. `reduce` runs the chosen
+// reduction on the instance again (the Reduce button); it also runs by itself whenever the
+// instance or reduction changes. reduceError is { message, hint, detail } when the last reduction
+// failed (see userFacingError), else null; it clears as soon as a new reduction starts.
 function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductionType) {
   const [reducedInstance, setReducedInstance] = useState("");
+  const [reduceError, setReduceError] = useState(null);
+  // Bumped on every reduction and when its inputs change, so an answer that arrives late is dropped.
+  const reduceRun = useRef(0);
 
   useWhenChanged([chosenReductionType, chosenReduceTo], () => setReducedInstance(""));
+  useWhenChanged([chosenReductionType, problemInstance, url], () => setReduceError(null));
+
+  const runReduction = useCallback(async () => {
+    reduceRun.current += 1;
+    const run = reduceRun.current;
+    let error = null;
+    const reduced = await (chosenReductionType && problemInstance
+      ? requestReducedInstanceFromPath(url, chosenReductionType, problemInstance, (...failure) => {
+          error = userFacingError(...failure);
+        })
+      : "");
+    if (run !== reduceRun.current) return;
+    setReducedInstance(reduced ?? "");
+    setReduceError(reduced === undefined ? error : null);
+  }, [chosenReductionType, problemInstance, url]);
 
   // Automatically reduces the instance one the reduction type is chosen.
   // This makes it so it's less input from the user but also makes the "Reduce" button effectly useless.
   useEffect(() => {
-    let ignore = false;
-    (async () => {
-      const reduced =
-        chosenReductionType && problemInstance
-          ? ((await requestReducedInstanceFromPath(url, chosenReductionType, problemInstance)) ??
-            "")
-          : "";
-      if (!ignore) setReducedInstance(reduced);
-    })();
+    runReduction();
     return () => {
-      ignore = true;
+      reduceRun.current += 1;
     };
-  }, [chosenReductionType, problemInstance, url]);
+  }, [runReduction]);
 
-  return [reducedInstance, setReducedInstance];
+  const reduce = useCallback(() => {
+    setReduceError(null);
+    runReduction();
+  }, [runReduction]);
+
+  return [reducedInstance, setReducedInstance, reduce, reduceError];
 }
 
 // The target's picture type, or undefined while the current target's type is still loading.
