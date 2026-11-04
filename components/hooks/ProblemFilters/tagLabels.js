@@ -47,3 +47,18 @@ export const REDUCTION_TYPE_LABELS = {
 export function reductionTypeLabel(reductionType) {
   return REDUCTION_TYPE_LABELS[reductionType] ?? reductionType;
 }
+
+/** The `/Navigation/ProblemVariants` vocabulary (ReduxISU/Redux#946). Already
+ * display-ready, kept as a map for the same reason as the others: a later value
+ * may not be. */
+export const PROBLEM_VARIANT_LABELS = {
+  Unclassified: "Unclassified",
+  Decision: "Decision",
+  Optimization: "Optimization",
+};
+
+/** `PROBLEM_VARIANT_LABELS[value]`, falling back to the raw value itself for
+ * anything not in the map so a not-yet-labeled value is never silently dropped. */
+export function problemVariantLabel(problemVariant) {
+  return PROBLEM_VARIANT_LABELS[problemVariant] ?? problemVariant;
+}

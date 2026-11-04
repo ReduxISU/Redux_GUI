@@ -61,6 +61,15 @@ function startTimeout() {
   };
 }
 
+// The parsed JSON body of a failed response, or undefined when it has none.
+async function readJsonBody(resp) {
+  try {
+    return await resp.json();
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * @param failMsg The message that is logged on failure. Message is lazily evaluated.
  * @param onError Optional; called with a one-line description of what went wrong (HTTP status
@@ -82,7 +91,8 @@ async function fetchAndParse(url, init, failMsg, onError) {
     }
     if (!resp.ok) {
       console.log(`${failMsg()}: ${resp.status} (${resp.statusText})`);
-      onError?.(await describeFailedResponse(resp));
+      const failedBody = resp.clone();
+      onError?.(await describeFailedResponse(resp), await readJsonBody(failedBody));
       return undefined;
     }
     try {
@@ -451,6 +461,8 @@ export async function requestReductions(url, problemFrom, problemTo, onError) {
 }
 
 /**
+ * @param onError Optional; called with a description of the failure and, when the server
+ *   answered with JSON, its parsed body (a solver that can't run sends `{ message, hint }`).
  * @returns the solved `instance` from the specified `solver`.
  * @returns `undefined` on failure and logs the error.
  */
@@ -638,6 +650,21 @@ export function requestAllVisualizationTypes(url, onError) {
         fail,
       ),
     onError,
+  );
+}
+
+/**
+ * @returns the problem-variant vocabulary in display order, e.g.
+ * `["Decision", "Optimization", "Unclassified"]` -- the values a problem's `problemVariants`
+ * list can hold (ReduxISU/Redux#946).
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error, including when the endpoint doesn't exist
+ * yet on the connected API -- callers should fall back to ordering whatever variants the
+ * problems themselves declare (none, on such an API).
+ */
+export function requestProblemVariants(url) {
+  return cachedRequest(`${url}|problemVariants`, () =>
+    fetchJson(`${url}Navigation/ProblemVariants`, () => "PROBLEM VARIANTS REQUEST FAILED"),
   );
 }
 

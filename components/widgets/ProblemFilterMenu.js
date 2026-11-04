@@ -15,6 +15,8 @@ import { useState } from "react";
 import { COMPLEXITY_CLASS_LABELS } from "../hooks/ProblemFilters/complexityClassOrder";
 import { buildFixedOrderFacetOptions } from "../hooks/ProblemFilters/facetOptions";
 import { PROBLEM_TYPE_LABELS, PROBLEM_TYPE_ORDER } from "../hooks/ProblemFilters/problemTypeOrder";
+import { problemVariantLabel } from "../hooks/ProblemFilters/tagLabels";
+import { UNCLASSIFIED } from "../hooks/ProblemFilters/tagLists";
 
 // Fixed display order for the Complexity Class facet -- P/NP/NP-Complete/NP-Hard,
 // the classical hierarchy in containment order. The quantum classes (BQP/EQP/QMA/
@@ -92,7 +94,13 @@ function FacetGroup({ title, options, selected, onChange }) {
  * problems appear by complexity class and/or problem type (subject-matter category,
  * e.g. Graph Theory, Logic, Games and Puzzles). Both facets render in a fixed order
  * (not derived alphabetically from what's present) since each is a small, closed
- * vocabulary -- see COMPLEXITY_CLASS_ORDER / PROBLEM_TYPE_ORDER above.
+ * vocabulary -- see COMPLEXITY_CLASS_ORDER / PROBLEM_TYPE_ORDER above. A problem with
+ * several problem types counts toward, and is matched by, each of them (#409).
+ *
+ * The Decision / Optimization facet (#409, #321) takes its order from
+ * `problemVariantOrder` (`/Navigation/ProblemVariants`, via useProblemIndex) minus
+ * "Unclassified", same as the Problem Type facet leaves that out; on an API without
+ * that endpoint the list is empty and the facet reads "No values available".
  */
 export default function ProblemFilterMenu({
   problemIndex,
@@ -100,6 +108,9 @@ export default function ProblemFilterMenu({
   setSelectedComplexityClasses,
   selectedProblemTypes,
   setSelectedProblemTypes,
+  problemVariantOrder = [],
+  selectedProblemVariants,
+  setSelectedProblemVariants,
   clearFilters,
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -114,14 +125,21 @@ export default function ProblemFilterMenu({
   const problemTypeOptions = buildFixedOrderFacetOptions(
     problemIndex,
     PROBLEM_TYPE_ORDER,
-    (tags) => [tags.problemType],
+    (tags) => tags.problemTypes,
     (key) => PROBLEM_TYPE_LABELS[key],
+  );
+  const problemVariantOptions = buildFixedOrderFacetOptions(
+    problemIndex,
+    problemVariantOrder.filter((key) => key !== UNCLASSIFIED),
+    (tags) => tags.problemVariants,
+    problemVariantLabel,
   );
 
   // #375: every facet actually offered below must count toward the badge and
   // "Clear filters" enablement -- a facet selection that isn't counted here is
   // effectively invisible/unclearable even though it's still filtering results.
-  const activeCount = selectedComplexityClasses.size + selectedProblemTypes.size;
+  const activeCount =
+    selectedComplexityClasses.size + selectedProblemTypes.size + selectedProblemVariants.size;
 
   return (
     <>
@@ -154,6 +172,15 @@ export default function ProblemFilterMenu({
             options={problemTypeOptions}
             selected={selectedProblemTypes}
             onChange={setSelectedProblemTypes}
+          />
+
+          <Divider sx={{ my: 1.5 }} />
+
+          <FacetGroup
+            title="Decision / Optimization"
+            options={problemVariantOptions}
+            selected={selectedProblemVariants}
+            onChange={setSelectedProblemVariants}
           />
 
           <Button size="small" onClick={clearFilters} disabled={activeCount === 0}>
