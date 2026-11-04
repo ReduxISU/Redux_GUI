@@ -67,10 +67,14 @@ const chipScrollRowSx = {
  * @param complexityClassValue Raw wire value behind that label (e.g. "NPComplete") --
  * what gets passed to `onComplexityClassClick`, since that's what
  * `useProblemFilters`'s `selectedComplexityClasses` Set is keyed on.
- * @param problemType Display label for the problem-type chip (e.g. "Graph Theory").
- * @param problemTypeValue Raw wire value behind that label (e.g. "GraphTheory") --
- * what gets passed to `onProblemTypeClick`, since that's what
- * `useProblemFilters`'s `selectedProblemTypes` Set is keyed on.
+ * @param problemTypes `[{value, label}]` -- one problem-type chip per tag the problem
+ * declares (#409), raw wire value (e.g. "GraphTheory", what gets passed to
+ * `onProblemTypeClick`, since that's what `useProblemFilters`'s
+ * `selectedProblemTypes` Set is keyed on) plus display label (e.g. "Graph Theory").
+ * @param problemVariants `[{value, label}]` -- one chip per variant the problem
+ * declares (Decision / Optimization), same shape as `problemTypes`. The caller
+ * (pages/browse/index.js) leaves out "Unclassified", so an API without
+ * `problemVariants` adds no chip at all.
  * @param solverTypes `[{value, label}]` -- raw wire value plus display label for
  * each solver-type chip, so a click can report the raw value while still
  * rendering the human-facing label.
@@ -84,8 +88,10 @@ const chipScrollRowSx = {
  * doesn't have to know the sentinel exists.
  * @param onComplexityClassClick Called with `complexityClassValue` when the
  * complexity-class chip is clicked. Omit to render the chip as non-interactive.
- * @param onProblemTypeClick Called with `problemTypeValue` when the problem-type
- * chip is clicked. Omit to render the chip as non-interactive.
+ * @param onProblemTypeClick Called with a problem type's raw `value` when its chip
+ * is clicked. Omit to render problem-type chips as non-interactive.
+ * @param onProblemVariantClick Called with a variant's raw `value` when its chip is
+ * clicked. Omit to render variant chips as non-interactive.
  * @param onSolverTypeClick Called with a solver type's raw `value` when its chip
  * is clicked. Omit to render solver chips as non-interactive.
  * @param onVisualizationTypeClick Called with a visualization category's value
@@ -96,12 +102,13 @@ export default function ProblemCard({
   displayName = name,
   complexityClass,
   complexityClassValue,
-  problemType,
-  problemTypeValue,
+  problemTypes = [],
+  problemVariants = [],
   solverTypes,
   visualizationTypes = [],
   onComplexityClassClick,
   onProblemTypeClick,
+  onProblemVariantClick,
   onSolverTypeClick,
   onVisualizationTypeClick,
 }) {
@@ -143,22 +150,40 @@ export default function ProblemCard({
           }
           sx={tagChipSx("complexityClass", { clickable: !!onComplexityClassClick, mode })}
         />
-        {problemType ? (
+        {problemTypes.map(({ value, label }) => (
           <Chip
-            label={problemType}
+            key={`problemType-${value}`}
+            label={label}
             size="small"
             clickable={!!onProblemTypeClick}
             onClick={
               onProblemTypeClick
                 ? (event) => {
                     event.stopPropagation();
-                    onProblemTypeClick(problemTypeValue);
+                    onProblemTypeClick(value);
                   }
                 : undefined
             }
             sx={tagChipSx("problemType", { clickable: !!onProblemTypeClick, mode })}
           />
-        ) : null}
+        ))}
+        {problemVariants.map(({ value, label }) => (
+          <Chip
+            key={`problemVariant-${value}`}
+            label={label}
+            size="small"
+            clickable={!!onProblemVariantClick}
+            onClick={
+              onProblemVariantClick
+                ? (event) => {
+                    event.stopPropagation();
+                    onProblemVariantClick(value);
+                  }
+                : undefined
+            }
+            sx={tagChipSx("problemVariant", { clickable: !!onProblemVariantClick, mode })}
+          />
+        ))}
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", mb: 1.25 }}>

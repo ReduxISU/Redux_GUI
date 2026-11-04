@@ -16,6 +16,10 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Optional override for the GitHub repo the info boxes link to (inlined at build time).
+ARG NEXT_PUBLIC_REDUX_REPO_URL
+ENV NEXT_PUBLIC_REDUX_REPO_URL=$NEXT_PUBLIC_REDUX_REPO_URL
+
 RUN npm run build
 
 # Production image, copy all the files and run next

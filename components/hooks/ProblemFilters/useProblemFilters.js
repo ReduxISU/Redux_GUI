@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
+import { ALL_VISUALIZATIONS_KEY } from "../../Visualization/svgs/visualizationCategories";
 import { complexityClassRank } from "./complexityClassOrder";
+import { anyTagMatches, solverFiltersMatch } from "./tagLists";
 
 /**
  * `oneHop`: problems directly reachable from `source` via a single reduction
@@ -41,6 +43,11 @@ function intersects(setA, setB) {
   return false;
 }
 
+// The combined Solver Type + Solver Complexity rule lives in tagLists.js (with the
+// other any-tag-matches rules) so node --test can load it without React; re-exported
+// here for callers that already import it from this hook.
+export { solverFiltersMatch };
+
 /**
  * Faceted filter state over the derived problem index from `useProblemIndex`,
  * plus an optional reduction-reachability filter. Facets combine with AND;
@@ -49,12 +56,17 @@ function intersects(setA, setB) {
  * set is empty meaning "no filter on that facet").
  *
  * @param problemIndex `Map<problemName, {displayName, complexityClass,
- * complexityClasses: Set, problemType, solverTypes: Set, visualizationTypes: Set,
- * visualizationCategories: Set, hasRenderableVisualization}>` from
- * `useProblemIndex`. selectedVisualizationTypes matches against
+ * complexityClasses: Set, problemTypes: Array, problemVariants: Array, solverTypes: Set,
+ * solverComplexities: Set, visualizationTypes: Set, visualizationCategories: Set,
+ * hasRenderableVisualization}>` from `useProblemIndex`. A problem with several tags
+ * in one category (problemTypes, problemVariants, a solver's types) matches that
+ * facet when ANY of them is selected (#409). selectedVisualizationTypes matches against
  * visualizationCategories (the deduped conceptual category, e.g. "Graph"), not the
  * raw per-renderer visualizationTypes -- so selecting "Graph" matches a problem
- * whose visualizations are GraphD3, GraphLaTeX, or both.
+ * whose visualizations are GraphD3, GraphLaTeX, or both. `ALL_VISUALIZATIONS_KEY`
+ * is a special-cased sentinel value within that same Set: it matches any problem
+ * with `hasRenderableVisualization`, OR'd with whatever specific categories are
+ * also selected, rather than being looked up in visualizationCategories itself.
  * @param reductionGraph Raw reduction graph object from `useProblemIndex`.
  * @returns filter state, setters, the filtered problem-name list (sorted
  * classical-then-quantum, low-to-high by complexityClassRank, alphabetical by name
@@ -63,7 +75,9 @@ function intersects(setA, setB) {
 export function useProblemFilters(problemIndex, reductionGraph) {
   const [selectedComplexityClasses, setSelectedComplexityClasses] = useState(new Set());
   const [selectedSolverTypes, setSelectedSolverTypes] = useState(new Set());
+  const [selectedSolverComplexities, setSelectedSolverComplexities] = useState(new Set());
   const [selectedProblemTypes, setSelectedProblemTypes] = useState(new Set());
+  const [selectedProblemVariants, setSelectedProblemVariants] = useState(new Set());
   const [selectedVisualizationTypes, setSelectedVisualizationTypes] = useState(new Set());
   const [reachabilitySource, setReachabilitySource] = useState(null);
   const [reachabilityMode, setReachabilityMode] = useState("oneHop"); // "oneHop" | "anyHops"
@@ -84,17 +98,25 @@ export function useProblemFilters(problemIndex, reductionGraph) {
       ) {
         continue;
       }
-      if (selectedSolverTypes.size > 0 && !intersects(tags.solverTypes, selectedSolverTypes)) {
+      if (!solverFiltersMatch(tags, selectedSolverTypes, selectedSolverComplexities)) {
         continue;
       }
-      if (selectedProblemTypes.size > 0 && !selectedProblemTypes.has(tags.problemType)) {
+      if (!anyTagMatches(tags.problemTypes, selectedProblemTypes)) {
         continue;
       }
-      if (
-        selectedVisualizationTypes.size > 0 &&
-        !intersects(tags.visualizationCategories, selectedVisualizationTypes)
-      ) {
+      if (!anyTagMatches(tags.problemVariants, selectedProblemVariants)) {
         continue;
+      }
+      if (selectedVisualizationTypes.size > 0) {
+        const matchesAllVisualizations =
+          selectedVisualizationTypes.has(ALL_VISUALIZATIONS_KEY) && tags.hasRenderableVisualization;
+        const matchesCategory = intersects(
+          tags.visualizationCategories,
+          selectedVisualizationTypes,
+        );
+        if (!matchesAllVisualizations && !matchesCategory) {
+          continue;
+        }
       }
       if (reachableSet && !reachableSet.has(problemName)) {
         continue;
@@ -113,7 +135,9 @@ export function useProblemFilters(problemIndex, reductionGraph) {
     problemIndex,
     selectedComplexityClasses,
     selectedSolverTypes,
+    selectedSolverComplexities,
     selectedProblemTypes,
+    selectedProblemVariants,
     selectedVisualizationTypes,
     reachableSet,
   ]);
@@ -121,7 +145,9 @@ export function useProblemFilters(problemIndex, reductionGraph) {
   function clearFilters() {
     setSelectedComplexityClasses(new Set());
     setSelectedSolverTypes(new Set());
+    setSelectedSolverComplexities(new Set());
     setSelectedProblemTypes(new Set());
+    setSelectedProblemVariants(new Set());
     setSelectedVisualizationTypes(new Set());
     setReachabilitySource(null);
     setReachabilityMode("oneHop");
@@ -132,8 +158,12 @@ export function useProblemFilters(problemIndex, reductionGraph) {
     setSelectedComplexityClasses,
     selectedSolverTypes,
     setSelectedSolverTypes,
+    selectedSolverComplexities,
+    setSelectedSolverComplexities,
     selectedProblemTypes,
     setSelectedProblemTypes,
+    selectedProblemVariants,
+    setSelectedProblemVariants,
     selectedVisualizationTypes,
     setSelectedVisualizationTypes,
     reachabilitySource,

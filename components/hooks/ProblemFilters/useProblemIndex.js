@@ -5,15 +5,18 @@ import {
   requestAllSolvers,
   requestAllVisualizations,
   requestAllVisualizationTypes,
+  requestProblemVariants,
   requestReductionGraph,
 } from "../../redux";
 import { isRenderable } from "../../Visualization/svgs/renderability";
 import { visualizationTypeCategory } from "../../Visualization/svgs/visualizationCategories";
+import { tagList, tagListOrUnclassified } from "./tagLists";
 
 /**
  * Read-only, derived index over every problem's declared metadata tags --
  * complexity class (both the raw declared value and the NP-Complete-implies-NP
- * expanded set), problem type, the set of solver types it has solvers for, the
+ * expanded set), problem types, problem variants (Decision / Optimization), the
+ * set of solver types it has solvers for, the
  * set of visualization types it has visualizations for, and whether any of
  * those visualizations are actually renderable by this GUI. Deliberately
  * independent of `useProblemProvider`'s stateful selection-reducer tree:
@@ -21,14 +24,26 @@ import { visualizationTypeCategory } from "../../Visualization/svgs/visualizatio
  * single-selection flow.
  *
  * Also returns the raw reduction graph (from `requestReductionGraph`) for
- * reachability filtering -- see `useProblemFilters`.
+ * reachability filtering -- see `useProblemFilters` -- and the problem-variant
+ * vocabulary in display order (from `requestProblemVariants`, asked for only when a
+ * problem declares `problemVariants`; otherwise `[]`).
+ *
+ * Every tag category is read as a LIST via tagList.js (#409): an item can carry
+ * several tags from one category, and a problem/solver/visualization counts toward
+ * (and is matched by) each of them. A problem that declares no problem type or
+ * variant gets `["Unclassified"]`, same as every other facet's fallback.
  *
  * @param url Base API URL, e.g. `/api/redux/`.
  * @returns `{ problemIndex: Map<problemName, {displayName: string,
- * complexityClass: string, complexityClasses: Set<string>, problemType: string,
- * solverTypes: Set<string>, visualizationTypes: Set<string>,
- * visualizationCategories: Set<string>}>,
- * reductionGraph: object, loading: boolean }`. visualizationTypes is the raw wire
+ * complexityClass: string, complexityClasses: Set<string>, problemTypes: string[],
+ * problemVariants: string[], solverTypes: Set<string>, solverComplexities: Set<string>,
+ * solvers: Array<{types: string[], complexity: string}>, visualizationTypes: Set<string>,
+ * visualizationCategories: Set<string>, hasRenderableVisualization: boolean}>,
+ * reductionGraph: object, problemVariantOrder: string[], loading: boolean }`.
+ * solverComplexities is each solver's
+ * declared `complexityBucket` (Interfaces/SolverComplexityBucket.cs -- a coarse
+ * worst-case-growth classification, distinct from complexityClass), same
+ * per-problem-solvers derivation as solverTypes. visualizationTypes is the raw wire
  * vocabulary (GraphD3/GraphLaTeX/...); visualizationCategories is the deduped
  * conceptual-category projection of it (both collapse to "Graph") -- use the latter
  * for anything user-facing (filters, display), the former only where the specific
@@ -54,6 +69,7 @@ import { visualizationTypeCategory } from "../../Visualization/svgs/visualizatio
 export function useProblemIndex(url) {
   const [problemIndex, setProblemIndex] = useState(new Map());
   const [reductionGraph, setReductionGraph] = useState({});
+  const [problemVariantOrder, setProblemVariantOrder] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,23 +88,34 @@ export function useProblemIndex(url) {
           requestReductionGraph(url),
         ]);
 
-      if (cancelled) return;
-
       const problemNames = problems ?? [];
       const info = allInfo ?? {};
+
+      // /Navigation/ProblemVariants ships with the problemVariants field
+      // (ReduxISU/Redux#946), so it is only asked for when some problem actually
+      // declares one. An older API would answer 404, and the e2e silent-failure guard
+      // (tests/e2e/fixtures.js) rightly fails on any failed request.
+      const hasProblemVariants = problemNames.some((name) =>
+        Array.isArray(info[name]?.problemVariants),
+      );
+      const variants = hasProblemVariants ? await requestProblemVariants(url) : undefined;
+
+      if (cancelled) return;
       const solversByProblem = allSolvers ?? {};
       const visualizationsByProblem = allVisualizations ?? {};
       const visualizationTypes = allVisualizationTypes ?? null;
 
-      // Same fallback shape as useVisualizationTypeMap
-      // (components/hooks/ProblemProvider/Visualization.js): prefer the
-      // dedicated allVisualizationTypes endpoint, fall back to reading
-      // visualizationType off allInfo when that endpoint isn't deployed yet.
-      const resolveVisualizationType = (className) => {
-        if (visualizationTypes) {
-          return visualizationTypes[className];
-        }
-        return info[className]?.visualizationType || info[className]?.VisualizationType;
+      // Every type a visualization declares (#409), for filtering and display only --
+      // the renderer is still picked from the single type, see useVisualizationTypeMap
+      // (components/hooks/ProblemProvider/Visualization.js). allInfo's list (or, on an
+      // older API, its single field via tagList's fallback) first; the dedicated
+      // allVisualizationTypes map, which holds one type per class, covers a class
+      // allInfo has no entry for.
+      const resolveVisualizationTypes = (className) => {
+        const declared = tagList(info[className], "visualizationTypes", "visualizationType");
+        if (declared.length > 0) return declared;
+        const mapped = visualizationTypes?.[className];
+        return mapped ? [mapped] : [];
       };
 
       const map = new Map();
@@ -103,20 +130,39 @@ export function useProblemIndex(url) {
         const displayName = problemInfo?.problemName || problemInfo?.ProblemName || problemName;
         const complexityClass =
           problemInfo?.complexityClass || problemInfo?.ComplexityClass || "Unclassified";
-        // NP-Complete is a subset of NP by definition (Interfaces/ComplexityClass.cs's
-        // doc comment on NP) -- the engine expands that implication here rather than
-        // requiring every NP-Complete problem to redundantly declare both, so a problem
-        // counts toward (and can be filtered by) both facet options.
+        // Direct project-owner instruction: browsing "NP" should surface NP-Complete
+        // and NP-Hard problems too, alongside anything declared bare "NP" (e.g. Prime
+        // Factorization) -- NP-Complete is a subset of NP by definition
+        // (Interfaces/ComplexityClass.cs's doc comment on NP), and NP-Hard is treated
+        // the same way here for browsing purposes even though it isn't a strict subset
+        // in the textbook sense. The engine expands both implications here rather than
+        // requiring every problem to redundantly declare every class it browses under,
+        // so a problem counts toward (and can be filtered by) every facet option this
+        // implies.
         const complexityClasses = new Set([complexityClass]);
-        if (complexityClass === "NPComplete") complexityClasses.add("NP");
+        if (complexityClass === "NPComplete" || complexityClass === "NPHard") {
+          complexityClasses.add("NP");
+        }
 
-        const problemType = problemInfo?.problemType || problemInfo?.ProblemType || "Unclassified";
+        const problemTypes = tagListOrUnclassified(problemInfo, "problemTypes", "problemType");
+        // No single-field predecessor: an API without problemVariants yields
+        // ["Unclassified"] for every problem.
+        const problemVariants = tagListOrUnclassified(problemInfo, "problemVariants");
 
         const solverTypes = new Set();
+        const solverComplexities = new Set();
+        // Per-solver {types, complexity} pairs, kept alongside the two aggregate Sets so
+        // a combined Solver Type + Solver Complexity filter can require ONE solver to
+        // satisfy both (see solverMatchesBoth in useProblemFilters).
+        const solvers = [];
         for (const solverClassName of solversByProblem[problemName] ?? []) {
           const solverInfo = info[solverClassName];
-          const solverType = solverInfo?.solverType || solverInfo?.SolverType || "Unclassified";
-          solverTypes.add(solverType);
+          const types = tagListOrUnclassified(solverInfo, "solverTypes", "solverType");
+          for (const type of types) solverTypes.add(type);
+          const solverComplexity =
+            solverInfo?.complexityBucket || solverInfo?.ComplexityBucket || "Unclassified";
+          solverComplexities.add(solverComplexity);
+          solvers.push({ types, complexity: solverComplexity });
         }
 
         const visualizationTypeSet = new Set();
@@ -130,13 +176,17 @@ export function useProblemIndex(url) {
         // explicit "Unimplemented" declaration -- see this file's own header.
         const visualizationCategorySet = new Set();
         for (const visClassName of visualizationsByProblem[problemName] ?? []) {
-          const type = resolveVisualizationType(visClassName);
-          if (isRenderable(type)) {
-            visualizationTypeSet.add(type);
-            visualizationCategorySet.add(visualizationTypeCategory(type));
+          for (const type of resolveVisualizationTypes(visClassName)) {
+            if (isRenderable(type)) {
+              visualizationTypeSet.add(type);
+              visualizationCategorySet.add(visualizationTypeCategory(type));
+            }
           }
         }
-        if (visualizationCategorySet.size === 0) {
+        // Captured before the "Unimplemented" sentinel is added below -- backs the
+        // "All Visualizations" filter option (see useProblemFilters).
+        const hasRenderableVisualization = visualizationCategorySet.size > 0;
+        if (!hasRenderableVisualization) {
           visualizationCategorySet.add("Unimplemented");
         }
 
@@ -144,15 +194,20 @@ export function useProblemIndex(url) {
           displayName,
           complexityClass,
           complexityClasses,
-          problemType,
+          problemTypes,
+          problemVariants,
           solverTypes,
+          solverComplexities,
+          solvers,
           visualizationTypes: visualizationTypeSet,
           visualizationCategories: visualizationCategorySet,
+          hasRenderableVisualization,
         });
       }
 
       setProblemIndex(map);
       setReductionGraph(graph ?? {});
+      setProblemVariantOrder(Array.isArray(variants) ? variants : []);
       setLoading(false);
     })();
 
@@ -161,5 +216,5 @@ export function useProblemIndex(url) {
     };
   }, [url]);
 
-  return { problemIndex, reductionGraph, loading };
+  return { problemIndex, reductionGraph, problemVariantOrder, loading };
 }

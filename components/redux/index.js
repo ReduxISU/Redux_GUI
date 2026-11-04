@@ -322,15 +322,46 @@ export async function requestReductions(url, problemFrom, problemTo) {
 }
 
 /**
+ * Turns a failed solve response into `{ message, hint }` for the user. The backend answers a
+ * solver that can't run right now (e.g. Shor's Algorithm when the quantum service is down) with
+ * a 503 `solver_unavailable` body that carries both.
+ */
+function describeSolveError(status, body) {
+  const message = body?.message ?? body?.detail ?? body?.title ?? body?.error;
+  return {
+    message: message ?? `The solver couldn't finish (HTTP ${status}).`,
+    hint: body?.hint ?? "",
+  };
+}
+
+/**
+ * @param onError Optional; called with `{ message, hint }` when the request fails.
  * @returns the solved `instance` from the specified `solver`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestSolvedInstance(url, solver, instance) {
-  return await fetchPostJson(
-    `${url}ProblemProvider/solve?solver=${solver}`,
-    instance,
-    () => `${solver} SOLVED INSTANCE REQUEST FAILED`,
-  );
+export async function requestSolvedInstance(url, solver, instance, onError) {
+  try {
+    const resp = await fetch(`${url}ProblemProvider/solve?solver=${solver}`, {
+      method: "POST",
+      body: JSON.stringify(instance),
+      headers: { "Content-Type": "application/json; charset=UTF-8" },
+    });
+    if (resp.ok) {
+      return await resp.json();
+    }
+    console.log(`${solver} SOLVED INSTANCE REQUEST FAILED: ${resp.status} (${resp.statusText})`);
+    let body;
+    try {
+      body = await resp.json();
+    } catch {
+      body = undefined;
+    }
+    onError?.(describeSolveError(resp.status, body));
+  } catch (error) {
+    console.log(`${solver} SOLVED INSTANCE REQUEST FAILED: `, error);
+    onError?.({ message: "The solver couldn't be reached.", hint: "" });
+  }
+  return undefined;
 }
 
 /**
@@ -490,6 +521,21 @@ export function requestAllVisualizationTypes(url) {
       `${url}Navigation/Batch/allVisualizationTypes`,
       () => "ALL VISUALIZATION TYPES REQUEST FAILED",
     ),
+  );
+}
+
+/**
+ * @returns the problem-variant vocabulary in display order, e.g.
+ * `["Decision", "Optimization", "Unclassified"]` -- the values a problem's `problemVariants`
+ * list can hold (ReduxISU/Redux#946).
+ * @returns cached data when available to reduce API calls.
+ * @returns `undefined` on failure and logs the error, including when the endpoint doesn't exist
+ * yet on the connected API -- callers should fall back to ordering whatever variants the
+ * problems themselves declare (none, on such an API).
+ */
+export function requestProblemVariants(url) {
+  return cachedRequest(`${url}|problemVariants`, () =>
+    fetchJson(`${url}Navigation/ProblemVariants`, () => "PROBLEM VARIANTS REQUEST FAILED"),
   );
 }
 

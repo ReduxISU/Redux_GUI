@@ -14,6 +14,7 @@ import { Download as DownloadIcon } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { complexityClassLabel } from "../hooks/ProblemFilters/complexityClassOrder";
 import { reductionTypeLabel } from "../hooks/ProblemFilters/tagLabels";
+import { tagListOrUnclassified } from "../hooks/ProblemFilters/tagLists";
 import { useProblemInfo, useReducerInfo } from "../hooks/ProblemProvider";
 import { requestReducedInstanceFromPath } from "../redux";
 import DragHandle from "../widgets/DragHandle";
@@ -145,6 +146,7 @@ export default function ReduceToRowReact({
                   // hyperlink
                   componentLink: reduceToInfo.problemLink || "",
                   sourceLink: reduceToInfo.sourceLink || "",
+                  sourceFile: reduceToInfo.sourceFile || "",
                 }
               : TOOLTIP1
           }
@@ -195,7 +197,9 @@ export default function ReduceToRowReact({
                     },
                     {
                       label: "Reduction type",
-                      value: reductionTypeLabel(reducerInfo.reductionType || "Unclassified"),
+                      value: tagListOrUnclassified(reducerInfo, "reductionTypes", "reductionType")
+                        .map(reductionTypeLabel)
+                        .join(", "),
                     },
                     {
                       label: "Complexity bucket",
@@ -212,6 +216,7 @@ export default function ReduceToRowReact({
                       : "",
                   componentLink: reducerInfo.problemLink || "",
                   sourceLink: reducerInfo.sourceLink || "",
+                  sourceFile: reducerInfo.sourceFile || "",
                 }
               : TOOLTIP2
           }

@@ -113,6 +113,7 @@ export default function VerifyRowReact({
                   // hyperlink target
                   componentLink: verifierInfo.verifierLink || "",
                   sourceLink: verifierInfo.sourceLink || "",
+                  sourceFile: verifierInfo.sourceFile || "",
                 }
               : TOOLTIP
           }

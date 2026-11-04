@@ -1,6 +1,6 @@
 /**
  * Single source of truth for tag/chip coloring by facet kind, so a given kind
- * of tag (a problem's complexity class, its problem type, a solver's type, a
+ * of tag (a problem's complexity class, its problem type, its variant, a solver's type, a
  * visualization's type) always renders in the same color everywhere it shows
  * up -- Browse's ProblemCard, the Home page's problem/solver/visualization
  * dropdowns, and anywhere else a facet tag is rendered.
@@ -17,6 +17,13 @@ export const TAG_KIND_STYLES = {
     background: "rgba(124,58,237,0.10)",
     border: "rgba(124,58,237,0.32)",
     hoverBackground: "rgba(124,58,237,0.20)",
+  },
+  // Decision / Optimization (#409, #321).
+  problemVariant: {
+    color: "#be185d",
+    background: "rgba(219,39,119,0.10)",
+    border: "rgba(219,39,119,0.32)",
+    hoverBackground: "rgba(219,39,119,0.20)",
   },
   solverType: {
     color: "#0f766e",

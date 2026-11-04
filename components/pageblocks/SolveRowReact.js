@@ -8,12 +8,14 @@
  * @author Alex Diviney
  */
 
-import React, { useContext } from "react";
+import React, { useContext, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Download as DownloadIcon } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
+import { tagListOrUnclassified } from "../hooks/ProblemFilters/tagLists";
 import { useSolverInfo } from "../hooks/ProblemProvider";
+import { useWhenChanged } from "../hooks/useWhenChanged";
 import { requestSolvedInstance } from "../redux";
 import DragHandle from "../widgets/DragHandle";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
@@ -55,11 +57,29 @@ export default function SolveRowReact({
   dragHandleProps,
 }) {
   const solverInfo = useSolverInfo(url, chosenSolver);
+  // Why the last Solve failed ({ message, hint }), e.g. the quantum service being down.
+  const [solveError, setSolveError] = useState(null);
+  // Bumped on every Solve and selection change, so a failure that arrives late is dropped.
+  const solveRun = useRef(0);
+
+  // Same reset as the solved instance in useSolvedInstance. A new problem brings a new instance.
+  useWhenChanged([problemInstance, chosenSolver], () => {
+    solveRun.current += 1;
+    setSolveError(null);
+  });
 
   async function handleSolve() {
+    solveRun.current += 1;
+    const run = solveRun.current;
+    setSolveError(null);
+    const onError = (error) => {
+      if (run === solveRun.current) {
+        setSolveError(error);
+      }
+    };
     setSolvedInstance(
       chosenSolver && problemInstance
-        ? ((await requestSolvedInstance(url, chosenSolver, problemInstance)) ?? "")
+        ? ((await requestSolvedInstance(url, chosenSolver, problemInstance, onError)) ?? "")
         : "",
     );
   }
@@ -93,11 +113,22 @@ export default function SolveRowReact({
 
         componentLink: solverInfo.solverLink || "",
         sourceLink: solverInfo.sourceLink || "",
+        sourceFile: solverInfo.sourceFile || "",
 
         classification: [
-          { label: "Solver type", value: solverTypeLabel(solverInfo.solverType || "Unclassified") },
+          {
+            label: "Solver type",
+            value: tagListOrUnclassified(solverInfo, "solverTypes", "solverType")
+              .map(solverTypeLabel)
+              .join(", "),
+          },
           { label: "Complexity bucket", value: solverInfo.complexityBucket || "Unclassified" },
-          { label: "Big-O", value: solverInfo.complexity || "Not yet determined" },
+          {
+            label: "Big-O",
+            value: solverInfo.timeComplexity
+              ? `O(${solverInfo.timeComplexity.Function})${solverInfo.timeComplexity.Description ?? ""}`
+              : "Not yet determined",
+          },
         ],
       }
     : TOOLTIP;
@@ -111,10 +142,13 @@ export default function SolveRowReact({
           onSelect={setChosenSolver}
           options={solverOptions}
           optionsMap={solverNameMap}
-          optionTag={(key) => ({
-            label: solverTypeLabel(solverTypeMap?.get(key) || "Unclassified"),
-            kind: "solverType",
-          })}
+          // One tag per solver type, in the backend's order (#409).
+          optionTag={(key) =>
+            (solverTypeMap?.get(key) ?? ["Unclassified"]).map((type) => ({
+              label: solverTypeLabel(type),
+              kind: "solverType",
+            }))
+          }
           disabled={!problemName}
           disabledMessage={"No solvers available. Please select a problem."}
           extenderButtons={(input) => {
@@ -140,6 +174,17 @@ export default function SolveRowReact({
             text={solvedInstance}
             tooLargeMessage={SOLUTION_TOO_LARGE_MESSAGE}
           />
+        ) : null}
+        {solveError ? (
+          <p role="alert">
+            {solveError.message}
+            {solveError.hint ? (
+              <>
+                <br />
+                <span>Try: {solveError.hint}</span>
+              </>
+            ) : null}
+          </p>
         ) : null}
         <div className="submitButton">
           <Button
