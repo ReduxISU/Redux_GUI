@@ -34,6 +34,64 @@ function zoomFilter(event) {
   return false;
 }
 
+// Room left around a fitted picture, in the picture's own units, so outlines and labels at the
+// edge aren't cut.
+const FIT_PADDING = 16;
+// The tallest a fitted picture gets, as a share of the window's height.
+const MAX_HEIGHT_SHARE = 0.75;
+const MIN_HEIGHT_PX = 200;
+
+// The attributes fitPictures sets; changes to these alone don't call for another fit.
+const FIT_ATTRIBUTES = new Set(["viewBox", "preserveAspectRatio", "width", "height", "style"]);
+
+const isPictureSvg = (svg) =>
+  !svg.classList.contains("MuiSvgIcon-root") && !svg.classList.contains("MuiCircularProgress-svg");
+
+/**
+ * Fits each picture to the pane: the renderers draw into a fixed-size viewBox pinned to its left
+ * edge (a force layout centred on a fixed point, say), so a large picture was cut off on the left
+ * or right and a small one sat off to one side. The drawing svg's viewBox becomes the box around
+ * what is actually drawn, centred, and the picture takes the pane's full width, as tall as its
+ * shape needs up to MAX_HEIGHT_SHARE of the window. Pictures without a viewBox are left alone.
+ * Returns nothing; safe to call again whenever the drawing changes.
+ */
+function fitPictures(viewport, content) {
+  const paneWidth = viewport.clientWidth; // untransformed by the zoom, unlike getBoundingClientRect
+  if (!paneWidth) return;
+  const outer = [...content.querySelectorAll("svg")].find(
+    (svg) => isPictureSvg(svg) && !svg.parentElement.closest("svg"),
+  );
+  if (!outer) return;
+  const drawing = [outer, ...outer.querySelectorAll("svg")].find(
+    (svg) => isPictureSvg(svg) && svg.hasAttribute("viewBox"),
+  );
+  if (!drawing) return;
+  let box;
+  try {
+    box = drawing.getBBox();
+  } catch {
+    return; // not rendered (e.g. inside a collapsed section)
+  }
+  if (!box.width || !box.height) return;
+  const viewBox = [
+    box.x - FIT_PADDING,
+    box.y - FIT_PADDING,
+    box.width + 2 * FIT_PADDING,
+    box.height + 2 * FIT_PADDING,
+  ].map((n) => Math.round(n * 10) / 10);
+  const viewBoxText = viewBox.join(" ");
+  if (drawing.getAttribute("viewBox") !== viewBoxText) drawing.setAttribute("viewBox", viewBoxText);
+  drawing.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  if (drawing !== outer) {
+    drawing.setAttribute("width", "100%");
+    drawing.setAttribute("height", "100%");
+  }
+  const maxHeight = Math.max(MIN_HEIGHT_PX, window.innerHeight * MAX_HEIGHT_SHARE);
+  const height = Math.min(maxHeight, (paneWidth * viewBox[3]) / viewBox[2]);
+  outer.style.width = "100%";
+  outer.style.height = `${Math.round(height)}px`;
+}
+
 export default function ZoomPanView({ children, resetKey }) {
   const { mode } = useThemeMode();
   const surface = surfaceColors(mode);
@@ -67,6 +125,38 @@ export default function ZoomPanView({ children, resetKey }) {
     reset();
   }, [resetKey, reset]);
 
+  // Keeps the picture fitted to the pane as it is drawn (a force layout moves for a while after it
+  // appears), redrawn, or the pane is resized. At most one fit per animation frame.
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const content = contentRef.current;
+    let frame = 0;
+    const scheduleFit = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        fitPictures(viewport, content);
+      });
+    };
+    scheduleFit();
+    const mutations = new MutationObserver((records) => {
+      // Our own viewBox and size changes would otherwise call for another fit forever.
+      if (records.some((r) => !(r.type === "attributes" && FIT_ATTRIBUTES.has(r.attributeName)))) {
+        scheduleFit();
+      }
+    });
+    mutations.observe(content, { subtree: true, childList: true, attributes: true });
+    const resizes = new ResizeObserver(scheduleFit);
+    resizes.observe(viewport);
+    window.addEventListener("resize", scheduleFit);
+    return () => {
+      cancelAnimationFrame(frame);
+      mutations.disconnect();
+      resizes.disconnect();
+      window.removeEventListener("resize", scheduleFit);
+    };
+  }, []);
+
   return (
     <Box
       ref={viewportRef}
@@ -77,6 +167,8 @@ export default function ZoomPanView({ children, resetKey }) {
         overflow: "hidden",
         // Lets a one-finger swipe scroll the page while two-finger gestures reach the zoom handler.
         touchAction: "pan-x pan-y",
+        // Room above the picture for the Fit button, so it never covers part of the drawing.
+        pt: "40px",
       }}
     >
       <Box ref={contentRef} data-zoom-content="" sx={{ transformOrigin: "0 0" }}>
