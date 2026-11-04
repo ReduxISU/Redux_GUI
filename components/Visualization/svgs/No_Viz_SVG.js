@@ -134,9 +134,11 @@ export function Loading_Viz_Svg() {
  * anything it needs failed or got no answer, or its renderer crashed. Under the main line,
  * `step` says which step failed and for which problem, visualization or reduction, and `detail`
  * what happened (HTTP status and server error text, no answer, or the exception message), so
- * the failure can be acted on.
+ * the failure can be acted on. A failed request also brings `message`, what went wrong in plain
+ * words (the server's own message, or that it couldn't be reached), and maybe a `hint` of what to
+ * try (userFacingError in components/redux/index.js); they are shown first.
  */
-export function Failed_Viz_Svg({ step, detail }) {
+export function Failed_Viz_Svg({ step, detail, message, hint }) {
   const { mode } = useThemeMode();
   const colors = textColors(mode);
   return (
@@ -150,6 +152,24 @@ export function Failed_Viz_Svg({ step, detail }) {
         >
           Failed to Visualize
         </Typography>
+        {message && (
+          <Typography
+            variant="body1"
+            style={{
+              color: colors.heading,
+              textAlign: "center",
+              marginTop: 8,
+              overflowWrap: "anywhere",
+            }}
+          >
+            {message}
+          </Typography>
+        )}
+        {hint && (
+          <Typography variant="body1" style={{ color: colors.body, textAlign: "center" }}>
+            Try: {hint}
+          </Typography>
+        )}
         {step && (
           <Typography
             variant="body2"
@@ -158,7 +178,7 @@ export function Failed_Viz_Svg({ step, detail }) {
             {step}
           </Typography>
         )}
-        {detail && (
+        {detail && detail !== message && (
           <Typography
             variant="body2"
             style={{ color: colors.body, textAlign: "center", overflowWrap: "anywhere" }}
