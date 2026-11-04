@@ -94,6 +94,45 @@ test("switching problems with Show reduction on never brings back the old proble
   await expect(visualizeRow).not.toContainText(SAT3_TO_CLIQUE_LABEL);
 });
 
+// The main pane of the Visualize row when "Show reduction" is on.
+const mainPane = (page) => row(page, "Visualize").locator(".wrap > .MuiContainer-root").nth(0);
+
+// Lines in a force-drawn graph whose ends sit at no node's center, as "x1,y1 x2,y2" strings.
+// Every edge is drawn from the center of one circle to the center of another.
+const detachedEdges = (pane) =>
+  pane.evaluate((root) => {
+    const svg = root.querySelector("svg:not(.MuiSvgIcon-root):not(.MuiCircularProgress-svg)");
+    if (!svg) return ["no picture"];
+    const centers = [...svg.querySelectorAll("circle")].map((c) => [
+      Number(c.getAttribute("cx")),
+      Number(c.getAttribute("cy")),
+    ]);
+    const atANode = (x, y) =>
+      centers.some(([cx, cy]) => Math.abs(cx - x) < 0.5 && Math.abs(cy - y) < 0.5);
+    return [...svg.querySelectorAll("line")]
+      .map((l) => ["x1", "y1", "x2", "y2"].map((a) => Number(l.getAttribute(a))))
+      .filter(([x1, y1, x2, y2]) => !atANode(x1, y1) || !atANode(x2, y2))
+      .map(([x1, y1, x2, y2]) => `${x1},${y1} ${x2},${y2}`);
+  });
+
+test("after switching problems with Show reduction on, every edge of the main graph ends at its nodes", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(pictures(row(page, "Visualize")).first()).toBeVisible();
+  await showReduction(page);
+  await expect(pictures(reductionPane(page)).first()).toBeVisible();
+
+  // Clique's graph is drawn at once and drawn again when its gadget map arrives with the reduction
+  // picture. The second draw used to link to node objects left over from the first.
+  await choose(page, "Problem", "Clique");
+  await expect(pictures(reductionPane(page)).first()).toBeVisible();
+  await expect(mainPane(page).locator("svg line").first()).toBeAttached();
+  await page.waitForTimeout(1000);
+
+  await expect.poll(() => detachedEdges(mainPane(page))).toEqual([]);
+});
+
 test("switching the reduction target asks for and draws the new target's reduction", async ({
   page,
 }) => {
