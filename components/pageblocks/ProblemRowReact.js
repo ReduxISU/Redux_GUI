@@ -222,6 +222,7 @@ export default function ProblemRowReact({
           optionsMap={problemNameMap}
           groupBy={(key) => problemIndex.get(key)?.complexityClass || "Unclassified"}
           groupOrder={COMPLEXITY_CLASS_ORDER}
+          hideSelectedTagsWhileTyping
           optionTag={(key) => [
             {
               label: complexityClassLabel(problemIndex.get(key)?.complexityClass || "Unclassified"),
