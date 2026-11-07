@@ -155,14 +155,16 @@ route that exists look permanently broken.
 
 Start from the example closest to what you want:
 
-| You want to test                           | Copy                                          | Technique it shows                                            |
-| ------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------- |
-| What the API returns to the GUI            | `tests/e2e/proxy.spec.js`                     | HTTP assertions, no browser — fast and stable                 |
-| A dropdown, a value, a page state          | `app.spec.js` › _the problem catalogue loads_ | Locating a row, reading a combobox                            |
-| A visualization drawing                    | `app.spec.js` › _renders a visualization_     | Asserting on drawn SVG, and ruling out error cards            |
-| Clicking something and checking the result | `app.spec.js` › _solving 3SAT_                | Expanding a row, waiting for enabled, asserting output        |
-| Typing input and checking both outcomes    | `app.spec.js` › _the 3SAT verifier answers…_  | Filling a textbox, asserting a positive and a negative result |
-| A structural contract of the page          | `tests/e2e/tour.spec.js`                      | Counting anchors the tour depends on, no backend data needed  |
+| You want to test                           | Copy                                                              | Technique it shows                                                               |
+| ------------------------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| What the API returns to the GUI            | `tests/e2e/proxy.spec.js`                                         | HTTP assertions, no browser — fast and stable                                    |
+| A dropdown, a value, a page state          | `app.spec.js` › _the problem catalogue loads_                     | Locating a row, reading a combobox                                               |
+| A visualization drawing                    | `app.spec.js` › _renders a visualization_                         | Asserting on drawn SVG, and ruling out error cards                               |
+| Clicking something and checking the result | `app.spec.js` › _solving 3SAT_                                    | Expanding a row, waiting for enabled, asserting output                           |
+| Typing input and checking both outcomes    | `app.spec.js` › _the 3SAT verifier answers…_                      | Filling a textbox, asserting a positive and a negative result                    |
+| A structural contract of the page          | `tests/e2e/tour.spec.js`                                          | Counting anchors the tour depends on, no backend data needed                     |
+| A race between a switch and a late answer  | `tests/e2e/visualization-switching.spec.js`                       | Holding answers back with `page.route`, faking an empty or failed answer         |
+| A request that never answers               | `visualization-switching.spec.js` › _…no answer…after 60 seconds_ | A `page.route` handler that never replies, `page.clock` to skip the 60 s timeout |
 
 ### Things that will cost you an afternoon if nobody tells you
 
@@ -224,10 +226,8 @@ These do not need a browser or a backend; call the handler directly with a fake 
 - A test asserting CLIQUE (which has two visualizations) selects its declared default. The bug that
   once broke this is fixed; the test that would keep it fixed is not written.
 - Anything in `KNOWN_SILENT_FAILURES` in `tests/e2e/fixtures.js`. Fix the request, delete the
-  entry, and the guard starts protecting that call. Two are nearly free:
-  several calls fire with an empty `reduction=` parameter before the reduction has been chosen,
-  which should simply be guarded; and the Problem row seeds a placeholder instance that the backend
-  rejects before the real default arrives.
+  entry, and the guard starts protecting that call. One is nearly free: the Problem row seeds a
+  placeholder instance that the backend rejects before the real default arrives.
 
 **Later**
 - A tour walkthrough test (click through every step, assert the popover titles and that Solve and

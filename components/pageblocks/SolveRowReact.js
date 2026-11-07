@@ -77,9 +77,14 @@ export default function SolveRowReact({
     solveRun.current += 1;
     const run = solveRun.current;
     setSolveError(null);
-    const onError = (error) => {
+    // A solver that can't run answers with `{ message, hint }`; any other failure has only the
+    // description of what went wrong.
+    const onError = (detail, body) => {
       if (run === solveRun.current) {
-        setSolveError(error);
+        setSolveError({
+          message: body?.message || body?.detail || body?.title || body?.error || detail,
+          hint: body?.hint ?? "",
+        });
       }
     };
     setSolvedInstance(
