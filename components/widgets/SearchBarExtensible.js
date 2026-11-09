@@ -12,6 +12,7 @@ import React, { useState } from "react";
 import { normalizeTags, tagChipSx } from "../hooks/ProblemFilters/tagStyles";
 import { useThemeMode } from "../ThemeModeContext";
 import { keyForLabel } from "./optionKeys";
+import { showsSelectedTags } from "./selectedTagVisibility";
 
 export default function SearchBarExtensible({
   selected,
@@ -46,6 +47,9 @@ export default function SearchBarExtensible({
   // matching the user's input (e.g. a problem's complexity class/solver types) so
   // search isn't limited to the display name alone. (key) => string.
   optionSearchText = null,
+  // Hides the selected-value tags inside the search box while the typed text differs from the
+  // selected option's label (issue #341). Off by default: only the main problem picker opts in.
+  hideSelectedTagsWhileTyping = false,
   ...props
 }) {
   const [input, setInput] = useState("");
@@ -106,8 +110,17 @@ export default function SearchBarExtensible({
         // Tags for the currently-selected value, shown to the right of the
         // input's text even while the dropdown list itself is closed --
         // same tags/colors as the open list's rows (via optionTag + tagChipSx).
-        const selectedTags =
-          !disabled && optionTag && selected ? normalizeTags(optionTag(selected)) : [];
+        const selectedLabel = optionsMap.get(selected) ?? "";
+        const selectedTags = showsSelectedTags({
+          disabled,
+          hasOptionTag: Boolean(optionTag),
+          selected,
+          selectedLabel,
+          input,
+          hideWhileTyping: hideSelectedTagsWhileTyping,
+        })
+          ? normalizeTags(optionTag(selected))
+          : [];
         return (
           <TextField
             {...params}
