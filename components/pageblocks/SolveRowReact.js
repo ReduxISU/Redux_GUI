@@ -10,15 +10,14 @@
 
 import React, { useContext, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Download as DownloadIcon, DragIndicator as DragIndicatorIcon } from "@mui/icons-material";
-import { Button, IconButton } from "@mui/material";
+import { Download as DownloadIcon } from "@mui/icons-material";
+import { Button } from "@mui/material";
 import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 import { tagListOrUnclassified } from "../hooks/ProblemFilters/tagLists";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import { useWhenChanged } from "../hooks/useWhenChanged";
 import { requestSolvedInstance } from "../redux";
-import { useThemeMode } from "../ThemeModeContext";
-import { surfaceColors, textColors } from "../theme";
+import DragHandle from "../widgets/DragHandle";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
@@ -57,10 +56,6 @@ export default function SolveRowReact({
   chosenReduceTo,
   dragHandleProps,
 }) {
-  const { mode } = useThemeMode();
-  const surface = surfaceColors(mode);
-  const text = textColors(mode);
-
   const solverInfo = useSolverInfo(url, chosenSolver);
   // Why the last Solve failed ({ message, hint }), e.g. the quantum service being down.
   const [solveError, setSolveError] = useState(null);
@@ -167,23 +162,7 @@ export default function SolveRowReact({
           }}
         />{" "}
         <PopoverTooltipClick toolTip={tip} />
-        {dragHandleProps && (
-          <IconButton
-            {...dragHandleProps.attributes}
-            {...dragHandleProps.listeners}
-            size="small"
-            title="Drag to reorder"
-            sx={{
-              cursor: "grab",
-              color: text.body,
-              backgroundColor: surface.surfaceAlt,
-              "&:hover": { backgroundColor: surface.surfaceAltHover },
-              mr: 1,
-            }}
-          >
-            <DragIndicatorIcon />
-          </IconButton>
-        )}
+        <DragHandle dragHandleProps={dragHandleProps} />
       </ProblemSection.Header>
 
       <ProblemSection.Body>
@@ -197,12 +176,12 @@ export default function SolveRowReact({
           />
         ) : null}
         {solveError ? (
-          <p role="alert" style={{ color: text.heading }}>
+          <p role="alert">
             {solveError.message}
             {solveError.hint ? (
               <>
                 <br />
-                <span style={{ color: text.body }}>Try: {solveError.hint}</span>
+                <span>Try: {solveError.hint}</span>
               </>
             ) : null}
           </p>

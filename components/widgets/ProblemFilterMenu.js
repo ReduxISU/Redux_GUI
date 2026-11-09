@@ -7,7 +7,6 @@ import {
   Divider,
   FormControlLabel,
   FormGroup,
-  IconButton,
   Popover,
   Typography,
 } from "@mui/material";
@@ -17,6 +16,7 @@ import { buildFixedOrderFacetOptions } from "../hooks/ProblemFilters/facetOption
 import { PROBLEM_TYPE_LABELS, PROBLEM_TYPE_ORDER } from "../hooks/ProblemFilters/problemTypeOrder";
 import { problemVariantLabel } from "../hooks/ProblemFilters/tagLabels";
 import { UNCLASSIFIED } from "../hooks/ProblemFilters/tagLists";
+import HeaderIconButton from "./HeaderIconButton";
 
 // Fixed display order for the Complexity Class facet -- P/NP/NP-Complete/NP-Hard,
 // the classical hierarchy in containment order. The quantum classes (BQP/EQP/QMA/
@@ -143,11 +143,11 @@ export default function ProblemFilterMenu({
 
   return (
     <>
-      <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+      <HeaderIconButton aria-label="Filter problems" onClick={(e) => setAnchorEl(e.currentTarget)}>
         <Badge badgeContent={activeCount} color="secondary">
           <FilterListIcon fontSize="medium" />
         </Badge>
-      </IconButton>
+      </HeaderIconButton>
 
       <Popover
         open={open}
