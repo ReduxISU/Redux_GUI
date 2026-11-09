@@ -13,6 +13,7 @@ import {
 } from "../Visualization/svgs/No_Viz_SVG";
 import { isRenderable } from "../Visualization/svgs/renderability";
 import Visualizations from "../Visualization/svgs/Visualizations.js";
+import VisualizationErrorBoundary from "./VisualizationErrorBoundary";
 
 const NO_GADGETS = {
   key: null,
@@ -105,6 +106,50 @@ export default function VisualizationLogic({
     [reductionData, gadgetsReady, fetchedGadgets],
   );
 
+  // "Failed to Visualize" for a renderer that crashed, whether it threw while its element was built
+  // (the try/catch below) or while React rendered it (the error boundary).
+  const pictureRenderError = (err) => (
+    <Viz_Render_Error_Svg
+      niceProblemName={problemNameMap.get(problemName)}
+      visualizationName={visualizationName}
+      visualizationType={visualizationType}
+      error={err}
+    />
+  );
+  const reductionRenderError = (err) => (
+    <Viz_Render_Error_Svg
+      niceReductionName={reductionNameMap.get(chosenReductionType) ?? chosenReductionType}
+      visualizationType={reductionVisualization}
+      error={err}
+    />
+  );
+
+  // Draws a picture with its renderer. A renderer can crash in two places: while its element is
+  // built (caught here) or while React renders it or runs its effects, which a try/catch cannot
+  // see (caught by the error boundary). Either way the pane shows `fallback(error)` and the error
+  // is logged. The boundary keeps showing the card only until a reset key or anything the picture
+  // is drawn from changes; then the renderer gets another try, so a crash never sticks after a
+  // switch.
+  function drawPicture(type, data, { fallback, logMessage, resetKeys }) {
+    let element;
+    try {
+      element = Visualizations.get(type)(solve, url, data, gadgetMap, visualizationState.gadgetsOn);
+    } catch (err) {
+      console.error(logMessage, type, err);
+      return fallback(err);
+    }
+    return (
+      <VisualizationErrorBoundary
+        resetKeys={[...resetKeys, data, gadgetMap, solve, visualizationState.gadgetsOn]}
+        fallback={fallback}
+        logMessage={logMessage}
+        logDetails={[type]}
+      >
+        {element}
+      </VisualizationErrorBoundary>
+    );
+  }
+
   // The main picture is drawn without waiting for the gadget map. Statuses come from
   // VisualizeRowReact: "loading", "failed", "missing" (an empty answer), "ready" or "none".
   if (problemStatus === "loading") {
@@ -122,25 +167,11 @@ export default function VisualizationLogic({
         />
       );
     } else {
-      try {
-        visualization = Visualizations.get(visualizationType)(
-          solve,
-          url,
-          mappedProblemData,
-          gadgetMap,
-          visualizationState.gadgetsOn,
-        );
-      } catch (err) {
-        console.error("visualization renderer threw", visualizationType, err);
-        visualization = (
-          <Viz_Render_Error_Svg
-            niceProblemName={problemNameMap.get(problemName)}
-            visualizationName={visualizationName}
-            visualizationType={visualizationType}
-            error={err}
-          />
-        );
-      }
+      visualization = drawPicture(visualizationType, mappedProblemData, {
+        fallback: pictureRenderError,
+        logMessage: "visualization renderer threw",
+        resetKeys: [problemName, problemInstance, visualizationName, visualizationType],
+      });
     }
   }
 
@@ -172,29 +203,16 @@ export default function VisualizationLogic({
         />
       );
     } else {
-      try {
-        reducedVisualization = Visualizations.get(reductionVisualization)(
-          solve,
-          url,
-          mappedReductionData,
-          gadgetMap,
-          visualizationState.gadgetsOn,
-        );
+      reducedVisualization = drawPicture(reductionVisualization, mappedReductionData, {
+        fallback: reductionRenderError,
+        logMessage: "reduction visualization renderer threw",
+        resetKeys: [problemName, problemInstance, chosenReductionType, reductionVisualization],
+      });
 
-        //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance,
-        // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
-        if (reductionName == "CLIQUE") {
-          //reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
-        }
-      } catch (err) {
-        console.error("reduction visualization renderer threw", reductionVisualization, err);
-        reducedVisualization = (
-          <Viz_Render_Error_Svg
-            niceReductionName={reductionNameMap.get(chosenReductionType) ?? chosenReductionType}
-            visualizationType={reductionVisualization}
-            error={err}
-          />
-        );
+      //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance,
+      // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
+      if (reductionName == "CLIQUE") {
+        //reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
       }
     }
   }

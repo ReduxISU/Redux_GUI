@@ -165,6 +165,7 @@ Start from the example closest to what you want:
 | A structural contract of the page          | `tests/e2e/tour.spec.js`                                          | Counting anchors the tour depends on, no backend data needed                     |
 | A race between a switch and a late answer  | `tests/e2e/visualization-switching.spec.js`                       | Holding answers back with `page.route`, faking an empty or failed answer         |
 | A request that never answers               | `visualization-switching.spec.js` › _…no answer…after 60 seconds_ | A `page.route` handler that never replies, `page.clock` to skip the 60 s timeout |
+| A renderer that crashes while drawing      | `tests/e2e/visualization-crash.spec.js`                           | A wrong-shaped payload, ruling out Next.js error screens                         |
 
 ### Things that will cost you an afternoon if nobody tells you
 
