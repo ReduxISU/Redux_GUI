@@ -7,9 +7,10 @@
 const MAX_ERROR_TEXT = 200;
 
 /**
- * Describes a failed (non-2xx) response for a person: the HTTP status and, when the body has
- * one, the server's error text (`detail`/`title`/`message`/`error` of a JSON body, else the
- * plain text), shortened to MAX_ERROR_TEXT characters.
+ * Reads a failed (non-2xx) response once. `description` is the HTTP status and, when the body has
+ * one, the server's error text (`detail`/`title`/`message`/`error` of a JSON body, else the plain
+ * text), shortened to MAX_ERROR_TEXT characters. `body` is the parsed JSON body (undefined when
+ * the body isn't JSON) and `text` the shortened plain-text body (empty when the body is JSON).
  */
 async function describeFailedResponse(resp) {
   let text = "";
@@ -18,16 +19,19 @@ async function describeFailedResponse(resp) {
   } catch {
     // No readable body; the status alone has to do.
   }
+  let body;
   try {
-    const json = JSON.parse(text);
-    const message = json?.detail || json?.title || json?.message || json?.error;
-    if (typeof message === "string") text = message;
+    body = JSON.parse(text);
   } catch {
     // Not JSON; keep the plain text.
   }
+  let serverText = body === undefined ? text : "";
+  const message = body?.detail || body?.title || body?.message || body?.error;
+  if (typeof message === "string") text = message;
   if (text.length > MAX_ERROR_TEXT) text = `${text.slice(0, MAX_ERROR_TEXT)}…`;
+  if (serverText.length > MAX_ERROR_TEXT) serverText = `${serverText.slice(0, MAX_ERROR_TEXT)}…`;
   const status = `HTTP ${resp.status}${resp.statusText ? ` ${resp.statusText}` : ""}`;
-  return text ? `${status}: ${text}` : status;
+  return { description: text ? `${status}: ${text}` : status, body, text: serverText };
 }
 
 /** Describes a fetch that got no response at all (network error or abort). */
@@ -40,6 +44,56 @@ function describeFetchError(error) {
 export const REQUEST_TIMEOUT_MS = 60_000;
 
 const TIMEOUT_TEXT = `No answer from the server after ${REQUEST_TIMEOUT_MS / 1000} seconds.`;
+
+const UNREACHABLE_MESSAGE = "Couldn't reach the Redux server. Check your connection and try again.";
+
+// A plain message for an error status the server sent no message with.
+function statusMessage(status) {
+  if (status === 400 || status === 422) {
+    return `The Redux server couldn't use this input (HTTP ${status}). Check the instance and try again.`;
+  }
+  if (status === 404) return "The Redux server doesn't know this request (HTTP 404).";
+  if (status === 408 || status === 504) {
+    return `The Redux server took too long to answer (HTTP ${status}). Try again.`;
+  }
+  if (status >= 500) {
+    return `The Redux server ran into a problem (HTTP ${status}). Try again in a moment.`;
+  }
+  return `The Redux server turned down this request (HTTP ${status}).`;
+}
+
+const nonEmptyText = (value) => (typeof value === "string" ? value.trim() : "");
+
+/**
+ * Turns the arguments fetchAndParse passes to onError into `{ message, hint, detail }` to show the
+ * user: `message` says what went wrong in plain words, `hint` (may be empty) what to try, and
+ * `detail` is the technical one-line description. A server that rejected the request is quoted
+ * (its `message`, else `detail`, else ProblemDetails' `title`, else its plain-text body, else a
+ * message for the HTTP status), with its `hint` (Redux #933's error body). A server that couldn't
+ * be reached, including the proxy's 502 when the backend is down, gets a message saying so.
+ */
+export function userFacingError(detail, body, failure) {
+  const kind = failure?.kind;
+  const backendMessage =
+    nonEmptyText(body?.message) || nonEmptyText(body?.detail) || nonEmptyText(body?.title);
+  const unreachable =
+    kind === "unreachable" || (kind === "rejected" && failure.status === 502 && !backendMessage);
+  let message;
+  if (unreachable) message = UNREACHABLE_MESSAGE;
+  else if (kind === "timeout") {
+    message = `The Redux server didn't answer within ${REQUEST_TIMEOUT_MS / 1000} seconds. Try again.`;
+  } else if (kind === "unreadable")
+    message = "The Redux server's answer couldn't be read. Try again.";
+  else {
+    message =
+      backendMessage ||
+      nonEmptyText(failure?.text) ||
+      (failure?.status ? statusMessage(failure.status) : "") ||
+      nonEmptyText(detail) ||
+      "The request failed. Try again.";
+  }
+  return { message, hint: unreachable ? "" : nonEmptyText(body?.hint), detail: detail ?? "" };
+}
 
 /**
  * Starts the REQUEST_TIMEOUT_MS clock for one request. `signal` aborts the request when it runs
@@ -61,19 +115,14 @@ function startTimeout() {
   };
 }
 
-// The parsed JSON body of a failed response, or undefined when it has none.
-async function readJsonBody(resp) {
-  try {
-    return await resp.json();
-  } catch {
-    return undefined;
-  }
-}
-
 /**
  * @param failMsg The message that is logged on failure. Message is lazily evaluated.
- * @param onError Optional; called with a one-line description of what went wrong (HTTP status
- * and server error text, network error, or an unreadable answer) when the request fails.
+ * @param onError Optional; called as onError(description, body, failure) when the request fails:
+ * `description` is one line saying what went wrong (HTTP status and server error text, network
+ * error, or an unreadable answer), `body` the parsed JSON body of a failed response (undefined
+ * otherwise), and `failure` is `{ kind, status, text }` with kind "unreachable" (no answer),
+ * "timeout", "rejected" (an error status; `status` and the plain-text body `text` come with it)
+ * or "unreadable". userFacingError turns these into a message for the user.
  * @returns the JSON format of the fetch request.
  * @returns `undefined` on failure and logs the error.
  */
@@ -86,24 +135,28 @@ async function fetchAndParse(url, init, failMsg, onError) {
       resp = await fetch(url, { ...init, signal: timeout.signal });
     } catch (error) {
       console.log(`${failMsg()}: `, error);
-      onError?.(timeout.timedOut() ? TIMEOUT_TEXT : describeFetchError(error));
+      if (timeout.timedOut()) onError?.(TIMEOUT_TEXT, undefined, { kind: "timeout" });
+      else onError?.(describeFetchError(error), undefined, { kind: "unreachable" });
       return undefined;
     }
     if (!resp.ok) {
       console.log(`${failMsg()}: ${resp.status} (${resp.statusText})`);
-      const failedBody = resp.clone();
-      onError?.(await describeFailedResponse(resp), await readJsonBody(failedBody));
+      const { description, body, text } = await describeFailedResponse(resp);
+      onError?.(description, body, { kind: "rejected", status: resp.status, text });
       return undefined;
     }
     try {
       return await resp.json();
     } catch (error) {
       console.log(`${failMsg()}: `, error);
-      onError?.(
-        timeout.timedOut()
-          ? TIMEOUT_TEXT
-          : `The server's answer could not be read (${error?.message || String(error)}).`,
-      );
+      if (timeout.timedOut()) onError?.(TIMEOUT_TEXT, undefined, { kind: "timeout" });
+      else {
+        onError?.(
+          `The server's answer could not be read (${error?.message || String(error)}).`,
+          undefined,
+          { kind: "unreadable" },
+        );
+      }
       return undefined;
     }
   } finally {
@@ -149,9 +202,9 @@ async function fetchPostJson(url, body, failMsg, onError) {
  * refresh. Failed (falsy) results are not cached.
  * @param cacheKey Unique key identifying this request.
  * @param requestFn Function that performs the request when not cached; it is passed an
- * `onError` callback that records the failure description.
- * @param onError Optional; called with the failure description when the result is a failure,
- * also for callers that shared someone else's in-flight request.
+ * `onError` callback that records the failure (fetchAndParse's onError arguments).
+ * @param onError Optional; called with the recorded failure when the result is a failure, also
+ * for callers that shared someone else's in-flight request.
  * @returns the cached or freshly-fetched result.
  * @returns `undefined` if the request fails; failed results are not cached.
  */
@@ -161,7 +214,7 @@ const requestFailures = new Map();
 async function cachedRequest(cacheKey, requestFn, onError) {
   let promise = requestCache.get(cacheKey);
   if (!promise) {
-    promise = requestFn((detail) => requestFailures.set(cacheKey, detail));
+    promise = requestFn((...failure) => requestFailures.set(cacheKey, failure));
     requestCache.set(cacheKey, promise);
   }
 
@@ -170,7 +223,7 @@ async function cachedRequest(cacheKey, requestFn, onError) {
   // Don't cache failed requests.
   if (!result) {
     if (requestCache.get(cacheKey) === promise) requestCache.delete(cacheKey);
-    onError?.(requestFailures.get(cacheKey) ?? "The server sent back nothing.");
+    onError?.(...(requestFailures.get(cacheKey) ?? ["The server sent back nothing."]));
   }
 
   return result;
@@ -192,8 +245,9 @@ export async function requestGadgetMap(url, reduction, instance, onError) {
 /**
  * @param isCurrent Optional; when it returns false the walk stops early (resolving `undefined`),
  * so an answer nobody is waiting for any more sends no further requests.
- * @param onError Optional; called as onError(step, detail) when a gadget map or reduce request
- * along the path fails, `step` naming the request and reduction, `detail` what went wrong.
+ * @param onError Optional; called as onError(step, detail, body, failure) when a gadget map or
+ * reduce request along the path fails, `step` naming the request and reduction, `detail` what
+ * went wrong, and `body`/`failure` as fetchAndParse gives them (see userFacingError).
  * @returns `undefined` when a gadget map or reduce request along the path fails.
  */
 export async function processReductions(
@@ -209,24 +263,22 @@ export async function processReductions(
   let currentMap = null;
 
   for (const reduction of reductions) {
-    let detail;
-    const nextMap = await requestGadgetMap(url, reduction, currentInstance, (d) => {
-      detail = d;
+    let failure = [];
+    const nextMap = await requestGadgetMap(url, reduction, currentInstance, (...f) => {
+      failure = f;
     });
     if (!isCurrent()) return undefined;
     if (nextMap === undefined) {
-      onError(`Gadget request for reduction ${reduction}`, detail);
+      onError(`Gadget request for reduction ${reduction}`, ...failure);
       return undefined;
     }
-    const reduced = await requestReducedInstance(url, reduction, currentInstance, (d) => {
-      detail = d;
+    const reduced = await requestReducedInstance(url, reduction, currentInstance, (...f) => {
+      failure = f;
     });
     if (!isCurrent()) return undefined;
     if (!reduced) {
-      onError(
-        `Reduce request for reduction ${reduction}`,
-        detail ?? "The server sent back nothing.",
-      );
+      const [detail = "The server sent back nothing.", ...rest] = failure;
+      onError(`Reduce request for reduction ${reduction}`, detail, ...rest);
       return undefined;
     }
     const nextInstance = reduced.reductionTo.instance;
@@ -361,15 +413,21 @@ export async function requestInfo(url, apiCall, onError) {
 
 /**
  * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
+ * @param onError Optional; called with fetchAndParse's onError arguments when a reduce request
+ * along the path fails (see userFacingError).
  * @returns the reduced `instance` list of reductions, the reduction path.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReducedInstanceFromPath(url, reductionPath, instance) {
+export async function requestReducedInstanceFromPath(url, reductionPath, instance, onError) {
   for (const path of reductionPath.split("-")) {
-    const reducedInst = await requestReducedInstance(url, path, instance);
+    let failure = ["The server sent back nothing."];
+    const reducedInst = await requestReducedInstance(url, path, instance, (...f) => {
+      failure = f;
+    });
     if (!reducedInst) {
       console.log(`${reductionPath} AT ${path} REDUCED INSTANCE FROM PATH REQUEST FAILED`);
-      return instance;
+      onError?.(...failure);
+      return undefined;
     }
     instance = reducedInst.reductionTo.instance;
   }

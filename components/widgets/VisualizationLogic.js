@@ -3,7 +3,7 @@
 import { Container } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import Split from "react-split";
-import { makeIdsUnique, processReductions, remapIdsDeep } from "../redux";
+import { makeIdsUnique, processReductions, remapIdsDeep, userFacingError } from "../redux";
 import {
   Failed_Viz_Svg,
   Loading_Viz_Svg,
@@ -69,18 +69,20 @@ export default function VisualizationLogic({
       chosenReductionType,
       problemInstance,
       () => !ignore,
-      (step, detail) => {
-        failure = { step, detail };
+      (step, ...requestFailure) => {
+        failure = { step, ...userFacingError(...requestFailure) };
       },
     )
       .catch((err) => {
         console.error("gadget map request failed", err);
-        failure = { step: "Gadget map", detail: String(err?.message ?? err) };
+        failure = { step: "Gadget map", ...userFacingError(String(err?.message ?? err)) };
       })
       .then((rawGadgetMap) => {
         if (ignore) return;
         // processReductions answers undefined when a gadget or reduce request failed.
-        if (rawGadgetMap === undefined) failure ??= { step: "Gadget map", detail: "No answer." };
+        if (rawGadgetMap === undefined) {
+          failure ??= { step: "Gadget map", ...userFacingError("No answer.") };
+        }
         setFetchedGadgets({ key: gadgetKey, failure, ...makeIdsUnique(rawGadgetMap) });
       });
     return () => {
@@ -155,6 +157,8 @@ export default function VisualizationLogic({
             problemNameMap.get(problemName) ?? problemName
           }).`}
           detail={fetchedGadgets.failure.detail}
+          message={fetchedGadgets.failure.message}
+          hint={fetchedGadgets.failure.hint}
         />
       );
     } else if (
