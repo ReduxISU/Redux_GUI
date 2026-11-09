@@ -313,15 +313,25 @@ export default function ContributePage() {
                   including for commercial purposes, provided you follow the license: keep the
                   copyright notice and disclaimer intact, and do not use the name of Idaho State
                   University or the names of contributors to endorse your derivative work without
-                  permission. The full text lives in the{" "}
+                  permission. The full text is in the LICENSE files for the{" "}
                   <Link
-                    href="https://github.com/ReduxISU/"
+                    href="https://github.com/ReduxISU/Redux_GUI/blob/ReduxAPI_GUI/LICENSE"
                     target="_blank"
                     rel="noopener noreferrer"
                     underline="hover"
                     sx={linkSx}
                   >
-                    LICENSE file in each repository
+                    website
+                  </Link>{" "}
+                  and the{" "}
+                  <Link
+                    href="https://github.com/ReduxISU/Redux/blob/CSharpAPI/LICENSE"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={linkSx}
+                  >
+                    API
                   </Link>
                   . If you would like to build on Redux, we would rather you contribute to it, so
                   please get in touch.
@@ -366,7 +376,7 @@ export default function ContributePage() {
               />
               <StaticSection.Body>
                 <BodyText sx={{ fontStyle: "italic" }}>
-                  Version 1.1 (Updated Thu, 29 Oct 2026).
+                  Version 1.2 (Updated Mon, 9 Nov 2026).
                 </BodyText>
 
                 <BodyText>
@@ -404,9 +414,12 @@ export default function ContributePage() {
                   When you solve, verify, or reduce a problem, the instance you entered is sent to
                   the Redux API so it can be worked on, and the answer is sent back to your browser.
                   Redux has no database and does not save your problem instances; they are discarded
-                  once the response is returned. Note that the Share button builds a link containing
-                  your problem instance, so if you share that link, anyone who has it can see that
-                  instance.
+                  once the response is returned. The instance travels in the body of the request,
+                  not in its address, so it does not appear in the hosting servers&apos; access
+                  logs. Links made with the Share button are the exception: they put your problem
+                  instance in the address itself. Anyone who has such a link can see that instance,
+                  and when the link is opened, the instance is recorded in the access logs along
+                  with the rest of the address.
                 </BodyText>
 
                 <BodyText>
