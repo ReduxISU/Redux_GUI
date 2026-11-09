@@ -17,6 +17,7 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Button, FormControlLabel, IconButton, Switch, TextField, Tooltip } from "@mui/material";
 import Link from "next/link"; // <-- IMPORTANT for Quantum button
+import { tagList } from "../hooks/ProblemFilters/tagLists";
 import { useVisualizationInfo } from "../hooks/ProblemProvider";
 import { useWhenChanged } from "../hooks/useWhenChanged";
 import {
@@ -47,6 +48,12 @@ const TOOLTIP = {
   info: "Choose a visualization to see info about it",
 };
 
+/** The deduped display categories for a list of visualizationType wire values, in
+ * order -- GraphD3 and GraphLaTeX both read "Graph", once (visualizationCategories.js). */
+function visualizationCategoryLabels(types) {
+  return [...new Set(types.map(visualizationTypeCategory))];
+}
+
 export default function VisualizeRowReact({
   url,
   problemInfo,
@@ -66,6 +73,7 @@ export default function VisualizeRowReact({
   VisualizationOptions,
   defaultVisualizationMap,
   visualizationTypeMap,
+  visualizationTagMap,
   dragHandleProps,
 }) {
   const { mode } = useThemeMode();
@@ -284,9 +292,10 @@ export default function VisualizeRowReact({
         classification: [
           {
             label: "Visualization type",
-            value: visualizationInfo.visualizationType
-              ? visualizationTypeCategory(visualizationInfo.visualizationType)
-              : "Unclassified",
+            value:
+              visualizationCategoryLabels(
+                tagList(visualizationInfo, "visualizationTypes", "visualizationType"),
+              ).join(", ") || "Unclassified",
           },
         ],
         source: visualizationInfo.source,
@@ -311,10 +320,13 @@ export default function VisualizeRowReact({
           optionsMap={VisualizationNameMap}
           optionsDisabled={unrenderableOptions}
           disabledOptionHint="no renderer available"
-          optionTag={(key) => ({
-            label: visualizationTypeCategory(visualizationTypeMap?.get(key)),
-            kind: "visualizationType",
-          })}
+          // One tag per category the visualization's types fall in (#409); the
+          // renderer itself is still picked from visualizationTypeMap's single type.
+          optionTag={(key) =>
+            visualizationCategoryLabels(
+              visualizationTagMap?.get(key) ?? [visualizationTypeMap?.get(key)],
+            ).map((label) => ({ label, kind: "visualizationType" }))
+          }
           disabled={!problemName || noRenderableOptions}
           disabledMessage={
             noRenderableOptions

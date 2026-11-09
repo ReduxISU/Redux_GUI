@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "node --test \"tests/unit/**/*.test.mjs\"",
     "test:e2e": "playwright test",
     "format": "biome check --write .",
     "format:check": "biome check .",
@@ -41,7 +42,7 @@
     "react-split": "^2.0.14"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.3",
+    "@biomejs/biome": "^2.6.4",
     "@playwright/test": "^1.64.1",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.3",

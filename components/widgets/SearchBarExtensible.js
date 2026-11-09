@@ -11,6 +11,7 @@ import {
 import React, { useState } from "react";
 import { normalizeTags, tagChipSx } from "../hooks/ProblemFilters/tagStyles";
 import { useThemeMode } from "../ThemeModeContext";
+import { keyForLabel } from "./optionKeys";
 
 export default function SearchBarExtensible({
   selected,
@@ -65,7 +66,7 @@ export default function SearchBarExtensible({
       }}
       value={disabled ? disabledMessage : (optionsMap.get(selected) ?? "")}
       onChange={(event, value) => {
-        value = getKeyByValue(optionsMap, value) ?? "";
+        value = keyForLabel(options, optionsMap, value) ?? "";
         if (value === "" || options.includes(value)) {
           onSelect(value);
         }
@@ -81,7 +82,7 @@ export default function SearchBarExtensible({
         optionSearchText
           ? createFilterOptions({
               stringify: (option) => {
-                const key = getKeyByValue(optionsMap, option);
+                const key = keyForLabel(options, optionsMap, option);
                 const extra = key != null ? optionSearchText(key) : null;
                 return extra ? `${option} ${extra}` : option;
               },
@@ -90,7 +91,7 @@ export default function SearchBarExtensible({
       }
       getOptionDisabled={
         optionsDisabled
-          ? (option) => optionsDisabled.includes(getKeyByValue(optionsMap, option))
+          ? (option) => optionsDisabled.includes(keyForLabel(options, optionsMap, option))
           : undefined
       }
       disabled={disabled}
@@ -122,7 +123,7 @@ export default function SearchBarExtensible({
                       <Box sx={{ display: "flex", gap: 0.5, mr: 0.5, flexShrink: 0 }}>
                         {selectedTags.map((tag) => (
                           <Chip
-                            key={tag.kind ?? tag.label}
+                            key={`${tag.kind ?? ""}:${tag.label}`}
                             label={tag.label}
                             size="small"
                             sx={tagChipSx(tag.kind, { mode })}
@@ -145,7 +146,7 @@ export default function SearchBarExtensible({
       renderOption={
         optionsHighlight || optionsDisabled || optionTag
           ? (props, option) => {
-              const key = getKeyByValue(optionsMap, option);
+              const key = keyForLabel(options, optionsMap, option);
               const isDeemphasized = optionsHighlight ? !optionsHighlight.includes(key) : false;
               const isDisabledOption = optionsDisabled ? optionsDisabled.includes(key) : false;
               const tags = optionTag && key != null ? normalizeTags(optionTag(key)) : [];
@@ -172,7 +173,7 @@ export default function SearchBarExtensible({
                     <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
                       {tags.map((tag) => (
                         <Chip
-                          key={tag.kind ?? tag.label}
+                          key={`${tag.kind ?? ""}:${tag.label}`}
                           label={tag.label}
                           size="small"
                           sx={tagChipSx(tag.kind, { mode })}
@@ -254,15 +255,4 @@ function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
 
 function insensitiveContains(array, value) {
   return array.findIndex((element) => element.toLowerCase() === value.toLowerCase()) !== -1;
-}
-
-// The following function gets the map key based on a value input
-function getKeyByValue(map, searchValue) {
-  for (const [key, value] of map.entries()) {
-    if (value === searchValue) {
-      return key;
-    }
-  }
-  // Return a default value (e.g., null) if the value is not found
-  return null;
 }

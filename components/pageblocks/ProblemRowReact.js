@@ -22,6 +22,8 @@ import {
   complexityClassLabel,
 } from "../hooks/ProblemFilters/complexityClassOrder";
 import { problemTypeLabel } from "../hooks/ProblemFilters/problemTypeOrder";
+import { problemVariantLabel } from "../hooks/ProblemFilters/tagLabels";
+import { tagListOrUnclassified, UNCLASSIFIED } from "../hooks/ProblemFilters/tagLists";
 import { useProblemFilters } from "../hooks/ProblemFilters/useProblemFilters";
 import { useProblemIndex } from "../hooks/ProblemFilters/useProblemIndex";
 import { useProblemInfo } from "../hooks/ProblemProvider";
@@ -73,12 +75,14 @@ export default function ProblemRowReact({
   const text = textColors(mode);
 
   const problemInfo = useProblemInfo(url, problemName);
-  const { problemIndex, reductionGraph } = useProblemIndex(url);
+  const { problemIndex, reductionGraph, problemVariantOrder } = useProblemIndex(url);
   const {
     selectedComplexityClasses,
     setSelectedComplexityClasses,
     selectedProblemTypes,
     setSelectedProblemTypes,
+    selectedProblemVariants,
+    setSelectedProblemVariants,
     filteredProblems,
     clearFilters,
   } = useProblemFilters(problemIndex, reductionGraph);
@@ -176,6 +180,18 @@ export default function ProblemRowReact({
             label: "Complexity class",
             value: complexityClassLabel(problemInfo.complexityClass || "Unclassified"),
           },
+          {
+            label: "Problem type",
+            value: tagListOrUnclassified(problemInfo, "problemTypes", "problemType")
+              .map(problemTypeLabel)
+              .join(", "),
+          },
+          {
+            label: "Decision / Optimization",
+            value: tagListOrUnclassified(problemInfo, "problemVariants")
+              .map(problemVariantLabel)
+              .join(", "),
+          },
         ],
         // Source shown on its own line here
         source:
@@ -211,16 +227,23 @@ export default function ProblemRowReact({
               label: complexityClassLabel(problemIndex.get(key)?.complexityClass || "Unclassified"),
               kind: "complexityClass",
             },
-            {
-              label: problemTypeLabel(problemIndex.get(key)?.problemType || "Unclassified"),
+            // Every problem type and variant the problem declares (#409); an
+            // "Unclassified" variant (an API without problemVariants) adds no tag.
+            ...(problemIndex.get(key)?.problemTypes ?? [UNCLASSIFIED]).map((type) => ({
+              label: problemTypeLabel(type),
               kind: "problemType",
-            },
+            })),
+            ...(problemIndex.get(key)?.problemVariants ?? [])
+              .filter((variant) => variant !== UNCLASSIFIED)
+              .map((variant) => ({ label: problemVariantLabel(variant), kind: "problemVariant" })),
           ]}
           optionSearchText={(key) => {
             const tags = problemIndex.get(key);
             if (!tags) return "";
+            const problemTypes = (tags.problemTypes ?? []).join(" ");
+            const problemVariants = (tags.problemVariants ?? []).join(" ");
             const solverTypes = tags.solverTypes ? [...tags.solverTypes].join(" ") : "";
-            return `${complexityClassLabel(tags.complexityClass || "Unclassified")} ${tags.problemType ?? ""} ${solverTypes}`;
+            return `${complexityClassLabel(tags.complexityClass || "Unclassified")} ${problemTypes} ${problemVariants} ${solverTypes}`;
           }}
           extenderButtons={(input) => [
             {
@@ -235,6 +258,9 @@ export default function ProblemRowReact({
           setSelectedComplexityClasses={setSelectedComplexityClasses}
           selectedProblemTypes={selectedProblemTypes}
           setSelectedProblemTypes={setSelectedProblemTypes}
+          problemVariantOrder={problemVariantOrder}
+          selectedProblemVariants={selectedProblemVariants}
+          setSelectedProblemVariants={setSelectedProblemVariants}
           clearFilters={clearFilters}
         />{" "}
         <PopoverTooltipClick toolTip={tip} />
