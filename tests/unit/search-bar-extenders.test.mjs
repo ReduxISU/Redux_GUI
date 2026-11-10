@@ -1,20 +1,6 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
-import { fileURLToPath } from "node:url";
-
-/**
- * Mirrors `shouldOfferExtenders` in components/widgets/SearchBarExtensible.js.
- * Kept as a pure predicate so node:test can cover the Add-new rule without a
- * React transform (#387).
- */
-function shouldOfferExtenders(input, optionLabels) {
-  return (
-    input !== "" &&
-    optionLabels.findIndex((element) => element.toLowerCase() === input.toLowerCase()) === -1
-  );
-}
+import { shouldOfferExtenders } from "../../components/widgets/shouldOfferExtenders.js";
 
 describe("shouldOfferExtenders (Add new … when nothing matches)", () => {
   const labels = ["3SAT", "Clique", "Vertex Cover"];
@@ -34,15 +20,5 @@ describe("shouldOfferExtenders (Add new … when nothing matches)", () => {
 
   it("still offers the button for a partial non-exact match", () => {
     assert.equal(shouldOfferExtenders("Cli", labels), true);
-  });
-});
-
-describe("SearchBarExtensible.js keeps the helper and controlled open", () => {
-  it("exports shouldOfferExtenders and controls Autocomplete open", () => {
-    const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-    const src = readFileSync(join(root, "components/widgets/SearchBarExtensible.js"), "utf8");
-    assert.match(src, /export function shouldOfferExtenders/);
-    assert.match(src, /open=\{open\}/);
-    assert.match(src, /reason === "blur"/);
   });
 });

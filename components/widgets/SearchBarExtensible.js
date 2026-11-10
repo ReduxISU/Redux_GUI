@@ -11,6 +11,9 @@ import {
 import React, { useState } from "react";
 import { normalizeTags, tagChipSx } from "../hooks/ProblemFilters/tagStyles";
 import { useThemeMode } from "../ThemeModeContext";
+import { keyForLabel } from "./optionKeys";
+import { showsSelectedTags } from "./selectedTagVisibility";
+import { shouldOfferExtenders } from "./shouldOfferExtenders";
 
 export default function SearchBarExtensible({
   selected,
@@ -45,30 +48,18 @@ export default function SearchBarExtensible({
   // matching the user's input (e.g. a problem's complexity class/solver types) so
   // search isn't limited to the display name alone. (key) => string.
   optionSearchText = null,
+  // Hides the selected-value tags inside the search box while the typed text differs from the
+  // selected option's label (issue #341). Off by default: only the main problem picker opts in.
+  hideSelectedTagsWhileTyping = false,
   ...props
 }) {
   const [input, setInput] = useState("");
-  // Controlled open so the paper stays up when the filter yields no options —
-  // that is exactly when the Add new … extender buttons are needed (#387).
-  const [open, setOpen] = useState(false);
   const { mode } = useThemeMode();
 
   return (
     <Autocomplete
       {...props}
-      open={open}
-      onOpen={() => setOpen(true)}
-      onClose={(_event, reason) => {
-        if (
-          reason === "blur" ||
-          reason === "escape" ||
-          reason === "selectOption" ||
-          reason === "removeOption" ||
-          reason === "toggleInput"
-        ) {
-          setOpen(false);
-        }
-      }}
+      slotProps={{ popper: { keepMounted: true } }}
       slots={{
         paper: ({ children }) => (
           <SearchBarPaper input={input} optionsMap={optionsMap} extenderButtons={extenderButtons}>
@@ -76,19 +67,12 @@ export default function SearchBarExtensible({
           </SearchBarPaper>
         ),
       }}
-      onInputChange={(_event, value, reason) => {
-        const next = value ?? "";
-        setInput(next);
-        if (reason === "input" && next !== "") {
-          setOpen(true);
-        }
-        if (reason === "clear" || reason === "reset") {
-          setOpen(false);
-        }
+      onInputChange={(event, value) => {
+        setInput(value ?? "");
       }}
       value={disabled ? disabledMessage : (optionsMap.get(selected) ?? "")}
       onChange={(event, value) => {
-        value = getKeyByValue(optionsMap, value) ?? "";
+        value = keyForLabel(options, optionsMap, value) ?? "";
         if (value === "" || options.includes(value)) {
           onSelect(value);
         }
@@ -104,7 +88,7 @@ export default function SearchBarExtensible({
         optionSearchText
           ? createFilterOptions({
               stringify: (option) => {
-                const key = getKeyByValue(optionsMap, option);
+                const key = keyForLabel(options, optionsMap, option);
                 const extra = key != null ? optionSearchText(key) : null;
                 return extra ? `${option} ${extra}` : option;
               },
@@ -113,7 +97,7 @@ export default function SearchBarExtensible({
       }
       getOptionDisabled={
         optionsDisabled
-          ? (option) => optionsDisabled.includes(getKeyByValue(optionsMap, option))
+          ? (option) => optionsDisabled.includes(keyForLabel(options, optionsMap, option))
           : undefined
       }
       disabled={disabled}
@@ -128,8 +112,17 @@ export default function SearchBarExtensible({
         // Tags for the currently-selected value, shown to the right of the
         // input's text even while the dropdown list itself is closed --
         // same tags/colors as the open list's rows (via optionTag + tagChipSx).
-        const selectedTags =
-          !disabled && optionTag && selected ? normalizeTags(optionTag(selected)) : [];
+        const selectedLabel = optionsMap.get(selected) ?? "";
+        const selectedTags = showsSelectedTags({
+          disabled,
+          hasOptionTag: Boolean(optionTag),
+          selected,
+          selectedLabel,
+          input,
+          hideWhileTyping: hideSelectedTagsWhileTyping,
+        })
+          ? normalizeTags(optionTag(selected))
+          : [];
         return (
           <TextField
             {...params}
@@ -168,7 +161,7 @@ export default function SearchBarExtensible({
       renderOption={
         optionsHighlight || optionsDisabled || optionTag
           ? (props, option) => {
-              const key = getKeyByValue(optionsMap, option);
+              const key = keyForLabel(options, optionsMap, option);
               const isDeemphasized = optionsHighlight ? !optionsHighlight.includes(key) : false;
               const isDisabledOption = optionsDisabled ? optionsDisabled.includes(key) : false;
               const tags = optionTag && key != null ? normalizeTags(optionTag(key)) : [];
@@ -237,10 +230,6 @@ function sortOptions(a, b, { groupBy, groupOrder, optionsHighlight }) {
 }
 
 function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
-  const buttons =
-    typeof extenderButtons === "function" && shouldOfferExtenders(input, [...optionsMap.values()])
-      ? extenderButtons(input)
-      : [];
   return (
     <Paper
       sx={{
@@ -255,10 +244,10 @@ function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
       }}
     >
       {children}
-      {buttons.length > 0 ? (
+      {!shouldOfferExtenders(input, [...optionsMap.values()]) ? null : (
         <>
           <Divider />
-          {buttons.map(({ label, href }, idx) => (
+          {extenderButtons(input).map(({ label, href }, idx) => (
             <Button
               key={`ExtenderButton#${idx}`}
               color="primary"
@@ -274,27 +263,7 @@ function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
             </Button>
           ))}
         </>
-      ) : null}
+      )}
     </Paper>
   );
-}
-
-/** True when typed text is non-empty and not an exact option label (case-insensitive). */
-export function shouldOfferExtenders(input, optionLabels) {
-  return input !== "" && !insensitiveContains(optionLabels, input);
-}
-
-function insensitiveContains(array, value) {
-  return array.findIndex((element) => element.toLowerCase() === value.toLowerCase()) !== -1;
-}
-
-// The following function gets the map key based on a value input
-function getKeyByValue(map, searchValue) {
-  for (const [key, value] of map.entries()) {
-    if (value === searchValue) {
-      return key;
-    }
-  }
-  // Return a default value (e.g., null) if the value is not found
-  return null;
 }
