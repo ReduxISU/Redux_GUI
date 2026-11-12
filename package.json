@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.6",
-    "@playwright/test": "^1.64.1",
+    "@playwright/test": "^1.65.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.5",
     "eslint-config-prettier": "^10.1.8",
