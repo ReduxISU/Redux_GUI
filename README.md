@@ -29,6 +29,7 @@
 The Redux Frontend is a Next.js-based web application that provides an interactive interface for exploring computational complexity problems, reductions, and visualizations. The frontend is **integrally linked to the Redux REST API** and depends on the backend being installed and running.
 
 **Key Features:**
+
 - Interactive problem visualization using React and D3.js
 - Real-time problem reduction visualization
 - Solution and certificate verification interface
@@ -92,21 +93,25 @@ The Redux frontend is currently functionally complete. The majority of future ad
 ### Key Directory Structure
 
 **Visualization Files:**
+
 - `components/Visualization/svgs/Visualizations.js` - The registry that maps a `visualizationType` (for example `GraphD3`) to the renderer that draws it
 - `components/Visualization/svgs/visualizationTypes.json` - A copy of the API's list of visualization types (see "Adding New Visualizations" below)
 - `components/Visualization/svgs/` - Contains all SVG-generating React components
 - `components/widgets/VisualizationLogic.js` - Looks up the renderer and hands it the data to draw (reductions are drawn through the same registry)
 
 **Page Components:**
+
 - `components/pageblocks/` - Major components that make up the main interface
 - `pages/index.js` - Main page that implements all components
 
 **Widgets:**
+
 - `components/widgets/` - Reusable React components used throughout the application
 
 ### Adding New Components
 
 When adding new features:
+
 - **New major components** → Add to `components/pageblocks/` folder, then implement in `pages/index.js`
 - **New visualizations** → Add to `components/Visualization/svgs/` folder
 - **New widgets** → Add to `components/widgets/` folder
@@ -141,6 +146,7 @@ Whichever case you are in, make sure the visualization works for both solved and
 ### Adding New Major Components
 
 New major page components should be:
+
 1. Created in the `components/pageblocks/` folder
 2. Implemented in the `pages/index.js` file
 
@@ -234,16 +240,19 @@ If your visualization reuses an existing type, the work is in the Redux API and 
 If you added a **new type** to this repo, all of the following must be true:
 
 **React Component Structure**
+
 - The renderer is a React component that returns an SVG
 - It draws from the `problemData` prop it is given, and does not call the API itself
 - It follows the style of existing visualizations and reuses their methods where applicable
 
 **Feature Completeness**
+
 - Solution highlighting works (both solved and unsolved instances draw correctly)
 - Gadget highlighting works if the type is used for reduction visualizations
 - It works for all relevant reduction types
 
 **Code Integration**
+
 - The renderer is registered in `components/Visualization/svgs/Visualizations.js`
 - The type name is in `components/Visualization/svgs/visualizationTypes.json`, spelled exactly like the API's enum member
 - The matching Redux API PR exists and links to this one
