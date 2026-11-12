@@ -291,6 +291,6 @@ For a complete list of contributors, visit our [About Us page](https://redux.por
 
 ## License
 
-This project is developed at Idaho State University's Computer Science Department.
+BSD 3-Clause, the same license as the Redux backend. See [LICENSE](./LICENSE). This project is developed at Idaho State University's Computer Science Department.
 
 ---
