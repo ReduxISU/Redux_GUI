@@ -67,16 +67,23 @@ export default function SolveRowReact({
   const [solveError, setSolveError] = useState(null);
   // Bumped on every Solve and selection change, so a failure that arrives late is dropped.
   const solveRun = useRef(0);
+  // The running Solve's AbortController, aborted like solveRun is bumped; it stops a wait to ask a
+  // busy server again for an answer nobody wants any more.
+  const solveStale = useRef(null);
 
   // Same reset as the solved instance in useSolvedInstance. A new problem brings a new instance.
   useWhenChanged([problemInstance, chosenSolver], () => {
     solveRun.current += 1;
+    solveStale.current?.abort();
     setSolveError(null);
   });
 
   async function handleSolve() {
     solveRun.current += 1;
     const run = solveRun.current;
+    solveStale.current?.abort();
+    const stale = new AbortController();
+    solveStale.current = stale;
     setSolveError(null);
     // A solver that can't run answers with `{ message, hint }`; an unreachable server or any
     // other failure gets a plain message (userFacingError).
@@ -85,7 +92,13 @@ export default function SolveRowReact({
     };
     setSolvedInstance(
       chosenSolver && problemInstance
-        ? ((await requestSolvedInstance(url, chosenSolver, problemInstance, onError)) ?? "")
+        ? ((await requestSolvedInstance(
+            url,
+            chosenSolver,
+            problemInstance,
+            onError,
+            stale.signal,
+          )) ?? "")
         : "",
     );
   }
