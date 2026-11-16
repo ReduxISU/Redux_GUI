@@ -17,6 +17,13 @@ import { useEffect, useState } from "react";
 import { requestContributorDirectory, requestContributorProfile } from "../../components/redux";
 import { useThemeMode } from "../../components/ThemeModeContext";
 import { innerCardSx, surfaceColors, textColors } from "../../components/theme";
+import {
+  normalizeOtherContributions,
+  prCountLabel,
+  prLinkText,
+  toggleLabel,
+  visiblePullRequests,
+} from "../../components/widgets/otherContributions";
 import ProblemSection from "../../components/widgets/ProblemSection";
 
 const reduxBaseUrl = "/api/redux/";
@@ -277,6 +284,75 @@ function ContributionList({ label, items }) {
           </Box>
         ))}
       </Box>
+    </Box>
+  );
+}
+
+// One area of "Other Contributions:" -- its PR links, first few only until expanded.
+function OtherContributionsArea({ area, pullRequests }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  const [expanded, setExpanded] = useState(false);
+  const toggle = toggleLabel(pullRequests.length, expanded);
+  return (
+    <Box sx={{ mt: 0.75 }}>
+      <Typography sx={{ color: text.body, fontSize: "0.84rem", fontWeight: 600 }}>
+        {area} {prCountLabel(pullRequests.length)}
+      </Typography>
+      <Box component="ul" sx={{ m: 0, pl: 3, color: text.caption, fontSize: "0.82rem" }}>
+        {visiblePullRequests(pullRequests, expanded).map((pr) => (
+          <Box component="li" key={pr.url}>
+            <Link
+              href={pr.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ color: text.body }}
+            >
+              {prLinkText(pr)}
+            </Link>
+          </Box>
+        ))}
+      </Box>
+      {toggle && (
+        <Button
+          size="small"
+          onClick={() => setExpanded((value) => !value)}
+          aria-expanded={expanded}
+          sx={{
+            color: text.heading,
+            fontSize: "0.78rem",
+            minWidth: 0,
+            ml: 2,
+            p: "0 6px",
+            textTransform: "none",
+            textDecoration: "underline",
+            textDecorationColor: "#F47C20",
+          }}
+        >
+          {toggle}
+        </Button>
+      )}
+    </Box>
+  );
+}
+
+// PRs outside the code-credited categories above (API/core code, interfaces, tests, CI,
+// docs), grouped by area. Filled by the backend at release time, so it is often empty --
+// then nothing renders.
+function OtherContributionsList({ items }) {
+  const { mode } = useThemeMode();
+  const text = textColors(mode);
+  const areas = normalizeOtherContributions(items);
+  if (areas.length === 0) return null;
+  return (
+    <Box sx={{ mb: 1.5 }}>
+      <Typography sx={{ color: text.heading, fontSize: "0.87rem", fontWeight: 600 }}>
+        Other Contributions:
+      </Typography>
+      {areas.map(({ area, pullRequests }) => (
+        <OtherContributionsArea key={area} area={area} pullRequests={pullRequests} />
+      ))}
     </Box>
   );
 }
@@ -1015,6 +1091,10 @@ export default function AboutUsPage() {
               <ContributionList
                 label="Visualizations"
                 items={profileData.visualizationsCreated ?? profileData.VisualizationsCreated}
+              />
+
+              <OtherContributionsList
+                items={profileData.otherContributions ?? profileData.OtherContributions}
               />
 
               <LegacyContributionsList
