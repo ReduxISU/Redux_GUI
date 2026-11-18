@@ -254,6 +254,20 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
       .text((d) => d.name)
       .style("pointer-events", "none"); // disables pointer events for labels
 
+    // Vertex weights are decimal strings so full Int64 values remain exact.
+    // Keep them separate from node identity and from the existing edge weights.
+    const nodeWeightLabel = svg
+      .selectAll(".node-weight-label")
+      .data(data.nodes.filter((d) => d.weight != null && String(d.weight).trim() !== ""))
+      .enter()
+      .append("text")
+      .attr("class", "node-weight-label")
+      .attr("fill", textColor)
+      .attr("font-size", "10px")
+      .attr("text-anchor", "middle")
+      .style("pointer-events", "none")
+      .text((d) => `w=${d.weight}`);
+
     // Scale for link distances based on weight
     const weights = data.links.map((d) => d.weight);
     const minWeight = d3.min(weights);
@@ -304,6 +318,8 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
         .attr("y", (d) => d.y)
         .attr("dy", 5)
         .text((d) => d.name);
+
+      nodeWeightLabel.attr("x", (d) => d.x).attr("y", (d) => d.y - 27);
     }
 
     // Stop this draw's simulation before the next draw or unmount, so an old one doesn't keep

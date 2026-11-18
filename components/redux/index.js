@@ -614,9 +614,10 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
  * @returns the graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualization(url, visualization, instance, onError) {
+export async function requestVisualization(url, visualization, instance, onError, solver) {
+  const solverQuery = solver ? `&solver=${encodeURIComponent(solver)}` : "";
   return await fetchPostJson(
-    `${url}ProblemProvider/visualize?visualization=${visualization}`,
+    `${url}ProblemProvider/visualize?visualization=${visualization}${solverQuery}`,
     instance,
     () => `${visualization} VISUALIZE REQUEST FAILED`,
     onError,
