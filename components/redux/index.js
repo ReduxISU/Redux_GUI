@@ -3,6 +3,14 @@
  * This is a reusable, stand-alone module.
  */
 
+import {
+  BUSY_MESSAGE,
+  busyAnswerAction,
+  busyError,
+  busyRetryDelayMs,
+  waitUnlessAborted,
+} from "./busyRetry.js";
+
 // Longest server error text kept in a failure description.
 const MAX_ERROR_TEXT = 200;
 
@@ -41,6 +49,9 @@ function describeFetchError(error) {
 
 // How long a request may go without a full answer before it counts as failed. Without it a
 // request that hangs (no answer and no error) would leave its pane on "Loading..." forever.
+// The limit is per attempt: a compute request the server was too busy for (HTTP 429) is asked
+// again up to MAX_BUSY_RETRIES times (busyRetry.js), each attempt with its own 60 seconds, and the
+// waits between attempts (at most 31 seconds each) don't count against it.
 export const REQUEST_TIMEOUT_MS = 60_000;
 
 const TIMEOUT_TEXT = `No answer from the server after ${REQUEST_TIMEOUT_MS / 1000} seconds.`;
@@ -53,6 +64,7 @@ function statusMessage(status) {
     return `The Redux server couldn't use this input (HTTP ${status}). Check the instance and try again.`;
   }
   if (status === 404) return "The Redux server doesn't know this request (HTTP 404).";
+  if (status === 429) return BUSY_MESSAGE;
   if (status === 408 || status === 504) {
     return `The Redux server took too long to answer (HTTP ${status}). Try again.`;
   }
@@ -78,6 +90,10 @@ export function userFacingError(detail, body, failure) {
     nonEmptyText(body?.message) || nonEmptyText(body?.detail) || nonEmptyText(body?.title);
   const unreachable =
     kind === "unreachable" || (kind === "rejected" && failure.status === 502 && !backendMessage);
+  if (kind === "rejected" && failure.status === 429) {
+    // Still busy after every retry: say so plainly, with the server's hint when it sent one.
+    return { ...busyError(body), detail: detail ?? "" };
+  }
   let message;
   if (unreachable) message = UNREACHABLE_MESSAGE;
   else if (kind === "timeout") {
@@ -123,10 +139,35 @@ function startTimeout() {
  * otherwise), and `failure` is `{ kind, status, text }` with kind "unreachable" (no answer),
  * "timeout", "rejected" (an error status; `status` and the plain-text body `text` come with it)
  * or "unreadable". userFacingError turns these into a message for the user.
+ * @param options Optional `{ retryBusy, signal, wait, random }`. With `retryBusy` (the compute
+ * requests the backend limits, see fetchComputeJson), an HTTP 429 "server busy" answer is not a
+ * failure yet: the request waits the server's Retry-After (busyRetry.js) and is sent again, up to
+ * MAX_BUSY_RETRIES times. Only the last answer is logged and passed to onError, so the caller's
+ * pane stays on its loading state in between. `signal` is the caller's AbortSignal: once it
+ * aborts (nobody wants the answer any more), a wait ends at once, nothing more is sent, and the
+ * request resolves `undefined` without calling onError. It does not cut short an attempt already
+ * sent, which ends as it always has, except that a busy answer to it is dropped too. `wait(ms, signal)` and `random()` stand in for the timer and
+ * the jitter in unit tests.
  * @returns the JSON format of the fetch request.
  * @returns `undefined` on failure and logs the error.
  */
-async function fetchAndParse(url, init, failMsg, onError) {
+export async function fetchAndParse(url, init, failMsg, onError, options = {}) {
+  const { retryBusy = false, signal, wait = waitUnlessAborted, random = Math.random } = options;
+  for (let retries = 0; ; retries += 1) {
+    const retryOn = (status) => retryBusy && busyAnswerAction(status, retries, signal) !== "fail";
+    const attempt = await fetchAndParseOnce(url, init, failMsg, onError, retryOn);
+    if (!attempt.retry) return attempt.result;
+    const delay = busyRetryDelayMs(attempt.retryAfter, attempt.body, random);
+    if (!(await wait(delay, signal)) || signal?.aborted) return undefined;
+  }
+}
+
+/**
+ * One attempt of fetchAndParse, with its own REQUEST_TIMEOUT_MS. When `retryOn(status)` says a
+ * failed answer is to be asked again, resolves `{ retry: true, retryAfter, body }` (its Retry-After
+ * header and parsed body) without logging it or calling onError; otherwise `{ result }`.
+ */
+async function fetchAndParseOnce(url, init, failMsg, onError, retryOn) {
   // The timeout covers the whole exchange: waiting for the answer and reading its body.
   const timeout = startTimeout();
   try {
@@ -137,16 +178,20 @@ async function fetchAndParse(url, init, failMsg, onError) {
       console.log(`${failMsg()}: `, error);
       if (timeout.timedOut()) onError?.(TIMEOUT_TEXT, undefined, { kind: "timeout" });
       else onError?.(describeFetchError(error), undefined, { kind: "unreachable" });
-      return undefined;
+      return { result: undefined };
     }
     if (!resp.ok) {
+      if (retryOn(resp.status)) {
+        const { body } = await describeFailedResponse(resp);
+        return { retry: true, retryAfter: resp.headers?.get("Retry-After"), body };
+      }
       console.log(`${failMsg()}: ${resp.status} (${resp.statusText})`);
       const { description, body, text } = await describeFailedResponse(resp);
       onError?.(description, body, { kind: "rejected", status: resp.status, text });
-      return undefined;
+      return { result: undefined };
     }
     try {
-      return await resp.json();
+      return { result: await resp.json() };
     } catch (error) {
       console.log(`${failMsg()}: `, error);
       if (timeout.timedOut()) onError?.(TIMEOUT_TEXT, undefined, { kind: "timeout" });
@@ -157,7 +202,7 @@ async function fetchAndParse(url, init, failMsg, onError) {
           { kind: "unreadable" },
         );
       }
-      return undefined;
+      return { result: undefined };
     }
   } finally {
     timeout.clear();
@@ -180,7 +225,7 @@ async function fetchJson(url, failMsg, onError) {
  * @returns the JSON format of the fetch request.
  * @returns `undefined` on failure and logs the error.
  */
-async function fetchPostJson(url, body, failMsg, onError) {
+async function fetchPostJson(url, body, failMsg, onError, options) {
   return fetchAndParse(
     url,
     {
@@ -192,7 +237,19 @@ async function fetchPostJson(url, body, failMsg, onError) {
     },
     failMsg,
     onError,
+    options,
   );
+}
+
+/**
+ * A POST to a compute endpoint, one the backend limits (its `[ComputeJob]` actions: solve, verify,
+ * visualize, visualizeReduction, reduce, mapSolution, mapSolutionBack, gadgets). Only these can be
+ * turned away as busy (HTTP 429), so only these are retried (see fetchAndParse); the job was
+ * turned away before it started, so sending the POST again is safe. `signal` (optional) is the
+ * caller's AbortSignal for a request whose answer may stop being wanted.
+ */
+async function fetchComputeJson(url, body, failMsg, onError, signal) {
+  return fetchPostJson(url, body, failMsg, onError, { retryBusy: true, signal });
 }
 
 /**
@@ -233,12 +290,13 @@ async function cachedRequest(cacheKey, requestFn, onError) {
  * @returns the gadget map of ids based on an `instance` from the specified `reduction`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestGadgetMap(url, reduction, instance, onError) {
-  return await fetchPostJson(
+export async function requestGadgetMap(url, reduction, instance, onError, signal) {
+  return await fetchComputeJson(
     `${url}ProblemProvider/gadgets?reduction=${reduction}`,
     instance,
     () => `${reduction} MAP GADGETS REQUEST FAILED`,
     onError,
+    signal,
   );
 }
 
@@ -248,6 +306,8 @@ export async function requestGadgetMap(url, reduction, instance, onError) {
  * @param onError Optional; called as onError(step, detail, body, failure) when a gadget map or
  * reduce request along the path fails, `step` naming the request and reduction, `detail` what
  * went wrong, and `body`/`failure` as fetchAndParse gives them (see userFacingError).
+ * @param signal Optional; the caller's AbortSignal, which also stops a wait to retry a request the
+ * server was too busy for (see fetchAndParse).
  * @returns `undefined` when a gadget map or reduce request along the path fails.
  */
 export async function processReductions(
@@ -256,6 +316,7 @@ export async function processReductions(
   instance,
   isCurrent = () => true,
   onError = () => {},
+  signal,
 ) {
   const reductions = reductionPath.split("-").map((r) => r.trim());
 
@@ -264,17 +325,29 @@ export async function processReductions(
 
   for (const reduction of reductions) {
     let failure = [];
-    const nextMap = await requestGadgetMap(url, reduction, currentInstance, (...f) => {
-      failure = f;
-    });
+    const nextMap = await requestGadgetMap(
+      url,
+      reduction,
+      currentInstance,
+      (...f) => {
+        failure = f;
+      },
+      signal,
+    );
     if (!isCurrent()) return undefined;
     if (nextMap === undefined) {
       onError(`Gadget request for reduction ${reduction}`, ...failure);
       return undefined;
     }
-    const reduced = await requestReducedInstance(url, reduction, currentInstance, (...f) => {
-      failure = f;
-    });
+    const reduced = await requestReducedInstance(
+      url,
+      reduction,
+      currentInstance,
+      (...f) => {
+        failure = f;
+      },
+      signal,
+    );
     if (!isCurrent()) return undefined;
     if (!reduced) {
       const [detail = "The server sent back nothing.", ...rest] = failure;
@@ -415,15 +488,29 @@ export async function requestInfo(url, apiCall, onError) {
  * @param reductionPath a hyphen (`-`) separated list of reductions to perform on the instance.
  * @param onError Optional; called with fetchAndParse's onError arguments when a reduce request
  * along the path fails (see userFacingError).
+ * @param signal Optional; the caller's AbortSignal (see fetchAndParse).
  * @returns the reduced `instance` list of reductions, the reduction path.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReducedInstanceFromPath(url, reductionPath, instance, onError) {
+export async function requestReducedInstanceFromPath(
+  url,
+  reductionPath,
+  instance,
+  onError,
+  signal,
+) {
   for (const path of reductionPath.split("-")) {
     let failure = ["The server sent back nothing."];
-    const reducedInst = await requestReducedInstance(url, path, instance, (...f) => {
-      failure = f;
-    });
+    const reducedInst = await requestReducedInstance(
+      url,
+      path,
+      instance,
+      (...f) => {
+        failure = f;
+      },
+      signal,
+    );
+    if (signal?.aborted) return undefined;
     if (!reducedInst) {
       console.log(`${reductionPath} AT ${path} REDUCED INSTANCE FROM PATH REQUEST FAILED`);
       onError?.(...failure);
@@ -438,12 +525,13 @@ export async function requestReducedInstanceFromPath(url, reductionPath, instanc
  * @returns the reduced `instance` from the specified `reduction`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReducedInstance(url, reduction, instance, onError) {
-  return await fetchPostJson(
+export async function requestReducedInstance(url, reduction, instance, onError, signal) {
+  return await fetchComputeJson(
     `${url}ProblemProvider/reduce?reduction=${reduction}`,
     instance,
     () => `${reduction}  REDUCED INSTANCE REQUEST FAILED`,
     onError,
+    signal,
   );
 }
 
@@ -477,12 +565,20 @@ export async function requestReductionOptions(url, problem, onError) {
  * @returns the graph visualization of the reduced problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestReductionVisualization(url, reduction, solution, instance, onError) {
-  return await fetchPostJson(
+export async function requestReductionVisualization(
+  url,
+  reduction,
+  solution,
+  instance,
+  onError,
+  signal,
+) {
+  return await fetchComputeJson(
     `${url}ProblemProvider/visualizeReduction?reduction=${reduction}&solution=${solution}`,
     instance,
     () => `${reduction} VISUALIZE REQUEST FAILED`,
     onError,
+    signal,
   );
 }
 
@@ -524,12 +620,13 @@ export async function requestReductions(url, problemFrom, problemTo, onError) {
  * @returns the solved `instance` from the specified `solver`.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestSolvedInstance(url, solver, instance, onError) {
-  return await fetchPostJson(
+export async function requestSolvedInstance(url, solver, instance, onError, signal) {
+  return await fetchComputeJson(
     `${url}ProblemProvider/solve?solver=${solver}`,
     instance,
     () => `${solver} SOLVED INSTANCE REQUEST FAILED`,
     onError,
+    signal,
   );
 }
 
@@ -565,48 +662,72 @@ function describeVerifyError(status, body) {
     const detail = body.detail ? ` (${body.detail})` : "";
     return `Certificate couldn't be read.${expected}${detail}`;
   }
+  if (status === 429) {
+    const { message, hint } = busyError(body);
+    return `${message} ${hint}`;
+  }
   const message = body?.message ?? body?.detail ?? body?.title ?? body?.error;
   return `Verification failed (HTTP ${status})${message ? `: ${message}` : ""}`;
 }
 
 /**
+ * Verify is a compute endpoint, so an HTTP 429 "server busy" answer is asked again like the
+ * others (see fetchAndParse; `options` takes the same `signal`, `wait` and `random`).
  * @returns the verified `instance` result from the specified `verifier`.
  * @returns a human-readable error message (a string) if the request fails or the backend rejects
- * the certificate, e.g. "Certificate couldn't be read. Expected: ...". Never `undefined`.
+ * the certificate, e.g. "Certificate couldn't be read. Expected: ...". Never `undefined`; an empty
+ * string when `signal` aborted while waiting to ask again.
  */
-export async function requestVerifiedInstance(url, problem, verifier, instance, certificate) {
-  const timeout = startTimeout();
-  try {
-    const resp = await fetch(`${url}ProblemProvider/verify?verifier=${verifier}`, {
-      method: "POST",
-      body: JSON.stringify({ problemInstance: instance, certificate: certificate }),
-      headers: { "Content-Type": "application/json; charset=UTF-8" },
-      signal: timeout.signal,
-    });
-    if (resp.ok) {
-      return await resp.json();
-    }
-    let body;
+export async function requestVerifiedInstance(
+  url,
+  problem,
+  verifier,
+  instance,
+  certificate,
+  options = {},
+) {
+  const { signal, wait = waitUnlessAborted, random = Math.random } = options;
+  for (let retries = 0; ; retries += 1) {
+    const timeout = startTimeout();
+    let busy;
     try {
-      body = await resp.json();
-    } catch {
-      body = undefined;
+      const resp = await fetch(`${url}ProblemProvider/verify?verifier=${verifier}`, {
+        method: "POST",
+        body: JSON.stringify({ problemInstance: instance, certificate: certificate }),
+        headers: { "Content-Type": "application/json; charset=UTF-8" },
+        signal: timeout.signal,
+      });
+      if (resp.ok) {
+        return await resp.json();
+      }
+      let body;
+      try {
+        body = await resp.json();
+      } catch {
+        body = undefined;
+      }
+      if (busyAnswerAction(resp.status, retries, signal) !== "fail") {
+        busy = { retryAfter: resp.headers?.get("Retry-After"), body };
+      } else {
+        // A rejected certificate is expected user error, not a broken request; only log the rest.
+        if (body?.error !== "certificate_parse_error") {
+          console.log(
+            `${verifier} VERIFIED INSTANCE REQUEST FAILED: ${resp.status} (${resp.statusText})`,
+          );
+        }
+        return describeVerifyError(resp.status, body);
+      }
+    } catch (error) {
+      console.log(`${verifier} VERIFIED INSTANCE REQUEST FAILED: `, error);
+      if (timeout.timedOut()) {
+        return `The verifier didn't answer within ${REQUEST_TIMEOUT_MS / 1000} seconds. Try again.`;
+      }
+      return "Couldn't reach the verifier. Check your connection and try again.";
+    } finally {
+      timeout.clear();
     }
-    // A rejected certificate is expected user error, not a broken request; only log the rest.
-    if (body?.error !== "certificate_parse_error") {
-      console.log(
-        `${verifier} VERIFIED INSTANCE REQUEST FAILED: ${resp.status} (${resp.statusText})`,
-      );
-    }
-    return describeVerifyError(resp.status, body);
-  } catch (error) {
-    console.log(`${verifier} VERIFIED INSTANCE REQUEST FAILED: `, error);
-    if (timeout.timedOut()) {
-      return `The verifier didn't answer within ${REQUEST_TIMEOUT_MS / 1000} seconds. Try again.`;
-    }
-    return "Couldn't reach the verifier. Check your connection and try again.";
-  } finally {
-    timeout.clear();
+    const delay = busyRetryDelayMs(busy.retryAfter, busy.body, random);
+    if (!(await wait(delay, signal)) || signal?.aborted) return "";
   }
 }
 
@@ -614,12 +735,13 @@ export async function requestVerifiedInstance(url, problem, verifier, instance, 
  * @returns the graph visualization of the problem instance.
  * @returns `undefined` on failure and logs the error.
  */
-export async function requestVisualization(url, visualization, instance, onError) {
-  return await fetchPostJson(
+export async function requestVisualization(url, visualization, instance, onError, signal) {
+  return await fetchComputeJson(
     `${url}ProblemProvider/visualize?visualization=${visualization}`,
     instance,
     () => `${visualization} VISUALIZE REQUEST FAILED`,
     onError,
+    signal,
   );
 }
 

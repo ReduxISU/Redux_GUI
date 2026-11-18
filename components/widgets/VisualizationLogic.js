@@ -65,6 +65,8 @@ export default function VisualizationLogic({
     if (!gadgetKey) return;
     let ignore = false;
     let failure = null;
+    // Stops a wait to ask a busy server again once this answer is no longer wanted.
+    const stale = new AbortController();
     processReductions(
       url,
       chosenReductionType,
@@ -73,6 +75,7 @@ export default function VisualizationLogic({
       (step, ...requestFailure) => {
         failure = { step, ...userFacingError(...requestFailure) };
       },
+      stale.signal,
     )
       .catch((err) => {
         console.error("gadget map request failed", err);
@@ -88,6 +91,7 @@ export default function VisualizationLogic({
       });
     return () => {
       ignore = true;
+      stale.abort();
     };
   }, [gadgetKey, url, chosenReductionType, problemInstance]);
 

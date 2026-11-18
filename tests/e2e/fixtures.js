@@ -64,6 +64,10 @@ export const test = base.extend({
       page.on("response", (response) => {
         const url = response.url();
         const status = response.status();
+        // A 429 "server busy" answer is not a failure yet: the app waits and asks again
+        // (components/redux/busyRetry.js). If every retry is turned away too, the app logs its
+        // REQUEST FAILED message, which the console listener below still catches.
+        if (status === 429) return;
         const isExpected = expectedFailures.some((e) => url.includes(e.url) && status === e.status);
         if (
           url.includes("/api/redux/") &&

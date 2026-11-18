@@ -267,3 +267,75 @@ test.describe("Picture", () => {
     await expect(failedNote(visualizeRow)).toHaveCount(0);
   });
 });
+
+// The backend's answer when every compute slot is taken (Redux Interfaces/ComputeJobs.cs), with a
+// 1-second Retry-After (the shortest wait the app takes) so these tests stay quick.
+const BUSY = {
+  error: "server_busy",
+  message: "The server is busy with other jobs right now, so this one wasn't started.",
+  detail: "At most 4 compute jobs can run at once, and all of them are in use.",
+  maxConcurrentJobs: 4,
+  retryAfterSeconds: 1,
+  hint: "Wait about 1 seconds and try again.",
+};
+const BUSY_MESSAGE = "The Redux server is busy with other requests.";
+
+// Answers the first `times` requests as busy, then lets the rest through to the backend; returns
+// a function counting the requests seen.
+async function busyFor(page, pattern, times) {
+  let seen = 0;
+  await page.route(pattern, (route) => {
+    seen += 1;
+    if (seen > times) return route.fallback();
+    return route.fulfill({
+      status: 429,
+      headers: { "Retry-After": "1" },
+      contentType: "application/json",
+      body: JSON.stringify(BUSY),
+    });
+  });
+  return () => seen;
+}
+
+test.describe("Busy server (HTTP 429)", () => {
+  test("a solve turned away twice is asked again and shows its solution", async ({ page }) => {
+    const { solveButton, body } = await openSolveRow(page);
+
+    const seen = await busyFor(page, SOLVE, 2);
+    await solveButton.click();
+
+    await expect(body).toContainText(/Solution:\s*\(x\d+:(True|False)/);
+    await expect(body.getByRole("alert")).toHaveCount(0);
+    expect(seen()).toBeGreaterThanOrEqual(3);
+  });
+
+  test("a solve the server stays too busy for says the server is busy", async ({
+    page,
+    expectedFailures,
+  }) => {
+    expectedFailures.push({ url: "ProblemProvider/solve", status: 429, log: "SOLVED INSTANCE" });
+    const { solveButton, body } = await openSolveRow(page);
+
+    // The first answer plus 3 retries, about a second apart.
+    const seen = await busyFor(page, SOLVE, Number.POSITIVE_INFINITY);
+    await solveButton.click();
+
+    const alert = body.getByRole("alert");
+    await expect(alert).toContainText(BUSY_MESSAGE, { timeout: 15_000 });
+    await expect(alert).toContainText(`Try: ${BUSY.hint}`);
+    expect(seen()).toBeGreaterThanOrEqual(4);
+  });
+
+  test("a picture turned away once is asked again and draws", async ({ page }) => {
+    const seen = await busyFor(page, CLIQUE_PICTURE, 1);
+    await page.goto("/");
+    const visualizeRow = row(page, "Visualize");
+    await expect(pictures(visualizeRow).first()).toBeVisible();
+
+    await choose(page, "Problem", "Clique");
+
+    await expect(pictures(visualizeRow).first()).toBeVisible();
+    await expect(failedNote(visualizeRow)).toHaveCount(0);
+    expect(seen()).toBeGreaterThanOrEqual(2);
+  });
+});
