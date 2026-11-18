@@ -355,8 +355,15 @@ test("a picture request with no answer shows Failed to Visualize after 60 second
   );
 
   const asked = page.waitForRequest(/visualize\?visualization=CliqueDefaultVisualization/);
+  // Choosing Clique also reduces it; that answer must arrive before the clock jumps 60 s, or it
+  // times out too.
+  const reduced = page.waitForResponse(
+    (response) => /\/reduce\?/.test(response.url()) && response.status() === 200,
+    { timeout: 30_000 },
+  );
   await choose(page, "Problem", "Clique");
   await asked;
+  await reduced;
   await expect(loadingNote(visualizeRow)).toBeVisible();
 
   // Just short of the limit it is still loading; past it, it has failed.
