@@ -38,7 +38,7 @@ export default function TourLauncher() {
   if (compact === null) return null;
 
   return (
-    <span className="corner-button-left">
+    <span>
       {compact ? (
         <Fab
           color="secondary"

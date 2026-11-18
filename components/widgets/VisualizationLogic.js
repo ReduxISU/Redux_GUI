@@ -13,7 +13,11 @@ import {
 } from "../Visualization/svgs/No_Viz_SVG";
 import { isRenderable } from "../Visualization/svgs/renderability";
 import Visualizations from "../Visualization/svgs/Visualizations.js";
+import ZoomPanView from "../Visualization/ZoomPanView";
 import VisualizationErrorBoundary from "./VisualizationErrorBoundary";
+
+// Table visualizations scroll natively instead of zooming.
+const NON_ZOOMABLE_TYPES = ["DynamicTable", "Dynamic Table"];
 
 const NO_GADGETS = {
   key: null,
@@ -45,6 +49,8 @@ export default function VisualizationLogic({
 }) {
   let visualization;
   let reducedVisualization;
+  let zoomMain = false;
+  let zoomReduced = false;
 
   const solve = visualizationState.solverOn;
 
@@ -178,6 +184,7 @@ export default function VisualizationLogic({
         logMessage: "visualization renderer threw",
         resetKeys: [problemName, problemInstance, visualizationName, visualizationType],
       });
+      zoomMain = !NON_ZOOMABLE_TYPES.includes(visualizationType);
     }
   }
 
@@ -216,6 +223,7 @@ export default function VisualizationLogic({
         logMessage: "reduction visualization renderer threw",
         resetKeys: [problemName, problemInstance, chosenReductionType, reductionVisualization],
       });
+      zoomReduced = !NON_ZOOMABLE_TYPES.includes(reductionVisualization);
 
       //NOTE - Caleb, The following is a temporary fix until CLIQUE_SVG_REACT.js is fixed, currently it takes the 3sat instance,
       // but should take the clique instance, once that is fixed the following code block should be able to be removed without issue
@@ -223,6 +231,21 @@ export default function VisualizationLogic({
         //reducedVisualization = ReducedVisualizations.get(chosenReductionType)(solve, url, problemInstance, mappedSolution)
       }
     }
+  }
+
+  // A different problem, instance or visualization starts from the fitted view again.
+  const resetKey = `${problemName}|${problemInstance}|${visualizationType}`;
+  if (zoomMain) visualization = <ZoomPanView resetKey={resetKey}>{visualization}</ZoomPanView>;
+  if (zoomReduced) {
+    reducedVisualization = (
+      // Includes the target problem and reduction too: two reductions can share a renderer, and
+      // switching between them must still start from the fitted view.
+      <ZoomPanView
+        resetKey={`${resetKey}|${reductionName}|${chosenReductionType}|${reductionVisualization}`}
+      >
+        {reducedVisualization}
+      </ZoomPanView>
+    );
   }
 
   if (!visualizationState.reductionOn && !loading) {

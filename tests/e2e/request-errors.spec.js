@@ -49,7 +49,7 @@ async function openSolveRow(page) {
   });
   // Wait for the button before expanding; see app.spec.js for why.
   await expect(solveButton).toBeEnabled();
-  await solveRow.getByRole("button", { name: "▼" }).click();
+  await solveRow.getByRole("button", { name: "Expand Solve section" }).click();
   const body = solveRow.locator(".card-body");
   await expect(body).toBeVisible();
   return { solveButton, body };

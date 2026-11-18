@@ -65,7 +65,7 @@ test("solving 3SAT returns a satisfying assignment", async ({ page }) => {
 
   // The button stays disabled until a solver is chosen, so waiting for it to enable is also how
   // we know the solver list arrived from the backend. Wait for it BEFORE expanding the row: the
-  // ▼ button is painted before React hydrates, and a click that lands in that window is silently
+  // expand button is painted before React hydrates, and a click that lands in that window is silently
   // lost. An enabled Solve button proves the page is hydrated and has data. includeHidden is what
   // lets the locator find it while the row is still collapsed; getByRole skips hidden elements
   // by default.
@@ -78,7 +78,7 @@ test("solving 3SAT returns a satisfying assignment", async ({ page }) => {
 
   // Solve and Verify start collapsed (components/widgets/ProblemSection.js). Their bodies are in
   // the DOM but hidden, so expand before asserting on anything inside.
-  await solveRow.getByRole("button", { name: "▼" }).click();
+  await solveRow.getByRole("button", { name: "Expand Solve section" }).click();
 
   const body = solveRow.locator(".card-body");
   await expect(body).toBeVisible();
@@ -108,7 +108,7 @@ test("a solver that can't run shows the backend's message and hint", async ({
     includeHidden: true,
   });
   await expect(solveButton).toBeEnabled();
-  await solveRow.getByRole("button", { name: "▼" }).click();
+  await solveRow.getByRole("button", { name: "Expand Solve section" }).click();
   const body = solveRow.locator(".card-body");
   await expect(body).toBeVisible();
 
@@ -145,7 +145,7 @@ test("a solver's error doesn't follow the user to another solver", async ({
     includeHidden: true,
   });
   await expect(solveButton).toBeEnabled();
-  await solveRow.getByRole("button", { name: "▼" }).click();
+  await solveRow.getByRole("button", { name: "Expand Solve section" }).click();
   const body = solveRow.locator(".card-body");
   await expect(body).toBeVisible();
 
@@ -219,7 +219,7 @@ test("the 3SAT verifier answers True and False correctly", async ({ page }) => {
   const verifyRow = row(page, "Verify");
 
   // Same order as the Solve test: wait for the action button to enable (hydrated, data arrived)
-  // before clicking ▼, or the expand click can be lost.
+  // before clicking the expand button, or the expand click can be lost.
   const verifyButton = verifyRow.getByRole("button", {
     name: "Verify",
     exact: true,
@@ -228,7 +228,7 @@ test("the 3SAT verifier answers True and False correctly", async ({ page }) => {
   await expect(verifyButton).toBeEnabled();
 
   // Verify starts collapsed, like Solve.
-  await verifyRow.getByRole("button", { name: "▼" }).click();
+  await verifyRow.getByRole("button", { name: "Expand Verify section" }).click();
   const body = verifyRow.locator(".card-body");
   await expect(body).toBeVisible();
 
@@ -256,7 +256,7 @@ test("a 3SAT certificate containing new lines reaches the backend instead of bei
     includeHidden: true,
   });
   await expect(verifyButton).toBeEnabled();
-  await verifyRow.getByRole("button", { name: "▼" }).click();
+  await verifyRow.getByRole("button", { name: "Expand Verify section" }).click();
   const body = verifyRow.locator(".card-body");
   await expect(body).toBeVisible();
 
@@ -285,7 +285,7 @@ test("a malformed certificate shows the backend's parse error, never undefined",
     includeHidden: true,
   });
   await expect(verifyButton).toBeEnabled();
-  await verifyRow.getByRole("button", { name: "▼" }).click();
+  await verifyRow.getByRole("button", { name: "Expand Verify section" }).click();
   const body = verifyRow.locator(".card-body");
   await expect(body).toBeVisible();
 
