@@ -174,6 +174,8 @@ export default function VisualizeRowReact({
   useEffect(() => {
     if (!problemInstance || !chosenSolver) return;
     let ignore = false;
+    // Stops a wait to ask a busy server again once this answer is no longer wanted.
+    const stale = new AbortController();
 
     const fetchSolvedInstance = async () => {
       let error = null;
@@ -185,6 +187,7 @@ export default function VisualizeRowReact({
           (...failure) => {
             error = userFacingError(...failure);
           },
+          stale.signal,
         );
         if (ignore) return;
         setSolution(solved || false);
@@ -203,6 +206,7 @@ export default function VisualizeRowReact({
 
     return () => {
       ignore = true;
+      stale.abort();
     };
   }, [problemInstance, chosenSolver, url]);
 
@@ -217,6 +221,7 @@ export default function VisualizeRowReact({
   useEffect(() => {
     if (!chosenReductionType || !problemInstance || !showReduction || !solution) return;
     let ignore = false;
+    const stale = new AbortController();
 
     const fetch = async () => {
       let error = null;
@@ -229,6 +234,7 @@ export default function VisualizeRowReact({
           (...failure) => {
             error = userFacingError(...failure);
           },
+          stale.signal,
         );
         if (ignore) return;
         // undefined means the request failed; [] is an answer with nothing to draw.
@@ -247,6 +253,7 @@ export default function VisualizeRowReact({
 
     return () => {
       ignore = true;
+      stale.abort();
     };
   }, [showReduction, problemInstance, solution, chosenReductionType, url]);
 
@@ -255,6 +262,7 @@ export default function VisualizeRowReact({
     if (!instanceReady || !chosenVisualization) return;
 
     let alive = true;
+    const stale = new AbortController();
 
     const fetch = async () => {
       let error = null;
@@ -266,6 +274,7 @@ export default function VisualizeRowReact({
           (...failure) => {
             error = userFacingError(...failure);
           },
+          stale.signal,
         );
 
         if (!alive) return;
@@ -294,6 +303,7 @@ export default function VisualizeRowReact({
 
     return () => {
       alive = false;
+      stale.abort();
     };
   }, [instanceReady, chosenVisualization, problemInstance, showReduction, url, problemName]);
 

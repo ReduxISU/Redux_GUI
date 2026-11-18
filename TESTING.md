@@ -209,6 +209,7 @@ Each of these is a real gap. Pick one, open an issue if there is not one already
 matching example above as your starting point.
 
 **More flows**
+
 - One test per visualization type in `components/Visualization/svgs/Visualizations.js`. There are
   many and almost none are covered.
 - The three switches on the Visualize row (_Show reduction_, _Highlight gadgets_, _Highlight
@@ -216,6 +217,7 @@ matching example above as your starting point.
 - A smoke test per route: `/browse` and `/aboutus` both call the backend and neither is tested.
 
 **The proxy's error handling** (`pages/api/redux/[...path].js`) — none of these is tested:
+
 - 500 when `REDUX_BASE_URL` is unset
 - 400 when it is set to something that is not a URL
 - 502 when the backend is unreachable
@@ -223,6 +225,7 @@ matching example above as your starting point.
 These do not need a browser or a backend; call the handler directly with a fake request/response.
 
 **Bugs to fix, each of which unlocks a test**
+
 - The duplicate `id="search-bar"` across all six dropdowns (accessibility + testability).
 - A test asserting CLIQUE (which has two visualizations) selects its declared default. The bug that
   once broke this is fixed; the test that would keep it fixed is not written.
@@ -231,6 +234,7 @@ These do not need a browser or a backend; call the handler directly with a fake 
   placeholder instance that the backend rejects before the real default arrives.
 
 **Later**
+
 - A tour walkthrough test (click through every step, assert the popover titles and that Solve and
   Verify expand and re-collapse) — `tests/e2e/tour.spec.js` covers only the anchors. See
   `INTEGRATION_TEST_REQUIREMENTS.md` in the parent directory, section 2.
