@@ -99,11 +99,19 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
   useEffect(() => {
     if (!problemData) return;
 
-    // Normalize links and nodes to always exist
+    // The force simulation writes positions into the nodes and replaces each link's source and
+    // target name with a node object. It gets its own copies, with every endpoint given as a node
+    // name, so the props are never changed and a redraw (for example after the gadget map arrives
+    // and the ids are remapped) never links to node objects from an earlier draw.
+    const endpointName = (end) => (end && typeof end === "object" ? end.name : end);
     const data = {
       ...problemData,
-      links: problemData.links || [],
-      nodes: problemData.nodes || [],
+      nodes: (problemData.nodes || []).map((n) => ({ ...n })),
+      links: (problemData.links || []).map((l) => ({
+        ...l,
+        source: endpointName(l.source),
+        target: endpointName(l.target),
+      })),
     };
 
     d3.select(ref.current).selectChildren().remove();
@@ -118,7 +126,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
     const defs = svg.append("defs");
 
-    problemData.links?.forEach((d, i) => {
+    data.links.forEach((d, i) => {
       if (d.directed) {
         const marker = defs
           .append("marker")
@@ -169,7 +177,7 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
     // Draw arrowhead markers for directed edges. Match the link's animation so
     // the arrow color stays in sync with its line.
-    problemData.links?.forEach((d) => {
+    data.links.forEach((d) => {
       if (d.directed) {
         const markerPath = d3.select(`#${d.markerId} path`);
         const delayMs = getDelayMs(d);
@@ -257,11 +265,11 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
 
     // Force simulation
     const simulation = d3
-      .forceSimulation(problemData.nodes)
+      .forceSimulation(data.nodes)
       .force(
         "link",
         d3
-          .forceLink(problemData.links)
+          .forceLink(data.links)
           .id((d) => d.name)
           .distance((d) => scale(d.weight) * Math.abs(charge) * 1.5),
       )
@@ -297,6 +305,10 @@ function ForceGraph({ w, h, charge, problemData, gadgetMap }) {
         .attr("dy", 5)
         .text((d) => d.name);
     }
+
+    // Stop this draw's simulation before the next draw or unmount, so an old one doesn't keep
+    // ticking after its picture is gone.
+    return () => simulation.stop();
   }, [problemData, charge, gadgetMap, height, width, margin.left, margin.top, textColor]);
 
   return (

@@ -16,11 +16,11 @@ import { complexityClassLabel } from "../hooks/ProblemFilters/complexityClassOrd
 import { reductionTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 import { tagListOrUnclassified } from "../hooks/ProblemFilters/tagLists";
 import { useProblemInfo, useReducerInfo } from "../hooks/ProblemProvider";
-import { requestReducedInstanceFromPath } from "../redux";
 import { useThemeMode } from "../ThemeModeContext";
 import { surfaceColors, textColors } from "../theme";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
+import RequestErrorMessage from "../widgets/RequestErrorMessage";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
 import TruncatedTextSection from "../widgets/TruncatedTextSection";
 
@@ -68,7 +68,6 @@ export default function ReduceToRowReact({
   url,
   problemName,
   problemNameMap,
-  problemInstance,
   reductionNameMap,
   reduceToOptions,
   chosenReduceTo,
@@ -77,7 +76,8 @@ export default function ReduceToRowReact({
   chosenReductionType,
   setChosenReductionType,
   reducedInstance,
-  setReducedInstance,
+  reduce,
+  reduceError,
   dragHandleProps,
 }) {
   const { mode } = useThemeMode();
@@ -86,14 +86,6 @@ export default function ReduceToRowReact({
 
   const reduceToInfo = useProblemInfo(url, chosenReduceTo);
   const reducerInfo = useReducerInfo(url, chosenReductionType);
-
-  async function reduceRequest() {
-    setReducedInstance(
-      chosenReductionType && problemInstance
-        ? ((await requestReducedInstanceFromPath(url, chosenReductionType, problemInstance)) ?? "")
-        : "",
-    );
-  }
 
   async function handleDownload() {
     const blob = new Blob([reducedInstance], { type: "text/plain" });
@@ -253,6 +245,7 @@ export default function ReduceToRowReact({
             problemName={problemNameMap.get(chosenReduceTo)}
           />
         ) : null}
+        <RequestErrorMessage error={reduceError} />
 
         <div className="submitButton">
           <Button
@@ -269,7 +262,7 @@ export default function ReduceToRowReact({
             size="large"
             color="white"
             style={{ backgroundColor: THEME.colors.grey }}
-            onClick={reduceRequest}
+            onClick={reduce}
             disabled={!chosenReductionType}
           >
             {REDUCE_BUTTON.buttonText}
