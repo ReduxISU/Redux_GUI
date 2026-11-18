@@ -148,7 +148,7 @@ export default function VisualizeRowReact({
   const currentProblemData = problemData?.[currentStep] ?? null;
   const currentReductionData = problemReductionData?.[currentStep] ?? null;
 
-  useWhenChanged([problemName, problemInstance, chosenVisualization], () => {
+  useWhenChanged([problemName, problemInstance, chosenVisualization, chosenSolver], () => {
     setProblemData(null);
     setProblemDataError(null);
     setCurrentStep(0);
@@ -275,6 +275,7 @@ export default function VisualizeRowReact({
             error = userFacingError(...failure);
           },
           stale.signal,
+          chosenSolver,
         );
 
         if (!alive) return;
@@ -305,7 +306,15 @@ export default function VisualizeRowReact({
       alive = false;
       stale.abort();
     };
-  }, [instanceReady, chosenVisualization, problemInstance, showReduction, url, problemName]);
+  }, [
+    instanceReady,
+    chosenVisualization,
+    problemInstance,
+    showReduction,
+    url,
+    problemName,
+    chosenSolver,
+  ]);
 
   // Fetch SAT3
   useEffect(() => {
