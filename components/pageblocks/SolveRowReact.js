@@ -16,10 +16,11 @@ import { solverTypeLabel } from "../hooks/ProblemFilters/tagLabels";
 import { tagListOrUnclassified } from "../hooks/ProblemFilters/tagLists";
 import { useSolverInfo } from "../hooks/ProblemProvider";
 import { useWhenChanged } from "../hooks/useWhenChanged";
-import { requestSolvedInstance } from "../redux";
+import { requestSolvedInstance, userFacingError } from "../redux";
 import DragHandle from "../widgets/DragHandle";
 import PopoverTooltipClick from "../widgets/PopoverTooltipClick";
 import ProblemSection from "../widgets/ProblemSection";
+import RequestErrorMessage from "../widgets/RequestErrorMessage";
 import SearchBarExtensible from "../widgets/SearchBarExtensible";
 import TruncatedTextSection from "../widgets/TruncatedTextSection";
 
@@ -57,29 +58,42 @@ export default function SolveRowReact({
   dragHandleProps,
 }) {
   const solverInfo = useSolverInfo(url, chosenSolver);
-  // Why the last Solve failed ({ message, hint }), e.g. the quantum service being down.
+  // Why the last Solve failed ({ message, hint, detail }), e.g. the quantum service being down.
   const [solveError, setSolveError] = useState(null);
   // Bumped on every Solve and selection change, so a failure that arrives late is dropped.
   const solveRun = useRef(0);
+  // The running Solve's AbortController, aborted like solveRun is bumped; it stops a wait to ask a
+  // busy server again for an answer nobody wants any more.
+  const solveStale = useRef(null);
 
   // Same reset as the solved instance in useSolvedInstance. A new problem brings a new instance.
   useWhenChanged([problemInstance, chosenSolver], () => {
     solveRun.current += 1;
+    solveStale.current?.abort();
     setSolveError(null);
   });
 
   async function handleSolve() {
     solveRun.current += 1;
     const run = solveRun.current;
+    solveStale.current?.abort();
+    const stale = new AbortController();
+    solveStale.current = stale;
     setSolveError(null);
-    const onError = (error) => {
-      if (run === solveRun.current) {
-        setSolveError(error);
-      }
+    // A solver that can't run answers with `{ message, hint }`; an unreachable server or any
+    // other failure gets a plain message (userFacingError).
+    const onError = (...failure) => {
+      if (run === solveRun.current) setSolveError(userFacingError(...failure));
     };
     setSolvedInstance(
       chosenSolver && problemInstance
-        ? ((await requestSolvedInstance(url, chosenSolver, problemInstance, onError)) ?? "")
+        ? ((await requestSolvedInstance(
+            url,
+            chosenSolver,
+            problemInstance,
+            onError,
+            stale.signal,
+          )) ?? "")
         : "",
     );
   }
@@ -175,17 +189,7 @@ export default function SolveRowReact({
             tooLargeMessage={SOLUTION_TOO_LARGE_MESSAGE}
           />
         ) : null}
-        {solveError ? (
-          <p role="alert">
-            {solveError.message}
-            {solveError.hint ? (
-              <>
-                <br />
-                <span>Try: {solveError.hint}</span>
-              </>
-            ) : null}
-          </p>
-        ) : null}
+        <RequestErrorMessage error={solveError} />
         <div className="submitButton">
           <Button
             size="large"

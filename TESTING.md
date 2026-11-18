@@ -155,14 +155,17 @@ route that exists look permanently broken.
 
 Start from the example closest to what you want:
 
-| You want to test                           | Copy                                          | Technique it shows                                            |
-| ------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------- |
-| What the API returns to the GUI            | `tests/e2e/proxy.spec.js`                     | HTTP assertions, no browser — fast and stable                 |
-| A dropdown, a value, a page state          | `app.spec.js` › _the problem catalogue loads_ | Locating a row, reading a combobox                            |
-| A visualization drawing                    | `app.spec.js` › _renders a visualization_     | Asserting on drawn SVG, and ruling out error cards            |
-| Clicking something and checking the result | `app.spec.js` › _solving 3SAT_                | Expanding a row, waiting for enabled, asserting output        |
-| Typing input and checking both outcomes    | `app.spec.js` › _the 3SAT verifier answers…_  | Filling a textbox, asserting a positive and a negative result |
-| A structural contract of the page          | `tests/e2e/tour.spec.js`                      | Counting anchors the tour depends on, no backend data needed  |
+| You want to test                           | Copy                                                              | Technique it shows                                                               |
+| ------------------------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| What the API returns to the GUI            | `tests/e2e/proxy.spec.js`                                         | HTTP assertions, no browser — fast and stable                                    |
+| A dropdown, a value, a page state          | `app.spec.js` › _the problem catalogue loads_                     | Locating a row, reading a combobox                                               |
+| A visualization drawing                    | `app.spec.js` › _renders a visualization_                         | Asserting on drawn SVG, and ruling out error cards                               |
+| Clicking something and checking the result | `app.spec.js` › _solving 3SAT_                                    | Expanding a row, waiting for enabled, asserting output                           |
+| Typing input and checking both outcomes    | `app.spec.js` › _the 3SAT verifier answers…_                      | Filling a textbox, asserting a positive and a negative result                    |
+| A structural contract of the page          | `tests/e2e/tour.spec.js`                                          | Counting anchors the tour depends on, no backend data needed                     |
+| A race between a switch and a late answer  | `tests/e2e/visualization-switching.spec.js`                       | Holding answers back with `page.route`, faking an empty or failed answer         |
+| A request that never answers               | `visualization-switching.spec.js` › _…no answer…after 60 seconds_ | A `page.route` handler that never replies, `page.clock` to skip the 60 s timeout |
+| A renderer that crashes while drawing      | `tests/e2e/visualization-crash.spec.js`                           | A wrong-shaped payload, ruling out Next.js error screens                         |
 
 ### Things that will cost you an afternoon if nobody tells you
 
@@ -206,6 +209,7 @@ Each of these is a real gap. Pick one, open an issue if there is not one already
 matching example above as your starting point.
 
 **More flows**
+
 - One test per visualization type in `components/Visualization/svgs/Visualizations.js`. There are
   many and almost none are covered.
 - The three switches on the Visualize row (_Show reduction_, _Highlight gadgets_, _Highlight
@@ -213,6 +217,7 @@ matching example above as your starting point.
 - A smoke test per route: `/browse` and `/aboutus` both call the backend and neither is tested.
 
 **The proxy's error handling** (`pages/api/redux/[...path].js`) — none of these is tested:
+
 - 500 when `REDUX_BASE_URL` is unset
 - 400 when it is set to something that is not a URL
 - 502 when the backend is unreachable
@@ -220,16 +225,16 @@ matching example above as your starting point.
 These do not need a browser or a backend; call the handler directly with a fake request/response.
 
 **Bugs to fix, each of which unlocks a test**
+
 - The duplicate `id="search-bar"` across all six dropdowns (accessibility + testability).
 - A test asserting CLIQUE (which has two visualizations) selects its declared default. The bug that
   once broke this is fixed; the test that would keep it fixed is not written.
 - Anything in `KNOWN_SILENT_FAILURES` in `tests/e2e/fixtures.js`. Fix the request, delete the
-  entry, and the guard starts protecting that call. Two are nearly free:
-  several calls fire with an empty `reduction=` parameter before the reduction has been chosen,
-  which should simply be guarded; and the Problem row seeds a placeholder instance that the backend
-  rejects before the real default arrives.
+  entry, and the guard starts protecting that call. One is nearly free: the Problem row seeds a
+  placeholder instance that the backend rejects before the real default arrives.
 
 **Later**
+
 - A tour walkthrough test (click through every step, assert the popover titles and that Solve and
   Verify expand and re-collapse) — `tests/e2e/tour.spec.js` covers only the anchors. See
   `INTEGRATION_TEST_REQUIREMENTS.md` in the parent directory, section 2.
