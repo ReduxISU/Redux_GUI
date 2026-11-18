@@ -144,6 +144,72 @@ test("heuristic suboptimal result is drawn instead of the default exact solution
   await expect(selectedEdges(page)).toHaveCount(3);
 });
 
+test("a late visualization from the previous solver cannot replace the current result", async ({
+  page,
+}) => {
+  await loadWeightedClique(page);
+  await setInstance(
+    page,
+    "(({a,b,c,d,e,f},{{a,d},{b,e},{c,f},{d,e},{d,f},{e,f}}),((a,10),(b,10),(c,10),(d,6),(e,6),(f,6)))",
+  );
+  await expect(weights(page)).toHaveCount(6);
+
+  let release;
+  let markHeld;
+  let markDelivered;
+  const held = new Promise((resolve) => {
+    markHeld = resolve;
+  });
+  const released = new Promise((resolve) => {
+    release = resolve;
+  });
+  const delivered = new Promise((resolve) => {
+    markDelivered = resolve;
+  });
+  await page.route("**/ProblemProvider/visualize?**", async (route) => {
+    if (
+      new URL(route.request().url()).searchParams.get("solver") !==
+      "WeightedMaxCliqueBranchAndBoundSolver"
+    ) {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch();
+    markHeld();
+    await released;
+    await route.fulfill({ response });
+    markDelivered();
+  });
+
+  try {
+    await chooseSolver(page, "Weighted Maximum Clique Exact Branch and Bound");
+    await held;
+    const input = row(page, "Solve").getByRole("combobox");
+    await input.click();
+    await input.fill("Weighted Maximum Clique Greedy Multi-Start Local Search Heuristic");
+    await page
+      .getByRole("listbox")
+      .getByText("Weighted Maximum Clique Greedy Multi-Start Local Search Heuristic", {
+        exact: true,
+      })
+      .click();
+    await expect(weights(page)).toHaveCount(6);
+    await visualization(page).getByLabel("Highlight solution").check();
+    await expect(selectedNodes(page)).toHaveCount(2);
+    release();
+    await delivered;
+    // Let the old response reach React; it must neither replace the graph nor reset the step.
+    await page.waitForTimeout(300);
+    await expect(visualization(page).getByLabel("Highlight solution")).toBeChecked();
+    expect(
+      await selectedNodes(page).evaluateAll((nodes) => nodes.map((n) => n.__data__.name).sort()),
+    ).toEqual(["a", "d"]);
+    await expect(selectedEdges(page)).toHaveCount(1);
+  } finally {
+    release();
+  }
+});
+
 test("feasible suboptimal picture redraw preserves weights and selects b,d", async ({
   page,
   request,

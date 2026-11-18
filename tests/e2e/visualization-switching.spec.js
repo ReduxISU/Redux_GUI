@@ -345,6 +345,14 @@ test("a picture request with no answer shows Failed to Visualize after 60 second
   await page.goto("/");
   const visualizeRow = row(page, "Visualize");
   await expect(pictures(visualizeRow).first()).toBeVisible();
+  // Fast-forwarding times out every request still in flight, so let the page's own reduction
+  // finish first; on a busy server it may still be waiting to ask again.
+  await expect(row(page, "Reduce").locator(".card-body")).toContainText(
+    "Reduced Clique Instance:",
+    {
+      timeout: 30_000,
+    },
+  );
 
   const asked = page.waitForRequest(/visualize\?visualization=CliqueDefaultVisualization/);
   await choose(page, "Problem", "Clique");

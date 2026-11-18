@@ -100,6 +100,9 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
   const [reduceError, setReduceError] = useState(null);
   // Bumped on every reduction and when its inputs change, so an answer that arrives late is dropped.
   const reduceRun = useRef(0);
+  // The running reduction's AbortController: a newer run or an input change aborts it, which stops
+  // a wait to ask a busy server again for an answer nobody wants any more.
+  const reduceStale = useRef(null);
 
   useWhenChanged([chosenReductionType, chosenReduceTo], () => setReducedInstance(""));
   useWhenChanged([chosenReductionType, problemInstance, url], () => setReduceError(null));
@@ -107,11 +110,20 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
   const runReduction = useCallback(async () => {
     reduceRun.current += 1;
     const run = reduceRun.current;
+    reduceStale.current?.abort();
+    const stale = new AbortController();
+    reduceStale.current = stale;
     let error = null;
     const reduced = await (chosenReductionType && problemInstance
-      ? requestReducedInstanceFromPath(url, chosenReductionType, problemInstance, (...failure) => {
-          error = userFacingError(...failure);
-        })
+      ? requestReducedInstanceFromPath(
+          url,
+          chosenReductionType,
+          problemInstance,
+          (...failure) => {
+            error = userFacingError(...failure);
+          },
+          stale.signal,
+        )
       : "");
     if (run !== reduceRun.current) return;
     setReducedInstance(reduced ?? "");
@@ -124,6 +136,7 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
     runReduction();
     return () => {
       reduceRun.current += 1;
+      reduceStale.current?.abort();
     };
   }, [runReduction]);
 

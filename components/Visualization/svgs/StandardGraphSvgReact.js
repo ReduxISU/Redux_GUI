@@ -1,5 +1,8 @@
 // ForceGraphReact.js
 import * as d3 from "d3";
+// d3 7.9.2 marks itself side-effect free, so the bundler drops the re-export that adds
+// selection.transition(). Importing d3-transition directly keeps that patch in the build.
+import "d3-transition";
 import { useEffect, useRef, useState } from "react";
 import { useThemeMode } from "../../ThemeModeContext";
 import { textColors } from "../../theme";
