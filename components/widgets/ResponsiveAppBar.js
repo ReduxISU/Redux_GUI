@@ -23,6 +23,7 @@ import {
 } from "@mui/material"; // Grouped all directory imports safely into a named root import
 import * as React from "react";
 import { useThemeMode } from "../ThemeModeContext";
+import ReportBugButton from "./ReportBugButton";
 
 const pages = ["Home", "About Us", "Browse", "Help", "Contribute"];
 
@@ -103,6 +104,8 @@ const ResponsiveAppBar = () => {
               );
             })}
           </Box>
+
+          <ReportBugButton />
 
           <Tooltip title={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
             <IconButton
