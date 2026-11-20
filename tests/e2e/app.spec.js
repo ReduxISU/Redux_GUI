@@ -43,6 +43,15 @@ test("the problem catalogue loads from the backend", async ({ page }) => {
   await expect(page.getByRole("listbox").getByText("Clique", { exact: true })).toBeVisible();
 });
 
+test("Problem Add new appears when the typed name matches nothing", async ({ page }) => {
+  // Regression for #387: freeSolo used to hide the popup when nothing matched, so the
+  // Add new … extender never appeared. keepMounted on the popper keeps that path visible.
+  const problemInput = row(page, "Problem").getByRole("combobox");
+  await problemInput.click();
+  await problemInput.fill("Pull");
+  await expect(page.getByRole("button", { name: /Add new problem/i })).toBeVisible();
+});
+
 test("the default problem renders a visualization", async ({ page }) => {
   const visualizeRow = row(page, "Visualize");
 
