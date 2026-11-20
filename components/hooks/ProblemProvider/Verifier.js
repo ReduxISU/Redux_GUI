@@ -3,13 +3,14 @@ import { requestAllInfo, requestAllVerifiers } from "../../redux";
 import { useGenericInfo } from "../ProblemProvider";
 import { useWhenChanged } from "../useWhenChanged";
 
-export function useVerifier(url, problemName, problemNameMap, problemInfoMap) {
+export function useVerifier(url, problemName, problemNameMap, problemInfoMap, restore) {
   const state = {};
   [state.defaultVerifierMap] = useDefaultVerifierMap(url, problemInfoMap);
   [state.verifierOptions] = useVerifierOptions(url, problemName);
   [state.chosenVerifier, state.setChosenVerifier] = useChosenVerifier(
     problemName,
     state.defaultVerifierMap,
+    restore,
   );
   [state.verifierNameMap] = useVerifierNameMap(url, problemNameMap);
   return state;
@@ -68,12 +69,16 @@ function useVerifierOptions(url, problemName) {
   return [verifierOptions, setVerifierOptions];
 }
 
-function useChosenVerifier(problemName, defaultVerifierMap) {
+// A just-restored shared link's verifier (already checked against the problem's verifiers) wins
+// over the default.
+function useChosenVerifier(problemName, defaultVerifierMap, restore) {
   const [chosenVerifier, setChosenVerifier] = useState("");
 
-  useWhenChanged([problemName, defaultVerifierMap], () => {
-    if (!problemName || defaultVerifierMap.size === 0) return;
-    setChosenVerifier(defaultVerifierMap.get(problemName));
+  useWhenChanged([problemName, defaultVerifierMap, restore.id], () => {
+    if (!problemName) return;
+    const shared = restore.values?.problem === problemName ? restore.values.verifier : undefined;
+    if (shared) setChosenVerifier(shared);
+    else if (defaultVerifierMap.size > 0) setChosenVerifier(defaultVerifierMap.get(problemName));
   });
 
   return [chosenVerifier, setChosenVerifier];

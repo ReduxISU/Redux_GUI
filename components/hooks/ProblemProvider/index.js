@@ -4,8 +4,10 @@ export * from "./Solver";
 export * from "./Verifier";
 export * from "./Visualization";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { requestInfo } from "../../redux";
+import { NO_RESTORE, useShareRestore } from "../../share/useShareRestore";
+import { useWhenChanged } from "../useWhenChanged";
 
 import { useProblem } from "./Problem";
 import { useReducer } from "./Reducer";
@@ -14,14 +16,35 @@ import { useVerifier } from "./Verifier";
 import { useVisualization } from "./Visualization";
 
 export function useProblemProvider(url) {
-  const problem = useProblem(url);
+  // A view restored from a shared link (#281): { id, values }. `id` goes up on every restore, so
+  // the pickers below re-pick from `values` (the link's checked choices) even when the problem
+  // stays the same. `values` is cleared, keeping `id`, once the user moves to another problem, so
+  // coming back gets the defaults again and nothing re-picks on the clear itself.
+  const [restore, setRestore] = useState(NO_RESTORE);
+  // True while a restored view waits for the user's first click: nothing is solved, verified,
+  // reduced or drawn on its own until then, so opening a link never starts a (possibly huge) job.
+  const [held, setHeld] = useState(false);
+  const releaseHold = useCallback(() => setHeld(false), []);
+
+  const problem = useProblem(url, restore);
   const { problemName, problemNameMap, problemInfoMap, problemInstance } = problem;
+
+  // Moving to another problem is the user's own choice: the restored view is over.
+  useWhenChanged([problemName], () => {
+    if (restore.values && problemName && problemName !== restore.values.problem) {
+      setRestore({ id: restore.id, values: null });
+      setHeld(false);
+    }
+  });
+
+  const share = useShareRestore(url, problem, setRestore, setHeld);
   return {
-    problem: problem,
-    reducer: useReducer(url, problemName, problemInstance),
-    solver: useSolver(url, problemName, problemNameMap, problemInfoMap, problemInstance),
-    verifier: useVerifier(url, problemName, problemNameMap, problemInfoMap),
+    problem: { ...problem, restoreId: restore.id },
+    reducer: useReducer(url, problemName, problemInstance, restore, held, releaseHold),
+    solver: useSolver(url, problemName, problemNameMap, problemInfoMap, problemInstance, restore),
+    verifier: useVerifier(url, problemName, problemNameMap, problemInfoMap, restore),
     visualization: useVisualization(url, problemName, problemNameMap, problemInfoMap),
+    share: { ...share, held, releaseHold },
   };
 }
 

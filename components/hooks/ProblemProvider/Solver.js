@@ -4,7 +4,14 @@ import { tagListOrUnclassified } from "../ProblemFilters/tagLists";
 import { useGenericInfo } from "../ProblemProvider";
 import { useWhenChanged } from "../useWhenChanged";
 
-export function useSolver(url, problemName, problemNameMap, problemInfoMap, problemInstance) {
+export function useSolver(
+  url,
+  problemName,
+  problemNameMap,
+  problemInfoMap,
+  problemInstance,
+  restore,
+) {
   const state = {};
   /// Maps each problem name to its default solver name.
   [state.defaultSolverMap] = useDefaultSolverMap(url, problemInfoMap);
@@ -12,6 +19,7 @@ export function useSolver(url, problemName, problemNameMap, problemInfoMap, prob
   [state.chosenSolver, state.setChosenSolver] = useChosenSolver(
     problemName,
     state.defaultSolverMap,
+    restore,
   );
   [state.solverNameMap, , state.solverTypeMap] = useSolverNameMap(url, problemNameMap);
   [state.solvedInstance, state.setSolvedInstance] = useSolvedInstance(
@@ -113,12 +121,16 @@ function useSolverOptions(url, problemName) {
   return [solverOptions, setSolverOptions];
 }
 
-function useChosenSolver(problemName, defaultSolverMap) {
+// A just-restored shared link's solver (already checked against the problem's solvers) wins over
+// the default.
+function useChosenSolver(problemName, defaultSolverMap, restore) {
   const [chosenSolver, setChosenSolver] = useState("");
 
-  useWhenChanged([problemName, defaultSolverMap], () => {
-    if (!problemName || defaultSolverMap.size === 0) return;
-    setChosenSolver(defaultSolverMap.get(problemName));
+  useWhenChanged([problemName, defaultSolverMap, restore.id], () => {
+    if (!problemName) return;
+    const shared = restore.values?.problem === problemName ? restore.values.solver : undefined;
+    if (shared) setChosenSolver(shared);
+    else if (defaultSolverMap.size > 0) setChosenSolver(defaultSolverMap.get(problemName));
   });
 
   return [chosenSolver, setChosenSolver];

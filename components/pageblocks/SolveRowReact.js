@@ -56,6 +56,7 @@ export default function SolveRowReact({
   solverTypeMap,
   problemNameMap,
   chosenReduceTo,
+  releaseHold,
   dragHandleProps,
 }) {
   const { mode } = useThemeMode();
@@ -79,6 +80,8 @@ export default function SolveRowReact({
   });
 
   async function handleSolve() {
+    // The user's first click after a shared link was opened ends the hold (useProblemProvider).
+    releaseHold?.();
     solveRun.current += 1;
     const run = solveRun.current;
     solveStale.current?.abort();
