@@ -74,8 +74,27 @@ test("opening a shared link restores the view and runs nothing until the user cl
   await expect(page.getByTestId("share-held-pictures")).toHaveCount(0);
 });
 
-test("Share copies a link that opens the same view", async ({ page, context }) => {
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+// Browsers only offer navigator.clipboard on secure pages (https or localhost). CI serves the GUI
+// from another container over plain http, so these tests put in a stand-in clipboard instead:
+// one that keeps what is written, or one that refuses, to reach Share's manual-copy dialog.
+async function fakeClipboard(page, { refuse = false } = {}) {
+  await page.addInitScript((refuse) => {
+    let text = "";
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value) => {
+          if (refuse) throw new DOMException("Write permission denied.", "NotAllowedError");
+          text = value;
+        },
+        readText: async () => text,
+      },
+    });
+  }, refuse);
+}
+
+test("Share copies a link that opens the same view", async ({ page }) => {
+  await fakeClipboard(page);
   await page.goto(`/${sharedQuery()}`);
   await expectRestored(page);
 
@@ -88,6 +107,20 @@ test("Share copies a link that opens the same view", async ({ page, context }) =
 
   await page.goto(link);
   await expectRestored(page);
+});
+
+test("Share shows the link to copy by hand when the browser won't copy it", async ({ page }) => {
+  await fakeClipboard(page, { refuse: true });
+  await page.goto(`/${sharedQuery()}`);
+  await expectRestored(page);
+
+  await page.getByRole("button", { name: "Share a link to this view" }).click();
+  const dialog = page.getByRole("dialog", { name: "Copy this link" });
+  await expect(dialog).toBeVisible();
+  await expect(page.getByText("Link copied.")).toHaveCount(0);
+
+  const params = new URL(await dialog.getByLabel("Share link").inputValue()).searchParams;
+  for (const [key, value] of Object.entries(SHARED)) expect(params.get(key)).toBe(value);
 });
 
 test("Import restores a pasted link in place, without reloading or running anything", async ({
