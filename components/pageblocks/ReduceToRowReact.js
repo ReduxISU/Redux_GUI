@@ -78,11 +78,16 @@ export default function ReduceToRowReact({
   reducedInstance,
   reduce,
   reduceError,
+  noReductions,
   dragHandleProps,
 }) {
   const { mode } = useThemeMode();
   const surface = surfaceColors(mode);
   const text = textColors(mode);
+
+  // Known to have nothing to reduce to: its targets arrived and there are none (the target choice
+  // is empty then). Not while they load, and not when only the chosen target lacks a path.
+  const noTargets = noReductions && !chosenReduceTo;
 
   const reduceToInfo = useProblemInfo(url, chosenReduceTo);
   const reducerInfo = useReducerInfo(url, chosenReductionType);
@@ -107,11 +112,18 @@ export default function ReduceToRowReact({
           placeholder={ACCORDION_FORM_ONE.placeHolder}
           selected={chosenReduceTo}
           onSelect={setChosenReduceTo}
-          optionsHighlight={reduceToOptions}
-          options={[...problemNameMap.keys()].filter((x) => x !== problemName)} // Cannot reduce to current problem
+          // Only problems the selected one really reduces to: the backend's availableReductions
+          // (Navigation/NPC_NavGraph), which counts chains of reductions too. Listing the whole
+          // catalogue offered targets with no reduction at all, e.g. NP-complete problems for a
+          // P problem (#46, #19). A problem can't reduce to itself.
+          options={reduceToOptions.filter((x) => x !== problemName)}
           optionsMap={problemNameMap}
-          disabled={!problemName}
-          disabledMessage={"No reduction method available. Please choose a reduce-to."}
+          disabled={!problemName || noTargets}
+          disabledMessage={
+            noTargets
+              ? "No reductions from this problem yet."
+              : "No reduction method available. Please choose a reduce-to."
+          }
           extenderButtons={(input) => [
             {
               label: `Add new problem "${input}"`,
