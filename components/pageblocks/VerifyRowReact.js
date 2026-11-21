@@ -39,6 +39,7 @@ export default function VerifyRowReact({
   setChosenVerifier,
   verifierOptions,
   verifierNameMap,
+  releaseHold,
   dragHandleProps,
 }) {
   const { mode } = useThemeMode();
@@ -59,6 +60,8 @@ export default function VerifyRowReact({
   });
 
   async function handleVerify() {
+    // The user's first click after a shared link was opened ends the hold (useProblemProvider).
+    releaseHold?.();
     setVerifyResult(
       chosenVerifier
         ? await requestVerifiedInstance(

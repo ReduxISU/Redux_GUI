@@ -32,11 +32,10 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { memo, useEffect, useState } from "react"; // CHANGED: added useState for row order
 import { Container } from "react-bootstrap";
-import { useHandleParameters } from "../components/eventHandlers/handleParameters";
-import { useUnload } from "../components/eventHandlers/handleUnload";
 import { useProblemProvider } from "../components/hooks/ProblemProvider";
 import TourLauncher from "../components/tour/TourLauncher";
 import ShareButton from "../components/widgets/ShareButton";
+import SharedViewNotice from "../components/widgets/SharedViewNotice";
 
 const SHOW_QUANTUM_VIS = false; //Flag to show a quantum circuit visualizer (sandbox feature)
 const ProblemRowMemo = memo(ProblemRowReact);
@@ -91,9 +90,8 @@ function SortableRow({ id, children }) {
 function MainPageContent() {
   const imgStyle = { textAlign: "center" };
 
-  //useHandleParameters();
-
-  const { problem, solver, verifier, reducer, visualization } = useProblemProvider(reduxBaseUrl);
+  const { problem, solver, verifier, reducer, visualization, share } =
+    useProblemProvider(reduxBaseUrl);
 
   const [rowOrder, setRowOrder] = useState(["problem", "visualize", "solve", "verify", "reduce"]);
 
@@ -111,6 +109,8 @@ function MainPageContent() {
         chosenSolver={solver.chosenSolver}
         defaultSolverMap={solver.defaultSolverMap}
         {...visualization}
+        held={share.held}
+        releaseHold={share.releaseHold}
       />
     ),
     solve: (
@@ -119,9 +119,17 @@ function MainPageContent() {
         {...problem}
         {...solver}
         chosenReduceTo={reducer.chosenReduceTo}
+        releaseHold={share.releaseHold}
       />
     ),
-    verify: <VerifyRowMemo url={reduxBaseUrl} {...problem} {...verifier} />,
+    verify: (
+      <VerifyRowMemo
+        url={reduxBaseUrl}
+        {...problem}
+        {...verifier}
+        releaseHold={share.releaseHold}
+      />
+    ),
   };
 
   // Replaces the old handleDragStart/handleDragOver/handleDrop trio.
@@ -142,8 +150,19 @@ function MainPageContent() {
         {/** This is an artifact from the old bootstrap code, may be deprecated */}
         <div className="d-flex flex-column">
           <div className="p-2 col-example">
-            <ShareButton problem={problem} solver={solver} verifier={verifier} reducer={reducer} />
+            <ShareButton
+              problem={problem}
+              solver={solver}
+              verifier={verifier}
+              reducer={reducer}
+              importLink={share.importLink}
+            />
             <TourLauncher />
+            <SharedViewNotice
+              notice={share.notice}
+              held={share.held}
+              onDismiss={share.dismissNotice}
+            />
           </div>
           <DndContext
             sensors={sensors}
