@@ -340,7 +340,22 @@ test("a picture request with no answer shows Failed to Visualize after 60 second
     status: 0,
     log: "CliqueDefaultVisualization VISUALIZE REQUEST FAILED",
   });
+  // Two full rounds of backend requests in real time (3SAT's page, then Clique's) can take most
+  // of the default 30 s on a slow runner.
+  test.setTimeout(90_000);
   await page.clock.install();
+  // The page's clock runs in real time until it is fast-forwarded, and the 60 s limit starts when
+  // the picture is asked for. Note that moment on the page's own clock, so the waits below don't
+  // eat into the limit. (The timer starts in the same step as the fetch: components/redux.)
+  await page.addInitScript(() => {
+    const fetch = window.fetch;
+    window.fetch = (input, init) => {
+      if (String(input?.url ?? input).includes("visualization=CliqueDefaultVisualization")) {
+        window.__pictureAskedAt = Date.now();
+      }
+      return fetch(input, init);
+    };
+  });
   await page.route(/visualize\?visualization=CliqueDefaultVisualization/, NEVER_ANSWER);
   await page.goto("/");
   const visualizeRow = row(page, "Visualize");
@@ -355,12 +370,34 @@ test("a picture request with no answer shows Failed to Visualize after 60 second
   );
 
   const asked = page.waitForRequest(/visualize\?visualization=CliqueDefaultVisualization/);
+  // Choosing Clique also sets off a chain of other requests (its info, its reduction options, then
+  // its reduction). Every one must be answered before the clock jumps 60 s, or it times out too.
+  const open = new Set();
+  page.on("request", (request) => {
+    if (request.url().includes("/api/redux/")) open.add(request);
+  });
+  const done = (request) => open.delete(request);
+  page.on("requestfinished", done);
+  page.on("requestfailed", done);
+  const othersOpen = () =>
+    [...open]
+      .map((request) => request.url())
+      .filter((url) => !url.includes("visualization=CliqueDefaultVisualization"));
+
   await choose(page, "Problem", "Clique");
   await asked;
+  // Quiet for half a second, so the next request in the chain has had its chance to start.
+  await expect(async () => {
+    expect(othersOpen()).toEqual([]);
+    await page.waitForTimeout(500);
+    expect(othersOpen()).toEqual([]);
+  }).toPass({ timeout: 30_000 });
   await expect(loadingNote(visualizeRow)).toBeVisible();
 
-  // Just short of the limit it is still loading; past it, it has failed.
-  await page.clock.fastForward(59_000);
+  // Just short of the limit it is still loading; past it, it has failed. The clock stays paused
+  // from here, so no real time slips past the limit while the page catches up.
+  const askedAt = await page.evaluate(() => window.__pictureAskedAt);
+  await page.clock.pauseAt(askedAt + 59_000);
   await expect(loadingNote(visualizeRow)).toBeVisible();
   await page.clock.fastForward(2_000);
 
