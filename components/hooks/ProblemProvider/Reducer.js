@@ -25,7 +25,10 @@ function pickDefault(preferred, options) {
   return options.includes(preferred) ? preferred : (options[0] ?? "");
 }
 
-export function useReducer(url, problemName, problemInstance) {
+// `restore` is a shared link's view (see useProblemProvider): its target and reduction are picked
+// over the defaults. While `held` is true nothing is reduced on its own; Reduce then only calls
+// `releaseHold`, and the release itself starts the reduction.
+export function useReducer(url, problemName, problemInstance, restore, held, releaseHold) {
   const state = {};
   let reduceToOptionsLoaded, reductionTypeOptionsLoaded, reduceToError, reductionTypeError;
   [state.reduceToOptions, reduceToOptionsLoaded, reduceToError] = useReduceToOptions(
@@ -35,6 +38,7 @@ export function useReducer(url, problemName, problemInstance) {
   [state.chosenReduceTo, state.setChosenReduceTo] = useChosenReduceTo(
     problemName,
     state.reduceToOptions,
+    restore,
   );
   [state.reductionNameMap] = useReductionNameMap(url, problemName, state.chosenReduceTo);
   [state.reductionTypeOptions, reductionTypeOptionsLoaded, reductionTypeError] =
@@ -61,9 +65,17 @@ export function useReducer(url, problemName, problemInstance) {
     problemName,
     state.chosenReduceTo,
     state.reductionTypeOptions,
+    restore,
   );
   [state.reducedInstance, state.setReducedInstance, state.reduce, state.reduceError] =
-    useReducedInstance(url, problemInstance, state.chosenReduceTo, state.chosenReductionType);
+    useReducedInstance(
+      url,
+      problemInstance,
+      state.chosenReduceTo,
+      state.chosenReductionType,
+      held,
+      releaseHold,
+    );
   [
     state.reductionVisualization,
     state.setReductionVisualization,
@@ -93,9 +105,16 @@ export function useReducerInfo(url, reducer) {
 
 // Returns [reducedInstance, setReducedInstance, reduce, reduceError]. `reduce` runs the chosen
 // reduction on the instance again (the Reduce button); it also runs by itself whenever the
-// instance or reduction changes. reduceError is { message, hint, detail } when the last reduction
+// instance or reduction changes, except while `held` (a just-restored shared view). reduceError is { message, hint, detail } when the last reduction
 // failed (see userFacingError), else null; it clears as soon as a new reduction starts.
-function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductionType) {
+function useReducedInstance(
+  url,
+  problemInstance,
+  chosenReduceTo,
+  chosenReductionType,
+  held,
+  releaseHold,
+) {
   const [reducedInstance, setReducedInstance] = useState("");
   const [reduceError, setReduceError] = useState(null);
   // Bumped on every reduction and when its inputs change, so an answer that arrives late is dropped.
@@ -132,18 +151,25 @@ function useReducedInstance(url, problemInstance, chosenReduceTo, chosenReductio
 
   // Automatically reduces the instance one the reduction type is chosen.
   // This makes it so it's less input from the user but also makes the "Reduce" button effectly useless.
+  // Not while a restored shared view is held: opening a link must never start a job by itself.
   useEffect(() => {
+    if (held) return;
     runReduction();
     return () => {
       reduceRun.current += 1;
       reduceStale.current?.abort();
     };
-  }, [runReduction]);
+  }, [runReduction, held]);
 
   const reduce = useCallback(() => {
+    // Releasing re-runs the effect above, which reduces; running here too would ask twice.
+    if (held) {
+      releaseHold?.();
+      return;
+    }
     setReduceError(null);
     runReduction();
-  }, [runReduction]);
+  }, [runReduction, held, releaseHold]);
 
   return [reducedInstance, setReducedInstance, reduce, reduceError];
 }
@@ -221,6 +247,21 @@ function useReduceToOptions(url, problemName) {
   return [loaded ? fetched.options : NO_OPTIONS, loaded, loaded ? fetched.error : null];
 }
 
+/**
+ * The reduction-type options for reducing `problemName` to `chosenReduceTo`: one hyphen-joined
+ * path of reductions (the first reduction at each step), or [] when there is none. undefined when
+ * the request failed; onError then gets what went wrong. Shared links are checked against it too.
+ */
+export async function requestReductionTypeOptions(url, problemName, chosenReduceTo, onError) {
+  const reductions = await requestReductions(url, problemName, chosenReduceTo, onError);
+  if (reductions === undefined) return undefined;
+  let path = "";
+  for (const reduction of reductions) {
+    path += reduction[0] + "-";
+  }
+  return path !== "" ? [path.slice(0, -1)] : [];
+}
+
 function useReductionTypeOptions(url, problemName, chosenReduceTo) {
   const [fetched, setFetched] = useState({
     problemName: undefined,
@@ -229,24 +270,13 @@ function useReductionTypeOptions(url, problemName, chosenReduceTo) {
     error: null,
   });
 
-  // undefined when the request failed; onError then gets what went wrong.
-  async function requestPreparedReductions(url, problemName, chosenReduceTo, onError) {
-    const reductions = await requestReductions(url, problemName, chosenReduceTo, onError);
-    if (reductions === undefined) return undefined;
-    let path = "";
-    for (const reduction of reductions) {
-      path += reduction[0] + "-";
-    }
-    return path !== "" ? [path.slice(0, -1)] : [];
-  }
-
   useEffect(() => {
     let ignore = false;
     (async () => {
       let error = null;
       const answer =
         problemName && chosenReduceTo
-          ? await requestPreparedReductions(url, problemName, chosenReduceTo, (detail) => {
+          ? await requestReductionTypeOptions(url, problemName, chosenReduceTo, (detail) => {
               error = detail;
             })
           : [];
@@ -270,24 +300,30 @@ function useReductionTypeOptions(url, problemName, chosenReduceTo) {
   return [loaded ? fetched.options : NO_OPTIONS, loaded, loaded ? fetched.error : null];
 }
 
-function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOptions) {
+function useChosenReductionType(problemName, chosenReduceTo, reductionTypeOptions, restore) {
   const [chosenReductionType, setChosenReductionType] = useState("");
 
   useWhenChanged([problemName, chosenReduceTo], () => setChosenReductionType(""));
 
   // reductionTypeOptions only ever holds the current target's options (NO_OPTIONS while they
   // load), so the choice stays empty until they arrive.
-  useWhenChanged([reductionTypeOptions, chosenReduceTo], () => {
+  // A just-restored shared link's reduction wins over the preferred one, for its own target.
+  useWhenChanged([reductionTypeOptions, chosenReduceTo, restore.id], () => {
     if (reductionTypeOptions.length === 0) return;
+    const shared = restore.values;
+    const sharedType =
+      shared?.problem === problemName && shared.reduceTo === chosenReduceTo
+        ? shared.reductionType
+        : undefined;
     setChosenReductionType(
-      pickDefault(PREFERRED_REDUCTION_TYPE[chosenReduceTo], reductionTypeOptions),
+      pickDefault(sharedType ?? PREFERRED_REDUCTION_TYPE[chosenReduceTo], reductionTypeOptions),
     );
   });
 
   return [chosenReductionType, setChosenReductionType];
 }
 
-function useChosenReduceTo(problemName, reduceToOptions) {
+function useChosenReduceTo(problemName, reduceToOptions, restore) {
   const [chosenReduceTo, setChosenReduceTo] = useState("");
 
   useWhenChanged([problemName], () => setChosenReduceTo(""));
@@ -296,9 +332,12 @@ function useChosenReduceTo(problemName, reduceToOptions) {
   // problem changes, reduceToOptions recomputes and this re-runs with the current problemName in
   // scope. Keying on problemName directly would pick a default from the previous problem's
   // still-stale options.
-  useWhenChanged([reduceToOptions], () => {
+  // restore.id is a dependency so a restore re-picks even when the problem (and so the options)
+  // stayed the same; a just-restored shared link's target wins over the preferred one.
+  useWhenChanged([reduceToOptions, restore.id], () => {
     if (reduceToOptions.length === 0) return;
-    setChosenReduceTo(pickDefault(PREFERRED_REDUCE_TO[problemName], reduceToOptions));
+    const shared = restore.values?.problem === problemName ? restore.values.reduceTo : undefined;
+    setChosenReduceTo(pickDefault(shared ?? PREFERRED_REDUCE_TO[problemName], reduceToOptions));
   });
 
   return [chosenReduceTo, setChosenReduceTo];

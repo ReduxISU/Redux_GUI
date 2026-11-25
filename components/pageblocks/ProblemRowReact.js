@@ -68,6 +68,7 @@ export default function ProblemRowReact({
   problemNameMap,
   problemInstance,
   setProblemInstance,
+  restoreId,
   dragHandleProps,
 }) {
   const { mode } = useThemeMode();
@@ -157,8 +158,9 @@ export default function ProblemRowReact({
   });
 
   // A new problem arrives with its default instance already set by useProblem; the text field
-  // follows it. Typing goes the other way, so this is keyed on the problem, not the instance.
-  useWhenChanged([problemName], () => setProblemLocalInstance(problemInstance));
+  // follows it, and so it does when a shared link is restored (restoreId), even for the same
+  // problem. Typing goes the other way, so this is keyed on those, not on the instance.
+  useWhenChanged([problemName, restoreId], () => setProblemLocalInstance(problemInstance));
 
   //Local state that handles problem instance change without triggering mass refreshing.
   const handleChangeInstance = (event) => {

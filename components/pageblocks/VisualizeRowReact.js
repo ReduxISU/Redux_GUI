@@ -80,6 +80,8 @@ export default function VisualizeRowReact({
   visualizationListStatus,
   visualizationListError,
   visualizationTagMap,
+  held,
+  releaseHold,
   dragHandleProps,
 }) {
   const { mode } = useThemeMode();
@@ -171,8 +173,10 @@ export default function VisualizeRowReact({
     setSolveError(null);
   });
 
+  // None of the fetches below run while a just-restored shared view is held (useProblemProvider):
+  // opening a link must not start a solve or a drawing by itself.
   useEffect(() => {
-    if (!problemInstance || !chosenSolver) return;
+    if (held || !problemInstance || !chosenSolver) return;
     let ignore = false;
     // Stops a wait to ask a busy server again once this answer is no longer wanted.
     const stale = new AbortController();
@@ -208,7 +212,7 @@ export default function VisualizeRowReact({
       ignore = true;
       stale.abort();
     };
-  }, [problemInstance, chosenSolver, url]);
+  }, [held, problemInstance, chosenSolver, url]);
 
   // The reduction picture belongs to one problem, instance, reduction and solution; drop it as
   // soon as any of them changes so the old one is never shown.
@@ -219,7 +223,7 @@ export default function VisualizeRowReact({
 
   // Fetch reduction visualization
   useEffect(() => {
-    if (!chosenReductionType || !problemInstance || !showReduction || !solution) return;
+    if (held || !chosenReductionType || !problemInstance || !showReduction || !solution) return;
     let ignore = false;
     const stale = new AbortController();
 
@@ -255,11 +259,11 @@ export default function VisualizeRowReact({
       ignore = true;
       stale.abort();
     };
-  }, [showReduction, problemInstance, solution, chosenReductionType, url]);
+  }, [held, showReduction, problemInstance, solution, chosenReductionType, url]);
 
   // Fetch main visualization data
   useEffect(() => {
-    if (!instanceReady || !chosenVisualization) return;
+    if (held || !instanceReady || !chosenVisualization) return;
 
     let alive = true;
     const stale = new AbortController();
@@ -307,6 +311,7 @@ export default function VisualizeRowReact({
       stale.abort();
     };
   }, [
+    held,
     instanceReady,
     chosenVisualization,
     problemInstance,
@@ -318,7 +323,7 @@ export default function VisualizeRowReact({
 
   // Fetch SAT3
   useEffect(() => {
-    if (problemName !== "SAT3") return;
+    if (held || problemName !== "SAT3") return;
 
     const fetchSAT3 = async () => {
       try {
@@ -335,7 +340,7 @@ export default function VisualizeRowReact({
     };
 
     fetchSAT3();
-  }, [problemInstance, problemName, chosenReductionType, url]);
+  }, [held, problemInstance, problemName, chosenReductionType, url]);
 
   useWhenChanged([problemName, chosenReduceTo], () => setShowGadgets(false));
 
@@ -632,33 +637,55 @@ export default function VisualizeRowReact({
           </div>
         </div>
 
-        {/* Main visualization */}
-        <VisualizationLogic
-          loading={svgIsLoading}
-          problemInstance={problemInstance}
-          problemVisualizationData={problemVisualizationData}
-          reducedVisualizationData={reducedVisualizationData}
-          problemSolutionData={defaultSat3SolutionArr}
-          visualizationState={logicProps}
-          url={url}
-          problemName={problemName}
-          problemNameMap={problemNameMap}
-          chosenReduceTo={chosenReduceTo}
-          chosenReductionType={chosenReductionType}
-          reductionNameMap={reductionNameMap}
-          reducedInstance={reducedInstance}
-          chosenSolver={chosenSolver}
-          visualizationType={visualizationInfo.visualizationType}
-          visualizationName={chosenVisualization}
-          problemData={currentProblemData}
-          problemStatus={problemStatus}
-          problemFailure={problemFailure}
-          reductionData={currentReductionData}
-          reductionStatus={reductionStatus}
-          reductionFailure={reductionFailure}
-          showSolutionToggle={showSolution}
-          reductionVisualization={reductionVisualization}
-        />
+        {/* Main visualization. Held (a shared link was just opened): nothing is drawn until the
+            user asks, since drawing solves and visualizes on the server. */}
+        {held ? (
+          <div
+            data-testid="share-held-pictures"
+            style={{
+              border: mode === "dark" ? "2px solid rgba(255,255,255,0.10)" : "2px solid #ccc",
+              borderRadius: "8px",
+              padding: "24px",
+              textAlign: "center",
+              backgroundColor: surface.surfaceAlt,
+              color: text.body,
+            }}
+          >
+            <p style={{ color: text.heading }}>
+              This view came from a shared link. Nothing has been drawn yet.
+            </p>
+            <Button variant="contained" color="secondary" onClick={releaseHold}>
+              Show pictures
+            </Button>
+          </div>
+        ) : (
+          <VisualizationLogic
+            loading={svgIsLoading}
+            problemInstance={problemInstance}
+            problemVisualizationData={problemVisualizationData}
+            reducedVisualizationData={reducedVisualizationData}
+            problemSolutionData={defaultSat3SolutionArr}
+            visualizationState={logicProps}
+            url={url}
+            problemName={problemName}
+            problemNameMap={problemNameMap}
+            chosenReduceTo={chosenReduceTo}
+            chosenReductionType={chosenReductionType}
+            reductionNameMap={reductionNameMap}
+            reducedInstance={reducedInstance}
+            chosenSolver={chosenSolver}
+            visualizationType={visualizationInfo.visualizationType}
+            visualizationName={chosenVisualization}
+            problemData={currentProblemData}
+            problemStatus={problemStatus}
+            problemFailure={problemFailure}
+            reductionData={currentReductionData}
+            reductionStatus={reductionStatus}
+            reductionFailure={reductionFailure}
+            showSolutionToggle={showSolution}
+            reductionVisualization={reductionVisualization}
+          />
+        )}
       </ProblemSection.Body>
     </ProblemSection>
   );

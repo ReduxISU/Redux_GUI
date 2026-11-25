@@ -9,7 +9,7 @@ const DEFAULT_PROBLEM_NAME = "SAT3";
 // default value.
 const DEFAULT_PROBLEM_INSTANCE = "{{1,2,3},{1,2},GENERIC}";
 
-export function useProblem(url) {
+export function useProblem(url, restore) {
   const state = {};
   [state.problemInfoMap] = useProblemInfoMap(url);
   [state.problemNameMap] = useProblemNameMap(state.problemInfoMap);
@@ -17,18 +17,22 @@ export function useProblem(url) {
   [state.problemInstance, state.setProblemInstance] = useProblemInstance(
     state.problemName,
     state.problemInfoMap,
+    restore,
   );
   return state;
 }
 
-function useProblemInstance(problemName, problemInfoMap) {
+function useProblemInstance(problemName, problemInfoMap, restore) {
   const [problemInstance, setProblemInstance] = useState(DEFAULT_PROBLEM_INSTANCE);
 
-  // A newly chosen problem starts from its own default instance. The map is a dependency too so
-  // the boot-time default applies once the catalogue arrives.
-  useWhenChanged([problemName, problemInfoMap], () => {
+  // A newly chosen problem starts from its own default instance, or from a shared link's instance
+  // when one was just restored for it. The map is a dependency too so the boot-time default
+  // applies once the catalogue arrives.
+  useWhenChanged([problemName, problemInfoMap, restore.id], () => {
+    const shared = restore.values?.problem === problemName ? restore.values.instance : undefined;
     const info = problemInfoMap.get(problemName);
-    if (info?.problemName) setProblemInstance(info.defaultInstance ?? "");
+    if (shared !== undefined) setProblemInstance(shared);
+    else if (info?.problemName) setProblemInstance(info.defaultInstance ?? "");
   });
 
   return [problemInstance, setProblemInstance];
