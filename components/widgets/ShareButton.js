@@ -16,15 +16,24 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Fab,
   Button as MuiButton,
   Snackbar,
   TextField,
 } from "@mui/material";
 import React, { useState } from "react";
-import Button from "react-bootstrap/Button";
 import { buildShareUrl, shareStateFrom } from "../share/shareState";
 
-const THEME = { colors: { grey: "#424242", orange: "#d4441c" } };
+// Round theme buttons like the Getting started button in the opposite corner: the theme's grey in
+// both light and dark mode (no Bootstrap blue border), icons centered, the same 48 px size, and an
+// orange ring that shows only when the button has keyboard focus.
+const cornerFabSx = {
+  "&.Mui-focusVisible": {
+    outline: "3px solid",
+    outlineColor: "secondary.main",
+    outlineOffset: "2px",
+  },
+};
 
 /** The page's address without its query: shared links always open the main page. */
 function pageBaseUrl() {
@@ -81,30 +90,28 @@ export default function ShareButton({ problem, solver, verifier, reducer, import
 
   return (
     <>
-      <span className="corner-button" style={{ display: "flex", gap: "8px" }}>
-        <Button
-          variant="primary"
-          size="large"
-          color="white"
-          style={{ backgroundColor: THEME.colors.grey }}
+      <span className="corner-button" style={{ display: "flex", gap: "12px" }}>
+        <Fab
+          color="primary"
+          size="medium"
+          sx={cornerFabSx}
           onClick={openImport}
           aria-label="Import a shared link"
           title="Import a shared link"
         >
           <ImportIcon />
-        </Button>
-        <Button
+        </Fab>
+        <Fab
           data-tour-id="share-button"
-          variant="primary"
-          size="large"
-          color="white"
-          style={{ backgroundColor: THEME.colors.grey }}
+          color="primary"
+          size="medium"
+          sx={cornerFabSx}
           onClick={handleShare}
           aria-label="Share a link to this view"
           title="Share a link to this view"
         >
           <ShareIcon />
-        </Button>
+        </Fab>
       </span>
 
       <Snackbar
