@@ -1,12 +1,14 @@
 /**
- * Share and Import, in the main page's corner (#281, link sharing phase 1).
+ * Share and Import, in the main page's corner (#281 and ReduxISU/Redux#844, link sharing).
  *
  * Share puts the current view (problem, instance, solver, reduction target and method, verifier)
  * into a link and copies it. If the browser won't copy, the link is shown to copy by hand. A view
- * too big for a safe link (MAX_SHARE_URL_LENGTH) is refused with a message instead.
+ * too big for a safe plain link (MAX_SHARE_URL_LENGTH) is saved on the server instead and a short
+ * `?share={id}` link is copied; if it can't be saved, a message says why.
  *
- * Import takes a pasted link, or just its "?problem=..." part, and restores that view in place,
- * without reloading. Like opening the link, it never runs anything (useShareRestore.js).
+ * Import takes a pasted link, its "?problem=..." or "?share=..." part, or a bare short-link id,
+ * and restores that view in place, without reloading. Like opening the link, it never runs
+ * anything (useShareRestore.js).
  */
 import { FileOpen as ImportIcon, Share as ShareIcon } from "@mui/icons-material";
 import {
@@ -23,6 +25,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { buildShareUrl, shareStateFrom } from "../share/shareState";
+import { buildShortLinkUrl, createShortLink, SHORT_LINK_LIFETIME } from "../share/shortLinks";
 
 // Round theme buttons like the Getting started button in the opposite corner: the theme's grey in
 // both light and dark mode (no Bootstrap blue border), icons centered, the same 48 px size, and an
@@ -40,11 +43,19 @@ function pageBaseUrl() {
   return window.location.origin + window.location.pathname;
 }
 
-export default function ShareButton({ problem, solver, verifier, reducer, importLink }) {
+/**
+ * @param url the Redux API base URL, where too-big views are saved as short links.
+ */
+export default function ShareButton({ url, problem, solver, verifier, reducer, importLink }) {
   // What the Share dialog shows: null (closed), { kind: "manual", url } when the link couldn't be
   // copied, or { kind: "tooBig", message }.
   const [shareDialog, setShareDialog] = useState(null);
+  // Whether the "copied" snackbar shows, and for which kind of link ("plain" or "short"). The kind
+  // is kept after closing so the text doesn't change while the snackbar fades out.
   const [copied, setCopied] = useState(false);
+  const [copiedKind, setCopiedKind] = useState("plain");
+  // True while a short link is being saved, so a second click doesn't save it twice.
+  const [sharing, setSharing] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
   const [importError, setImportError] = useState("");
@@ -60,16 +71,27 @@ export default function ShareButton({ problem, solver, verifier, reducer, import
       verifier: verifier.chosenVerifier,
     });
     const built = buildShareUrl(pageBaseUrl(), state);
+    let link = built.url;
+    let kind = "plain";
     if (!built.ok) {
-      setShareDialog({ kind: "tooBig", message: built.message });
-      return;
+      // Too long for a plain link: save the view on the server and share its short id instead.
+      setSharing(true);
+      const saved = await createShortLink(url, state);
+      setSharing(false);
+      if (!saved.ok) {
+        setShareDialog({ kind: "tooBig", message: saved.message });
+        return;
+      }
+      link = buildShortLinkUrl(pageBaseUrl(), saved.id);
+      kind = "short";
     }
     try {
-      await navigator.clipboard.writeText(built.url);
+      await navigator.clipboard.writeText(link);
+      setCopiedKind(kind);
       setCopied(true);
     } catch {
       // No clipboard (an http:// page, or permission refused): let the user copy it themselves.
-      setShareDialog({ kind: "manual", url: built.url });
+      setShareDialog({ kind: "manual", url: link });
     }
   }
 
@@ -107,6 +129,7 @@ export default function ShareButton({ problem, solver, verifier, reducer, import
           size="medium"
           sx={cornerFabSx}
           onClick={handleShare}
+          disabled={sharing}
           aria-label="Share a link to this view"
           title="Share a link to this view"
         >
@@ -116,12 +139,14 @@ export default function ShareButton({ problem, solver, verifier, reducer, import
 
       <Snackbar
         open={copied}
-        autoHideDuration={4000}
+        autoHideDuration={copiedKind === "short" ? 6000 : 4000}
         onClose={() => setCopied(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert severity="success" onClose={() => setCopied(false)} variant="filled">
-          Link copied. Anyone who opens it sees this view.
+          {copiedKind === "short"
+            ? `Saved link copied. Anyone who opens it sees this view; it lasts ${SHORT_LINK_LIFETIME}.`
+            : "Link copied. Anyone who opens it sees this view."}
         </Alert>
       </Snackbar>
 
