@@ -376,7 +376,7 @@ export default function ContributePage() {
               />
               <StaticSection.Body>
                 <BodyText sx={{ fontStyle: "italic" }}>
-                  Version 1.2 (Updated Mon, 9 Nov 2026).
+                  Version 1.3 (Updated Wed, 25 Nov 2026).
                 </BodyText>
 
                 <BodyText>
@@ -420,22 +420,6 @@ export default function ContributePage() {
                   instance in the address itself. Anyone who has such a link can see that instance,
                   and when the link is opened, the instance is recorded in the access logs along
                   with the rest of the address.
-                </BodyText>
-
-                <BodyText>
-                  This site is hosted by Idaho State University, so your use of it is also covered
-                  by the university&apos;s{" "}
-                  <Link
-                    href="https://www.isu.edu/ogc/privacy/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="hover"
-                    sx={linkSx}
-                  >
-                    privacy statement
-                  </Link>
-                  , which describes how ISU handles information submitted through its websites and
-                  applications.
                 </BodyText>
 
                 <BodyText>
