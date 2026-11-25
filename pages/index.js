@@ -151,6 +151,7 @@ function MainPageContent() {
         <div className="d-flex flex-column">
           <div className="p-2 col-example">
             <ShareButton
+              url={reduxBaseUrl}
               problem={problem}
               solver={solver}
               verifier={verifier}

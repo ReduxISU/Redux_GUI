@@ -1,9 +1,9 @@
 /**
- * Link sharing, phase 1 (#281): the current view of the main page as a link, and back.
+ * Link sharing (#281): the current view of the main page as a plain link, and back.
  *
  * Pure functions only, so they can be unit tested without a browser. The page-side wiring is in
  * useShareRestore.js (reading a link back into app state) and widgets/ShareButton.js (making and
- * importing links).
+ * importing links). Views too big for a plain link become short links (shortLinks.js).
  */
 
 /** The parts of the view a link carries, in the order they appear in the link. */
@@ -17,21 +17,26 @@ export const SHARE_KEYS = [
 ];
 
 /**
- * The longest share link we will make, in characters.
+ * The longest plain share link we will make, in characters.
  *
  * Browsers cope with much longer URLs, but the servers and proxies in front of the site, chat
  * apps and email clients often do not: many cut URLs off or refuse them somewhere past 8,000
  * characters (8 KB is a common request-line limit, for example in nginx's default buffers and
  * several CDNs). A link that is cut off restores a broken instance, which is worse than no link,
- * so past this length Share refuses and says why instead. Phase 2 (ReduxISU/Redux#844, short
- * links stored by the API) removes the limit.
+ * so past this length Share saves the view on the server and copies a short link instead
+ * (shortLinks.js, ReduxISU/Redux#844).
  */
 export const MAX_SHARE_URL_LENGTH = 8000;
 
+/** What to try when a view can't be shared at all (too big, and no short link either). */
+export const TOO_BIG_ADVICE =
+  "Try a smaller instance, or copy the instance text and send it separately.";
+
+/** Why buildShareUrl refused: the plain link would be too long to survive being passed around. */
 export const TOO_BIG_MESSAGE =
   "This view is too big to fit in a link. The problem instance is too long: a link this long " +
   "would get cut off by some browsers, servers or chat apps, and then it would open the wrong " +
-  "thing. Try a smaller instance, or copy the instance text and send it separately.";
+  `thing. ${TOO_BIG_ADVICE}`;
 
 /**
  * Reads the shareable state out of the page's state pieces, leaving out empty parts.
@@ -61,7 +66,8 @@ export function shareStateFrom({
 }
 
 /**
- * Builds the share link for `state` on `baseUrl` (the page's address without a query).
+ * Builds the plain share link for `state` on `baseUrl` (the page's address without a query).
+ * When it would be too long, Share makes a short link instead (shortLinks.js).
  * @returns {{ ok: true, url: string } | { ok: false, length: number, message: string }}
  */
 export function buildShareUrl(baseUrl, state) {
