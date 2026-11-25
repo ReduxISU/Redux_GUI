@@ -413,13 +413,24 @@ export default function ContributePage() {
                 <BodyText>
                   When you solve, verify, or reduce a problem, the instance you entered is sent to
                   the Redux API so it can be worked on, and the answer is sent back to your browser.
-                  Redux has no database and does not save your problem instances; they are discarded
+                  Redux does not save the instances you solve, verify, or reduce; they are discarded
                   once the response is returned. The instance travels in the body of the request,
                   not in its address, so it does not appear in the hosting servers&apos; access
                   logs. Links made with the Share button are the exception: they put your problem
                   instance in the address itself. Anyone who has such a link can see that instance,
                   and when the link is opened, the instance is recorded in the access logs along
                   with the rest of the address.
+                </BodyText>
+
+                <BodyText>
+                  A view too big to fit in an address is shared as a short link instead. To make
+                  one, Redux saves that view (the problem instance and how it is shown) under a
+                  short id, together with when the link was made and when it expires. Nothing about
+                  you is saved with it, not even your IP address. Anyone with the link can open the
+                  view. A short link stops working about six months after it is made (sharing the
+                  same view again extends it), and expired views are then deleted. To limit abuse,
+                  Redux counts how many short links each address makes per hour; that count is kept
+                  only in memory and is never saved.
                 </BodyText>
 
                 <BodyText>
