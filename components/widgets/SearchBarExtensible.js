@@ -13,6 +13,7 @@ import { normalizeTags, tagChipSx } from "../hooks/ProblemFilters/tagStyles";
 import { useThemeMode } from "../ThemeModeContext";
 import { keyForLabel } from "./optionKeys";
 import { showsSelectedTags } from "./selectedTagVisibility";
+import { shouldOfferExtenders } from "./shouldOfferExtenders";
 
 export default function SearchBarExtensible({
   selected,
@@ -58,6 +59,7 @@ export default function SearchBarExtensible({
   return (
     <Autocomplete
       {...props}
+      slotProps={{ popper: { keepMounted: true } }}
       slots={{
         paper: ({ children }) => (
           <SearchBarPaper input={input} optionsMap={optionsMap} extenderButtons={extenderButtons}>
@@ -242,7 +244,7 @@ function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
       }}
     >
       {children}
-      {input === "" || insensitiveContains([...optionsMap.values()], input) ? null : (
+      {!shouldOfferExtenders(input, [...optionsMap.values()]) ? null : (
         <>
           <Divider />
           {extenderButtons(input).map(({ label, href }, idx) => (
@@ -264,8 +266,4 @@ function SearchBarPaper({ children, input, optionsMap, extenderButtons }) {
       )}
     </Paper>
   );
-}
-
-function insensitiveContains(array, value) {
-  return array.findIndex((element) => element.toLowerCase() === value.toLowerCase()) !== -1;
 }
