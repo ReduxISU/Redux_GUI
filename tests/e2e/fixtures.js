@@ -27,24 +27,15 @@ import { test as base, expect } from "@playwright/test";
  * Every entry here is a fault on the GUI side — the API is correctly rejecting a malformed request
  * or a route that does not exist. None of them is a backend bug.
  *
- * Captured 2026-08-05, re-verified 2026-09-23 against ghcr.io/reduxisu/redux:latest. Re-check with a freshly pulled image
+ * Captured 2026-08-05, re-verified 2026-09-23 against ghcr.io/reduxisu/redux:latest; emptied 2026-11-26 (#125). Re-check with a freshly pulled image
  * before adding an entry: `:latest` moves, and a stale local copy will make a route that exists
  * look permanently broken.
  */
-const KNOWN_SILENT_FAILURES = [
-  {
-    url: "ProblemProvider/problemInstance",
-    status: 400,
-    log: "PROBLEM GENERIC INSTANCE REQUEST FAILED",
-    why: "fires with the placeholder instance '{{1,2,3},{1,2},GENERIC}' seeded in Problem.js before the real defaultInstance arrives; the backend rejects it as unparseable",
-  },
-  {
-    url: "ProblemProvider/solve",
-    status: 400,
-    log: "SOLVED INSTANCE REQUEST FAILED",
-    why: "the visualize row auto-solves on mount, hitting the same placeholder instance as above",
-  },
-];
+// Empty since #125 was fixed: the placeholder instance in Problem.js is replaced by the backend's
+// defaultInstance in the same render that picks 3SAT (#316), so no request carries it. Its two entries
+// here (problemInstance and the visualize row's solve, both 400) are gone, so every test now guards
+// those calls too.
+const KNOWN_SILENT_FAILURES = [];
 
 const isKnownResponse = (url, status) =>
   KNOWN_SILENT_FAILURES.some((known) => url.includes(known.url) && status === known.status);
