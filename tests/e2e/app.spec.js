@@ -99,7 +99,11 @@ test("a solver that can't run shows the backend's message and hint", async ({
 }) => {
   // Stands in for the quantum service being down (Redux #625): the backend answers 503
   // solver_unavailable with a message and a hint.
-  expectedFailures.push({ url: "ProblemProvider/solve", status: 503 });
+  expectedFailures.push({
+    url: "ProblemProvider/solve",
+    status: 503,
+    log: "SOLVED INSTANCE REQUEST FAILED",
+  });
 
   const solveRow = row(page, "Solve");
   const solveButton = solveRow.getByRole("button", {
@@ -136,7 +140,11 @@ test("a solver's error doesn't follow the user to another solver", async ({
   page,
   expectedFailures,
 }) => {
-  expectedFailures.push({ url: "ProblemProvider/solve", status: 503 });
+  expectedFailures.push({
+    url: "ProblemProvider/solve",
+    status: 503,
+    log: "SOLVED INSTANCE REQUEST FAILED",
+  });
 
   const solveRow = row(page, "Solve");
   const solveButton = solveRow.getByRole("button", {
