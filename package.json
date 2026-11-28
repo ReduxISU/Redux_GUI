@@ -49,6 +49,6 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.6",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import-x": "^4.18.0"
+    "eslint-plugin-import-x": "^4.18.1"
   }
 }
