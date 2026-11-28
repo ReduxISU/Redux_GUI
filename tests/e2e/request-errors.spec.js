@@ -63,7 +63,11 @@ test.describe("Solve", () => {
     page,
     expectedFailures,
   }) => {
-    expectedFailures.push({ url: "ProblemProvider/solve", status: 422 });
+    expectedFailures.push({
+      url: "ProblemProvider/solve",
+      status: 422,
+      log: "SOLVED INSTANCE REQUEST FAILED",
+    });
     const { solveButton, body } = await openSolveRow(page);
 
     await page.route(SOLVE, rejectWith(422, REJECTED));
@@ -76,7 +80,13 @@ test.describe("Solve", () => {
     await expect(body).not.toContainText("undefined");
   });
 
-  test("a solve that can't reach the server says so", async ({ page }) => {
+  test("a solve that can't reach the server says so", async ({ page, expectedFailures }) => {
+    // No response at all, so only the app's log line to allow.
+    expectedFailures.push({
+      url: "ProblemProvider/solve",
+      status: 0,
+      log: "SOLVED INSTANCE REQUEST FAILED",
+    });
     const { solveButton, body } = await openSolveRow(page);
 
     await page.route(SOLVE, (route) => route.abort());
@@ -89,7 +99,11 @@ test.describe("Solve", () => {
     page,
     expectedFailures,
   }) => {
-    expectedFailures.push({ url: "ProblemProvider/solve", status: 502 });
+    expectedFailures.push({
+      url: "ProblemProvider/solve",
+      status: 502,
+      log: "SOLVED INSTANCE REQUEST FAILED",
+    });
     const { solveButton, body } = await openSolveRow(page);
 
     // What pages/api/redux/[...path].js answers when the backend doesn't answer.
@@ -103,7 +117,11 @@ test.describe("Solve", () => {
     page,
     expectedFailures,
   }) => {
-    expectedFailures.push({ url: "ProblemProvider/solve", status: 422 });
+    expectedFailures.push({
+      url: "ProblemProvider/solve",
+      status: 422,
+      log: "SOLVED INSTANCE REQUEST FAILED",
+    });
     const { solveButton, body } = await openSolveRow(page);
 
     await page.route(SOLVE, rejectWith(422, REJECTED));
